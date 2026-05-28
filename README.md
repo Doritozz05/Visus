@@ -1,136 +1,107 @@
-# Visus 👁️ - Advanced Speed Reading & Multi-Device PWA
+# Visus 👁️
 
-Visus is an open-source, high-performance speed reading and peripheral vision training platform. Designed from day one around low latency cognitive consumption, Visus functions natively offline as a Progressive Web App (PWA) on both mobile (on-the-go training) and desktop (deep focus reading) screens.
+### Simple & powerful speed-reading platform for web & PWA
 
-By integrating state-of-the-art RSVP (Rapid Serial Visual Presentation) visual focus anchoring (ORP - Optimal Recognition Point) and syntactic visual chunking (Cúmulos) algorithms, Visus reduces subvocalization rates, helping you double your visual reading speed without sacrificing comprehension.
+[![Next.js](https://img.shields.io/badge/Next.js-14.2-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![PWA](https://img.shields.io/badge/PWA-Support-6366F1?style=for-the-badge&logo=progressive-web-apps&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+Visus is a speed-reading web application and Progressive Web App (PWA) designed to help you read faster and train your vision. It supports RSVP (word-by-word) and Cluster (grouping words) reading modes, runs completely offline, and respects your privacy by keeping your texts in your browser.
 
 ---
 
-## 🏛️ System Architecture
+## 🌟 Core features
 
-Visus uses a hybrid architecture combining **Clean Architecture** and **Feature-Driven Development (FDD)**. This separation of concerns ensures that the reading engines are 100% UI and framework-independent, while new user interfaces remain modular and self-contained.
+<details>
+<summary><b>📖 Dual reading modes</b> (Click to expand)</summary>
 
-### Visual Architecture Flow Diagram
+* **RSVP Mode**: Displays words one-by-one in a fixed position. It highlights the Optimal Recognition Point (ORP) in each word so your eyes do not have to move.
+* **Cluster Mode**: Groups words into small chunks (2 to 5 words) so you can read phrases at a glance and expand your peripheral vision.
+
+</details>
+
+<details>
+<summary><b>⚡ Fast & practical customizations</b> (Click to expand)</summary>
+
+* **Adjustable speed**: Change reading speeds easily from 100 to 1200 Words Per Minute (WPM).
+* **Reading themes**: Comfortable color presets including Light (Paper), Sepia, Nordic, and Dark modes.
+* **Smart pauses**: Automatically adds minor delays at punctuation marks (like periods and commas) to make reading feel natural.
+
+</details>
+
+---
+
+## 🗺️ Project structure
+
+Clean and modular directory structure:
 
 ```text
-┌────────────────────────────────────────────────────────┐
-│                      CLIENT LAYER                      │
-│                  (Next.js App Router)                  │
-│                                                        │
-│            ┌────────────────────────────┐              │
-│            │        src/app/            │              │
-│            │   (Layouts, Pages, SEO)    │              │
-│            └─────────────┬──────────────┘              │
-└──────────────────────────┼─────────────────────────────┘
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│                   PRESENTATION LAYER                   │
-│            (Feature-Driven Development / UI)           │
-│                                                        │
-│   ┌────────────────────────────────────────────────┐   │
-│   │                 src/features/                  │   │
-│   │  ┌───────────────┐ ┌───────────────┐ ┌────────┐│   │
-│   │  │  reader-rsvp/ │ │reader-clusters│ │  ...   ││   │
-│   │  └───────┬───────┘ └───────┬───────┘ └────────┘│   │
-│   └──────────┼─────────────────┼───────────────────┘   │
-│              ▼                 ▼                       │
-│   ┌────────────────────────────────────────────────┐   │
-│   │                 src/components/                │   │
-│   │            (Atomic Shared UI Components)       │   │
-│   └────────────────────────────────────────────────┘   │
-└───────────────────────────────────┬────────────────────┘
-                                    │ (Utilizes hooks/contexts)
-                                    ▼
-┌────────────────────────────────────────────────────────┐
-│                  LOGIC & STATE LAYER                   │
-│         (React Hooks, Contexts & Integrations)         │
-│                                                        │
-│     ┌────────────────────────┐┌──────────────────┐     │
-│     │      src/hooks/        ││   src/context/   │     │
-│     │  (use-player, etc.)    ││ (reader-context) │     │
-│     └───────────┬────────────┘└────────┬─────────┘     │
-└─────────────────┼──────────────────────┼───────────────┘
-                  │                      │ (Decoupled access)
-                  ▼                      ▼
-┌────────────────────────────────────────────────────────┐
-│                       CORE LAYER                       │
-│          (Domain Model / Framework Agnostic)           │
-│                                                        │
-│     ┌────────────────────────────────────────────┐     │
-│     │                 src/core/                  │     │
-│     │   ┌─────────────────┐ ┌────────────────┐   │     │
-│     │   │   algorithms/   │ │   entities/    │   │     │
-│     │   │ (rsvp, clusters)│ │ (reader, text) │   │     │
-│     │   └─────────────────┘ └────────────────┘   │     │
-│     └────────────────────────────────────────────┘     │
-└────────────────────────────────────────────────────────┘
+visus/
+├── .github/                      # GitHub issue and PR templates
+├── public/                       # Static assets, manifest, and service worker for PWA
+├── src/
+│   ├── app/                      # Next.js App Router (Layouts & Pages)
+│   │   ├── dashboard/            # Reading analytics page
+│   │   ├── library/              # Upload and book list page
+│   │   ├── reader/               # RSVP & Cluster reader page
+│   │   └── settings/             # Font and speed settings page
+│   ├── components/               # Reusable UI components (like the Sidebar)
+│   ├── context/                  # Global react contexts
+│   ├── core/                     # Core reading algorithms (RSVP & chunking)
+│   ├── hooks/                    # Reusable React hooks
+│   └── lib/                      # Helper utilities and file parsers
+├── components.json               # Shadcn UI path setup
+├── package.json                  # Dependencies list
+└── tsconfig.json                 # TypeScript compiler setup
 ```
 
-### Architectural Layering Guidelines:
-1. **Core (Domain)**: Located in `src/core`. Exposes mathematical calculations, algorithms, and type definitions for RSVP and Clusters. **Zero framework dependencies** (no React/Next imports allowed).
-2. **Features**: Located in `src/features`. Each functional module (Dashboard, Settings, RSVP Reader, etc.) groups its own localized views, state contexts, and component utilities.
-3. **Components (UI)**: Atomic, reusable styling templates built using Radix and Shadcn aliases (`src/components/ui`).
-4. **Hooks/Contexts**: Global state managers that track speed-reading preferences, streaks, stats, and real-time playback updates.
-5. **App (Client Gateway)**: Layout wrappers, client-side PWA service worker registrations, and viewport management.
-
 ---
 
-## 🛠️ Technological Foundation
+## 🚀 Quick start
 
-- **Framework**: [Next.js 14 (App Router)](https://nextjs.org/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/) (Strict compilation check)
-- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/) (Custom HSL themes for Sepia, Nordic, and Clinical Dark Mode)
-- **UI Kit**: [Shadcn UI](https://ui.shadcn.com/) (Alias support via `components.json`)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/) (High refresh rate micro-interactions)
-- **PWA**: Custom service worker intercepting offline assets with standalone viewport configurations.
+### Prerequisites
 
----
+* **Node.js**: Version >= `18.x`
+* **NPM** or **pnpm**
+* **Git**
 
-## 🚀 Step-by-Step Installation
+### 1. Clone & setup
 
-Follow these instructions to clone, construct, and initialize the Visus environment.
-
-### 1. Requirements
-Ensure your environment meets the minimum version guidelines:
-- **Node.js**: LTS recommended (>= `18.x`, fully tested on `24.x`)
-- **NPM** (standard wrapper) or **pnpm**
-- **Git**
-
-### 2. Clone the Repository
 ```bash
-git clone https://github.com/your-username/visus.git
+git clone https://github.com/doritozz05/Visus.git
 cd visus
 ```
 
-### 3. Install Dependencies
+### 2. Install packages
+
 ```bash
 npm install
 ```
 
-### 4. Start Local Development Server
-Launch the compiler and hot-reloader:
+### 3. Run development server
+
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) to inspect the welcoming high-fidelity dashboard shell.
 
-### 5. Validate TypeScript Compilations
-To trigger strict type checks:
-```bash
-npm run typecheck
-```
+Open [http://localhost:3000](http://localhost:3000) on your browser.
 
-### 6. Build Production Bundle
-To compile and test static PWA assets locally:
+### 4. Build PWA
+
 ```bash
 npm run build
 ```
 
 ---
 
-## 📏 Code Contribution Standards
+## 📱 Offline & mobile testing
 
-Visus aims for world-class technical execution. We ask contributors to adhere to the following rules:
-- **Strict TSDoc**: Any exported types, helper algorithms, or domain objects must feature JSDocs detailing arguments, formulas, and rationale.
-- **Strict Decoupling**: Do not import React components or browser APIs into `src/core`. Keep mathematical speed computations completely pure.
-- **Mobile-First Responsive Layouts**: Ensure interfaces behave fluidly on compact phone displays up to multi-monitor setups.
+To test PWA offline and mobile installations locally without a domain:
+
+| Platform                           | URL                             | Note                                                      |
+| :--------------------------------- | :------------------------------ | :-------------------------------------------------------- |
+| **Desktop PC**               | `http://localhost:3000`       | Works offline out of the box in Chrome/Firefox/Safari.    |
+| **Mobile Browser**           | `http://<your-local-ip>:3000` | Expose server using `npx next dev --hostname 0.0.0.0`   |
+| **Mobile App (iOS/Android)** | `https://xxxx.ngrok-free.app` | Run `npx ngrok http 3000` to create a secure test link. |

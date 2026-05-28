@@ -106,7 +106,7 @@ export default function ReaderPage() {
                 : "text-[#c7c4d7] hover:text-[#c0c1ff]"
             }`}
           >
-            RSVP Mode
+            RSVP mode
           </button>
           <button 
             onClick={() => setMode("cluster")}
@@ -116,7 +116,7 @@ export default function ReaderPage() {
                 : "text-[#c7c4d7] hover:text-[#c0c1ff]"
             }`}
           >
-            Cluster Mode
+            Cluster mode
           </button>
         </div>
 
@@ -193,7 +193,7 @@ export default function ReaderPage() {
             {/* WPM Speed Slider */}
             <div className="flex flex-col gap-2 relative">
               <div className="flex justify-between items-end">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500">Target Speed</span>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500">Target speed</span>
                 <div className="text-lg font-bold text-[#c0c1ff] font-mono">
                   {wpm} <span className="text-[10px] text-slate-400 font-normal">WPM</span>
                 </div>

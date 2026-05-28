@@ -32,6 +32,7 @@ next-env.d.ts
 # IDE / Editor configurations
 .idea/
 .vscode/
+.cursorrules
 *.suo
 *.ntvs*
 *.njsproj

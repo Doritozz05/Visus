@@ -81,14 +81,14 @@ export default function LibraryPage() {
                   <p className="text-sm font-semibold text-slate-200 mb-1">Drop files here</p>
                   <p className="text-[10px] font-mono text-slate-500">PDF, EPUB, TXT</p>
                   <button className="mt-6 px-4 py-2 border border-[#464554]/40 text-xs font-mono uppercase tracking-wider text-[#c7c4d7] hover:text-[#c0c1ff] hover:border-[#c0c1ff] transition-colors rounded">
-                    Browse Files
+                    Browse files
                   </button>
                 </div>
               </div>
 
               {/* Storage Stats */}
               <div className="bg-[#171f33] rounded-xl border border-[#464554]/20 p-6 shadow-xl">
-                <h2 className="text-xs font-mono uppercase tracking-widest text-slate-400 mb-4">System Capacity</h2>
+                <h2 className="text-xs font-mono uppercase tracking-widest text-slate-400 mb-4">System capacity</h2>
                 <div className="flex justify-between items-end mb-2">
                   <span className="text-2xl font-bold font-heading text-slate-200">1.2<span className="text-sm text-slate-500">GB</span></span>
                   <span className="text-[10px] font-mono text-slate-500">of 5GB Used</span>

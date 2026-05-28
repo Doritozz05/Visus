@@ -13,7 +13,7 @@ export function Sidebar({ activePath }: SidebarProps) {
 
   const navItems = [
     { name: "Library", path: "/library", icon: "library_books" },
-    { name: "Reading Room", path: "/reader", icon: "speed" },
+    { name: "Reading room", path: "/reader", icon: "speed" },
     { name: "Performance", path: "/dashboard", icon: "insights" },
     { name: "Settings", path: "/settings", icon: "settings" },
   ];
@@ -30,7 +30,7 @@ export function Sidebar({ activePath }: SidebarProps) {
             </h1>
           </Link>
           <p className="text-[10px] font-mono text-[#c7c4d7] mt-1 opacity-70 uppercase tracking-widest">
-            High-Performance Reading
+            High-performance reading
           </p>
         </div>
         <nav className="flex-1 py-6 flex flex-col gap-2">
@@ -62,7 +62,7 @@ export function Sidebar({ activePath }: SidebarProps) {
         <div className="p-4 border-t border-[#464554]/20">
           <Link href="/reader">
             <button className="w-full py-3 bg-[#c0c1ff] text-[#1000a9] rounded font-mono text-xs uppercase tracking-wider hover:brightness-110 transition-all font-bold shadow-[0_0_15px_rgba(192,193,255,0.15)]">
-              Start Session
+              Start session
             </button>
           </Link>
         </div>

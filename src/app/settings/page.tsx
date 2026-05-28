@@ -50,12 +50,12 @@ export default function SettingsPage() {
             <section className="bg-[#171f33]/60 backdrop-blur-xl border border-[#c0c1ff]/10 rounded-xl p-6 shadow-xl">
               <div className="flex items-center gap-2 mb-6 border-b border-[#464554]/20 pb-4">
                 <span className="material-symbols-outlined text-[#c0c1ff]">text_format</span>
-                <h3 className="text-lg font-bold font-heading text-slate-100">Typography Engine</h3>
+                <h3 className="text-lg font-bold font-heading text-slate-100">Typography engine</h3>
               </div>
 
               {/* Typeface Selection */}
               <div className="mb-8">
-                <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7] mb-3">Primary Typeface</label>
+                <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7] mb-3">Primary typeface</label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <button 
                     onClick={() => setTypeface("inter")}
@@ -96,7 +96,7 @@ export default function SettingsPage() {
               {/* Font Size Control */}
               <div>
                 <div className="flex justify-between items-end mb-3">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">Base Optical Size</label>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">Base optical size</label>
                   <span className="text-xs font-mono text-[#c0c1ff] font-bold bg-[#222a3d] px-2 py-1 rounded">{fontSize}px</span>
                 </div>
                 <div className="flex items-center gap-4">
@@ -119,13 +119,13 @@ export default function SettingsPage() {
             <section className="bg-[#171f33]/60 backdrop-blur-xl border border-[#c0c1ff]/10 rounded-xl p-6 shadow-xl">
               <div className="flex items-center gap-2 mb-6 border-b border-[#464554]/20 pb-4">
                 <span className="material-symbols-outlined text-[#ffb690]">visibility</span>
-                <h3 className="text-lg font-bold font-heading text-slate-100">RSVP Calibration</h3>
+                <h3 className="text-lg font-bold font-heading text-slate-100">RSVP calibration</h3>
               </div>
 
               {/* Blink Sensitivity */}
               <div className="mb-6">
                 <div className="flex justify-between items-end mb-3">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">Eye Closure Timeout</label>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">Eye closure timeout</label>
                   <span className="text-xs font-mono text-[#ffb690] font-bold bg-[#222a3d] px-2 py-1 rounded">{sensitivity}ms</span>
                 </div>
                 <div className="flex items-center gap-4">
@@ -146,7 +146,7 @@ export default function SettingsPage() {
               {/* ORP Contrast */}
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">ORP Glow Highlight</label>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">ORP glow highlight</label>
                   <p className="text-[10px] text-slate-500 mt-1">Adds dynamic visual glow to the Optimal Recognition Point character.</p>
                 </div>
                 <button 
@@ -167,12 +167,12 @@ export default function SettingsPage() {
                 <span className="material-symbols-outlined text-[#4edea3]">palette</span>
                 <h3 className="text-lg font-bold font-heading text-slate-100">Environment</h3>
               </div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7] mb-3">Color Mode</label>
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7] mb-3">Color mode</label>
               <div className="flex flex-col gap-2">
                 {[
                   { id: "auto", name: "System Auto", icon: "brightness_auto" },
-                  { id: "dark", name: "Dark (Clinical)", icon: "dark_mode" },
-                  { id: "light", name: "Light (Paper)", icon: "light_mode" }
+                  { id: "dark", name: "Dark (clinical)", icon: "dark_mode" },
+                  { id: "light", name: "Light (paper)", icon: "light_mode" }
                 ].map((mode) => (
                   <button
                     key={mode.id}
@@ -197,7 +197,7 @@ export default function SettingsPage() {
             <section className="bg-[#171f33] border border-[#464554]/20 rounded-xl p-6 shadow-xl">
               <div className="flex items-center gap-2 mb-6 border-b border-[#464554]/20 pb-4">
                 <span className="material-symbols-outlined text-slate-400">cloud_sync</span>
-                <h3 className="text-lg font-bold font-heading text-slate-100">Data Sync</h3>
+                <h3 className="text-lg font-bold font-heading text-slate-100">Data sync</h3>
               </div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">Status</span>
@@ -211,7 +211,7 @@ export default function SettingsPage() {
                 disabled={isSyncing}
                 className="w-full py-2.5 border border-[#464554]/30 text-[#dae2fd] rounded font-mono text-xs uppercase tracking-wider hover:bg-[#222a3d] hover:border-[#c0c1ff] transition-all disabled:opacity-50"
               >
-                {isSyncing ? "Syncing..." : "Force Manual Sync"}
+                {isSyncing ? "Syncing..." : "Force manual sync"}
               </button>
             </section>
           </div>

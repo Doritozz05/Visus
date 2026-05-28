@@ -26,12 +26,12 @@ export default function DashboardPage() {
         {/* Diagnostics & Stats Header */}
         <header className="border-b border-[#464554]/20 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4">
           <div>
-            <h2 className="text-xs font-mono uppercase tracking-widest text-[#c0c1ff] mb-2">System Diagnostics</h2>
-            <h1 className="text-3xl font-extrabold font-heading text-[#dae2fd] tracking-tight">Telemetry &amp; Performance</h1>
+            <h2 className="text-xs font-mono uppercase tracking-widest text-[#c0c1ff] mb-2">System diagnostics</h2>
+            <h1 className="text-3xl font-extrabold font-heading text-[#dae2fd] tracking-tight">Telemetry &amp; performance</h1>
           </div>
           <div className="flex items-center gap-6">
             <div className="text-right">
-              <p className="text-[10px] font-mono uppercase tracking-wider text-slate-500">Global Rank</p>
+              <p className="text-[10px] font-mono uppercase tracking-wider text-slate-500">Global rank</p>
               <p className="text-2xl font-bold font-heading text-[#ffb95f]">#4,092</p>
             </div>
             <div className="h-10 w-px bg-[#464554]/30"></div>
@@ -68,7 +68,7 @@ export default function DashboardPage() {
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <span className="material-symbols-outlined text-8xl">local_fire_department</span>
             </div>
-            <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 mb-4">Current Streak</h3>
+            <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 mb-4">Current streak</h3>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-extrabold font-heading text-slate-100">14</span>
               <span className="text-xs font-mono text-slate-400 uppercase">Days</span>
@@ -99,14 +99,14 @@ export default function DashboardPage() {
         <section className="bg-[#171f33] border border-[#464554]/20 rounded-xl p-6 shadow-xl">
           <div className="flex items-center gap-2 mb-6 border-b border-[#464554]/20 pb-4">
             <span className="material-symbols-outlined text-[#c0c1ff]">bar_chart</span>
-            <h3 className="text-lg font-bold font-heading text-slate-100">Recent Reading Activity</h3>
+            <h3 className="text-lg font-bold font-heading text-slate-100">Recent reading activity</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-[#464554]/30 text-slate-500 font-mono text-[10px] uppercase tracking-wider">
-                  <th className="pb-3 font-semibold">Document Title</th>
-                  <th className="pb-3 font-semibold">Reading Mode</th>
+                  <th className="pb-3 font-semibold">Document title</th>
+                  <th className="pb-3 font-semibold">Reading mode</th>
                   <th className="pb-3 font-semibold">Speed</th>
                   <th className="pb-3 font-semibold">Duration</th>
                   <th className="pb-3 font-semibold">Accuracy</th>
