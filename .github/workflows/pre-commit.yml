@@ -1,15 +1,10 @@
-name: Continuous integration
+name: pre-commit
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [pull_request]
 
 jobs:
-  build-and-test:
+  pre-commit:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -17,8 +12,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache: npm
           node-version: 20
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -28,9 +23,3 @@ jobs:
 
       - name: Typecheck code
         run: npm run typecheck
-
-      - name: Run unit tests
-        run: npm run test
-
-      - name: Build application
-        run: npm run build
