@@ -70,7 +70,7 @@ visus/
 ### 1. Clone & setup
 
 ```bash
-git clone https://github.com/doritozz05/Visus.git
+git clone https://github.com/Doritozz05/Visus.git
 cd visus
 ```
 
