@@ -1,0 +1,48 @@
+{
+  "theme_color": "#6366f1",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "Visus - Lectura Rápida Avanzada",
+  "short_name": "Visus",
+  "description": "Plataforma de lectura rápida avanzada y PWA multidispositivo mediante RSVP y Cúmulos.",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Lector RSVP",
+      "short_name": "RSVP",
+      "description": "Iniciar la reproducción en modo RSVP",
+      "url": "/reader/rsvp",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Lector Cúmulos",
+      "short_name": "Cúmulos",
+      "description": "Iniciar la reproducción en modo Cúmulos",
+      "url": "/reader/clusters",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Estadísticas",
+      "short_name": "Estadísticas",
+      "description": "Ver mi rendimiento de lectura",
+      "url": "/stats",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
