@@ -67,6 +67,9 @@
 }
 
 @layer base {
+  html, body {
+    overscroll-behavior: none; /* Block browser pull-to-refresh, elastic scroll, and swipe gestures */
+  }
   * {
     @apply border-border;
   }

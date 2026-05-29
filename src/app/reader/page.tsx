@@ -90,7 +90,7 @@ export default function ReaderPage() {
   const progressPercentage = Math.round((Math.min(wordIndex + 1, words.length) / words.length) * 100);
 
   return (
-    <div className="bg-[#0b1326] text-[#dae2fd] font-sans min-h-screen flex flex-col md:flex-row antialiased selection:bg-[#8083ff]/30 selection:text-white">
+    <div className="bg-[#0b1326] text-[#dae2fd] font-sans h-screen overflow-hidden overscroll-none flex flex-col md:flex-row antialiased selection:bg-[#8083ff]/30 selection:text-white">
       <Sidebar activePath="/reader" />
 
       {/* Mobile TopNav */}
@@ -107,7 +107,7 @@ export default function ReaderPage() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-between relative md:pl-64 h-[calc(100vh-80px)] md:h-screen p-6 pt-32 pb-8">
+      <main className="flex-1 flex flex-col items-center justify-between relative md:pl-64 h-[calc(100vh-80px)] md:h-screen p-6 pt-32 pb-8 overflow-hidden overscroll-none">
 
         {/* Document Title / Progress */}
         <div className="absolute top-8 left-0 right-0 flex flex-col items-center justify-center opacity-50 z-10 pointer-events-none md:pl-64">
