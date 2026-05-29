@@ -1,38 +1,18 @@
 import * as React from "react";
 import { DynamicCluster } from "@/core/algorithms/clusters";
-
-export interface ClusterSettings {
-  highlightStyle?: "spotlight" | "capsule" | "underline";
-  activeColor?: string;
-  inactiveOpacity?: number;
-  blurAmount?: string;
-  glowEffect?: "indigo" | "amber" | "green" | "none";
-  fontSize?: "lg" | "xl" | "2xl" | "3xl" | "4xl";
-  fontWeight?: "font-normal" | "font-medium" | "font-semibold" | "font-bold";
-}
+import { ClusterSettings } from "@/core/entities/settings";
 
 interface ClusterVisualBoxProps {
   clusterChunks: string[] | DynamicCluster[];
   activeClusterIndex: number;
-  settings?: ClusterSettings;
+  settings: ClusterSettings;
 }
-
-const DEFAULT_SETTINGS: Required<ClusterSettings> = {
-  highlightStyle: "spotlight",
-  activeColor: "text-white",
-  inactiveOpacity: 0.25,
-  blurAmount: "0.4px",
-  glowEffect: "indigo",
-  fontSize: "2xl",
-  fontWeight: "font-semibold",
-};
 
 export function ClusterVisualBox({
   clusterChunks,
   activeClusterIndex,
-  settings: customSettings,
+  settings,
 }: ClusterVisualBoxProps) {
-  const settings = { ...DEFAULT_SETTINGS, ...customSettings };
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   // Normalize inputs (accepts both string arrays and DynamicCluster arrays)
@@ -65,31 +45,48 @@ export function ClusterVisualBox({
     }
   }, [activeClusterIndex]);
 
-  const fontSizes = {
-    lg: "text-lg md:text-xl",
-    xl: "text-xl md:text-2xl",
-    "2xl": "text-2xl md:text-3xl leading-relaxed md:leading-loose",
-    "3xl": "text-3xl md:text-4xl leading-loose",
-    "4xl": "text-4xl md:text-5xl leading-loose",
+  // Active color styling mapping
+  const activeColors = {
+    indigo: "text-indigo-500 dark:text-indigo-400",
+    violet: "text-violet-500 dark:text-violet-400",
+    emerald: "text-emerald-600 dark:text-emerald-400",
+    amber: "text-amber-600 dark:text-amber-400",
+    rose: "text-rose-500 dark:text-rose-400",
+    blue: "text-blue-500 dark:text-blue-400",
+    white: "text-foreground",
   };
 
   const glows = {
-    indigo: "text-shadow-glow-indigo text-[#c0c1ff]",
-    amber: "text-shadow-glow-amber text-amber-200",
-    green: "text-shadow-glow-green text-green-200",
+    indigo: "text-shadow-glow-indigo",
+    amber: "text-shadow-glow-amber",
+    green: "text-shadow-glow-green",
     none: "",
   };
 
-  const sizeClass = fontSizes[settings.fontSize] || fontSizes["2xl"];
-  const weightClass = settings.fontWeight;
+  const fontFamilies = {
+    inter: "font-sans",
+    atkinson: "font-sans font-medium tracking-wide",
+    dyslexic: "font-sans font-bold tracking-widest",
+  };
+
+  const sizeClass = `leading-relaxed md:leading-loose`;
+  const sizeStyle: React.CSSProperties = {
+    fontSize: `${settings.fontSize}px`,
+  };
+
+  const activeColorClass = activeColors[settings.activeColor as keyof typeof activeColors] || activeColors.white;
+  const fontFamilyClass = fontFamilies[settings.fontFamily as keyof typeof fontFamilies] || fontFamilies.inter;
 
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-4xl h-[50vh] overflow-y-auto scrollbar-none border border-[#464554]/15 rounded-2xl p-8 md:p-12 bg-[#0f1526]/50 backdrop-blur-xl relative transition-all duration-300"
+      className="w-full max-w-4xl h-[45vh] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl p-8 md:p-12 bg-card/45 backdrop-blur-xl relative transition-all duration-300"
     >
       {/* Book-Format Continuous Paragraph Flow */}
-      <div className={`text-justify whitespace-normal break-words font-sans py-16 ${sizeClass}`}>
+      <div 
+        style={sizeStyle}
+        className={`text-justify whitespace-normal break-words py-16 ${fontFamilyClass} ${sizeClass}`}
+      >
         {normalizedChunks.map((chunk, index) => {
           const isActive = index === activeClusterIndex;
 
@@ -106,19 +103,23 @@ export function ClusterVisualBox({
           let highlightClass = "";
           if (isActive) {
             if (settings.highlightStyle === "spotlight") {
-              highlightClass = `${settings.activeColor} ${glows[settings.glowEffect]}`;
+              highlightClass = `${activeColorClass} ${glows[settings.glowEffect as keyof typeof glows] || ""}`;
             } else if (settings.highlightStyle === "capsule") {
-              highlightClass = `${settings.activeColor} bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-400/20 shadow-[0_0_15px_rgba(99,102,241,0.15)]`;
+              highlightClass = `${activeColorClass} bg-primary/10 px-1.5 py-0.5 rounded border border-primary/20 shadow-[0_0_15px_rgba(var(--primary),0.15)]`;
             } else if (settings.highlightStyle === "underline") {
-              highlightClass = `${settings.activeColor} border-b-2 border-indigo-400 px-0.5`;
+              highlightClass = `${activeColorClass} border-b-2 border-primary px-0.5`;
+            } else if (settings.highlightStyle === "bold-only") {
+              highlightClass = "text-foreground font-extrabold";
+            } else if (settings.highlightStyle === "color-only") {
+              highlightClass = activeColorClass;
             }
           } else {
             if (settings.highlightStyle === "capsule") {
-              highlightClass = "border border-transparent px-1.5 py-0.5 text-[#c7c4d7]/70";
+              highlightClass = "border border-transparent px-1.5 py-0.5 text-muted-foreground/75";
             } else if (settings.highlightStyle === "underline") {
-              highlightClass = "border-b-2 border-transparent px-0.5 text-[#c7c4d7]/70";
+              highlightClass = "border-b-2 border-transparent px-0.5 text-muted-foreground/75";
             } else {
-              highlightClass = "text-[#c7c4d7]/70";
+              highlightClass = "text-muted-foreground/75";
             }
           }
 
@@ -127,7 +128,7 @@ export function ClusterVisualBox({
               <span
                 data-active={isActive}
                 style={isActive ? activeStyle : inactiveStyle}
-                className={`inline transition-all duration-300 ${weightClass} ${highlightClass}`}
+                className={`inline transition-all duration-300 ${highlightClass}`}
               >
                 {chunk.text}
               </span>

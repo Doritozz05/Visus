@@ -2,31 +2,32 @@
 
 import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { useSettings } from "@/context/settings-context";
+import { GeneralSettingsForm } from "@/features/settings/components/GeneralSettingsForm";
+import { RsvpSettingsForm } from "@/features/settings/components/RsvpSettingsForm";
+import { ClusterSettingsForm } from "@/features/settings/components/ClusterSettingsForm";
 
 export default function SettingsPage() {
-  const [typeface, setTypeface] = React.useState("inter");
-  const [fontSize, setFontSize] = React.useState(18);
-  const [sensitivity, setSensitivity] = React.useState(85);
-  const [glowEnabled, setGlowEnabled] = React.useState(true);
-  const [colorMode, setColorMode] = React.useState("dark");
+  const { resetSettings } = useSettings();
+  const [activeTab, setActiveTab] = React.useState<"general" | "rsvp" | "cluster">("general");
   const [isSyncing, setIsSyncing] = React.useState(false);
 
   const handleSync = () => {
     setIsSyncing(true);
-    setTimeout(() => setIsSyncing(false), 1500);
+    setTimeout(() => setIsSyncing(false), 1200);
   };
 
   return (
-    <div className="bg-[#0b1326] text-[#dae2fd] font-sans min-h-screen flex flex-col md:flex-row antialiased selection:bg-[#8083ff]/30 selection:text-white">
+    <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300">
       <Sidebar activePath="/settings" />
 
       {/* Mobile TopNav */}
-      <nav className="md:hidden bg-[#0b1326] border-b border-[#464554]/30 flex justify-between items-center w-full px-6 py-4 z-50 sticky top-0">
-        <div className="text-xl font-bold tracking-tight text-[#dae2fd]">Visus</div>
+      <nav className="md:hidden bg-card border-b border-border/50 flex justify-between items-center w-full px-6 py-4 z-50 sticky top-0 transition-colors">
+        <div className="text-xl font-bold tracking-tight text-foreground">Visus</div>
         <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-[#ffb95f]">local_fire_department</span>
-          <div className="w-8 h-8 rounded-full bg-[#171f33] border border-[#464554]/30 overflow-hidden">
-            <div className="w-full h-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-[#c0c1ff]">
+          <span className="material-symbols-outlined text-primary">local_fire_department</span>
+          <div className="w-8 h-8 rounded-full bg-accent border border-border/30 overflow-hidden">
+            <div className="w-full h-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
               VP
             </div>
           </div>
@@ -34,187 +35,107 @@ export default function SettingsPage() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-64 p-6 md:p-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full">
-        <header className="mb-10">
-          <h2 className="text-3xl font-extrabold font-heading text-[#dae2fd] tracking-tight">Configuration</h2>
-          <p className="text-[#c7c4d7] text-xs font-mono uppercase tracking-wider mt-2 max-w-2xl">
-            Adjust visual parameters for optimal cognitive consumption. Changes are applied in real-time to the reading canvas.
-          </p>
+      <main className="flex-1 md:ml-64 p-6 md:p-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full transition-all duration-300">
+        <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Configuration</h2>
+            <p className="text-muted-foreground text-xs font-mono uppercase tracking-wider mt-2 max-w-2xl">
+              Adjust global visual engine parameters. Changes are applied in real-time across all views.
+            </p>
+          </div>
+          <button 
+            onClick={resetSettings}
+            className="px-4 py-2 border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary rounded font-mono text-[10px] uppercase tracking-wider transition-all"
+          >
+            Reset Defaults
+          </button>
         </header>
 
+        {/* Dynamic Inner Configuration Tabs */}
+        <div className="flex border-b border-border/40 mb-8 overflow-x-auto scrollbar-none gap-2">
+          {[
+            { id: "general", name: "General & UI", icon: "settings" },
+            { id: "rsvp", name: "RSVP Engine", icon: "bolt" },
+            { id: "cluster", name: "Cluster Canvas", icon: "splitscreen" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-6 py-3 border-b-2 font-mono text-xs uppercase tracking-wider transition-all shrink-0 ${
+                activeTab === tab.id
+                  ? "border-primary text-primary font-bold bg-accent/40"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/10"
+              }`}
+            >
+              <span className="material-symbols-outlined text-lg">{tab.icon}</span>
+              {tab.name}
+            </button>
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Typography & Display */}
-          <div className="lg:col-span-7 space-y-6">
+          
+          {/* Main Controls Panel */}
+          <div className="lg:col-span-8">
+            {activeTab === "general" && <GeneralSettingsForm />}
+            {activeTab === "rsvp" && <RsvpSettingsForm />}
+            {activeTab === "cluster" && <ClusterSettingsForm />}
+          </div>
+
+          {/* Right Column: Account Status and Data Management */}
+          <div className="lg:col-span-4 space-y-6">
             
-            {/* Typography Module */}
-            <section className="bg-[#171f33]/60 backdrop-blur-xl border border-[#c0c1ff]/10 rounded-xl p-6 shadow-xl">
-              <div className="flex items-center gap-2 mb-6 border-b border-[#464554]/20 pb-4">
-                <span className="material-symbols-outlined text-[#c0c1ff]">text_format</span>
-                <h3 className="text-lg font-bold font-heading text-slate-100">Typography engine</h3>
+            {/* Account Status Card */}
+            <section className="bg-card border border-border/20 rounded-xl p-6 shadow-md glass-panel relative overflow-hidden">
+              <div className="absolute right-0 top-0 w-24 h-24 bg-primary/5 rounded-full -translate-y-8 translate-x-8 blur-xl pointer-events-none" />
+              <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
+                <span className="material-symbols-outlined text-primary">account_circle</span>
+                <h3 className="text-lg font-bold font-heading text-foreground font-heading">Local Profile</h3>
               </div>
-
-              {/* Typeface Selection */}
-              <div className="mb-8">
-                <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7] mb-3">Primary typeface</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <button 
-                    onClick={() => setTypeface("inter")}
-                    className={`px-4 py-3 border rounded text-center transition-all ${
-                      typeface === "inter"
-                        ? "border-[#c0c1ff] bg-[#222a3d] text-[#c0c1ff] font-bold"
-                        : "border-[#464554]/30 bg-[#131b2e] text-[#c7c4d7] hover:border-[#464554]/50"
-                    }`}
-                  >
-                    <span className="block text-sm mb-1 font-sans">Inter</span>
-                    <span className="block text-[9px] font-mono opacity-50 uppercase tracking-widest">Standard</span>
-                  </button>
-                  <button 
-                    onClick={() => setTypeface("atkinson")}
-                    className={`px-4 py-3 border rounded text-center transition-all ${
-                      typeface === "atkinson"
-                        ? "border-[#c0c1ff] bg-[#222a3d] text-[#c0c1ff] font-bold"
-                        : "border-[#464554]/30 bg-[#131b2e] text-[#c7c4d7] hover:border-[#464554]/50"
-                    }`}
-                  >
-                    <span className="block text-sm mb-1 font-sans">Atkinson</span>
-                    <span className="block text-[9px] font-mono opacity-50 uppercase tracking-widest">Hyperlegible</span>
-                  </button>
-                  <button 
-                    onClick={() => setTypeface("dyslexic")}
-                    className={`px-4 py-3 border rounded text-center transition-all ${
-                      typeface === "dyslexic"
-                        ? "border-[#c0c1ff] bg-[#222a3d] text-[#c0c1ff] font-bold"
-                        : "border-[#464554]/30 bg-[#131b2e] text-[#c7c4d7] hover:border-[#464554]/50"
-                    }`}
-                  >
-                    <span className="block text-sm mb-1 font-sans">Dyslexic</span>
-                    <span className="block text-[9px] font-mono opacity-50 uppercase tracking-widest">Accessibility</span>
-                  </button>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                  <span className="material-symbols-outlined text-primary text-2xl">person</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold">Guest Reader</h4>
+                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">Unregistered account</span>
                 </div>
               </div>
-
-              {/* Font Size Control */}
-              <div>
-                <div className="flex justify-between items-end mb-3">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">Base optical size</label>
-                  <span className="text-xs font-mono text-[#c0c1ff] font-bold bg-[#222a3d] px-2 py-1 rounded">{fontSize}px</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-[#c7c4d7] text-sm">A</span>
-                  <input 
-                    className="flex-1 accent-[#c0c1ff] h-1 bg-[#464554] rounded-lg appearance-none cursor-pointer"
-                    max="32" 
-                    min="14" 
-                    type="range" 
-                    value={fontSize}
-                    onChange={(e) => setFontSize(Number(e.target.value))}
-                  />
-                  <span className="text-[#c7c4d7] text-xl font-bold">A</span>
-                </div>
-                <p className="text-[10px] font-mono text-slate-500 mt-2">Applies to body text in Cluster and Standard modes.</p>
-              </div>
+              <button className="w-full py-2.5 bg-primary text-primary-foreground rounded font-mono text-xs uppercase tracking-wider hover:brightness-110 transition-all font-bold">
+                Login / Register
+              </button>
             </section>
 
-            {/* RSVP Specifics */}
-            <section className="bg-[#171f33]/60 backdrop-blur-xl border border-[#c0c1ff]/10 rounded-xl p-6 shadow-xl">
-              <div className="flex items-center gap-2 mb-6 border-b border-[#464554]/20 pb-4">
-                <span className="material-symbols-outlined text-[#ffb690]">visibility</span>
-                <h3 className="text-lg font-bold font-heading text-slate-100">RSVP calibration</h3>
+            {/* Cloud and Local Backup Integration */}
+            <section className="bg-card border border-border/20 rounded-xl p-6 shadow-md glass-panel">
+              <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
+                <span className="material-symbols-outlined text-primary">cloud_sync</span>
+                <h3 className="text-lg font-bold font-heading text-foreground">Storage Sync</h3>
+              </div>
+              
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Cloud Sync Status</span>
+                <span className="text-xs font-mono text-emerald-500 dark:text-emerald-400 flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                  Ready to Sync
+                </span>
+              </div>
+              <div className="text-[10px] text-muted-foreground mb-6 leading-relaxed">
+                Settings are safely cached locally in your secure browser storage. Log in to synchronize automatically across mobile and desktop.
               </div>
 
-              {/* Blink Sensitivity */}
-              <div className="mb-6">
-                <div className="flex justify-between items-end mb-3">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">Eye closure timeout</label>
-                  <span className="text-xs font-mono text-[#ffb690] font-bold bg-[#222a3d] px-2 py-1 rounded">{sensitivity}ms</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-slate-500 text-sm">low_priority</span>
-                  <input 
-                    className="flex-1 accent-[#ffb690] h-1 bg-[#464554] rounded-lg appearance-none cursor-pointer"
-                    max="200" 
-                    min="50" 
-                    type="range" 
-                    value={sensitivity}
-                    onChange={(e) => setSensitivity(Number(e.target.value))}
-                  />
-                  <span className="material-symbols-outlined text-slate-500 text-sm">priority_high</span>
-                </div>
-                <p className="text-[10px] font-mono text-slate-500 mt-2">Time in milliseconds the reader will pause when eyes are closed or looking away.</p>
-              </div>
-
-              {/* ORP Contrast */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">ORP glow highlight</label>
-                  <p className="text-[10px] text-slate-500 mt-1">Adds dynamic visual glow to the Optimal Recognition Point character.</p>
-                </div>
+              <div className="space-y-2">
                 <button 
-                  onClick={() => setGlowEnabled(!glowEnabled)}
-                  className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 relative ${glowEnabled ? "bg-[#c0c1ff]" : "bg-[#222a3d]"}`}
+                  onClick={handleSync}
+                  disabled={isSyncing}
+                  className="w-full py-2.5 border border-border/30 text-foreground rounded font-mono text-[10px] uppercase tracking-wider hover:bg-accent hover:border-primary transition-all disabled:opacity-50"
                 >
-                  <div className={`w-4 h-4 rounded-full bg-[#0b1326] transition-transform duration-300 ${glowEnabled ? "translate-x-6" : "translate-x-0"}`} />
+                  {isSyncing ? "Syncing configs..." : "Force DB Synchronize"}
                 </button>
               </div>
             </section>
           </div>
 
-          {/* Right Column: Environment & System */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Color Mode */}
-            <section className="bg-[#171f33] border border-[#464554]/20 rounded-xl p-6 shadow-xl">
-              <div className="flex items-center gap-2 mb-6 border-b border-[#464554]/20 pb-4">
-                <span className="material-symbols-outlined text-[#4edea3]">palette</span>
-                <h3 className="text-lg font-bold font-heading text-slate-100">Environment</h3>
-              </div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-[#c7c4d7] mb-3">Color mode</label>
-              <div className="flex flex-col gap-2">
-                {[
-                  { id: "auto", name: "System Auto", icon: "brightness_auto" },
-                  { id: "dark", name: "Dark (clinical)", icon: "dark_mode" },
-                  { id: "light", name: "Light (paper)", icon: "light_mode" }
-                ].map((mode) => (
-                  <button
-                    key={mode.id}
-                    onClick={() => setColorMode(mode.id)}
-                    className={`flex items-center justify-between p-3 border rounded text-left transition-all ${
-                      colorMode === mode.id
-                        ? "border-[#c0c1ff] bg-[#222a3d] text-[#c0c1ff]"
-                        : "border-[#464554]/30 bg-[#0b1326] text-[#c7c4d7] hover:border-[#464554]/50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-lg">{mode.icon}</span>
-                      <span className="text-sm font-semibold">{mode.name}</span>
-                    </div>
-                    {colorMode === mode.id && <span className="material-symbols-outlined text-[#c0c1ff]">check_circle</span>}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* Data Sync */}
-            <section className="bg-[#171f33] border border-[#464554]/20 rounded-xl p-6 shadow-xl">
-              <div className="flex items-center gap-2 mb-6 border-b border-[#464554]/20 pb-4">
-                <span className="material-symbols-outlined text-slate-400">cloud_sync</span>
-                <h3 className="text-lg font-bold font-heading text-slate-100">Data sync</h3>
-              </div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#c7c4d7]">Status</span>
-                <span className="text-xs font-mono text-[#4edea3] flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-[#4edea3] inline-block animate-pulse"></span>
-                  Synced
-                </span>
-              </div>
-              <button 
-                onClick={handleSync}
-                disabled={isSyncing}
-                className="w-full py-2.5 border border-[#464554]/30 text-[#dae2fd] rounded font-mono text-xs uppercase tracking-wider hover:bg-[#222a3d] hover:border-[#c0c1ff] transition-all disabled:opacity-50"
-              >
-                {isSyncing ? "Syncing..." : "Force manual sync"}
-              </button>
-            </section>
-          </div>
         </div>
       </main>
     </div>
