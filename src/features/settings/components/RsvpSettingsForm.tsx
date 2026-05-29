@@ -103,38 +103,63 @@ export function RsvpSettingsForm() {
           </button>
         </div>
 
-        {/* Context Adjacent words */}
+        {/* Toggle focus lines */}
         <div className="flex items-center justify-between py-3 border-t border-border/10">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Show Context Words</label>
-            <p className="text-[9px] text-muted-foreground mt-0.5">Displays surrounding words blurred to train peripheral vision field.</p>
+            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Visual Guide Lines</label>
+            <p className="text-[9px] text-muted-foreground mt-0.5">Show central horizontal and vertical lines as reading anchor points.</p>
           </div>
           <button 
-            onClick={() => updateRsvpSettings({ showContextWords: !rsvp.showContextWords })}
-            className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${rsvp.showContextWords ? "bg-primary" : "bg-accent"}`}
+            onClick={() => updateRsvpSettings({ showFocusGuides: !rsvp.showFocusGuides })}
+            className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${rsvp.showFocusGuides ? "bg-primary" : "bg-accent"}`}
           >
-            <div className={`w-4 h-4 rounded-full bg-background transition-transform duration-300 ${rsvp.showContextWords ? "translate-x-5" : "translate-x-0"}`} />
+            <div className={`w-4 h-4 rounded-full bg-background transition-transform duration-300 ${rsvp.showFocusGuides ? "translate-x-5" : "translate-x-0"}`} />
           </button>
         </div>
 
-        {/* Context Opacity */}
-        {rsvp.showContextWords && (
-          <div className="py-3 border-t border-border/10 transition-all duration-300">
-            <div className="flex justify-between items-end mb-2">
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Lateral Context Opacity</label>
-              <span className="text-[10px] font-mono text-primary font-semibold">{Math.round(rsvp.contextOpacity * 100)}%</span>
-            </div>
-            <input 
-              className="w-full accent-primary h-1 bg-accent rounded-lg appearance-none cursor-pointer"
-              max="0.5" 
-              min="0.1" 
-              step="0.05"
-              type="range" 
-              value={rsvp.contextOpacity}
-              onChange={(e) => updateRsvpSettings({ contextOpacity: Number(e.target.value) })}
-            />
+        {/* Unmarked Letter Opacity */}
+        <div className="py-3 border-t border-border/10 transition-all duration-300">
+          <div className="flex justify-between items-end mb-2">
+            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Unmarked Text Opacity</label>
+            <span className="text-[10px] font-mono text-primary font-semibold">{Math.round(rsvp.unmarkedOpacity * 100)}%</span>
           </div>
-        )}
+          <input 
+            className="w-full accent-primary h-1 bg-accent rounded-lg appearance-none cursor-pointer"
+            max="1.0" 
+            min="0.1" 
+            step="0.05"
+            type="range" 
+            value={rsvp.unmarkedOpacity}
+            onChange={(e) => updateRsvpSettings({ unmarkedOpacity: Number(e.target.value) })}
+          />
+          <p className="text-[8px] text-muted-foreground mt-1">Adjusts the transparency of the prefix and suffix surrounding the focus letter.</p>
+        </div>
+
+        {/* Unmarked Letter Color */}
+        <div className="py-3 border-t border-border/10 transition-all duration-300">
+          <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold mb-3">Unmarked Text Color</label>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { id: "foreground", name: "Standard", desc: "Solid contrast" },
+              { id: "primary", name: "Accent", desc: "Brand theme" },
+              { id: "muted", name: "Dimmed", desc: "Subtle blend" },
+            ].map((col) => (
+              <button
+                key={col.id}
+                type="button"
+                onClick={() => updateRsvpSettings({ unmarkedColor: col.id as any })}
+                className={`p-2 border rounded text-center transition-all ${
+                  rsvp.unmarkedColor === col.id
+                    ? "border-primary bg-accent/40 text-primary font-bold"
+                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
+                }`}
+              >
+                <span className="block text-[10px] font-semibold">{col.name}</span>
+                <span className="block text-[7px] opacity-60 font-mono tracking-wider">{col.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
       </div>
     </div>

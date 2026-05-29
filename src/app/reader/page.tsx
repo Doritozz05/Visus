@@ -192,8 +192,6 @@ export default function ReaderPage() {
               focusLetter={focusLetter}
               rightPart={rightPart}
               settings={settings.rsvp}
-              prevWord={prevWord}
-              nextWord={nextWord}
             />
           ) : (
             <ClusterVisualBox

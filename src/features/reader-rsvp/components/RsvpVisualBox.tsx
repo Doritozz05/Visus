@@ -6,8 +6,6 @@ interface RsvpVisualBoxProps {
   focusLetter: string;
   rightPart: string;
   settings: RsvpSettings;
-  prevWord?: string;
-  nextWord?: string;
 }
 
 export function RsvpVisualBox({ 
@@ -15,8 +13,6 @@ export function RsvpVisualBox({
   focusLetter, 
   rightPart,
   settings,
-  prevWord = "",
-  nextWord = "",
 }: RsvpVisualBoxProps) {
   const fontFamilies = {
     inter: "font-sans",
@@ -42,71 +38,64 @@ export function RsvpVisualBox({
     rose: "text-shadow-glow-rose",
   };
 
+  const unmarkedColors = {
+    foreground: "text-foreground",
+    primary: "text-primary",
+    muted: "text-muted-foreground",
+  };
+
   const fontFamilyClass = fontFamilies[settings.fontFamily as keyof typeof fontFamilies] || fontFamilies.inter;
   const orpColorClass = orpColors[settings.orpColor as keyof typeof orpColors] || orpColors.orange;
   const orpGlowClass = orpGlows[settings.orpColor as keyof typeof orpGlows] || orpGlows.orange;
+  const unmarkedColorClass = unmarkedColors[settings.unmarkedColor as keyof typeof unmarkedColors] || unmarkedColors.foreground;
   
   const fontSizeStyle: React.CSSProperties = {
     fontSize: `${settings.fontSize}px`,
   };
 
-  const contextStyle: React.CSSProperties = {
-    opacity: settings.contextOpacity,
-    fontSize: `${settings.fontSize * 0.6}px`, // slightly smaller
-    filter: "blur(2px)",
-  };
-
   return (
-    <div className="w-full py-20 border-y border-border/20 relative flex items-center justify-center bg-card/30 rounded-2xl overflow-hidden backdrop-blur-md">
+    <div className="w-full py-20 border border-border/30 dark:border-border/15 relative flex items-center justify-center bg-card/50 dark:bg-card/30 rounded-2xl overflow-hidden backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] transition-all duration-300">
       
-      {/* Target Reticle/Guide lines for visual balance pinning */}
-      <div className="absolute left-1/2 top-0 bottom-0 w-[2px] bg-primary/10 -translate-x-1/2 pointer-events-none z-0" />
-      <div className="absolute left-1/2 top-4 w-4 h-[2px] bg-primary/30 -translate-x-1/2 pointer-events-none z-0" />
-      <div className="absolute left-1/2 bottom-4 w-4 h-[2px] bg-primary/30 -translate-x-1/2 pointer-events-none z-0" />
-
       {/* The Active RSVP Layout */}
       <div 
         style={fontSizeStyle}
         className={`w-full font-heading select-none tracking-tight flex items-center relative z-10 ${fontFamilyClass}`}
       >
-        {/* Optional Context words to the left */}
-        {settings.showContextWords && prevWord && (
-          <div 
-            style={contextStyle}
-            className="absolute left-4 md:left-12 max-w-[20%] text-right font-medium truncate select-none hidden sm:block text-muted-foreground transition-all duration-300"
-          >
-            {prevWord}
-          </div>
-        )}
-
-        {/* Left Part: right-aligned, takes up left half */}
-        <div className="flex-1 text-right opacity-30 pr-0.5 text-foreground font-bold transition-all duration-350">
+        {/* Left Part: right-aligned, takes up 42% of space cleanly */}
+        <div 
+          style={{ flex: "42 42 0%", opacity: settings.unmarkedOpacity }}
+          className={`text-right pr-0.5 font-bold transition-all duration-350 min-w-0 ${unmarkedColorClass}`}
+        >
           {leftPart}
         </div>
         
-        {/* Focus Letter (ORP): exactly in the middle */}
-        <div 
-          className={`shrink-0 font-extrabold px-0.5 text-center relative transition-all duration-350 ${orpColorClass} ${
-            settings.orpGlow ? orpGlowClass : ""
-          }`}
-        >
-          {focusLetter}
+        {/* Focus Letter (ORP): exactly centered at the 42% boundary, never squished */}
+        <div className="shrink-0 flex items-center justify-center relative z-10 px-0.5">
+          {/* Target Reticle/Guide lines positioned exactly relative to the center of the focus letter! */}
+          {settings.showFocusGuides && (
+            <>
+              <div className="absolute top-[-80px] bottom-[-80px] w-[2px] bg-primary/15 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
+              <div className="absolute top-[-60px] w-4 h-[2px] bg-primary/35 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
+              <div className="absolute bottom-[-60px] w-4 h-[2px] bg-primary/35 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
+            </>
+          )}
+          
+          <span 
+            className={`font-extrabold text-center relative transition-all duration-350 ${orpColorClass} ${
+              settings.orpGlow ? orpGlowClass : ""
+            }`}
+          >
+            {focusLetter}
+          </span>
         </div>
         
-        {/* Right Part: left-aligned, takes up right half */}
-        <div className="flex-1 text-left opacity-30 pl-0.5 text-foreground font-bold transition-all duration-350">
+        {/* Right Part: left-aligned, takes up remaining 58% of space cleanly */}
+        <div 
+          style={{ flex: "58 58 0%", opacity: settings.unmarkedOpacity }}
+          className={`text-left pl-0.5 font-bold transition-all duration-350 min-w-0 ${unmarkedColorClass}`}
+        >
           {rightPart}
         </div>
-
-        {/* Optional Context words to the right */}
-        {settings.showContextWords && nextWord && (
-          <div 
-            style={contextStyle}
-            className="absolute right-4 md:right-12 max-w-[20%] text-left font-medium truncate select-none hidden sm:block text-muted-foreground transition-all duration-300"
-          >
-            {nextWord}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -80,12 +80,12 @@ export function ClusterVisualBox({
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-4xl h-[45vh] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl p-8 md:p-12 bg-card/45 backdrop-blur-xl relative transition-all duration-300"
+      className="w-full max-w-4xl h-[45vh] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl p-6 md:p-8 bg-card/45 backdrop-blur-xl relative transition-all duration-300"
     >
       {/* Book-Format Continuous Paragraph Flow */}
       <div 
         style={sizeStyle}
-        className={`text-justify whitespace-normal break-words py-16 ${fontFamilyClass} ${sizeClass}`}
+        className={`text-justify whitespace-normal break-words pt-2 pb-36 ${fontFamilyClass} ${sizeClass}`}
       >
         {normalizedChunks.map((chunk, index) => {
           const isActive = index === activeClusterIndex;

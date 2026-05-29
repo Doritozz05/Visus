@@ -14,8 +14,9 @@ export interface RsvpSettings {
   fontFamily: "inter" | "atkinson" | "dyslexic";
   orpColor: "amber" | "orange" | "emerald" | "violet" | "indigo" | "rose";
   orpGlow: boolean;
-  showContextWords: boolean;
-  contextOpacity: number;
+  showFocusGuides: boolean;
+  unmarkedOpacity: number;
+  unmarkedColor: "foreground" | "primary" | "muted";
 }
 
 export interface ClusterSettings {
@@ -51,8 +52,9 @@ export const DEFAULT_SETTINGS: SettingsState = {
     fontFamily: "inter",
     orpColor: "orange",
     orpGlow: true,
-    showContextWords: true,
-    contextOpacity: 0.25,
+    showFocusGuides: true,
+    unmarkedOpacity: 0.3,
+    unmarkedColor: "foreground",
   },
   cluster: {
     fontSize: 24,
