@@ -2,11 +2,164 @@
 
 import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { useLibrary } from "@/context/library-context";
+import { Book } from "@/core/entities/book";
+import { useRouter } from "next/navigation";
+
+import { parseEpub } from "@/lib/parser/epub";
+import { parsePdf } from "@/lib/parser/pdf";
+import { parseTxt } from "@/lib/parser/txt";
 
 export default function LibraryPage() {
-  const [isDragOver, setIsDragOver] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, activeBookId, setActiveBookId } = useLibrary();
+  const router = useRouter();
 
+  // State controls
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [activeTab, setActiveTab] = React.useState<"active" | "completed" | "archived">("active");
+  const [isDragOver, setIsDragOver] = React.useState(false);
+  const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null);
+  const [isIngesting, setIsIngesting] = React.useState(false);
+
+  // Modal forms state
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  
+  // Add Form State
+  const [newTitle, setNewTitle] = React.useState("");
+  const [newAuthor, setNewAuthor] = React.useState("");
+  const [newFormat, setNewFormat] = React.useState<"PDF" | "EPUB" | "TXT">("EPUB");
+
+  // Edit Form State
+  const [editingBookId, setEditingBookId] = React.useState<string | null>(null);
+  const [editTitle, setEditTitle] = React.useState("");
+  const [editAuthor, setEditAuthor] = React.useState("");
+  const [editFormat, setEditFormat] = React.useState<"PDF" | "EPUB" | "TXT">("EPUB");
+  const [editProgress, setEditProgress] = React.useState(0);
+  const [editStatus, setEditStatus] = React.useState<"active" | "completed" | "archived">("active");
+
+  // File input ref for browsing files
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Close dropdowns on click outside
+  React.useEffect(() => {
+    const handleOutsideClick = () => setActiveDropdownId(null);
+    window.addEventListener("click", handleOutsideClick);
+    return () => window.removeEventListener("click", handleOutsideClick);
+  }, []);
+
+  // Parse a file name to guess Title and Author
+  const parseFileName = (fileName: string) => {
+    const lastDotIndex = fileName.lastIndexOf(".");
+    const cleanName = lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName;
+    const extension = lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1).toUpperCase() : "TXT";
+    
+    const validFormat = (extension === "PDF" || extension === "EPUB" || extension === "TXT") 
+      ? (extension as "PDF" | "EPUB" | "TXT") 
+      : "TXT";
+
+    let title = cleanName;
+    let author = "Unknown Author";
+
+    if (cleanName.includes(" - ")) {
+      const parts = cleanName.split(" - ");
+      title = parts[0].trim();
+      author = parts[1].trim();
+    } else if (cleanName.includes("_")) {
+      const parts = cleanName.split("_");
+      title = parts.join(" ").trim();
+    }
+
+    return { title, author, format: validFormat };
+  };
+
+  const processAndAddFile = async (file: File) => {
+    const { title, author, format } = parseFileName(file.name);
+    
+    if (format === "TXT") {
+      return new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const textContent = event.target?.result as string;
+          const parsedChapters = parseTxt(textContent);
+          const newId = addBook(title, author, format, textContent, parsedChapters);
+          setActiveBookId(newId);
+          resolve();
+        };
+        reader.readAsText(file);
+      });
+    } else if (format === "PDF") {
+      return new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const arrayBuffer = event.target?.result as ArrayBuffer;
+            const parsed = await parsePdf(arrayBuffer);
+            const finalTitle = parsed.title && parsed.title !== "Unknown PDF" ? parsed.title : title;
+            const finalAuthor = parsed.author && parsed.author !== "Unknown Author" ? parsed.author : author;
+            const fullContent = parsed.chapters.map(c => c.content).join("\n\n");
+            const newId = addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters);
+            setActiveBookId(newId);
+            resolve();
+          } catch (pdfErr) {
+            console.error("PDF Parsing failed:", pdfErr);
+            const newId = addBook(title, author, format);
+            setActiveBookId(newId);
+            resolve();
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    } else if (format === "EPUB") {
+      return new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const arrayBuffer = event.target?.result as ArrayBuffer;
+            const parsed = await parseEpub(arrayBuffer);
+            const finalTitle = parsed.title && parsed.title !== "Unknown Title" ? parsed.title : title;
+            const finalAuthor = parsed.author && parsed.author !== "Unknown Author" ? parsed.author : author;
+            const fullContent = parsed.chapters.map(c => c.content).join("\n\n");
+            const newId = addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters);
+            setActiveBookId(newId);
+            resolve();
+          } catch (epubErr) {
+            console.error("EPUB Parsing failed:", epubErr);
+            const newId = addBook(title, author, format);
+            setActiveBookId(newId);
+            resolve();
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    } else {
+      const newId = addBook(title, author, format);
+      setActiveBookId(newId);
+    }
+  };
+
+  // Ingestion: File selection handler with FileReader and PDF/EPUB parsing
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    setIsIngesting(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        await processAndAddFile(files[i]);
+      }
+      
+      // Navigate instantly to reader once finished ingesting
+      router.push("/reader");
+    } catch (err) {
+      console.error("File ingestion failed:", err);
+    } finally {
+      setIsIngesting(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  // Ingestion: Drag and drop handlers with PDF/TXT/EPUB extraction
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -16,31 +169,133 @@ export default function LibraryPage() {
     setIsDragOver(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    alert("Prototype File Added successfully (scaffold action)!");
+
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+
+    setIsIngesting(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        await processAndAddFile(files[i]);
+      }
+      
+      router.push("/reader");
+    } catch (err) {
+      console.error("Drag and drop ingestion failed:", err);
+    } finally {
+      setIsIngesting(false);
+    }
   };
+
+  const triggerFileBrowser = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Modal Submit Handlers
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) return;
+
+    const newId = addBook(newTitle, newAuthor, newFormat);
+    setActiveBookId(newId);
+    
+    setNewTitle("");
+    setNewAuthor("");
+    setNewFormat("EPUB");
+    setIsAddModalOpen(false);
+    
+    router.push("/reader");
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBookId || !editTitle.trim()) return;
+
+    updateBook(editingBookId, {
+      title: editTitle.trim(),
+      author: editAuthor.trim() || "Unknown Author",
+      format: editFormat,
+      progress: editProgress,
+      status: editStatus,
+      estimatedReadingTime: editProgress === 100 
+        ? "Completed" 
+        : editProgress > 0 
+          ? `${Math.ceil((100 - editProgress) * 0.15)}h remaining at 450 WPM`
+          : "Not started"
+    });
+
+    setIsEditModalOpen(false);
+    setEditingBookId(null);
+  };
+
+  const openEditModal = (book: Book) => {
+    setEditingBookId(book.id);
+    setEditTitle(book.title);
+    setEditAuthor(book.author);
+    setEditFormat(book.format);
+    setEditProgress(book.progress);
+    setEditStatus(book.status);
+    setIsEditModalOpen(true);
+  };
+
+  const handleReadBook = (bookId: string) => {
+    setActiveBookId(bookId);
+    router.push("/reader");
+  };
+
+  // Stats computation
+  const completedBooksCount = React.useMemo(() => {
+    return books.filter((b) => b.status === "completed").length;
+  }, [books]);
+
+  const yearlyGoal = 15;
+  const goalProgressPercentage = Math.min(Math.round((completedBooksCount / yearlyGoal) * 100), 100);
+
+  // Filter books reactively
+  const filteredBooks = React.useMemo(() => {
+    return books.filter((book) => {
+      const matchesSearch = 
+        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesTab = book.status === activeTab;
+      return matchesSearch && matchesTab;
+    });
+  }, [books, searchQuery, activeTab]);
 
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300">
       <Sidebar activePath="/library" />
+
+      {/* Hidden file input for browsing */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        accept=".pdf,.epub,.txt" 
+        multiple
+        className="hidden" 
+      />
 
       {/* Mobile TopNav */}
       <nav className="md:hidden bg-card border-b border-border/30 flex justify-between items-center w-full px-6 py-4 z-50 sticky top-0 transition-all duration-300">
         <div className="text-xl font-bold tracking-tight text-foreground">Visus</div>
         <div className="flex items-center gap-4">
           <span className="material-symbols-outlined text-primary">local_fire_department</span>
-          <div className="w-8 h-8 rounded-full bg-accent border border-border/30 overflow-hidden">
-            <div className="w-full h-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-              VP
-            </div>
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary border border-border/30">
+            VP
           </div>
         </div>
       </nav>
 
       {/* Main Content Canvas */}
       <main className="flex-1 md:ml-64 flex flex-col min-h-screen">
+        
         {/* Header area */}
         <header className="hidden md:flex justify-between items-center px-8 py-6 border-b border-border/20">
           <h1 className="text-3xl font-extrabold font-heading text-foreground">Library</h1>
@@ -59,9 +314,11 @@ export default function LibraryPage() {
           {/* Bento Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            {/* Upload Zone & Storage */}
+            {/* Left Column: Ingestion Zone & Progress Stats */}
             <div className="lg:col-span-4 flex flex-col gap-6">
-              <div className="bg-card border border-border/20 rounded-xl p-6 flex flex-col h-full relative overflow-hidden group shadow-xl glass-panel">
+              
+              {/* Drag & Drop Upload Panel */}
+              <div className="bg-card border border-border/20 rounded-xl p-6 flex flex-col flex-1 relative overflow-hidden group shadow-xl glass-panel min-h-[250px]">
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent opacity-50"></div>
                 <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 relative z-10">Ingestion</h2>
                 
@@ -70,116 +327,449 @@ export default function LibraryPage() {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
+                  onClick={triggerFileBrowser}
                   className={`border border-dashed border-border/50 rounded-xl flex-1 flex flex-col items-center justify-center p-8 text-center transition-all duration-300 relative z-10 cursor-pointer ${
                     isDragOver 
-                      ? "border-primary bg-accent shadow-[inset_0_0_15px_rgba(var(--primary),0.1)]" 
-                      : "bg-background hover:bg-accent/40 hover:border-primary/50"
+                      ? "border-primary bg-accent/60 shadow-[inset_0_0_15px_rgba(var(--primary),0.1)] scale-[0.98]" 
+                      : "bg-background/80 hover:bg-accent/40 hover:border-primary/50"
                   }`}
                   id="drop-zone"
                 >
-                  <span className="material-symbols-outlined text-4xl text-muted-foreground mb-4 group-hover:text-primary transition-colors">upload_file</span>
-                  <p className="text-sm font-semibold text-foreground mb-1">Drop files here</p>
-                  <p className="text-[10px] font-mono text-muted-foreground/80">PDF, EPUB, TXT</p>
-                  <button className="mt-6 px-4 py-2 border border-border/40 text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-primary hover:border-primary transition-colors rounded bg-card">
-                    Browse files
-                  </button>
+                  {isIngesting ? (
+                    <div className="flex flex-col items-center justify-center">
+                      <span className="material-symbols-outlined text-4xl text-primary mb-3 animate-spin">sync</span>
+                      <p className="text-sm font-semibold text-foreground mb-1">Extracting text...</p>
+                      <p className="text-[10px] font-mono text-muted-foreground/80">Parsing foveal elements</p>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-4xl text-muted-foreground mb-3 group-hover:text-primary transition-colors animate-pulse">upload_file</span>
+                      <p className="text-sm font-semibold text-foreground mb-1">Drag & drop files here</p>
+                      <p className="text-[10px] font-mono text-muted-foreground/80">PDF, EPUB, TXT formats supported</p>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); triggerFileBrowser(); }}
+                        className="mt-6 px-4 py-2 border border-border/40 text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-primary hover:border-primary transition-all rounded bg-card/90"
+                      >
+                        Browse files
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
 
-              {/* Reading Stats - Books Read */}
-              <div className="bg-card rounded-xl border border-border/20 p-6 shadow-xl glass-panel relative overflow-hidden group">
+              {/* Dynamic Reading Stats */}
+              <div className="bg-card rounded-xl border border-border/20 p-6 shadow-xl glass-panel relative overflow-hidden group shrink-0">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
                 <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 relative z-10">Books read</h2>
                 <div className="flex justify-between items-end mb-2 relative z-10">
                   <span className="text-3xl font-extrabold font-heading text-foreground">
-                    12
-                    <span className="text-sm text-muted-foreground/80 font-normal ml-1">/ 15</span>
+                    {completedBooksCount}
+                    <span className="text-sm text-muted-foreground/80 font-normal ml-1">/ {yearlyGoal}</span>
                   </span>
-                  <span className="text-[10px] font-mono text-primary font-bold">80% Yearly Goal</span>
+                  <span className="text-[10px] font-mono text-primary font-bold">{goalProgressPercentage}% Yearly Goal</span>
                 </div>
                 <div className="w-full h-2 bg-background rounded-full overflow-hidden relative z-10 border border-border/10">
-                  <div className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-500 group-hover:brightness-110" style={{ width: "80%" }}></div>
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-500 group-hover:brightness-110" 
+                    style={{ width: `${goalProgressPercentage}%` }}
+                  ></div>
                 </div>
-                <p className="text-[9px] font-mono text-muted-foreground mt-3 relative z-10">
-                  Doing great! Next milestone is just 3 books away.
+                <p className="text-xs text-muted-foreground mt-3 relative z-10 leading-relaxed font-sans">
+                  {completedBooksCount >= yearlyGoal 
+                    ? "Congratulations! You reached your yearly goal! Keep setting new milestones."
+                    : `Doing great! Next milestone is just ${Math.max(1, yearlyGoal - completedBooksCount)} book${yearlyGoal - completedBooksCount > 1 ? "s" : ""} away.`}
                 </p>
               </div>
+
             </div>
 
-            {/* Current Reading List */}
+            {/* Right Column: Search, Filters & Book List */}
             <div className="lg:col-span-8 flex flex-col gap-6">
-              {/* Search & Filter Bar */}
+              
+              {/* Search, Filter Tabs & Add Button */}
               <div className="flex flex-col sm:flex-row gap-4 items-center bg-card rounded-xl border border-border/20 p-2 shadow-xl glass-panel">
                 <div className="flex-1 flex items-center px-4 gap-2 w-full">
                   <span className="material-symbols-outlined text-muted-foreground">search</span>
                   <input 
                     className="w-full bg-transparent border-none text-sm text-foreground focus:outline-none focus:ring-0 placeholder-muted-foreground/60 h-10" 
-                    placeholder="Search library..." 
+                    placeholder="Search by title or author..." 
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-2 w-full sm:w-auto overflow-x-auto px-2 pb-2 sm:pb-0 hide-scrollbar">
-                  <button className="px-3 py-1.5 rounded bg-accent text-primary border border-primary/30 text-xs font-mono uppercase tracking-wider">Active</button>
-                  <button className="px-3 py-1.5 rounded bg-transparent text-muted-foreground border border-transparent hover:border-border/30 text-xs font-mono uppercase tracking-wider">Completed</button>
-                  <button className="px-3 py-1.5 rounded bg-transparent text-muted-foreground border border-transparent hover:border-border/30 text-xs font-mono uppercase tracking-wider">Archived</button>
+                <div className="flex gap-2 items-center w-full sm:w-auto px-2 shrink-0">
+                  <div className="flex bg-background/50 border border-border/10 p-1 rounded-lg">
+                    {[
+                      { id: "active", label: "Active" },
+                      { id: "completed", label: "Completed" },
+                      { id: "archived", label: "Archived" }
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`px-3 py-1.5 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
+                          activeTab === tab.id
+                            ? "bg-accent text-primary font-bold shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="w-9 h-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:brightness-110 transition-all shadow-md"
+                    title="Add Book Manually"
+                  >
+                    <span className="material-symbols-outlined text-xl">add</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Book List */}
-              <div className="flex flex-col gap-4">
-                {[
-                  { title: "Neuromancer", author: "William Gibson", format: "EPUB", progress: 64, est: "2h 15m remaining at 450 WPM" },
-                  { title: "The Design of Everyday Things", author: "Don Norman", format: "PDF", progress: 12, est: "8h 30m remaining at 380 WPM" },
-                  { title: "Research Notes - Q3", author: "Internal Document", format: "TXT", progress: 0, est: "Not started" }
-                ].filter(book => book.title.toLowerCase().includes(searchQuery.toLowerCase())).map((book, index) => (
-                  <div 
-                    key={index}
-                    className="bg-card border border-border/20 rounded-xl p-5 flex flex-col sm:flex-row gap-6 relative overflow-hidden group hover:border-primary transition-all cursor-pointer shadow-md glass-panel"
-                  >
-                    {/* Progress visual background */}
-                    <div 
-                      className="absolute top-0 left-0 bottom-0 bg-primary opacity-[0.03] transition-all group-hover:opacity-[0.05]" 
-                      style={{ width: `${book.progress}%` }}
-                    />
-                    
-                    <div className="w-16 h-20 bg-background border border-border/30 rounded-lg flex items-center justify-center shrink-0 relative z-10 shadow-sm">
-                      <span className="material-symbols-outlined text-muted-foreground text-3xl">menu_book</span>
-                      <div className="absolute bottom-1 right-1 bg-accent px-1 rounded text-[8px] font-mono text-muted-foreground">{book.format}</div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col justify-between relative z-10">
-                      <div>
-                        <div className="flex justify-between items-start mb-1">
-                          <h3 className="text-base font-bold font-heading text-foreground group-hover:text-primary transition-colors">{book.title}</h3>
-                          <button className="text-muted-foreground hover:text-primary transition-colors">
-                            <span className="material-symbols-outlined text-xl">more_vert</span>
-                          </button>
-                        </div>
-                        <p className="text-xs text-muted-foreground font-mono">{book.author}</p>
-                      </div>
-                      
-                      <div className="mt-4 flex flex-col gap-2">
-                        <div className="flex justify-between items-end text-[10px] font-mono">
-                          <span className="text-primary font-bold">{book.progress}% Complete</span>
-                          <span className="text-muted-foreground">{book.est}</span>
-                        </div>
-                        <div className="w-full h-1 bg-background rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary transition-all duration-300" 
-                            style={{ width: `${book.progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
+              {/* Book List Scrollable Grid Panel */}
+              <div className="flex-1 max-h-[58vh] overflow-y-auto scrollbar-none pr-1">
+                {filteredBooks.length === 0 ? (
+                  <div className="border border-dashed border-border/40 rounded-xl flex flex-col items-center justify-center p-12 text-center bg-card/10 h-full min-h-[300px]">
+                    <span className="material-symbols-outlined text-4xl text-muted-foreground/60 mb-3">library_books</span>
+                    <p className="text-sm font-semibold text-muted-foreground">No books found</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs leading-relaxed">
+                      Try adjusting your search criteria, switching tabs, or uploading a new file in the ingestion area.
+                    </p>
+                    {books.length === 0 && (
+                      <button 
+                        onClick={resetLibrary}
+                        className="mt-4 px-3 py-1.5 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary bg-primary/5 hover:bg-primary/10 rounded transition-all"
+                      >
+                        Reload seed data
+                      </button>
+                    )}
                   </div>
-                ))}
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {filteredBooks.map((book) => (
+                      <div 
+                        key={book.id}
+                        className="bg-card border border-border/20 rounded-xl p-5 flex flex-col justify-between relative hover:border-primary/50 transition-all shadow-md glass-panel min-h-[160px]"
+                      >
+                        {/* Option Actions Row */}
+                        <div className="absolute top-4 right-4 flex items-center gap-1 z-20">
+                          {/* Direct Trash Icon Delete Button */}
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteBook(book.id);
+                            }}
+                            className="w-7 h-7 rounded-full hover:bg-rose-500/10 flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-all animate-fade-in"
+                            title="Delete Book"
+                          >
+                            <span className="material-symbols-outlined text-base">delete</span>
+                          </button>
+
+                          {/* Options Dropdown Trigger */}
+                          <div className="relative">
+                            <button 
+                              onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveDropdownId(activeDropdownId === book.id ? null : book.id);
+                              }}
+                              className="w-7 h-7 rounded-full hover:bg-accent/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+                            >
+                              <span className="material-symbols-outlined text-base">more_vert</span>
+                            </button>
+
+                            {/* Dropdown Menu (floats dynamically outside card, NEVER clipped, completely opaque) */}
+                            {activeDropdownId === book.id && (
+                              <div 
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute right-0 top-8 z-30 w-44 bg-[#ffffff] dark:bg-[#1c1c1f] border border-border/40 rounded-lg shadow-2xl py-1 animate-fade-in opacity-100"
+                              >
+                                <button
+                                  onClick={() => {
+                                    toggleCompleted(book.id);
+                                    setActiveDropdownId(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-sm">
+                                    {book.status === "completed" ? "unpublished" : "task_alt"}
+                                  </span>
+                                  {book.status === "completed" ? "Mark as Active" : "Mark as Completed"}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    openEditModal(book);
+                                    setActiveDropdownId(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-sm">edit</span>
+                                  Edit Details
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Card Info Cover Row */}
+                        <div className="flex gap-4 items-start pr-16 mb-4">
+                          <div className="w-12 h-16 bg-background border border-border/30 rounded-lg flex items-center justify-center shrink-0 relative shadow-inner">
+                            <span className="material-symbols-outlined text-muted-foreground/80 text-2xl">menu_book</span>
+                            <div className="absolute bottom-0.5 right-0.5 bg-accent/90 border border-border/10 px-1 rounded text-[7px] font-mono text-primary font-bold shadow-sm">{book.format}</div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">{book.title}</h3>
+                            <p className="text-[11px] text-muted-foreground font-mono truncate mt-0.5 mb-2">{book.author}</p>
+                            
+                            {/* Prominent Read Book Button */}
+                            <button
+                              onClick={() => handleReadBook(book.id)}
+                              className="flex items-center gap-1 px-3 py-1 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded transition-all shadow-sm"
+                            >
+                              <span className="material-symbols-outlined text-xs">chrome_reader_mode</span>
+                              Read Book
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Progress Bar & Reading Stats */}
+                        <div className="mt-auto pt-2 flex flex-col gap-1.5">
+                          <div className="flex justify-between items-end text-[10px] font-mono">
+                            <span className="text-primary font-bold">{book.progress}%</span>
+                            <span className="text-muted-foreground/80 truncate max-w-[120px]">{book.estimatedReadingTime}</span>
+                          </div>
+                          <div className="w-full h-1 bg-background border border-border/5 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300" 
+                              style={{ width: `${book.progress}%` }}
+                            />
+                          </div>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
             </div>
+
           </div>
         </div>
+
       </main>
+
+      {/* --- ADD BOOK DIALOG MODAL --- */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            onClick={() => setIsAddModalOpen(false)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-[4px] transition-opacity"
+          />
+          <div className="w-full max-w-md bg-card border border-border/30 rounded-2xl p-6 shadow-2xl relative z-10 glass-panel overflow-hidden animate-scale-up">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-border/10 mb-4 relative z-10">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">library_add</span>
+                <h3 className="font-heading font-bold text-lg">Add Book Manually</h3>
+              </div>
+              <button 
+                onClick={() => setIsAddModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleAddSubmit} className="space-y-4 relative z-10">
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Title</label>
+                <input 
+                  type="text" 
+                  required
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                  placeholder="e.g., Moby Dick"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Author</label>
+                <input 
+                  type="text" 
+                  value={newAuthor}
+                  onChange={(e) => setNewAuthor(e.target.value)}
+                  className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                  placeholder="e.g., Herman Melville"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Format</label>
+                <div className="flex gap-2">
+                  {(["EPUB", "PDF", "TXT"] as const).map((format) => (
+                    <button
+                      key={format}
+                      type="button"
+                      onClick={() => setNewFormat(format)}
+                      className={`flex-1 py-2 rounded-lg border text-xs font-mono transition-all ${
+                        newFormat === format 
+                          ? "border-primary bg-primary/10 text-primary font-bold shadow-sm"
+                          : "border-border/30 bg-card hover:bg-accent text-muted-foreground"
+                      }`}
+                    >
+                      {format}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="flex-1 py-2.5 border border-border/30 rounded-lg text-xs font-mono uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-primary text-primary-foreground font-bold rounded-lg text-xs font-mono uppercase tracking-wider shadow-md hover:brightness-110 transition-all"
+                >
+                  Add Volume
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- EDIT BOOK DIALOG MODAL --- */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            onClick={() => setIsEditModalOpen(false)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-[4px] transition-opacity"
+          />
+          <div className="w-full max-w-md bg-card border border-border/30 rounded-2xl p-6 shadow-2xl relative z-10 glass-panel overflow-hidden animate-scale-up">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-border/10 mb-4 relative z-10">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">edit</span>
+                <h3 className="font-heading font-bold text-lg">Edit Book Details</h3>
+              </div>
+              <button 
+                onClick={() => setIsEditModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleEditSubmit} className="space-y-4 relative z-10">
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Title</label>
+                <input 
+                  type="text" 
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                  placeholder="Title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Author</label>
+                <input 
+                  type="text" 
+                  value={editAuthor}
+                  onChange={(e) => setEditAuthor(e.target.value)}
+                  className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                  placeholder="Author"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Format</label>
+                  <select
+                    value={editFormat}
+                    onChange={(e) => setEditFormat(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-xs font-mono h-10 transition-colors"
+                  >
+                    <option value="EPUB">EPUB</option>
+                    <option value="PDF">PDF</option>
+                    <option value="TXT">TXT</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Status</label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-xs font-mono h-10 transition-colors"
+                  >
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Progress slider */}
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Progress</label>
+                  <span className="text-xs font-mono text-primary font-bold">{editProgress}%</span>
+                </div>
+                <input 
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={editProgress}
+                  onChange={(e) => {
+                    const progressVal = Number(e.target.value);
+                    setEditProgress(progressVal);
+                    
+                    if (progressVal === 100) {
+                      setEditStatus("completed");
+                    } else if (progressVal < 100 && editStatus === "completed") {
+                      setEditStatus("active");
+                    }
+                  }}
+                  className="w-full accent-primary h-1 bg-border/40 rounded-lg appearance-none cursor-pointer my-2"
+                />
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="flex-1 py-2.5 border border-border/30 rounded-lg text-xs font-mono uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-primary text-primary-foreground font-bold rounded-lg text-xs font-mono uppercase tracking-wider shadow-md hover:brightness-110 transition-all"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -25,7 +25,28 @@ export function ClusterVisualBox({
     });
   }, [clusterChunks]);
 
-  // Center scroll automatically to keep the active reading line perfectly focused
+  // High-performance foveal sliding window to avoid massive DOM trees and visual cognitive fatigue
+  const windowConfig = React.useMemo(() => {
+    const windowSize = 18; // optimal count for foveal visual tracking
+    const half = Math.floor(windowSize / 2);
+    
+    let start = Math.max(0, activeClusterIndex - half);
+    let end = Math.min(normalizedChunks.length, start + windowSize);
+    
+    // Adjust start offset if near the end of the chapter
+    if (end - start < windowSize) {
+      start = Math.max(0, end - windowSize);
+    }
+    
+    return {
+      start,
+      end,
+      hasPreceding: start > 0,
+      hasSucceeding: end < normalizedChunks.length,
+    };
+  }, [normalizedChunks.length, activeClusterIndex]);
+
+  // Auto-scroll inside container to keep active line centered if there is any minor overflow
   React.useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
@@ -47,13 +68,13 @@ export function ClusterVisualBox({
 
   // Active color styling mapping
   const activeColors = {
-    indigo: "text-indigo-500 dark:text-indigo-400",
-    violet: "text-violet-500 dark:text-violet-400",
-    emerald: "text-emerald-600 dark:text-emerald-400",
-    amber: "text-amber-600 dark:text-amber-400",
-    rose: "text-rose-500 dark:text-rose-400",
-    blue: "text-blue-500 dark:text-blue-400",
-    white: "text-foreground",
+    indigo: "text-indigo-500 dark:text-indigo-400 font-bold",
+    violet: "text-violet-500 dark:text-violet-400 font-bold",
+    emerald: "text-emerald-600 dark:text-emerald-400 font-bold",
+    amber: "text-amber-600 dark:text-amber-400 font-bold",
+    rose: "text-rose-500 dark:text-rose-400 font-bold",
+    blue: "text-blue-500 dark:text-blue-400 font-bold",
+    white: "text-foreground font-bold",
   };
 
   const glows = {
@@ -66,7 +87,7 @@ export function ClusterVisualBox({
   const fontFamilies = {
     inter: "font-sans",
     atkinson: "font-sans font-medium tracking-wide",
-    dyslexic: "font-sans font-bold tracking-widest",
+    dyslexic: "font-sans font-normal tracking-wide",
   };
 
   const sizeClass = `leading-relaxed md:leading-loose`;
@@ -77,18 +98,34 @@ export function ClusterVisualBox({
   const activeColorClass = activeColors[settings.activeColor as keyof typeof activeColors] || activeColors.white;
   const fontFamilyClass = fontFamilies[settings.fontFamily as keyof typeof fontFamilies] || fontFamilies.inter;
 
+  // Sliced chunks within sliding window
+  const visibleChunks = React.useMemo(() => {
+    return normalizedChunks.slice(windowConfig.start, windowConfig.end).map((chunk, index) => {
+      const absoluteIndex = windowConfig.start + index;
+      return {
+        ...chunk,
+        absoluteIndex,
+        isActive: absoluteIndex === activeClusterIndex,
+      };
+    });
+  }, [normalizedChunks, windowConfig, activeClusterIndex]);
+
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-4xl h-[45vh] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl p-6 md:p-8 bg-card/45 backdrop-blur-xl relative transition-all duration-300"
+      className="w-full max-w-3xl h-[280px] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl p-8 bg-card/45 backdrop-blur-xl relative transition-all duration-300 flex items-center justify-center shadow-xl"
     >
-      {/* Book-Format Continuous Paragraph Flow */}
       <div 
         style={sizeStyle}
-        className={`text-justify whitespace-normal break-words pt-2 pb-36 ${fontFamilyClass} ${sizeClass}`}
+        className={`text-center whitespace-normal break-words w-full ${fontFamilyClass} ${sizeClass}`}
       >
-        {normalizedChunks.map((chunk, index) => {
-          const isActive = index === activeClusterIndex;
+        {/* Preceding text fade indicator */}
+        {windowConfig.hasPreceding && (
+          <span className="text-muted-foreground/35 select-none font-mono text-[0.8em] mr-2">...</span>
+        )}
+
+        {visibleChunks.map((chunk) => {
+          const isActive = chunk.isActive;
 
           const inactiveStyle: React.CSSProperties = {
             opacity: settings.inactiveOpacity,
@@ -98,6 +135,8 @@ export function ClusterVisualBox({
           const activeStyle: React.CSSProperties = {
             opacity: 1,
             filter: "blur(0px)",
+            transform: "scale(1.05)",
+            display: "inline-block",
           };
 
           let highlightClass = "";
@@ -105,7 +144,7 @@ export function ClusterVisualBox({
             if (settings.highlightStyle === "spotlight") {
               highlightClass = `${activeColorClass} ${glows[settings.glowEffect as keyof typeof glows] || ""}`;
             } else if (settings.highlightStyle === "capsule") {
-              highlightClass = `${activeColorClass} bg-primary/10 px-1.5 py-0.5 rounded border border-primary/20 shadow-[0_0_15px_rgba(var(--primary),0.15)]`;
+              highlightClass = `${activeColorClass} bg-primary/10 px-2 py-0.5 rounded border border-primary/20 shadow-[0_0_15px_rgba(var(--primary),0.15)]`;
             } else if (settings.highlightStyle === "underline") {
               highlightClass = `${activeColorClass} border-b-2 border-primary px-0.5`;
             } else if (settings.highlightStyle === "bold-only") {
@@ -115,27 +154,31 @@ export function ClusterVisualBox({
             }
           } else {
             if (settings.highlightStyle === "capsule") {
-              highlightClass = "border border-transparent px-1.5 py-0.5 text-muted-foreground/75";
+              highlightClass = "border border-transparent px-2 py-0.5 text-muted-foreground/60";
             } else if (settings.highlightStyle === "underline") {
-              highlightClass = "border-b-2 border-transparent px-0.5 text-muted-foreground/75";
+              highlightClass = "border-b-2 border-transparent px-0.5 text-muted-foreground/60";
             } else {
-              highlightClass = "text-muted-foreground/75";
+              highlightClass = "text-muted-foreground/60";
             }
           }
 
           return (
-            <React.Fragment key={index}>
+            <React.Fragment key={chunk.absoluteIndex}>
               <span
                 data-active={isActive}
                 style={isActive ? activeStyle : inactiveStyle}
-                className={`inline transition-all duration-300 ${highlightClass}`}
+                className={`inline-block transition-all duration-300 mx-1.5 ${highlightClass}`}
               >
                 {chunk.text}
               </span>
-              {index < normalizedChunks.length - 1 && " "}
             </React.Fragment>
           );
         })}
+
+        {/* Succeeding text fade indicator */}
+        {windowConfig.hasSucceeding && (
+          <span className="text-muted-foreground/35 select-none font-mono text-[0.8em] ml-2">...</span>
+        )}
       </div>
     </div>
   );

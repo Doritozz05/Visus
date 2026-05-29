@@ -8,60 +8,74 @@ import { RsvpVisualBox } from "@/features/reader-rsvp/components/RsvpVisualBox";
 import { ClusterVisualBox } from "@/features/reader-clusters/components/ClusterVisualBox";
 import { ReaderPlayer } from "@/features/reader-controls/components/ReaderPlayer";
 import { useSettings } from "@/context/settings-context";
+import { useLibrary } from "@/context/library-context";
 import { GeneralSettingsForm } from "@/features/settings/components/GeneralSettingsForm";
 import { RsvpSettingsForm } from "@/features/settings/components/RsvpSettingsForm";
 import { ClusterSettingsForm } from "@/features/settings/components/ClusterSettingsForm";
+import { useRouter } from "next/navigation";
+import { Book } from "@/core/entities/book";
 
-interface Chapter {
-  title: string;
-  content: string;
-}
-
-const CHAPTERS: Chapter[] = [
-  {
-    title: "Chapter 1: The RSVP Revolution",
-    content: "Visus elevates your reading speed by locking your focus onto the Optimal Recognition Point of each word. By eliminating traditional eye scanning patterns, RSVP allows your brain to absorb information at an outstanding rate of compression. Combined with visual semantic cluster tracking, you can effortlessly train your peripheral field of vision."
-  },
-  {
-    title: "Chapter 2: Cognitive Visual Chunking",
-    content: "Rather than reading word-by-word, semantic clustering groups words into logical cognitive blocks. This matches how the human brain naturally processes language: not as isolated symbols, but as structured ideas. By reading in chunks, you widen your visual span and reduce subvocalization."
-  },
-  {
-    title: "Chapter 3: The Flow State of Visus",
-    content: "Entering a flow state is the ultimate goal of speed reading. Visus is designed to minimize visual friction, letting you absorb knowledge effortlessly. Calibrate your target WPM and let your focus settle into the center line, where optimal comprehension meets high speed."
-  }
-];
-
-function splitTextInHalf(text: string): [string, string] {
-  const wordsList = text.split(/\s+/);
-  const half = Math.ceil(wordsList.length / 2);
-  const firstHalf = wordsList.slice(0, half).join(" ");
-  const secondHalf = wordsList.slice(half).join(" ");
-  return [firstHalf, secondHalf];
-}
+import { paginateChapter } from "@/lib/parser/paginator";
+import { parseEpub } from "@/lib/parser/epub";
+import { parsePdf } from "@/lib/parser/pdf";
+import { parseTxt } from "@/lib/parser/txt";
 
 export default function ReaderPage() {
+  const router = useRouter();
+  const { settings } = useSettings();
+  const { books, activeBookId, setActiveBookId, addBook, updateBook } = useLibrary();
+
+  // Active book derivation
+  const activeBook = React.useMemo(() => {
+    if (!activeBookId) return null;
+    return books.find((b) => b.id === activeBookId) || null;
+  }, [books, activeBookId]);
+
+  // Player session states
+  const [activeChapterIndex, setActiveChapterIndex] = React.useState(0);
+  const [wordIndex, setWordIndex] = React.useState(0); // relative to active chapter
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [wpm, setWpm] = React.useState(600);
-  const [wordIndex, setWordIndex] = React.useState(0);
   const [mode, setMode] = React.useState<"rsvp" | "cluster" | "normal">("normal");
-  const [activeNormalPage, setActiveNormalPage] = React.useState(0);
   const [completedChapter, setCompletedChapter] = React.useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster">("rsvp");
-  
-  const { settings } = useSettings();
+  const [isTocOpen, setIsTocOpen] = React.useState(false);
 
-  // Process chapters data with word indices
+  // Ingestion File input reference
+  const localFileInputRef = React.useRef<HTMLInputElement>(null);
+  const initializedBookIdRef = React.useRef<string | null>(null);
+
+  // Dynamic parser turning any plain text content or structural parsed chapters into visual chapters/pages
   const chaptersData = React.useMemo(() => {
-    let wordOffset = 0;
-    return CHAPTERS.map((ch, idx) => {
+    if (!activeBook) return [];
+    
+    // Use pre-parsed chapters if available on the book object, otherwise segment content as fallback
+    let rawChapters = activeBook.chapters || [];
+    
+    if (rawChapters.length === 0 && activeBook.content) {
+      // Split content by double newlines or paragraph breaks as fallback
+      const paragraphs = activeBook.content.split(/\n\s*\n+/).filter(p => p.trim() !== "");
+      const legacyChapters = [];
+      for (let i = 0; i < paragraphs.length; i += 6) {
+        const title = `Section ${Math.floor(i / 6) + 1}`;
+        const content = paragraphs.slice(i, i + 6).join("\n\n");
+        legacyChapters.push({ title, content });
+      }
+      rawChapters = legacyChapters;
+    }
+
+    if (rawChapters.length === 0) {
+      rawChapters = [{
+        title: "Section 1",
+        content: activeBook.content || "Empty book content."
+      }];
+    }
+
+    return rawChapters.map((ch, idx) => {
       const rsvpSeq = generateRSVPSequence(ch.content);
       const clusterSeq = generateDynamicClusters(ch.content, 3);
-      const wordsArr = ch.content.split(/\s+/);
-      const startWordIndex = wordOffset;
-      const endWordIndex = wordOffset + wordsArr.length;
-      wordOffset = endWordIndex;
+      const wordsArr = ch.content.split(/\s+/).filter(w => w.trim() !== "");
       
       return {
         ...ch,
@@ -69,42 +83,112 @@ export default function ReaderPage() {
         words: wordsArr,
         rsvpSequence: rsvpSeq,
         clusterChunks: clusterSeq,
-        startWordIndex,
-        endWordIndex,
       };
     });
-  }, []);
+  }, [activeBook]);
+
+  // Derived properties from active chapter index
+  const currentChapter = React.useMemo(() => {
+    if (chaptersData.length === 0) {
+      return { title: "No Book Loaded", content: "", words: [], rsvpSequence: [], clusterChunks: [], index: 0 };
+    }
+    const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
+    return chaptersData[safeIdx];
+  }, [chaptersData, activeChapterIndex]);
 
   const words = React.useMemo(() => {
-    return chaptersData.flatMap(c => c.words);
-  }, [chaptersData]);
+    return currentChapter?.words || [];
+  }, [currentChapter]);
 
   const rsvpSequence = React.useMemo(() => {
-    return chaptersData.flatMap(c => c.rsvpSequence);
-  }, [chaptersData]);
+    return currentChapter?.rsvpSequence || [];
+  }, [currentChapter]);
 
   const clusterChunks = React.useMemo(() => {
-    return chaptersData.flatMap(c => c.clusterChunks);
-  }, [chaptersData]);
+    return currentChapter?.clusterChunks || [];
+  }, [currentChapter]);
 
-  const currentChapter = React.useMemo(() => {
-    const found = chaptersData.find(
-      (c) => wordIndex >= c.startWordIndex && wordIndex < c.endWordIndex
+  // Font-adaptive visual words-per-page scaler to prevent any visual overflows/cuts
+  const getSafeWordsPerPage = React.useCallback((fontSize: number, baseWords: number): number => {
+    const scale = 16 / fontSize;
+    // Apply a safety scaling factor (0.82) to guarantee text fits comfortably inside the 660px container under any font size
+    return Math.max(100, Math.round(baseWords * scale * 0.82));
+  }, []);
+
+  const wordsPerPage = React.useMemo(() => {
+    const baseWords = settings.general.readerWordsPerPage || 300;
+    const fontSize = settings.general.readerFontSize || 16;
+    return getSafeWordsPerPage(fontSize, baseWords);
+  }, [settings.general.readerWordsPerPage, settings.general.readerFontSize, getSafeWordsPerPage]);
+
+  const allBookPages = React.useMemo(() => {
+    if (chaptersData.length === 0) return [];
+    
+    let absolutePageIndex = 0;
+    return chaptersData.flatMap((ch, chIdx) => {
+      const chPages = paginateChapter(ch.content, wordsPerPage);
+      return chPages.map((page) => {
+        const absPageIdx = absolutePageIndex++;
+        return {
+          ...page,
+          chapterIndex: chIdx,
+          absolutePageIndex: absPageIdx,
+        };
+      });
+    });
+  }, [chaptersData, wordsPerPage]);
+
+  const activePage = React.useMemo(() => {
+    if (allBookPages.length === 0) return null;
+    const found = allBookPages.find(
+      (p) => p.chapterIndex === activeChapterIndex && wordIndex >= p.startWordIndex && wordIndex < p.endWordIndex
     );
-    return found || chaptersData[chaptersData.length - 1];
-  }, [chaptersData, wordIndex]);
+    return found || allBookPages.find(p => p.chapterIndex === activeChapterIndex) || allBookPages[0];
+  }, [allBookPages, activeChapterIndex, wordIndex]);
 
-  // Synchronize normal page with word index changes
+  // Sync back visual progress to the active library book
   React.useEffect(() => {
-    const chIndex = chaptersData.findIndex(
-      (c) => wordIndex >= c.startWordIndex && wordIndex < c.endWordIndex
+    if (!activeBook || chaptersData.length === 0 || words.length === 0) return;
+    
+    // Smooth progress representation across chapters
+    const progressInChapter = wordIndex / words.length;
+    const currentProgress = Math.min(
+      100,
+      Math.round(((activeChapterIndex + progressInChapter) / chaptersData.length) * 100)
     );
-    if (chIndex !== -1 && chIndex !== activeNormalPage) {
-      setActiveNormalPage(chIndex);
+    
+    // Atomic state update: avoid infinite loop checks
+    if (Math.abs(activeBook.progress - currentProgress) > 2) {
+      updateBook(activeBook.id, { progress: currentProgress });
     }
-  }, [wordIndex, chaptersData, activeNormalPage]);
+  }, [wordIndex, activeChapterIndex, chaptersData.length, words.length, activeBook, updateBook]);
 
-  // Map individual word index to correct dynamic semantic cluster index
+  // Reset player indexes when active book changes, resuming from last saved progress
+  React.useEffect(() => {
+    if (!activeBook || chaptersData.length === 0) {
+      setWordIndex(0);
+      setActiveChapterIndex(0);
+      setIsPlaying(false);
+      setCompletedChapter(null);
+      initializedBookIdRef.current = null;
+      return;
+    }
+    
+    if (initializedBookIdRef.current !== activeBook.id) {
+      initializedBookIdRef.current = activeBook.id;
+      const targetChapterIdx = Math.min(
+        chaptersData.length - 1,
+        Math.max(0, Math.floor((activeBook.progress / 100) * chaptersData.length))
+      );
+      
+      setActiveChapterIndex(targetChapterIdx);
+      setWordIndex(0);
+      setIsPlaying(false);
+      setCompletedChapter(null);
+    }
+  }, [activeBook, chaptersData.length]);
+
+  // Map individual word index to correct dynamic semantic foveal cluster chunk
   const activeClusterIndex = React.useMemo(() => {
     let currentWordOffset = 0;
     for (let i = 0; i < clusterChunks.length; i++) {
@@ -117,9 +201,9 @@ export default function ReaderPage() {
     return Math.max(0, clusterChunks.length - 1);
   }, [clusterChunks, wordIndex]);
 
-  // Master timer interval for RSVP and Cluster playback modes
+  // Master speed reading playback timer loop (chapter-scoped)
   React.useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || rsvpSequence.length === 0) return;
 
     const baseDelayMs = (60 * 1000) / wpm;
     let finalDelay = baseDelayMs;
@@ -146,38 +230,38 @@ export default function ReaderPage() {
       setWordIndex((prev) => {
         const nextIndex = prev + wordsToAdvance;
 
-        // Auto-pause checking at chapter boundaries
-        const currentCh = chaptersData.find(c => prev >= c.startWordIndex && prev < c.endWordIndex);
-        if (currentCh) {
-          if (nextIndex >= currentCh.endWordIndex) {
-            setIsPlaying(false);
-            setCompletedChapter(currentCh.title);
-            return Math.min(nextIndex, rsvpSequence.length - 1);
-          }
-        }
-
         if (nextIndex >= rsvpSequence.length) {
           setIsPlaying(false);
-          return 0;
+          setCompletedChapter(currentChapter.title);
+          return Math.min(nextIndex, rsvpSequence.length - 1);
         }
         return nextIndex;
       });
     }, finalDelay);
 
     return () => clearTimeout(interval);
-  }, [isPlaying, wordIndex, wpm, rsvpSequence, mode, clusterChunks, activeClusterIndex, chaptersData]);
-  // Paragraph double click handlers removed
+  }, [isPlaying, wordIndex, wpm, rsvpSequence, mode, clusterChunks, activeClusterIndex, currentChapter]);
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 0 || newPage >= chaptersData.length) return;
-    setActiveNormalPage(newPage);
-    setWordIndex(chaptersData[newPage].startWordIndex);
+  const handlePageChange = (direction: "prev" | "next") => {
+    if (allBookPages.length === 0 || !activePage) return;
+    
+    if (direction === "prev") {
+      if (activePage.absolutePageIndex > 0) {
+        const prevPageObj = allBookPages[activePage.absolutePageIndex - 1];
+        setActiveChapterIndex(prevPageObj.chapterIndex);
+        setWordIndex(prevPageObj.startWordIndex);
+      }
+    } else {
+      if (activePage.absolutePageIndex < allBookPages.length - 1) {
+        const nextPageObj = allBookPages[activePage.absolutePageIndex + 1];
+        setActiveChapterIndex(nextPageObj.chapterIndex);
+        setWordIndex(nextPageObj.startWordIndex);
+      }
+    }
   };
 
-  // Handle opening settings drawer (pauses reading)
   const openQuickSettings = () => {
     setIsPlaying(false);
-    // Align drawer tab automatically to the active reader mode for superior UX
     if (mode === "normal") {
       setDrawerTab("general");
     } else {
@@ -186,7 +270,86 @@ export default function ReaderPage() {
     setIsDrawerOpen(true);
   };
 
-  // Current RSVP word elements
+  // Parse a file name helper
+  const parseFileName = (fileName: string) => {
+    const lastDotIndex = fileName.lastIndexOf(".");
+    const cleanName = lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName;
+    const extension = lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1).toUpperCase() : "TXT";
+    const validFormat = (extension === "PDF" || extension === "EPUB" || extension === "TXT") ? (extension as "PDF" | "EPUB" | "TXT") : "TXT";
+    let title = cleanName;
+    let author = "Unknown Author";
+    if (cleanName.includes(" - ")) {
+      const parts = cleanName.split(" - ");
+      title = parts[0].trim();
+      author = parts[1].trim();
+    }
+    return { title, author, format: validFormat };
+  };
+
+  // Direct ingestion upload from within the Reading Room
+  const handleLocalFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    const { title, author, format } = parseFileName(file.name);
+    
+    if (format === "TXT") {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const textContent = event.target?.result as string;
+        const parsedChapters = parseTxt(textContent);
+        const newId = addBook(title, author, format, textContent, parsedChapters);
+        setActiveBookId(newId);
+      };
+      reader.readAsText(file);
+    } else if (format === "PDF") {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const arrayBuffer = event.target?.result as ArrayBuffer;
+          const parsed = await parsePdf(arrayBuffer);
+          const finalTitle = parsed.title && parsed.title !== "Unknown PDF" ? parsed.title : title;
+          const finalAuthor = parsed.author && parsed.author !== "Unknown Author" ? parsed.author : author;
+          const fullContent = parsed.chapters.map(c => c.content).join("\n\n");
+          const newId = addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters);
+          setActiveBookId(newId);
+        } catch (pdfErr) {
+          console.error("Local PDF Parsing failed:", pdfErr);
+          const newId = addBook(title, author, format);
+          setActiveBookId(newId);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else if (format === "EPUB") {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const arrayBuffer = event.target?.result as ArrayBuffer;
+          const parsed = await parseEpub(arrayBuffer);
+          const finalTitle = parsed.title && parsed.title !== "Unknown Title" ? parsed.title : title;
+          const finalAuthor = parsed.author && parsed.author !== "Unknown Author" ? parsed.author : author;
+          const fullContent = parsed.chapters.map(c => c.content).join("\n\n");
+          const newId = addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters);
+          setActiveBookId(newId);
+        } catch (epubErr) {
+          console.error("Local EPUB Parsing failed:", epubErr);
+          const newId = addBook(title, author, format);
+          setActiveBookId(newId);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      const newId = addBook(title, author, format);
+      setActiveBookId(newId);
+    }
+  };
+
+  const triggerLocalFileBrowser = () => {
+    if (localFileInputRef.current) localFileInputRef.current.value = "";
+    localFileInputRef.current?.click();
+  };
+
+  // Calculations for current active RSVP word
   const currentWordObj = rsvpSequence[wordIndex] || { text: "Ready", orpIndex: 1, delayMultiplier: 1.0 };
   const currentWordText = currentWordObj.text;
   const orpIndex = currentWordObj.orpIndex;
@@ -194,14 +357,134 @@ export default function ReaderPage() {
   const focusLetter = currentWordText.charAt(orpIndex);
   const rightPart = currentWordText.slice(orpIndex + 1);
 
-  // Context words for adjacent text blurring
-  const prevWordObj = wordIndex > 0 ? rsvpSequence[wordIndex - 1] : null;
-  const nextWordObj = wordIndex < rsvpSequence.length - 1 ? rsvpSequence[wordIndex + 1] : null;
-  const prevWord = prevWordObj ? prevWordObj.text : "";
-  const nextWord = nextWordObj ? nextWordObj.text : "";
+  const progressPercentage = words.length > 0 
+    ? Math.round((Math.min(wordIndex + 1, words.length) / words.length) * 100) 
+    : 0;
 
-  const progressPercentage = Math.round((Math.min(wordIndex + 1, words.length) / words.length) * 100);
+  const readerFontClass = React.useMemo(() => {
+    const ff = settings.general.readerFontFamily || "serif";
+    switch (ff) {
+      case "inter":
+        return "font-sans antialiased text-justify";
+      case "atkinson":
+        return "font-sans antialiased text-justify tracking-wide font-medium";
+      case "dyslexic":
+        return "font-sans antialiased text-justify tracking-wide font-normal";
+      case "serif":
+      default:
+        return "font-serif antialiased text-justify tracking-normal text-foreground/90";
+    }
+  }, [settings.general.readerFontFamily]);
 
+  // --- RENDERING STATE 1: COMPLETELY EMPTY LIBRARY ---
+  if (books.length === 0) {
+    return (
+      <div className="bg-background text-foreground font-sans h-screen flex flex-col md:flex-row antialiased transition-all duration-300 relative overflow-hidden">
+        <Sidebar activePath="/reader" />
+        <input 
+          type="file" 
+          ref={localFileInputRef} 
+          onChange={handleLocalFileChange} 
+          accept=".pdf,.epub,.txt" 
+          className="hidden" 
+        />
+        
+        <main className="flex-1 flex flex-col items-center justify-center p-8 md:pl-72 relative z-10">
+          <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl glass-panel relative overflow-hidden flex flex-col items-center justify-center gap-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-pulse relative z-10">
+              <span className="material-symbols-outlined text-4xl">auto_stories</span>
+            </div>
+            
+            <div className="relative z-10">
+              <h2 className="text-xl font-bold font-heading text-foreground mb-2">Reading Room</h2>
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed max-w-xs mx-auto">
+                Your speed reading center is ready, but your library is empty. Upload a PDF, EPUB, or TXT volume to begin calibrating foveal focus.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 w-full mt-2 relative z-10">
+              <button
+                onClick={() => router.push("/library")}
+                className="flex-1 py-2.5 border border-border/30 rounded-lg text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent transition-all flex items-center justify-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-sm">library_books</span>
+                Go to Library
+              </button>
+              <button
+                onClick={triggerLocalFileBrowser}
+                className="flex-1 py-2.5 bg-primary text-primary-foreground rounded-lg text-xs font-mono uppercase tracking-wider font-bold shadow-md hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-sm">upload_file</span>
+                Browse Book
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // --- RENDERING STATE 2: BOOKSHELF CHOOSE LIST ---
+  if (!activeBook) {
+    return (
+      <div className="bg-background text-foreground font-sans h-screen flex flex-col md:flex-row antialiased transition-all duration-300 relative overflow-hidden">
+        <Sidebar activePath="/reader" />
+        
+        <main className="flex-1 flex flex-col items-center justify-between p-6 pt-24 pb-8 md:pl-72 overflow-hidden">
+          
+          <div className="w-full max-w-4xl flex-1 flex flex-col justify-center gap-6 mt-4">
+            <div className="text-center mb-4">
+              <h2 className="text-2xl font-bold font-heading text-foreground">Bookshelf Shelf Selection</h2>
+              <p className="text-xs text-muted-foreground font-sans mt-1">Select a cataloged book to load into your speed reading room.</p>
+            </div>
+
+            {/* Scrollable Bookshelf Shelf */}
+            <div className="flex-1 max-h-[60vh] overflow-y-auto pr-1 scrollbar-none">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {books.map((book) => (
+                  <div 
+                    key={book.id}
+                    onClick={() => setActiveBookId(book.id)}
+                    className="bg-card border border-border/20 hover:border-primary/50 transition-all rounded-xl p-5 flex flex-col justify-between shadow-md cursor-pointer group glass-panel min-h-[170px]"
+                  >
+                    <div className="flex gap-3.5 items-start">
+                      <div className="w-10 h-14 bg-background border border-border/30 rounded flex items-center justify-center shrink-0 relative shadow-inner">
+                        <span className="material-symbols-outlined text-muted-foreground/80 text-xl">menu_book</span>
+                        <div className="absolute bottom-0.5 right-0.5 bg-accent/90 px-1 rounded text-[6px] font-mono text-primary font-bold">{book.format}</div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">{book.title}</h3>
+                        <p className="text-[10px] text-muted-foreground font-mono truncate mt-0.5">{book.author}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-2 border-t border-border/10 flex items-center justify-between text-[10px] font-mono">
+                      <span className="text-primary font-bold">{book.progress}% Done</span>
+                      <span className="text-muted-foreground">{book.status.toUpperCase()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-center mt-2">
+              <button 
+                onClick={() => router.push("/library")}
+                className="px-5 py-2.5 border border-border/30 rounded-lg text-xs font-mono uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground transition-all flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-sm">library_books</span>
+                Manage Library Books
+              </button>
+            </div>
+
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // --- RENDERING STATE 3: SPEED READING ENGINE WORKSPACE ---
   return (
     <div className="bg-background text-foreground font-sans h-screen overflow-hidden overscroll-none flex flex-col md:flex-row antialiased transition-all duration-300 relative">
       <Sidebar activePath="/reader" />
@@ -228,15 +511,99 @@ export default function ReaderPage() {
       <main className="flex-1 flex flex-col items-center justify-between relative md:pl-64 h-[calc(100vh-80px)] md:h-screen p-6 pt-32 pb-8 overflow-hidden overscroll-none">
 
         {/* Document Title / Progress & Settings Button */}
-        <div className="absolute top-8 left-0 right-0 flex items-center justify-between px-8 z-10 md:pl-72 border-b border-border/10 pb-4">
-          <div className="flex-1 flex flex-col items-center justify-center pointer-events-none">
-            <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground dark:text-foreground/75 font-bold">
-              Visus_Introduction_Guide.pdf
+        <div className="absolute top-8 left-0 md:left-64 right-0 flex items-center justify-between px-6 md:px-8 z-10 border-b border-border/10 pb-4 gap-4">
+          
+          {/* Back to Bookshelf */}
+          <button
+            onClick={() => setActiveBookId(null)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
+            title="Change book or back to selection list"
+          >
+            <span className="material-symbols-outlined text-base">arrow_back</span>
+            <span className="hidden sm:inline">Bookshelf</span>
+          </button>
+
+          <div className="flex-1 flex flex-col items-center justify-center pointer-events-auto min-w-0">
+            <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground dark:text-foreground/75 font-bold truncate max-w-[200px] sm:max-w-xs">
+              {activeBook.title}
             </h2>
-            <span className="text-xs text-primary/80 font-semibold bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded mt-1.5">
-              {currentChapter.title}
-            </span>
-            <div className="w-48 h-1.5 bg-muted dark:bg-card/90 mt-2.5 rounded-full overflow-hidden border border-border/40 dark:border-border/20 shadow-inner">
+            <div className="flex items-center gap-1.5 mt-1.5 shrink-0 pointer-events-auto relative">
+              <button
+                onClick={() => {
+                  if (activeChapterIndex > 0) {
+                    setActiveChapterIndex(activeChapterIndex - 1);
+                    setWordIndex(0);
+                  }
+                }}
+                disabled={activeChapterIndex === 0}
+                className="w-5 h-5 rounded border border-border/30 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
+                title="Previous Chapter"
+              >
+                <span className="material-symbols-outlined text-[12px] font-bold">chevron_left</span>
+              </button>
+              
+              {/* Clickable Chapter Badge */}
+              <button
+                onClick={() => setIsTocOpen(!isTocOpen)}
+                className="text-xs text-primary/80 hover:text-primary font-semibold bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/45 px-2.5 py-0.5 rounded flex items-center gap-1 transition-all truncate max-w-[120px] sm:max-w-[200px]"
+                title="Open Table of Contents / Chapter Index"
+              >
+                <span className="truncate">{currentChapter.title}</span>
+                <span className="material-symbols-outlined text-[14px] shrink-0 leading-none">{isTocOpen ? "expand_less" : "expand_more"}</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (activeChapterIndex < chaptersData.length - 1) {
+                    setActiveChapterIndex(activeChapterIndex + 1);
+                    setWordIndex(0);
+                  }
+                }}
+                disabled={activeChapterIndex === chaptersData.length - 1}
+                className="w-5 h-5 rounded border border-border/30 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
+                title="Next Chapter"
+              >
+                <span className="material-symbols-outlined text-[12px] font-bold">chevron_right</span>
+              </button>
+
+              {/* Table of Contents Floating Dropdown */}
+              {isTocOpen && (
+                <>
+                  {/* Click-outside backdrop to close */}
+                  <div 
+                    onClick={() => setIsTocOpen(false)}
+                    className="fixed inset-0 z-35"
+                  />
+                  <div className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 bg-card border border-border/40 shadow-2xl rounded-xl p-2 w-60 sm:w-72 max-h-60 overflow-y-auto z-40 animate-fade-in scrollbar-none flex flex-col gap-1">
+                    <div className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground px-2 py-1 border-b border-border/10 mb-1 font-bold flex justify-between items-center shrink-0 select-none">
+                      <span>Chapters Index</span>
+                      <span>{chaptersData.length} sections</span>
+                    </div>
+                    {chaptersData.map((ch, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setActiveChapterIndex(idx);
+                          setWordIndex(0);
+                          setIsTocOpen(false);
+                        }}
+                        className={`w-full text-left px-2.5 py-1.5 rounded text-[11px] font-sans transition-all flex items-start gap-2 ${
+                          activeChapterIndex === idx
+                            ? "bg-primary/15 border border-primary/20 text-primary font-semibold shadow-sm"
+                            : "hover:bg-accent hover:text-foreground text-muted-foreground border border-transparent"
+                        }`}
+                      >
+                        <span className="font-mono text-[8px] bg-muted dark:bg-accent/40 px-1 rounded font-bold shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <span className="truncate">{ch.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="w-48 h-1.5 bg-muted dark:bg-card/90 mt-2.5 rounded-full overflow-hidden border border-border/40 dark:border-border/20 shadow-inner mt-2">
               <div
                 className="h-full bg-primary transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
@@ -247,58 +614,62 @@ export default function ReaderPage() {
             </span>
           </div>
           
-          {/* Quick Settings Trigger (Desktop) */}
-          <button
-            onClick={openQuickSettings}
-            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
-          >
-            <span className="material-symbols-outlined text-base animate-spin-slow">settings</span>
-            Settings
-          </button>
+          <div className="hidden md:flex items-center gap-3 shrink-0">
+            {/* Triple Mode Switcher */}
+            <div className="bg-card border border-border/30 p-1 rounded-lg flex items-center shadow-sm">
+              <button
+                onClick={() => {
+                  setIsPlaying(false);
+                  setMode("normal");
+                }}
+                className={`px-3 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
+                  mode === "normal"
+                    ? "bg-accent text-primary font-bold shadow-sm"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+              >
+                Pages
+              </button>
+              <button
+                onClick={() => {
+                  setMode("rsvp");
+                  setCompletedChapter(null);
+                }}
+                className={`px-3 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
+                  mode === "rsvp"
+                    ? "bg-accent text-primary font-bold shadow-sm"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+              >
+                RSVP
+              </button>
+              <button
+                onClick={() => {
+                  setMode("cluster");
+                  setCompletedChapter(null);
+                }}
+                className={`px-3 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
+                  mode === "cluster"
+                    ? "bg-accent text-primary font-bold shadow-sm"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+              >
+                Cluster
+              </button>
+            </div>
+
+            {/* Quick Settings Trigger (Desktop) */}
+            <button
+              onClick={openQuickSettings}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
+            >
+              <span className="material-symbols-outlined text-base animate-spin-slow">settings</span>
+              Settings
+            </button>
+          </div>
         </div>
 
-        {/* Triple Mode Switcher */}
-        <div className="absolute top-24 right-8 bg-card border border-border/30 p-1 rounded-lg flex items-center z-20 shadow-md">
-          <button
-            onClick={() => {
-              setIsPlaying(false);
-              setMode("normal");
-            }}
-            className={`px-4 py-1.5 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
-              mode === "normal"
-                ? "bg-accent text-primary font-bold shadow-sm"
-                : "text-muted-foreground hover:text-primary"
-            }`}
-          >
-            Pages
-          </button>
-          <button
-            onClick={() => {
-              setMode("rsvp");
-              setCompletedChapter(null);
-            }}
-            className={`px-4 py-1.5 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
-              mode === "rsvp"
-                ? "bg-accent text-primary font-bold shadow-sm"
-                : "text-muted-foreground hover:text-primary"
-            }`}
-          >
-            RSVP (Word)
-          </button>
-          <button
-            onClick={() => {
-              setMode("cluster");
-              setCompletedChapter(null);
-            }}
-            className={`px-4 py-1.5 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
-              mode === "cluster"
-                ? "bg-accent text-primary font-bold shadow-sm"
-                : "text-muted-foreground hover:text-primary"
-            }`}
-          >
-            Cluster (Blocks)
-          </button>
-        </div>
+
 
         {/* Reading Canvas Container */}
         <div className={`w-full ${
@@ -352,66 +723,79 @@ export default function ReaderPage() {
           )}
 
           {mode === "normal" ? (
-            <div className="w-full bg-card/65 dark:bg-card/45 border border-border/20 rounded-2xl p-6 md:p-10 shadow-2xl glass-panel relative overflow-hidden transition-all duration-500 flex flex-col min-h-[460px]">
+            <div className="w-full bg-card/65 dark:bg-card/45 border border-border/20 rounded-2xl p-5 md:px-8 md:py-6 pb-4 md:pb-6 shadow-2xl glass-panel relative overflow-hidden transition-all duration-500 flex flex-col h-[660px] min-h-[660px] max-h-[660px]">
               {/* Book spine simulation in the middle (Desktop only) */}
               <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border/20 to-transparent z-10"></div>
               <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-8 bg-gradient-to-r from-black/5 via-transparent to-black/5 dark:from-black/15 dark:via-transparent dark:to-black/15 -ml-4 pointer-events-none z-10"></div>
 
               {/* Page Header */}
-              <div className="flex justify-between items-center text-[10px] font-mono tracking-widest text-muted-foreground uppercase pb-4 border-b border-border/10 mb-6">
-                <span>Visus Reader &bull; Pro</span>
-                <span className="text-primary font-bold">{chaptersData[activeNormalPage]?.title}</span>
+              <div className="flex justify-between items-center gap-4 text-[10px] font-mono tracking-widest text-muted-foreground uppercase pb-4 border-b border-border/10 mb-4 shrink-0">
+                <span className="shrink-0">Visus Reader &bull; Pro</span>
+                <span className="text-primary font-bold text-right break-words whitespace-normal max-w-[60%] leading-tight">{currentChapter.title}</span>
               </div>
 
               {/* Two-Column Page Content */}
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 leading-relaxed text-foreground select-none relative font-sans">
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 text-foreground select-none relative overflow-hidden">
                 {/* Left Page Column */}
-                <div className="flex flex-col justify-start p-4 transition-all duration-300">
-                  <p className="text-base text-foreground whitespace-pre-wrap leading-relaxed">
-                    {splitTextInHalf(chaptersData[activeNormalPage]?.content || "")[0]}
+                <div className="flex flex-col justify-start p-1 md:px-2 md:py-0 transition-all duration-300">
+                  {activePage?.pageIndex === 0 && (
+                    <h1 className="text-2xl md:text-3xl font-extrabold font-heading text-primary border-b border-border/10 pb-3 mb-4 uppercase tracking-wide leading-tight break-words whitespace-normal shrink-0">
+                      {currentChapter.title}
+                    </h1>
+                  )}
+                  <p 
+                    className={`${readerFontClass} whitespace-pre-wrap leading-relaxed`}
+                    style={{ fontSize: `${settings.general.readerFontSize || 16}px` }}
+                  >
+                    {activePage?.leftColumn || ""}
                   </p>
                 </div>
 
                 {/* Right Page Column */}
-                <div className="flex flex-col justify-start p-4 transition-all duration-300">
-                  <p className="text-base text-foreground whitespace-pre-wrap leading-relaxed">
-                    {splitTextInHalf(chaptersData[activeNormalPage]?.content || "")[1]}
+                <div className="flex flex-col justify-start p-1 md:px-2 md:py-0 transition-all duration-300">
+                  <p 
+                    className={`${readerFontClass} whitespace-pre-wrap leading-relaxed`}
+                    style={{ fontSize: `${settings.general.readerFontSize || 16}px` }}
+                  >
+                    {activePage?.rightColumn || ""}
                   </p>
                 </div>
               </div>
 
               {/* Page Footer Navigation */}
-              <div className="flex justify-between items-center pt-6 border-t border-border/10 mt-6 text-xs font-mono text-muted-foreground relative">
+              <div className="flex justify-between items-center pt-3 border-t border-border/10 mt-3 text-xs font-mono text-muted-foreground relative shrink-0">
                 <button
-                  onClick={() => handlePageChange(activeNormalPage - 1)}
-                  disabled={activeNormalPage === 0}
+                  onClick={() => handlePageChange("prev")}
+                  disabled={activePage ? activePage.absolutePageIndex === 0 : true}
                   className="flex items-center gap-1.5 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none z-20"
                 >
                   <span className="material-symbols-outlined text-sm">arrow_back_ios</span>
-                  Previous Chapter
+                  Previous
                 </button>
                 
-                {/* Left Page Number */}
-                <div className="absolute left-[25%] -translate-x-1/2 hidden md:block text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60">
-                  Page {2 * activeNormalPage + 1}
+                {/* Left Page Number absolute (visible on desktop) */}
+                <div className="absolute left-[20%] -translate-x-1/2 hidden lg:block text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60">
+                  Page {activePage ? (activePage.absolutePageIndex * 2 + 1) : 1}
                 </div>
 
-                {/* Right Page Number */}
-                <div className="absolute left-[75%] -translate-x-1/2 hidden md:block text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60">
-                  Page {2 * activeNormalPage + 2}
+                {/* Page Navigation Clean Pill */}
+                <div className="flex items-center bg-accent/40 border border-border/20 px-4 py-1.5 rounded-full z-20 shadow-sm mx-auto">
+                  <span className="text-[10px] font-mono tracking-widest font-bold text-primary">
+                    Page {activePage ? (activePage.absolutePageIndex * 2 + 1) : 1}-{activePage ? (activePage.absolutePageIndex * 2 + 2) : 2} of {allBookPages.length * 2 || 2}
+                  </span>
                 </div>
 
-                {/* Fallback for mobile */}
-                <div className="md:hidden text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60">
-                  Page {activeNormalPage + 1} of {chaptersData.length}
+                {/* Right Page Number absolute (visible on desktop) */}
+                <div className="absolute left-[80%] -translate-x-1/2 hidden lg:block text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60">
+                  Page {activePage ? (activePage.absolutePageIndex * 2 + 2) : 2}
                 </div>
 
                 <button
-                  onClick={() => handlePageChange(activeNormalPage + 1)}
-                  disabled={activeNormalPage === chaptersData.length - 1}
+                  onClick={() => handlePageChange("next")}
+                  disabled={activePage ? activePage.absolutePageIndex === allBookPages.length - 1 : true}
                   className="flex items-center gap-1.5 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none z-20"
                 >
-                  Next Chapter
+                  Next
                   <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
                 </button>
               </div>
@@ -432,44 +816,34 @@ export default function ReaderPage() {
           )}
         </div>
 
-        {/* Player Bar */}
-        <ReaderPlayer
-          isPlaying={isPlaying}
-          onPlayPauseToggle={() => {
-            if (mode === "normal") {
-              setMode("rsvp");
-              setIsPlaying(false);
-              const startWord = chaptersData[activeNormalPage]?.startWordIndex || 0;
-              setWordIndex(startWord);
-            } else {
-              setIsPlaying(!isPlaying);
-            }
-          }}
-          wpm={wpm}
-          onWpmChange={setWpm}
-          onRewind={() => setWordIndex((prev) => Math.max(0, prev - 10))}
-          onSkip={() => setWordIndex((prev) => Math.min(words.length - 1, prev + 10))}
-          mode={mode}
-          onPrevPage={() => handlePageChange(activeNormalPage - 1)}
-          onNextPage={() => handlePageChange(activeNormalPage + 1)}
-          hasPrevPage={activeNormalPage > 0}
-          hasNextPage={activeNormalPage < chaptersData.length - 1}
-        />
+        {/* Player Bar (Hidden in standard page mode) */}
+        {mode !== "normal" && (
+          <ReaderPlayer
+            isPlaying={isPlaying}
+            onPlayPauseToggle={() => setIsPlaying(!isPlaying)}
+            wpm={wpm}
+            onWpmChange={setWpm}
+            onRewind={() => setWordIndex((prev) => Math.max(0, prev - 10))}
+            onSkip={() => setWordIndex((prev) => Math.min(words.length - 1, prev + 10))}
+            mode={mode}
+            onPrevPage={() => handlePageChange("prev")}
+            onNextPage={() => handlePageChange("next")}
+            hasPrevPage={activePage ? activePage.absolutePageIndex > 0 : false}
+            hasNextPage={activePage ? activePage.absolutePageIndex < allBookPages.length - 1 : false}
+          />
+        )}
       </main>
 
       {/* QUICK SETTINGS DRAWER OVERLAY */}
       {isDrawerOpen && (
         <>
-          {/* Backdrop Click Dismiss */}
           <div 
             onClick={() => setIsDrawerOpen(false)}
             className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[90] transition-opacity duration-300"
           />
 
-          {/* Slide-over Drawer Panel */}
           <div className="fixed right-0 top-0 bottom-0 z-[100] w-full sm:w-[400px] bg-card border-l border-border/40 shadow-2xl glass-panel p-6 flex flex-col transition-all duration-300 animate-slide-in">
             
-            {/* Drawer Header */}
             <div className="flex items-center justify-between pb-4 border-b border-border/30 mb-6">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">settings_applications</span>
@@ -483,7 +857,6 @@ export default function ReaderPage() {
               </button>
             </div>
 
-            {/* Micro Tabs inside drawer */}
             <div className="flex gap-1 border-b border-border/10 pb-3 mb-6 overflow-x-auto scrollbar-none">
               {[
                 { id: "general", label: "General", icon: "settings" },
@@ -505,7 +878,6 @@ export default function ReaderPage() {
               ))}
             </div>
 
-            {/* Scrollable Form Container with Premium Fading Edge Mask */}
             <div 
               className="flex-1 overflow-y-auto scrollbar-none py-2 -my-2"
               style={{

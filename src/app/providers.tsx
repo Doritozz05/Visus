@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { SettingsProvider, useSettings } from "@/context/settings-context";
+import { LibraryProvider } from "@/context/library-context";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
@@ -77,7 +78,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <SettingsProvider>
-      <ThemeProviderHelper>{children}</ThemeProviderHelper>
+      <LibraryProvider>
+        <ThemeProviderHelper>{children}</ThemeProviderHelper>
+      </LibraryProvider>
     </SettingsProvider>
   );
 }

@@ -7,6 +7,9 @@ export interface GeneralSettings {
   soundEffects: boolean;
   readingTimerReminder: number; // in minutes, 0 = disabled
   autoSync: boolean;
+  readerFontSize: number;      // Font size in px
+  readerFontFamily: "inter" | "atkinson" | "dyslexic" | "serif";
+  readerWordsPerPage: number;  // Target words per page
 }
 
 export interface RsvpSettings {
@@ -46,6 +49,9 @@ export const DEFAULT_SETTINGS: SettingsState = {
     soundEffects: false,
     readingTimerReminder: 0,
     autoSync: true,
+    readerFontSize: 16,
+    readerFontFamily: "serif",
+    readerWordsPerPage: 300,
   },
   rsvp: {
     fontSize: 48,
