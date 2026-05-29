@@ -86,16 +86,23 @@ export default function LibraryPage() {
                 </div>
               </div>
 
-              {/* Storage Stats */}
-              <div className="bg-card rounded-xl border border-border/20 p-6 shadow-xl glass-panel">
-                <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">System capacity</h2>
-                <div className="flex justify-between items-end mb-2">
-                  <span className="text-2xl font-bold font-heading text-foreground">1.2<span className="text-sm text-muted-foreground/80">GB</span></span>
-                  <span className="text-[10px] font-mono text-muted-foreground">of 5GB Used</span>
+              {/* Reading Stats - Books Read */}
+              <div className="bg-card rounded-xl border border-border/20 p-6 shadow-xl glass-panel relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+                <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 relative z-10">Books read</h2>
+                <div className="flex justify-between items-end mb-2 relative z-10">
+                  <span className="text-3xl font-extrabold font-heading text-foreground">
+                    12
+                    <span className="text-sm text-muted-foreground/80 font-normal ml-1">/ 15</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-primary font-bold">80% Yearly Goal</span>
                 </div>
-                <div className="w-full h-1.5 bg-background rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500" style={{ width: "24%" }}></div>
+                <div className="w-full h-2 bg-background rounded-full overflow-hidden relative z-10 border border-border/10">
+                  <div className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-500 group-hover:brightness-110" style={{ width: "80%" }}></div>
                 </div>
+                <p className="text-[9px] font-mono text-muted-foreground mt-3 relative z-10">
+                  Doing great! Next milestone is just 3 books away.
+                </p>
               </div>
             </div>
 
