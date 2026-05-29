@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { calculateORP, calculatePunctuationDelay } from "@/core/algorithms/rsvp";
+import { calculateORP, generateRSVPSequence } from "@/core/algorithms/rsvp";
+import { RsvpVisualBox } from "@/features/reader-rsvp/components/RsvpVisualBox";
+import { ClusterVisualBox } from "@/features/reader-clusters/components/ClusterVisualBox";
 
 const PROTOTYPE_TEXT = 
   "Visus elevates your reading speed by locking your focus onto the Optimal Recognition Point of each word. By eliminating traditional eye scanning patterns, RSVP allows your brain to absorb information at an outstanding rate of compression. Combined with visual semantic cluster tracking, you can effortlessly train your peripheral field of vision.";
@@ -17,18 +19,22 @@ export default function ReaderPage() {
     return PROTOTYPE_TEXT.split(/\s+/);
   }, []);
 
+  const rsvpSequence = React.useMemo(() => {
+    return generateRSVPSequence(PROTOTYPE_TEXT);
+  }, []);
+
   // Timer interval for RSVP
   React.useEffect(() => {
     if (!isPlaying) return;
 
-    const currentWord = words[wordIndex] || "";
+    const currentWordObj = rsvpSequence[wordIndex];
     const baseDelayMs = (60 * 1000) / wpm;
-    const delayMultiplier = calculatePunctuationDelay(currentWord);
+    const delayMultiplier = currentWordObj ? currentWordObj.delayMultiplier : 1.0;
     const finalDelay = baseDelayMs * delayMultiplier;
 
     const interval = setTimeout(() => {
       setWordIndex((prev) => {
-        if (prev >= words.length - 1) {
+        if (prev >= rsvpSequence.length - 1) {
           setIsPlaying(false);
           return 0; // Reset
         }
@@ -37,14 +43,15 @@ export default function ReaderPage() {
     }, finalDelay);
 
     return () => clearTimeout(interval);
-  }, [isPlaying, wordIndex, wpm, words]);
+  }, [isPlaying, wordIndex, wpm, rsvpSequence]);
 
   // Current RSVP word elements
-  const currentWord = words[wordIndex] || "Ready";
-  const orpIndex = calculateORP(currentWord);
-  const leftPart = currentWord.slice(0, orpIndex);
-  const focusLetter = currentWord.charAt(orpIndex);
-  const rightPart = currentWord.slice(orpIndex + 1);
+  const currentWordObj = rsvpSequence[wordIndex] || { text: "Ready", orpIndex: 1, delayMultiplier: 1.0 };
+  const currentWordText = currentWordObj.text;
+  const orpIndex = currentWordObj.orpIndex;
+  const leftPart = currentWordText.slice(0, orpIndex);
+  const focusLetter = currentWordText.charAt(orpIndex);
+  const rightPart = currentWordText.slice(orpIndex + 1);
 
   // Cluster groupings (3 words per chunk)
   const clusterChunks = React.useMemo(() => {
@@ -124,42 +131,16 @@ export default function ReaderPage() {
         <div className="w-full max-w-2xl px-6 md:px-0 flex flex-col items-center justify-center flex-1 relative">
           
           {mode === "rsvp" ? (
-            /* RSVP Visual Box */
-            <div className="w-full py-20 border-y border-[#464554]/30 relative flex items-center justify-center bg-[#0b1326] overflow-hidden">
-              {/* ORP Alignment Guides */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-[#464554]/20 transform -translate-x-[20%]"></div>
-              <div className="absolute left-1/2 top-10 bottom-10 w-px bg-[#c0c1ff]/30 transform -translate-x-[20%]"></div>
-
-              {/* The Active RSVP Word */}
-              <div className="text-4xl md:text-6xl font-heading text-slate-100 relative z-10 font-bold tracking-tight flex select-none">
-                <span className="opacity-40">{leftPart}</span>
-                <span className="text-[#ffb95f] relative px-0.5">
-                  {focusLetter}
-                  {/* ORP Dot indicator */}
-                  <div className="absolute -top-4 left-1/2 w-1.5 h-1.5 bg-[#ffb95f] rounded-full -translate-x-1/2 shadow-[0_0_8px_#ffb95f]"></div>
-                </span>
-                <span className="opacity-40">{rightPart}</span>
-              </div>
-            </div>
+            <RsvpVisualBox 
+              leftPart={leftPart}
+              focusLetter={focusLetter}
+              rightPart={rightPart}
+            />
           ) : (
-            /* Cluster Visual Box */
-            <div className="w-full max-w-xl text-lg md:text-xl text-[#c7c4d7]/50 leading-relaxed text-justify py-8 h-64 overflow-y-auto border border-[#464554]/20 rounded-xl p-6 bg-[#171f33]/40">
-              {clusterChunks.map((chunk, index) => {
-                const isActive = index === activeClusterIndex;
-                return (
-                  <span 
-                    key={index} 
-                    className={`inline-block mr-2 px-1 rounded transition-all ${
-                      isActive 
-                        ? "bg-[#c0c1ff]/20 text-[#c0c1ff] font-bold border border-[#c0c1ff]/30 scale-105" 
-                        : "opacity-40"
-                    }`}
-                  >
-                    {chunk}
-                  </span>
-                );
-              })}
-            </div>
+            <ClusterVisualBox 
+              clusterChunks={clusterChunks}
+              activeClusterIndex={activeClusterIndex}
+            />
           )}
 
           {/* Core Controls */}

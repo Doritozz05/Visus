@@ -45,6 +45,21 @@ export function calculatePunctuationDelay(word: string): number {
 }
 
 /**
+ * Calculates the dynamic delay multiplier based on word length.
+ * Extremely long words receive a slight delay multiplier to aid cognitive decoding.
+ *
+ * @param word - Word being evaluated.
+ * @returns Time multiplier (1.0 = base, 1.15 = long word, 1.3 = extremely long word).
+ */
+export function calculateLengthDelay(word: string): number {
+  const cleanWord = word.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
+  const length = cleanWord.length;
+  if (length > 12) return 1.3;  // Extremely long words (e.g., electrocardiogram)
+  if (length > 8) return 1.15;  // Long words (e.g., everything, compositions)
+  return 1.0;
+}
+
+/**
  * Parses raw text content and generates the full sequence of RSVPWord structures ready for rendering.
  *
  * @param content - Raw text content.
@@ -54,9 +69,14 @@ export function generateRSVPSequence(content: string): RSVPWord[] {
   if (!content || typeof content !== "string") return [];
   
   const rawWords = content.trim().split(/\s+/);
-  return rawWords.map((word) => ({
-    text: word,
-    orpIndex: calculateORP(word),
-    delayMultiplier: calculatePunctuationDelay(word),
-  }));
+  return rawWords.map((word) => {
+    const puncDelay = calculatePunctuationDelay(word);
+    const lengthDelay = calculateLengthDelay(word);
+    return {
+      text: word,
+      orpIndex: calculateORP(word),
+      delayMultiplier: parseFloat((puncDelay * lengthDelay).toFixed(2)),
+    };
+  });
 }
+

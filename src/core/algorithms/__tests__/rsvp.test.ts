@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateORP, calculatePunctuationDelay, generateRSVPSequence } from "../rsvp";
+import { calculateORP, calculatePunctuationDelay, calculateLengthDelay, generateRSVPSequence } from "../rsvp";
 
 describe("RSVP Algorithm", () => {
   describe("calculateORP", () => {
@@ -58,6 +58,23 @@ describe("RSVP Algorithm", () => {
     });
   });
 
+  describe("calculateLengthDelay", () => {
+    it("should return 1.0 multiplier for short and medium words (length <= 8)", () => {
+      expect(calculateLengthDelay("short")).toBe(1.0);
+      expect(calculateLengthDelay("reading")).toBe(1.0);
+    });
+
+    it("should return 1.15 multiplier for long words (8 < length <= 12)", () => {
+      expect(calculateLengthDelay("everything")).toBe(1.15); // 10 chars
+      expect(calculateLengthDelay("compositions")).toBe(1.15); // 12 chars
+    });
+
+    it("should return 1.3 multiplier for extremely long words (length > 12)", () => {
+      expect(calculateLengthDelay("characterization")).toBe(1.3); // 16 chars
+      expect(calculateLengthDelay("electrocardiogram")).toBe(1.3); // 17 chars
+    });
+  });
+
   describe("generateRSVPSequence", () => {
     it("should return empty array for empty or invalid input", () => {
       expect(generateRSVPSequence("")).toEqual([]);
@@ -83,6 +100,19 @@ describe("RSVP Algorithm", () => {
         text: "test.",
         orpIndex: 1,
         delayMultiplier: 2.2,
+      });
+    });
+
+    it("should correctly combine punctuation delay and word-length delay", () => {
+      const text = "characterization.";
+      const sequence = generateRSVPSequence(text);
+
+      expect(sequence).toHaveLength(1);
+      // characterization. -> length 16, punctuation is dot (2.2 delay), length delay (1.3) => 2.2 * 1.3 = 2.86
+      expect(sequence[0]).toEqual({
+        text: "characterization.",
+        orpIndex: 4,
+        delayMultiplier: 2.86,
       });
     });
   });
