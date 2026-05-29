@@ -90,7 +90,7 @@ export default function SettingsPage() {
               <div className="absolute right-0 top-0 w-24 h-24 bg-primary/5 rounded-full -translate-y-8 translate-x-8 blur-xl pointer-events-none" />
               <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
                 <span className="material-symbols-outlined text-primary">account_circle</span>
-                <h3 className="text-lg font-bold font-heading text-foreground font-heading">Local Profile</h3>
+                <h3 className="text-lg font-bold font-heading text-foreground">Local Profile</h3>
               </div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">

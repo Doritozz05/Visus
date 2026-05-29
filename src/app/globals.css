@@ -119,12 +119,18 @@ html.theme-matrix-green {
    ========================================================================== */
 
 /* Font Family Mappings */
+body[data-ui-font="inter"] .font-sans,
+body[data-ui-font="inter"] .font-heading,
 body[data-ui-font="inter"] {
   font-family: var(--font-sans), sans-serif;
 }
+body[data-ui-font="outfit"] .font-sans,
+body[data-ui-font="outfit"] .font-heading,
 body[data-ui-font="outfit"] {
   font-family: var(--font-heading), sans-serif;
 }
+body[data-ui-font="roboto"] .font-sans,
+body[data-ui-font="roboto"] .font-heading,
 body[data-ui-font="roboto"] {
   font-family: 'Hanken Grotesk', sans-serif;
 }

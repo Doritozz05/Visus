@@ -138,17 +138,19 @@ export default function ReaderPage() {
 
         {/* Document Title / Progress & Settings Button */}
         <div className="absolute top-8 left-0 right-0 flex items-center justify-between px-8 z-10 md:pl-72">
-          <div className="flex-1 flex flex-col items-center justify-center opacity-60 pointer-events-none">
-            <h2 className="text-xs font-mono uppercase tracking-widest text-foreground/80">
+          <div className="flex-1 flex flex-col items-center justify-center pointer-events-none">
+            <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground dark:text-foreground/75 font-semibold">
               Visus_Introduction_Guide.pdf
             </h2>
-            <div className="w-48 h-1.5 bg-card/85 mt-2 rounded-full overflow-hidden border border-border/20">
+            <div className="w-48 h-1.5 bg-muted dark:bg-card/90 mt-2 rounded-full overflow-hidden border border-border/40 dark:border-border/20 shadow-inner">
               <div
                 className="h-full bg-primary transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
-            <span className="text-[10px] font-mono text-muted-foreground mt-1">{progressPercentage}% Complete</span>
+            <span className="text-[10px] font-mono text-muted-foreground/90 dark:text-muted-foreground font-semibold mt-1">
+              {progressPercentage}% Complete
+            </span>
           </div>
           
           {/* Quick Settings Trigger (Desktop) */}
