@@ -56,45 +56,51 @@ export function RsvpVisualBox({
   return (
     <div className="w-full py-20 border border-border/30 dark:border-border/15 relative flex items-center justify-center bg-card/50 dark:bg-card/30 rounded-2xl overflow-hidden backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] transition-all duration-300">
       
+      {/* Perfectly static, sub-pixel immune visual guide lines */}
+      {settings.showFocusGuides && (
+        <div className="absolute left-[42%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-32 pointer-events-none z-0">
+          <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[2px] bg-primary/15" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary/35" />
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary/35" />
+        </div>
+      )}
+
       {/* The Active RSVP Layout */}
       <div 
         style={fontSizeStyle}
-        className={`w-full font-heading select-none tracking-tight flex items-center relative z-10 ${fontFamilyClass}`}
+        className={`w-full h-[1.2em] font-heading select-none tracking-tight flex items-center justify-center relative z-10 ${fontFamilyClass}`}
       >
-        {/* Left Part: right-aligned, takes up 42% of space cleanly */}
+        {/* Centered Anchor at exactly 42% of the parent's width */}
         <div 
-          style={{ flex: "42 42 0%", opacity: settings.unmarkedOpacity }}
-          className={`text-right pr-0.5 font-bold transition-all duration-350 min-w-0 ${unmarkedColorClass}`}
+          style={{ left: "42%" }}
+          className="absolute -translate-x-1/2 flex items-center justify-center h-full"
         >
-          {leftPart}
-        </div>
-        
-        {/* Focus Letter (ORP): exactly centered at the 42% boundary, never squished */}
-        <div className="shrink-0 flex items-center justify-center relative z-10 px-0.5">
-          {/* Target Reticle/Guide lines positioned exactly relative to the center of the focus letter! */}
-          {settings.showFocusGuides && (
-            <>
-              <div className="absolute top-[-80px] bottom-[-80px] w-[2px] bg-primary/15 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
-              <div className="absolute top-[-60px] w-4 h-[2px] bg-primary/35 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
-              <div className="absolute bottom-[-60px] w-4 h-[2px] bg-primary/35 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
-            </>
-          )}
-          
-          <span 
-            className={`font-extrabold text-center relative transition-all duration-350 ${orpColorClass} ${
-              settings.orpGlow ? orpGlowClass : ""
-            }`}
+          {/* Left Part: placed absolute right-full, ends exactly at the left edge of the ORP letter */}
+          <div 
+            style={{ opacity: settings.unmarkedOpacity }}
+            className={`absolute right-full pr-[0.08em] font-bold text-right whitespace-nowrap select-none pointer-events-none transition-opacity duration-350 ${unmarkedColorClass}`}
           >
-            {focusLetter}
-          </span>
-        </div>
-        
-        {/* Right Part: left-aligned, takes up remaining 58% of space cleanly */}
-        <div 
-          style={{ flex: "58 58 0%", opacity: settings.unmarkedOpacity }}
-          className={`text-left pl-0.5 font-bold transition-all duration-350 min-w-0 ${unmarkedColorClass}`}
-        >
-          {rightPart}
+            {leftPart}
+          </div>
+          
+          {/* Focus Letter (ORP): exactly centered at the 42% mark of the parent card */}
+          <div className="relative flex items-center justify-center z-10">
+            <span 
+              className={`font-extrabold text-center relative transition-colors duration-200 ${orpColorClass} ${
+                settings.orpGlow ? orpGlowClass : ""
+              }`}
+            >
+              {focusLetter}
+            </span>
+          </div>
+          
+          {/* Right Part: placed absolute left-full, starts exactly at the right edge of the ORP letter */}
+          <div 
+            style={{ opacity: settings.unmarkedOpacity }}
+            className={`absolute left-full pl-[0.08em] font-bold text-left whitespace-nowrap select-none pointer-events-none transition-opacity duration-350 ${unmarkedColorClass}`}
+          >
+            {rightPart}
+          </div>
         </div>
       </div>
     </div>

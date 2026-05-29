@@ -159,7 +159,7 @@ export default function ReaderPage() {
             className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
           >
             <span className="material-symbols-outlined text-base animate-spin-slow">settings</span>
-            Ajustar
+            Settings
           </button>
         </div>
 
@@ -225,7 +225,7 @@ export default function ReaderPage() {
           />
 
           {/* Slide-over Drawer Panel */}
-          <div className="fixed right-0 top-0 bottom-0 z-[100] w-full sm:w-[400px] bg-card border-l border-border/40 shadow-2xl glass-panel p-6 overflow-y-auto scrollbar-none flex flex-col transition-all duration-300 animate-slide-in">
+          <div className="fixed right-0 top-0 bottom-0 z-[100] w-full sm:w-[400px] bg-card border-l border-border/40 shadow-2xl glass-panel p-6 flex flex-col transition-all duration-300 animate-slide-in">
             
             {/* Drawer Header */}
             <div className="flex items-center justify-between pb-4 border-b border-border/30 mb-6">
@@ -253,8 +253,8 @@ export default function ReaderPage() {
                   onClick={() => setDrawerTab(t.id as any)}
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-lg border font-mono text-[10px] uppercase tracking-wider transition-all shrink-0 ${
                     drawerTab === t.id
-                      ? "border-primary bg-primary/10 text-primary font-bold"
-                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/40"
+                      ? "border-primary bg-primary/10 text-primary font-bold shadow-sm"
+                      : "border-border/30 bg-card hover:bg-accent/65 text-muted-foreground hover:text-foreground shadow-sm"
                   }`}
                 >
                   <span className="material-symbols-outlined text-sm">{t.icon}</span>
@@ -263,17 +263,21 @@ export default function ReaderPage() {
               ))}
             </div>
 
-            {/* Scrollable Form Container */}
-            <div className="flex-1 overflow-y-auto scrollbar-none pb-8">
-              {drawerTab === "general" && <GeneralSettingsForm />}
-              {drawerTab === "rsvp" && <RsvpSettingsForm />}
-              {drawerTab === "cluster" && <ClusterSettingsForm />}
+            {/* Scrollable Form Container with Premium Fading Edge Mask */}
+            <div 
+              className="flex-1 overflow-y-auto scrollbar-none py-2 -my-2"
+              style={{
+                maskImage: "linear-gradient(to bottom, transparent 0%, black 16px, black calc(100% - 24px), transparent 100%)",
+                WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 16px, black calc(100% - 24px), transparent 100%)",
+              }}
+            >
+              <div className="pt-2 pb-12">
+                {drawerTab === "general" && <GeneralSettingsForm />}
+                {drawerTab === "rsvp" && <RsvpSettingsForm />}
+                {drawerTab === "cluster" && <ClusterSettingsForm />}
+              </div>
             </div>
 
-            {/* Quick action details */}
-            <div className="pt-4 border-t border-border/30 text-[9px] font-mono text-muted-foreground text-center bg-card">
-              Close drawer to resume speed reading session.
-            </div>
           </div>
         </>
       )}

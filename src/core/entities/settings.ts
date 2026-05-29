@@ -50,9 +50,9 @@ export const DEFAULT_SETTINGS: SettingsState = {
   rsvp: {
     fontSize: 48,
     fontFamily: "inter",
-    orpColor: "orange",
+    orpColor: "violet",
     orpGlow: true,
-    showFocusGuides: true,
+    showFocusGuides: false,
     unmarkedOpacity: 0.3,
     unmarkedColor: "foreground",
   },
