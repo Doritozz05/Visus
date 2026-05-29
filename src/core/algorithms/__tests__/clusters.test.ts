@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateFixedChunks, generateSemanticChunks } from "../clusters";
+import { generateFixedChunks, generateSemanticChunks, generateDynamicClusters } from "../clusters";
 
 describe("Clusters Algorithm", () => {
   describe("generateFixedChunks", () => {
@@ -56,4 +56,59 @@ describe("Clusters Algorithm", () => {
       expect(chunks).toEqual(["Hello world!"]);
     });
   });
+
+  describe("generateDynamicClusters", () => {
+    it("should return empty array for empty input", () => {
+      expect(generateDynamicClusters("")).toEqual([]);
+    });
+
+    it("should group words and respect the target chunk size limit", () => {
+      const paragraph = "one two three four five six";
+      const clusters = generateDynamicClusters(paragraph, 3);
+      
+      expect(clusters[0].text).toBe("one two three");
+      expect(clusters[0].wordCount).toBe(3);
+      expect(clusters[1].text).toBe("four five six");
+      expect(clusters[1].wordCount).toBe(3);
+    });
+
+    it("should cut immediately on punctuation to preserve semantic flow", () => {
+      const paragraph = "Hello world, how are you? Life is good.";
+      const clusters = generateDynamicClusters(paragraph, 3);
+      
+      // "Hello world," ends with comma -> should close immediately
+      expect(clusters[0].text).toBe("Hello world,");
+      
+      // "how are you?" ends with question mark -> should close immediately
+      expect(clusters[1].text).toBe("how are you?");
+      
+      // "Life is good." ends with period -> should close immediately
+      expect(clusters[2].text).toBe("Life is good.");
+    });
+
+    it("should compute delay multipliers correctly based on punctuation and complexity", () => {
+      const p1 = "Simple short.";
+      const p2 = "Very long complex word electromagnetism here.";
+      const p3 = "Just a comma, here.";
+      
+      const c1 = generateDynamicClusters(p1, 3);
+      const c2 = generateDynamicClusters(p2, 3);
+      const c3 = generateDynamicClusters(p3, 3);
+
+      // Ends with period -> should have 1.6 delay multiplier
+      expect(c1[0].delayMultiplier).toBeCloseTo(1.6);
+      
+      // Second chunk contains only "word electromagnetism" because "here." exceeds character limits
+      expect(c2[1].text).toBe("word electromagnetism");
+      expect(c2[1].delayMultiplier).toBeCloseTo(1.2);
+
+      // Third chunk contains "here."
+      expect(c2[2].text).toBe("here.");
+      expect(c2[2].delayMultiplier).toBeCloseTo(1.6);
+
+      // Ends with comma -> should have 1.3 delay multiplier
+      expect(c3[0].delayMultiplier).toBeCloseTo(1.3);
+    });
+  });
 });
+

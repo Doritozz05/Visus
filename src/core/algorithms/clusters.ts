@@ -55,3 +55,98 @@ export function generateSemanticChunks(paragraph: string, targetChunkSize: numbe
   
   return finishedChunks;
 }
+
+/**
+ * Representación estructurada de un cúmulo dinámico para lectura rápida.
+ */
+export interface DynamicCluster {
+  text: string;
+  wordCount: number;
+  charCount: number;
+  delayMultiplier: number;
+}
+
+/**
+ * Agrupa texto de forma dinámica basándose en principios cognitivos de lectura.
+ * Controla la longitud visual (visión parafoveal) y las pausas gramaticales,
+ * asignando un factor de retardo adaptativo a cada bloque.
+ *
+ * @param paragraph - Texto del párrafo a procesar.
+ * @param targetChunkSize - Cantidad ideal de palabras por cúmulo.
+ * @returns Listado de cúmulos dinámicos estructurados.
+ */
+export function generateDynamicClusters(paragraph: string, targetChunkSize: number = 3): DynamicCluster[] {
+  if (!paragraph || paragraph.trim() === "") return [];
+
+  const words = paragraph.trim().split(/\s+/);
+  const clusters: DynamicCluster[] = [];
+  
+  let currentWords: string[] = [];
+  let currentCharCount = 0;
+
+  const pushCurrentCluster = () => {
+    if (currentWords.length === 0) return;
+
+    const text = currentWords.join(" ");
+    const wordCount = currentWords.length;
+    const charCount = text.length;
+
+    // Calcular multiplicador de retardo cognitivo
+    let delayMultiplier = 1.0;
+    const lastWord = currentWords[currentWords.length - 1];
+
+    if (/[.?!]$/.test(lastWord)) {
+      delayMultiplier = 1.6; // Pausa mayor al final de frases
+    } else if (/[,,;:—]$/.test(lastWord)) {
+      delayMultiplier = 1.3; // Pausa media en comas y pausas sintácticas
+    }
+
+    // Incrementar retardo si contiene palabras complejas o largas
+    const hasLongWord = currentWords.some((w) => w.replace(/[^\w]/g, "").length >= 9);
+    if (hasLongWord) {
+      delayMultiplier += 0.2;
+    }
+
+    // Acelerar si son palabras muy cortas y simples
+    const avgLength = currentWords.reduce((sum, w) => sum + w.length, 0) / wordCount;
+    if (avgLength <= 3.5 && delayMultiplier === 1.0) {
+      delayMultiplier = 0.85;
+    }
+
+    clusters.push({
+      text,
+      wordCount,
+      charCount,
+      delayMultiplier: Math.min(2.0, Math.max(0.7, delayMultiplier)),
+    });
+
+    currentWords = [];
+    currentCharCount = 0;
+  };
+
+  for (const word of words) {
+    const wordLength = word.length;
+    
+    // Reglas de corte foveal y longitud (visión parafoveal max ~22 caracteres)
+    const wouldExceedCharLimit = currentWords.length > 0 && (currentCharCount + wordLength + 1 > 22);
+    const wouldExceedWordLimit = currentWords.length >= targetChunkSize;
+
+    if (wouldExceedCharLimit || wouldExceedWordLimit) {
+      pushCurrentCluster();
+    }
+
+    currentWords.push(word);
+    currentCharCount += (currentCharCount === 0 ? 0 : 1) + wordLength;
+
+    // Corte obligatorio por puntuación sintáctica pesada o media
+    if (/[.?!,;:—]$/.test(word)) {
+      pushCurrentCluster();
+    }
+  }
+
+  // Empujar residuo final
+  pushCurrentCluster();
+
+  return clusters;
+}
+
