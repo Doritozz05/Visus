@@ -36,8 +36,6 @@ export function TableOfContents({
 
   // Center the dropdown on the button, but clamp so it never overflows the viewport
   const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 800;
-  // The button lives in the content area (after the 256px sidebar), so its measured
-  // center is ~128px right of viewport center. Subtract half the sidebar to compensate.
   const sidebarOffset = typeof window !== "undefined" && window.innerWidth >= 768 ? 256 : 0;
   const rawLeft = (anchorX ?? viewportWidth / 2) - DROPDOWN_WIDTH / 2 - sidebarOffset;
   const clampedLeft = Math.max(8, Math.min(rawLeft, viewportWidth - DROPDOWN_WIDTH - 8));
