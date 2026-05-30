@@ -109,6 +109,15 @@ describe("Clusters Algorithm", () => {
       // Ends with comma -> should have 1.3 delay multiplier
       expect(c3[0].delayMultiplier).toBeCloseTo(1.3);
     });
+
+    it("should correctly identify long words with Spanish accents and apply delay boost", () => {
+      const p = "Palabra educación"; // "educación" is 9 letters. "Palabra" is 7.
+      const clusters = generateDynamicClusters(p, 3);
+
+      expect(clusters).toHaveLength(1);
+      // Base delay = 1.0. educación is >= 9 letters -> +0.2 delay boost => 1.2
+      expect(clusters[0].delayMultiplier).toBeCloseTo(1.2);
+    });
   });
 });
 

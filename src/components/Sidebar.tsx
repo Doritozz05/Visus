@@ -83,7 +83,7 @@ export function Sidebar({ activePath }: SidebarProps) {
               <div className={`${isActive ? "bg-accent px-4 py-1 rounded-full" : ""}`}>
                 <span
                   className="material-symbols-outlined text-2xl"
-                  style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0'" }}
+                  style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
                 >
                   {item.icon}
                 </span>

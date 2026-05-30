@@ -97,12 +97,12 @@ export function generateDynamicClusters(paragraph: string, targetChunkSize: numb
 
     if (/[.?!]$/.test(lastWord)) {
       delayMultiplier = 1.6; // Pausa mayor al final de frases
-    } else if (/[,,;:—]$/.test(lastWord)) {
+    } else if (/[,;:—]$/.test(lastWord)) {
       delayMultiplier = 1.3; // Pausa media en comas y pausas sintácticas
     }
 
-    // Incrementar retardo si contiene palabras complejas o largas
-    const hasLongWord = currentWords.some((w) => w.replace(/[^\w]/g, "").length >= 9);
+    // Incrementar retardo si contiene palabras complejas o largas (Spanish accent friendly)
+    const hasLongWord = currentWords.some((w) => w.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜíïöëàèìòù]/g, "").length >= 9);
     if (hasLongWord) {
       delayMultiplier += 0.2;
     }
