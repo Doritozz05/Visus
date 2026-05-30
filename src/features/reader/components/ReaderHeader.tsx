@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Book } from "@/core/entities/book";
+import { Book, Bookmark } from "@/core/entities/book";
 import { TableOfContents } from "./TableOfContents";
 
 interface ChapterItem {
@@ -24,6 +24,9 @@ interface ReaderHeaderProps {
   setActiveBookId: (id: string | null) => void;
   isTocOpen: boolean;
   setIsTocOpen: (open: boolean) => void;
+  bookmarks: Bookmark[];
+  onGoToBookmark: (chapterIndex: number, wordIndex: number) => void;
+  onDeleteBookmark: (id: string) => void;
 }
 
 export function ReaderHeader({
@@ -42,6 +45,9 @@ export function ReaderHeader({
   setActiveBookId,
   isTocOpen,
   setIsTocOpen,
+  bookmarks,
+  onGoToBookmark,
+  onDeleteBookmark,
 }: ReaderHeaderProps) {
   const chapterBtnRef = React.useRef<HTMLButtonElement>(null);
   const [anchorPos, setAnchorPos] = React.useState<{ x: number; y: number } | null>(null);
@@ -56,15 +62,17 @@ export function ReaderHeader({
 
   return (
     <div className="absolute top-8 left-0 md:left-64 right-0 flex items-center justify-between px-6 md:px-8 z-30 border-b border-border/10 pb-4 gap-4 bg-background/95 backdrop-blur-sm">
-      {/* Back to Bookshelf */}
-      <button
-        onClick={() => setActiveBookId(null)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
-        title="Change book or back to selection list"
-      >
-        <span className="material-symbols-outlined text-base">arrow_back</span>
-        <span className="hidden sm:inline">Bookshelf</span>
-      </button>
+      {/* Left: Back to Bookshelf */}
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={() => setActiveBookId(null)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
+          title="Change book or back to selection list"
+        >
+          <span className="material-symbols-outlined text-base">arrow_back</span>
+          <span className="hidden sm:inline">Bookshelf</span>
+        </button>
+      </div>
 
       <div className="flex-1 flex flex-col items-center justify-center pointer-events-auto min-w-0 relative">
         <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground dark:text-foreground/75 font-bold truncate max-w-[200px] sm:max-w-xs">
@@ -185,9 +193,13 @@ export function ReaderHeader({
         activeChapterIndex={activeChapterIndex}
         setActiveChapterIndex={setActiveChapterIndex}
         setWordIndex={setWordIndex}
+        bookmarks={bookmarks}
+        onGoToBookmark={onGoToBookmark}
+        onDeleteBookmark={onDeleteBookmark}
         anchorX={anchorPos?.x}
         anchorY={anchorPos?.y}
       />
     </div>
   );
 }
+

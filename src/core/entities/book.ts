@@ -9,6 +9,15 @@ export interface BookChapter {
   content: string;
 }
 
+export interface Bookmark {
+  id: string;
+  chapterIndex: number;
+  wordIndex: number;
+  name: string;
+  createdAt: string;
+  chapterTitle: string;
+}
+
 export interface Book {
   id: string;
   title: string;
@@ -20,6 +29,16 @@ export interface Book {
   content?: string; // Stored text content of the book
   chapters?: BookChapter[]; // Parsed chapters for EPUB/PDF/TXT
   createdAt: string;
+  /** Exact chapter index the user was on when they last left the reader */
+  lastChapterIndex?: number;
+  /** Exact word index (within the chapter) the user was on when they last left the reader */
+  lastWordIndex?: number;
+  /** Optional saved bookmark position (legacy) */
+  bookmarkChapterIndex?: number;
+  /** Optional saved bookmark word index within the bookmarked chapter (legacy) */
+  bookmarkWordIndex?: number;
+  /** Collection of multiple saved bookmarked positions */
+  bookmarks?: Bookmark[];
 }
 
 /**

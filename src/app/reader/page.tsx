@@ -151,24 +151,33 @@ export default function ReaderPage() {
     return found || allBookPages.find(p => p.chapterIndex === activeChapterIndex) || allBookPages[0];
   }, [allBookPages, activeChapterIndex, wordIndex]);
 
-  // Sync back visual progress to the active library book
+  // Sync back visual progress + exact position to the active library book
   React.useEffect(() => {
     if (!activeBook || chaptersData.length === 0 || words.length === 0) return;
-    
+    // Skip saving if this book hasn't been initialized yet to avoid overwriting saved position
+    if (initializedBookIdRef.current !== activeBook.id) return;
+
     // Smooth progress representation across chapters
     const progressInChapter = wordIndex / words.length;
     const currentProgress = Math.min(
       100,
       Math.round(((activeChapterIndex + progressInChapter) / chaptersData.length) * 100)
     );
-    
-    // Atomic state update: avoid infinite loop checks
-    if (Math.abs(activeBook.progress - currentProgress) > 2) {
-      updateBook(activeBook.id, { progress: currentProgress });
+
+    const progressChanged = Math.abs(activeBook.progress - currentProgress) > 2;
+    const chapterChanged = activeBook.lastChapterIndex !== activeChapterIndex;
+    const wordChanged = activeBook.lastWordIndex !== wordIndex;
+
+    if (progressChanged || chapterChanged || wordChanged) {
+      updateBook(activeBook.id, {
+        progress: currentProgress,
+        lastChapterIndex: activeChapterIndex,
+        lastWordIndex: wordIndex,
+      });
     }
   }, [wordIndex, activeChapterIndex, chaptersData.length, words.length, activeBook, updateBook]);
 
-  // Reset player indexes when active book changes, resuming from last saved progress
+  // Reset player indexes when active book changes, resuming from exact saved position
   React.useEffect(() => {
     if (!activeBook || chaptersData.length === 0) {
       setWordIndex(0);
@@ -181,13 +190,24 @@ export default function ReaderPage() {
     
     if (initializedBookIdRef.current !== activeBook.id) {
       initializedBookIdRef.current = activeBook.id;
-      const targetChapterIdx = Math.min(
-        chaptersData.length - 1,
-        Math.max(0, Math.floor((activeBook.progress / 100) * chaptersData.length))
-      );
-      
-      setActiveChapterIndex(targetChapterIdx);
-      setWordIndex(0);
+
+      // Prefer the exact saved chapter/word position over the rough progress-based estimate
+      const savedChapterIdx = activeBook.lastChapterIndex ?? null;
+      const savedWordIdx = activeBook.lastWordIndex ?? null;
+
+      if (savedChapterIdx !== null && savedChapterIdx < chaptersData.length) {
+        setActiveChapterIndex(savedChapterIdx);
+        setWordIndex(savedWordIdx ?? 0);
+      } else {
+        // Fallback for books saved before this update (only progress% available)
+        const targetChapterIdx = Math.min(
+          chaptersData.length - 1,
+          Math.max(0, Math.floor((activeBook.progress / 100) * chaptersData.length))
+        );
+        setActiveChapterIndex(targetChapterIdx);
+        setWordIndex(0);
+      }
+
       setIsPlaying(false);
       setCompletedChapter(null);
     }
@@ -274,6 +294,54 @@ export default function ReaderPage() {
     }
     setIsDrawerOpen(true);
   };
+
+  // Add a new named bookmark and persist it
+  const handleAddBookmark = React.useCallback((name: string, chapterIndex: number, wordIndex: number) => {
+    if (!activeBook) return;
+    const currentBookmarks = activeBook.bookmarks || [];
+    
+    // Find chapter title
+    const chapterTitle = chaptersData[chapterIndex]?.title || `Section ${chapterIndex + 1}`;
+    
+    const newBookmark = {
+      id: `bookmark-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      chapterIndex,
+      wordIndex,
+      name,
+      createdAt: new Date().toISOString(),
+      chapterTitle,
+    };
+    
+    updateBook(activeBook.id, {
+      bookmarks: [...currentBookmarks, newBookmark],
+    });
+  }, [activeBook, chaptersData, updateBook]);
+
+  // Remove an existing bookmark
+  const handleRemoveBookmark = React.useCallback((id: string) => {
+    if (!activeBook) return;
+    const currentBookmarks = activeBook.bookmarks || [];
+    updateBook(activeBook.id, {
+      bookmarks: currentBookmarks.filter((b) => b.id !== id),
+    });
+  }, [activeBook, updateBook]);
+
+  // Update a bookmark's custom name
+  const handleUpdateBookmarkName = React.useCallback((id: string, name: string) => {
+    if (!activeBook) return;
+    const currentBookmarks = activeBook.bookmarks || [];
+    updateBook(activeBook.id, {
+      bookmarks: currentBookmarks.map((b) => (b.id === id ? { ...b, name } : b)),
+    });
+  }, [activeBook, updateBook]);
+
+  // Jump to any saved bookmark position
+  const handleGoToBookmark = React.useCallback((chapterIndex: number, wordIndex: number) => {
+    setIsPlaying(false);
+    setActiveChapterIndex(chapterIndex);
+    setWordIndex(wordIndex);
+  }, [setActiveChapterIndex, setWordIndex]);
+
 
   // Parse a file name helper
   const parseFileName = (fileName: string) => {
@@ -445,6 +513,9 @@ export default function ReaderPage() {
           setActiveBookId={setActiveBookId}
           isTocOpen={isTocOpen}
           setIsTocOpen={setIsTocOpen}
+          bookmarks={activeBook.bookmarks || []}
+          onGoToBookmark={handleGoToBookmark}
+          onDeleteBookmark={handleRemoveBookmark}
         />
 
         {/* Reading Canvas Container */}
@@ -506,6 +577,10 @@ export default function ReaderPage() {
               readerFontClass={readerFontClass}
               fontSize={settings.general.readerFontSize || 16}
               handlePageChange={handlePageChange}
+              bookmarks={activeBook.bookmarks || []}
+              onAddBookmark={handleAddBookmark}
+              onRemoveBookmark={handleRemoveBookmark}
+              onUpdateBookmarkName={handleUpdateBookmarkName}
             />
           ) : mode === "rsvp" ? (
             <RsvpVisualBox

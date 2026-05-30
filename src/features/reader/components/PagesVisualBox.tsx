@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { Bookmark } from "@/core/entities/book";
+import { BookmarkCorner } from "./BookmarkCorner";
 
 interface VisualPage {
   pageIndex: number;
@@ -23,6 +25,10 @@ interface PagesVisualBoxProps {
   readerFontClass: string;
   fontSize: number;
   handlePageChange: (direction: "prev" | "next") => void;
+  bookmarks: Bookmark[];
+  onAddBookmark: (name: string, chapterIndex: number, wordIndex: number) => void;
+  onRemoveBookmark: (id: string) => void;
+  onUpdateBookmarkName: (id: string, name: string) => void;
 }
 
 export function PagesVisualBox({
@@ -32,9 +38,48 @@ export function PagesVisualBox({
   readerFontClass,
   fontSize,
   handlePageChange,
+  bookmarks,
+  onAddBookmark,
+  onRemoveBookmark,
+  onUpdateBookmarkName,
 }: PagesVisualBoxProps) {
+  // Find if any bookmark falls within the active page's word range
+  const activeBookmark = React.useMemo(() => {
+    if (!activePage || !bookmarks) return null;
+    return bookmarks.find((b) => {
+      return (
+        b.chapterIndex === activePage.chapterIndex &&
+        b.wordIndex >= activePage.startWordIndex &&
+        b.wordIndex < activePage.endWordIndex
+      );
+    }) || null;
+  }, [bookmarks, activePage]);
+
+  // Construct a smart, sentence-cased default bookmark name
+  const defaultBookmarkName = React.useMemo(() => {
+    if (!activePage) return "Section 1, page 1";
+    // Kindle-style: Section index + visual page index
+    const pageNum = activePage.absolutePageIndex * 2 + 1;
+    return `Section ${activePage.chapterIndex + 1}, page ${pageNum}`;
+  }, [activePage]);
+
   return (
-    <div className="w-full bg-card/65 dark:bg-card/45 border border-border/20 rounded-2xl p-5 md:px-8 md:py-6 pb-4 md:pb-6 shadow-2xl glass-panel relative overflow-hidden transition-all duration-500 flex flex-col h-[660px] min-h-[660px] max-h-[660px]">
+    <div className="w-full bg-card/65 dark:bg-card/45 border border-border/20 rounded-2xl px-5 pb-4 pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl glass-panel relative overflow-hidden transition-all duration-500 flex flex-col h-[660px] min-h-[660px] max-h-[660px]">
+      {/* Kindle-style corner bookmark ribbon */}
+      {activePage && (
+        <BookmarkCorner
+          bookmarks={bookmarks}
+          currentChapterIndex={activePage.chapterIndex}
+          currentWordIndex={activePage.startWordIndex}
+          chapterTitle={currentChapter.title}
+          defaultName={defaultBookmarkName}
+          activeBookmark={activeBookmark}
+          onAddBookmark={(name) => onAddBookmark(name, activePage.chapterIndex, activePage.startWordIndex)}
+          onRemoveBookmark={onRemoveBookmark}
+          onUpdateBookmarkName={onUpdateBookmarkName}
+        />
+      )}
+
       {/* Book spine simulation in the middle (Desktop only) */}
       <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border/20 to-transparent z-10"></div>
       <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-8 bg-gradient-to-r from-black/5 via-transparent to-black/5 dark:from-black/15 dark:via-transparent dark:to-black/15 -ml-4 pointer-events-none z-10"></div>

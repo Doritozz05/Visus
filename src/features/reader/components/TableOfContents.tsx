@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Bookmark } from "@/core/entities/book";
 
 interface ChapterItem {
   title: string;
@@ -13,6 +14,9 @@ interface TableOfContentsProps {
   activeChapterIndex: number;
   setActiveChapterIndex: (index: number) => void;
   setWordIndex: (index: number) => void;
+  bookmarks?: Bookmark[];
+  onGoToBookmark?: (chapterIndex: number, wordIndex: number) => void;
+  onDeleteBookmark?: (id: string) => void;
   /** Horizontal center of the trigger button, in viewport pixels */
   anchorX?: number;
   /** Bottom edge of the trigger button, in viewport pixels */
@@ -29,9 +33,14 @@ export function TableOfContents({
   activeChapterIndex,
   setActiveChapterIndex,
   setWordIndex,
+  bookmarks = [],
+  onGoToBookmark,
+  onDeleteBookmark,
   anchorX,
   anchorY,
 }: TableOfContentsProps) {
+  const [activeTab, setActiveTab] = React.useState<"sections" | "bookmarks">("sections");
+
   if (!isTocOpen) return null;
 
   // Center the dropdown on the button, but clamp so it never overflows the viewport
@@ -50,31 +59,107 @@ export function TableOfContents({
       />
       <div
         style={{ position: "fixed", top, left: clampedLeft }}
-        className="w-72 max-h-60 overflow-y-auto z-[40] bg-card border border-border/40 shadow-2xl rounded-xl p-2 animate-fade-in scrollbar-none flex flex-col gap-1"
+        className="w-72 max-h-64 overflow-y-auto z-[40] bg-card border border-border/40 shadow-2xl rounded-xl p-2 animate-fade-in scrollbar-none flex flex-col gap-1"
       >
-        <div className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground px-2 py-1 border-b border-border/10 mb-1 font-bold flex justify-between items-center shrink-0 select-none">
-          <span>Chapters Index</span>
-          <span>{chaptersData.length} sections</span>
-        </div>
-        {chaptersData.map((ch, idx) => (
+        {/* Navigation tabs */}
+        <div className="flex border-b border-border/10 mb-1.5 shrink-0 select-none">
           <button
-            key={idx}
-            onClick={() => {
-              setActiveChapterIndex(idx);
-              setWordIndex(0);
-              setIsTocOpen(false);
-            }}
-            className={`w-full text-left px-2.5 py-1.5 rounded text-[11px] font-sans transition-all flex items-start gap-2 ${activeChapterIndex === idx
-              ? "bg-primary/15 border border-primary/20 text-primary font-semibold shadow-sm"
-              : "hover:bg-accent hover:text-foreground text-muted-foreground border border-transparent"
-              }`}
+            onClick={() => setActiveTab("sections")}
+            className={`flex-1 text-center py-1.5 text-[9px] font-mono uppercase tracking-wider transition-all border-b-2 ${
+              activeTab === "sections"
+                ? "border-primary text-primary font-bold"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
           >
-            <span className="font-mono text-[8px] bg-muted dark:bg-accent/40 px-1 rounded font-bold shrink-0 mt-0.5">
-              {idx + 1}
-            </span>
-            <span className="truncate">{ch.title}</span>
+            Sections
           </button>
-        ))}
+          <button
+            onClick={() => setActiveTab("bookmarks")}
+            className={`flex-1 text-center py-1.5 text-[9px] font-mono uppercase tracking-wider transition-all border-b-2 ${
+              activeTab === "bookmarks"
+                ? "border-primary text-primary font-bold"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Bookmarks ({bookmarks.length})
+          </button>
+        </div>
+
+        {/* Tab contents */}
+        {activeTab === "sections" ? (
+          <div className="flex flex-col gap-1">
+            <div className="text-[8px] font-mono uppercase tracking-widest text-muted-foreground/60 px-2 py-0.5 mb-1 font-bold flex justify-between items-center shrink-0 select-none">
+              <span>Chapters index</span>
+              <span>{chaptersData.length} sections</span>
+            </div>
+            {chaptersData.map((ch, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setActiveChapterIndex(idx);
+                  setWordIndex(0);
+                  setIsTocOpen(false);
+                }}
+                className={`w-full text-left px-2.5 py-1.5 rounded text-[11px] font-sans transition-all flex items-start gap-2 ${
+                  activeChapterIndex === idx
+                    ? "bg-primary/15 border border-primary/20 text-primary font-semibold shadow-sm"
+                    : "hover:bg-accent hover:text-foreground text-muted-foreground border border-transparent"
+                }`}
+              >
+                <span className="font-mono text-[8px] bg-muted dark:bg-accent/40 px-1 rounded font-bold shrink-0 mt-0.5">
+                  {idx + 1}
+                </span>
+                <span className="truncate">{ch.title}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-0.5">
+            <div className="text-[8px] font-mono uppercase tracking-widest text-muted-foreground/60 px-2 py-0.5 mb-1 font-bold flex justify-between items-center shrink-0 select-none">
+              <span>Bookmarks index</span>
+              <span>{bookmarks.length} saved</span>
+            </div>
+            {bookmarks.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground/60 text-[10px] font-sans leading-relaxed select-none">
+                No bookmarks saved yet.
+                <br />
+                Click the page corner ribbon to add one.
+              </div>
+            ) : (
+              bookmarks.map((b) => (
+                <div
+                  key={b.id}
+                  className="w-full flex items-center justify-between rounded hover:bg-accent group transition-all"
+                >
+                  <button
+                    onClick={() => {
+                      if (onGoToBookmark) {
+                        onGoToBookmark(b.chapterIndex, b.wordIndex);
+                      }
+                      setIsTocOpen(false);
+                    }}
+                    className="flex-1 text-left px-2.5 py-1.5 text-[11px] font-sans truncate flex flex-col min-w-0"
+                  >
+                    <span className="font-semibold text-foreground truncate">{b.name}</span>
+                    <span className="text-[9px] text-muted-foreground truncate">{b.chapterTitle}</span>
+                  </button>
+                  {onDeleteBookmark && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteBookmark(b.id);
+                      }}
+                      className="p-1 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded transition-all mr-1 shrink-0"
+                      title="Delete bookmark"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </>
   );
