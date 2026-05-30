@@ -159,37 +159,123 @@ export default function ReaderPage() {
     return found || allBookPages.find(p => p.chapterIndex === activeChapterIndex) || allBookPages[0];
   }, [allBookPages, activeChapterIndex, wordIndex]);
 
-  // Sync back visual progress + exact position to the active library book
+  // Keep the latest wordIndex and activeChapterIndex in a ref so we can save it on unmount / beforeunload without re-subscribing the event listeners
+  const latestPositionRef = React.useRef({ wordIndex, activeChapterIndex });
   React.useEffect(() => {
-    if (!activeBook || chaptersData.length === 0 || words.length === 0) return;
-    // Skip saving if this book hasn't been initialized yet to avoid overwriting saved position
-    if (initializedBookIdRef.current !== activeBook.id) return;
+    latestPositionRef.current = { wordIndex, activeChapterIndex };
+  }, [wordIndex, activeChapterIndex]);
 
-    // Smooth progress representation across chapters
-    const progressInChapter = wordIndex / words.length;
+  // Keep track of the active book ID to save progress before switching books
+  const prevBookIdRef = React.useRef<string | null>(null);
+
+  // Core callback to save book progress to database context
+  const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number) => {
+    if (chaptersData.length === 0) return;
+    
+    const targetChapter = chaptersData[chIdx];
+    if (!targetChapter) return;
+    const chWordsLength = targetChapter.words.length || 1;
+    
+    const progressInChapter = wIdx / chWordsLength;
     let currentProgress = Math.min(
       100,
-      Math.round(((activeChapterIndex + progressInChapter) / chaptersData.length) * 100)
+      Math.round(((chIdx + progressInChapter) / chaptersData.length) * 100)
     );
 
-    // If we've reached the last page of the book, automatically set progress to 100%
-    const isLastPage = activePage && allBookPages.length > 0 && activePage.absolutePageIndex === allBookPages.length - 1;
+    const activePageObj = allBookPages.find(
+      (p) => p.chapterIndex === chIdx && wIdx >= p.startWordIndex && wIdx < p.endWordIndex
+    );
+    const isLastPage = activePageObj && allBookPages.length > 0 && activePageObj.absolutePageIndex === allBookPages.length - 1;
+    
     if (isLastPage) {
       currentProgress = 100;
     }
 
-    const progressChanged = Math.abs(activeBook.progress - currentProgress) > 2 || (isLastPage && activeBook.progress !== 100);
-    const chapterChanged = activeBook.lastChapterIndex !== activeChapterIndex;
-    const wordChanged = activeBook.lastWordIndex !== wordIndex;
+    updateBook(bookId, {
+      progress: currentProgress,
+      lastChapterIndex: chIdx,
+      lastWordIndex: wIdx,
+    });
+  }, [chaptersData, allBookPages, updateBook]);
 
-    if (progressChanged || chapterChanged || wordChanged) {
-      updateBook(activeBook.id, {
-        progress: currentProgress,
-        lastChapterIndex: activeChapterIndex,
-        lastWordIndex: wordIndex,
-      });
+  // Event Callback ref pattern to avoid infinite loops when saveProgressForBook changes reference
+  const saveProgressRef = React.useRef(saveProgressForBook);
+  React.useEffect(() => {
+    saveProgressRef.current = saveProgressForBook;
+  }, [saveProgressForBook]);
+
+  // Unmount cleanup and tab close safety hook
+  React.useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (initializedBookIdRef.current === activeBook?.id) {
+        saveProgressRef.current(
+          initializedBookIdRef.current,
+          latestPositionRef.current.activeChapterIndex,
+          latestPositionRef.current.wordIndex
+        );
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      if (initializedBookIdRef.current) {
+        saveProgressRef.current(
+          initializedBookIdRef.current,
+          latestPositionRef.current.activeChapterIndex,
+          latestPositionRef.current.wordIndex
+        );
+      }
+    };
+  }, [activeBook?.id]);
+
+  // Save previous book progress when activeBook changes
+  React.useEffect(() => {
+    if (activeBook) {
+      if (prevBookIdRef.current && prevBookIdRef.current !== activeBook.id) {
+        if (initializedBookIdRef.current === prevBookIdRef.current) {
+          saveProgressRef.current(
+            prevBookIdRef.current,
+            latestPositionRef.current.activeChapterIndex,
+            latestPositionRef.current.wordIndex
+          );
+        }
+      }
+      prevBookIdRef.current = activeBook.id;
     }
-  }, [wordIndex, activeChapterIndex, chaptersData.length, words.length, activeBook, updateBook, activePage, allBookPages]);
+  }, [activeBook]);
+
+  // Save position when the player pauses
+  React.useEffect(() => {
+    if (!isPlaying && initializedBookIdRef.current === activeBook?.id) {
+      saveProgressRef.current(
+        initializedBookIdRef.current,
+        latestPositionRef.current.activeChapterIndex,
+        latestPositionRef.current.wordIndex
+      );
+    }
+  }, [isPlaying, activeBook?.id]);
+
+  // Intercept and wrap chapter selection to trigger immediate saves
+  const handleChapterChange = React.useCallback((chapterIndex: number) => {
+    setIsPlaying(false);
+    
+    if (activeBook && initializedBookIdRef.current === activeBook.id) {
+      saveProgressForBook(
+        activeBook.id,
+        latestPositionRef.current.activeChapterIndex,
+        latestPositionRef.current.wordIndex
+      );
+    }
+    
+    setActiveChapterIndex(chapterIndex);
+    setWordIndex(0);
+    
+    if (activeBook) {
+      saveProgressForBook(activeBook.id, chapterIndex, 0);
+    }
+  }, [activeBook, saveProgressForBook]);
 
   // Reset player indexes when active book changes, resuming from exact saved position
   React.useEffect(() => {
@@ -289,12 +375,14 @@ export default function ReaderPage() {
         const prevPageObj = allBookPages[activePage.absolutePageIndex - 1];
         setActiveChapterIndex(prevPageObj.chapterIndex);
         setWordIndex(prevPageObj.startWordIndex);
+        saveProgressForBook(activeBook.id, prevPageObj.chapterIndex, prevPageObj.startWordIndex);
       }
     } else {
       if (activePage.absolutePageIndex < allBookPages.length - 1) {
         const nextPageObj = allBookPages[activePage.absolutePageIndex + 1];
         setActiveChapterIndex(nextPageObj.chapterIndex);
         setWordIndex(nextPageObj.startWordIndex);
+        saveProgressForBook(activeBook.id, nextPageObj.chapterIndex, nextPageObj.startWordIndex);
       } else {
         // Last page "Next" button clicked -> COMPLETE BOOK!
         const totalWords = activeBook.chapters?.reduce((acc, c) => acc + c.content.split(/\s+/).filter(Boolean).length, 0) || activeBook.content?.split(/\s+/).filter(Boolean).length || 4500;
@@ -388,7 +476,10 @@ export default function ReaderPage() {
     setIsPlaying(false);
     setActiveChapterIndex(chapterIndex);
     setWordIndex(wordIndex);
-  }, [setActiveChapterIndex, setWordIndex]);
+    if (activeBook) {
+      saveProgressForBook(activeBook.id, chapterIndex, wordIndex);
+    }
+  }, [setActiveChapterIndex, setWordIndex, activeBook, saveProgressForBook]);
 
 
   // Parse a file name helper
@@ -549,7 +640,7 @@ export default function ReaderPage() {
           activeBook={activeBook}
           currentChapter={currentChapter}
           activeChapterIndex={activeChapterIndex}
-          setActiveChapterIndex={setActiveChapterIndex}
+          setActiveChapterIndex={handleChapterChange}
           chaptersData={chaptersData}
           setWordIndex={setWordIndex}
           progressPercentage={progressPercentage}

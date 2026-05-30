@@ -115,5 +115,40 @@ describe("RSVP Algorithm", () => {
         delayMultiplier: 2.86,
       });
     });
+
+    it("should correctly align ORP in raw words with leading/trailing Spanish punctuation symbols", () => {
+      // "¿hola?" -> letters: 'hola' (length 4). clean ORP index is 1 ('o'). in raw string, 'o' is at index 2.
+      expect(calculateORP("¿hola?")).toBe(2);
+
+      // "(ejemplo)" -> letters: 'ejemplo' (length 7). clean ORP index is 2 ('e'). in raw string, 'e' is at index 3.
+      expect(calculateORP("(ejemplo)")).toBe(3);
+
+      // "—¿cómo?" -> letters: 'cómo' (length 4). clean ORP index is 1 ('ó'). in raw string, 'ó' is at index 3.
+      expect(calculateORP("—¿cómo?")).toBe(3);
+
+      // "etc." -> letters: 'etc' (length 3). clean ORP index is 1 ('t'). in raw string, 't' is at index 1.
+      expect(calculateORP("etc.")).toBe(1);
+    });
+
+    it("should bypass punctuation delay for common Spanish and English abbreviations", () => {
+      expect(calculatePunctuationDelay("etc.")).toBe(1.0);
+      expect(calculatePunctuationDelay("dr.")).toBe(1.0);
+      expect(calculatePunctuationDelay("sr.")).toBe(1.0);
+      expect(calculatePunctuationDelay("EE.UU.")).toBe(1.0);
+    });
+
+    it("should apply correct punctuation delay for nested brackets, parenthesis and quotes in Spanish text", () => {
+      // "(hola?)" -> ends with sentence-ending ? followed by closing parenthesis -> 2.2 delay
+      expect(calculatePunctuationDelay("(hola?)")).toBe(2.2);
+
+      // "«hola»" -> ends with quotes -> 1.8 delay
+      expect(calculatePunctuationDelay("«hola»")).toBe(1.8);
+
+      // "«hola»." -> ends with period after quote -> 2.2 delay
+      expect(calculatePunctuationDelay("«hola».")).toBe(2.2);
+
+      // "hola\"," -> ends with comma after quote -> 1.5 delay
+      expect(calculatePunctuationDelay('"hola",')).toBe(1.5);
+    });
   });
 });

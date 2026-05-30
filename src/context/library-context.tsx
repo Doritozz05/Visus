@@ -107,10 +107,25 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
   }, []);
 
   const updateBook = React.useCallback((id: string, updates: Partial<Book>) => {
-    setBooks((prev) =>
-      prev.map((book) => {
+    setBooks((prev) => {
+      let changed = false;
+      const nextBooks = prev.map((book) => {
         if (book.id !== id) return book;
-        
+
+        // Perform value-equality checks to avoid unnecessary state updates
+        let bookChanged = false;
+        for (const key in updates) {
+          const val1 = book[key as keyof Book];
+          const val2 = updates[key as keyof Book];
+          if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+            bookChanged = true;
+            break;
+          }
+        }
+
+        if (!bookChanged) return book;
+
+        changed = true;
         const mergedBook = { ...book, ...updates };
         
         // Calculate status and estimated reading time based on progress
@@ -126,8 +141,10 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
         }
 
         return mergedBook;
-      })
-    );
+      });
+
+      return changed ? nextBooks : prev;
+    });
   }, []);
 
   const deleteBook = React.useCallback((id: string) => {
