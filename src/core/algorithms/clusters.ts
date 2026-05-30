@@ -75,10 +75,14 @@ export interface DynamicCluster {
  * @param targetChunkSize - Cantidad ideal de palabras por cúmulo.
  * @returns Listado de cúmulos dinámicos estructurados.
  */
-export function generateDynamicClusters(paragraph: string, targetChunkSize: number = 3): DynamicCluster[] {
-  if (!paragraph || paragraph.trim() === "") return [];
+export function generateDynamicClusters(paragraphOrWords: string | string[], targetChunkSize: number = 3): DynamicCluster[] {
+  if (!paragraphOrWords) return [];
 
-  const words = paragraph.trim().split(/\s+/);
+  const words = Array.isArray(paragraphOrWords)
+    ? paragraphOrWords
+    : paragraphOrWords.trim().split(/\s+/).filter(w => w.trim() !== "");
+
+  if (words.length === 0) return [];
   const clusters: DynamicCluster[] = [];
   
   let currentWords: string[] = [];

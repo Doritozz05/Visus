@@ -111,10 +111,13 @@ export function calculateLengthDelay(word: string): number {
  * @param content - Raw text content.
  * @returns An ordered array of RSVPWord objects.
  */
-export function generateRSVPSequence(content: string): RSVPWord[] {
-  if (!content || typeof content !== "string") return [];
+export function generateRSVPSequence(contentOrWords: string | string[]): RSVPWord[] {
+  if (!contentOrWords) return [];
   
-  const rawWords = content.trim().split(/\s+/);
+  const rawWords = Array.isArray(contentOrWords)
+    ? contentOrWords
+    : contentOrWords.trim().split(/\s+/).filter(w => w.trim() !== "");
+    
   return rawWords.map((word) => {
     const puncDelay = calculatePunctuationDelay(word);
     const lengthDelay = calculateLengthDelay(word);

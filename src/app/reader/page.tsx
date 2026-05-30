@@ -105,9 +105,9 @@ export default function ReaderPage() {
     const ch = chaptersData[safeIdx];
     
     // Generate RSVP, Cluster sequences, and words JIT to guarantee instant page transitions
-    const rsvpSeq = generateRSVPSequence(ch.content);
-    const clusterSeq = generateDynamicClusters(ch.content, 3);
     const wordsArr = ch.content.split(/\s+/).filter(w => w.trim() !== "");
+    const rsvpSeq = generateRSVPSequence(wordsArr);
+    const clusterSeq = generateDynamicClusters(wordsArr, 3);
     
     return {
       ...ch,
@@ -375,24 +375,21 @@ export default function ReaderPage() {
   }, [isPlaying, wordIndex, wpm, rsvpSequence, mode, clusterChunks, activeClusterIndex, currentChapter]);
 
   const handlePageChange = (direction: "prev" | "next") => {
-    if (!activeBook || chaptersData.length === 0) return;
+    if (allBookPages.length === 0 || !activePage || !activeBook) return;
     
     if (direction === "prev") {
-      if (activeChapterIndex > 0) {
-        const prevChapterIdx = activeChapterIndex - 1;
-        setActiveChapterIndex(prevChapterIdx);
-        // Set word index to a very large number so PagesVisualBox knows to start at the last page of the previous chapter
-        const targetWordIdx = 999999;
-        setWordIndex(targetWordIdx);
-        saveProgressForBook(activeBook.id, prevChapterIdx, targetWordIdx);
+      if (activePage.absolutePageIndex > 0) {
+        const prevPageObj = allBookPages[activePage.absolutePageIndex - 1];
+        setActiveChapterIndex(prevPageObj.chapterIndex);
+        setWordIndex(prevPageObj.startWordIndex);
+        saveProgressForBook(activeBook.id, prevPageObj.chapterIndex, prevPageObj.startWordIndex);
       }
     } else {
-      if (activeChapterIndex < chaptersData.length - 1) {
-        const nextChapterIdx = activeChapterIndex + 1;
-        setActiveChapterIndex(nextChapterIdx);
-        const targetWordIdx = 0;
-        setWordIndex(targetWordIdx);
-        saveProgressForBook(activeBook.id, nextChapterIdx, targetWordIdx);
+      if (activePage.absolutePageIndex < allBookPages.length - 1) {
+        const nextPageObj = allBookPages[activePage.absolutePageIndex + 1];
+        setActiveChapterIndex(nextPageObj.chapterIndex);
+        setWordIndex(nextPageObj.startWordIndex);
+        saveProgressForBook(activeBook.id, nextPageObj.chapterIndex, nextPageObj.startWordIndex);
       } else {
         // Last page "Next" button clicked -> COMPLETE BOOK!
         const totalWords = activeBook.chapters?.reduce((acc, c) => acc + c.content.split(/\s+/).filter(Boolean).length, 0) || activeBook.content?.split(/\s+/).filter(Boolean).length || 4500;
@@ -681,7 +678,7 @@ export default function ReaderPage() {
             : mode === "normal" 
               ? "max-w-5xl" 
               : "max-w-2xl"
-        } px-6 md:px-0 flex-1 flex flex-col items-center justify-center relative z-10 transition-all duration-500`}>
+        } px-6 md:px-0 flex-1 flex flex-col items-center justify-center relative z-10 transition-opacity duration-300`}>
 
           {/* Auto-pause Chapter completed overlay */}
           {completedChapter && (
