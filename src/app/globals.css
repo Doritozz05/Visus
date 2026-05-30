@@ -290,5 +290,61 @@ body[data-glass="disabled"] .glass-panel {
   scroll-behavior: auto !important;
 }
 
+/* ==========================================================================
+   PREMIUM READER CANVAS DYNAMIC TYPOGRAPHY (IMMUNE TO STRIPPED EPUB CLASSES)
+   ========================================================================== */
+
+.reader-columns-canvas h1,
+.reader-columns-canvas h2 {
+  color: hsl(var(--primary));
+  font-family: var(--font-heading), 'Outfit', sans-serif;
+  font-weight: 800;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  line-height: 1.35;
+  letter-spacing: -0.03em;
+  border-bottom: 2px solid hsl(var(--primary) / 0.25);
+  padding-bottom: 0.5rem;
+  break-after: avoid;
+  page-break-after: avoid;
+  text-transform: capitalize;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.reader-columns-canvas h3,
+.reader-columns-canvas h4 {
+  color: hsl(var(--primary) / 0.9);
+  font-family: var(--font-heading), 'Outfit', sans-serif;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.3rem;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  break-after: avoid;
+  page-break-after: avoid;
+  transition: color 0.3s ease;
+}
+
+.reader-columns-canvas p {
+  margin-bottom: 1.25rem;
+  text-align: justify;
+  line-height: 1.8;
+  color: hsl(var(--foreground) / 0.9);
+}
+
+.reader-columns-canvas ul,
+.reader-columns-canvas ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.reader-columns-canvas li {
+  margin-bottom: 0.5rem;
+  line-height: 1.75;
+}
+
+
 
 

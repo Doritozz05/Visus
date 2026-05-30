@@ -7,6 +7,7 @@
 export interface BookChapter {
   title: string;
   content: string;
+  htmlContent?: string; // Rich HTML for column layout rendering
 }
 
 export interface Bookmark {
@@ -39,6 +40,13 @@ export interface Book {
   bookmarkWordIndex?: number;
   /** Collection of multiple saved bookmarked positions */
   bookmarks?: Bookmark[];
+  /** Premium Metadata & Cover Image */
+  coverUrl?: string; // Base64 encoded or external URL of cover image
+  description?: string; // Book synopsis or summary
+  genres?: string[]; // Subject tags or genres
+  publisher?: string; // Book publisher
+  publishDate?: string; // Book publication date
+  language?: string; // Language (e.g. 'en', 'es')
 }
 
 /**

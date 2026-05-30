@@ -7,7 +7,21 @@ interface LibraryContextType {
   books: Book[];
   activeBookId: string | null;
   setActiveBookId: (id: string | null) => void;
-  addBook: (title: string, author: string, format: "PDF" | "EPUB" | "TXT", content?: string, chapters?: BookChapter[]) => string;
+  addBook: (
+    title: string, 
+    author: string, 
+    format: "PDF" | "EPUB" | "TXT", 
+    content?: string, 
+    chapters?: BookChapter[],
+    metadata?: {
+      coverUrl?: string;
+      description?: string;
+      genres?: string[];
+      publisher?: string;
+      publishDate?: string;
+      language?: string;
+    }
+  ) => string;
   updateBook: (id: string, updates: Partial<Book>) => void;
   deleteBook: (id: string) => void;
   toggleCompleted: (id: string) => void;
@@ -77,18 +91,32 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
   // CRUD Implementations
 
-  const addBook = React.useCallback((title: string, author: string, format: "PDF" | "EPUB" | "TXT", content?: string, chapters?: BookChapter[]) => {
+  const addBook = React.useCallback((
+    title: string, 
+    author: string, 
+    format: "PDF" | "EPUB" | "TXT", 
+    content?: string, 
+    chapters?: BookChapter[],
+    metadata?: {
+      coverUrl?: string;
+      description?: string;
+      genres?: string[];
+      publisher?: string;
+      publishDate?: string;
+      language?: string;
+    }
+  ) => {
     const bookId = `book-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     
     // Default placeholder content if none is provided (e.g. for PDF/EPUB uploads)
     const placeholderContent = `Welcome to your Visus Reading Room!
-
+ 
 You are currently reading "${title}" by ${author || "Unknown Author"}. This high-performance speed reader locks your foveal focus onto the Optimal Recognition Point (ORP) of every word, eliminating traditional ocular scanning patterns.
-
+ 
 By stabilizing your eye alignment and moving foveal targets rapidly, RSVP enables your brain to absorb information at extreme visual speeds. Together with foveal cluster semantic chunking, you can train your foveal reading path to expand its peripheral field of vision.
-
+ 
 Keep calibrating your target words per minute (WPM), relax your foveal field, and let foveal visual processing take over as your eyes settle on the foveal alignment guides. Visus is designed to minimize cognitive visual friction, letting you enter a seamless, deep flow state.`;
-
+ 
     const newBook: Book = {
       id: bookId,
       title: title.trim(),
@@ -100,6 +128,12 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
       content: content ? content.trim() : placeholderContent,
       chapters,
       createdAt: new Date().toISOString(),
+      coverUrl: metadata?.coverUrl,
+      description: metadata?.description,
+      genres: metadata?.genres,
+      publisher: metadata?.publisher,
+      publishDate: metadata?.publishDate,
+      language: metadata?.language,
     };
 
     setBooks((prev) => [newBook, ...prev]);
