@@ -143,11 +143,24 @@ export function PagesVisualBox({
 
         <button
           onClick={() => handlePageChange("next")}
-          disabled={activePage ? activePage.absolutePageIndex === allBookPages.length - 1 : true}
-          className="flex items-center gap-1.5 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none z-20"
+          disabled={activePage ? false : true}
+          className={`flex items-center gap-1.5 transition-all z-20 ${
+            activePage && activePage.absolutePageIndex === allBookPages.length - 1
+              ? "text-primary font-extrabold bg-primary/10 border border-primary/20 px-3 py-1 rounded hover:bg-primary hover:text-primary-foreground shadow-sm drop-shadow-[0_2px_4px_rgba(var(--primary),0.25)] animate-pulse"
+              : "hover:text-primary disabled:opacity-30 disabled:pointer-events-none"
+          }`}
         >
-          Next
-          <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
+          {activePage && activePage.absolutePageIndex === allBookPages.length - 1 ? (
+            <>
+              Complete Book
+              <span className="material-symbols-outlined text-base">task_alt</span>
+            </>
+          ) : (
+            <>
+              Next
+              <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
+            </>
+          )}
         </button>
       </div>
     </div>

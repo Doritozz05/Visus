@@ -113,11 +113,14 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
         
         const mergedBook = { ...book, ...updates };
         
-        // Auto-recalculate estimated read time if progress reaches 100
-        if (updates.progress === 100) {
+        // Calculate status and estimated reading time based on progress
+        if (mergedBook.progress === 100) {
           mergedBook.estimatedReadingTime = "Completed";
           mergedBook.status = "completed";
-        } else if (updates.progress !== undefined && updates.progress < 100 && book.progress === 100) {
+        } else if (mergedBook.progress > 0 && mergedBook.progress < 100) {
+          mergedBook.status = "active";
+          mergedBook.estimatedReadingTime = `${mergedBook.progress}% completed`;
+        } else {
           mergedBook.status = "active";
           mergedBook.estimatedReadingTime = "Not started";
         }

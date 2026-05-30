@@ -2,8 +2,38 @@
 
 import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { useLibrary } from "@/context/library-context";
+import { StatsService } from "@/core/services/stats-service";
 
 export default function DashboardPage() {
+  const { books } = useLibrary();
+  const [isHydrated, setIsHydrated] = React.useState(false);
+  const [logs, setLogs] = React.useState<any[]>([]);
+  const [summary, setSummary] = React.useState<any>({
+    totalBooksRead: 0,
+    averageWpm: 550,
+    currentStreakDays: 12,
+    completionRatePercent: 75,
+    totalReadingTimeMinutes: 45
+  });
+
+  React.useEffect(() => {
+    const completedBooksCount = books.filter((b) => b.status === "completed").length;
+    const sessionLogs = StatsService.getSessionLogs();
+    const statsSummary = StatsService.getStatsSummary(completedBooksCount);
+    
+    setLogs(sessionLogs);
+    setSummary(statsSummary);
+    setIsHydrated(true);
+  }, [books]);
+
+  // Derived average accuracy
+  const averageAccuracy = React.useMemo(() => {
+    if (logs.length === 0) return 92;
+    const totalAccuracy = logs.reduce((sum, log) => sum + (log.accuracy || 90), 0);
+    return Math.round(totalAccuracy / logs.length);
+  }, [logs]);
+
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300">
       <Sidebar activePath="/dashboard" />
@@ -54,12 +84,14 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Average WPM</h3>
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-extrabold font-heading text-foreground">640</span>
+              <span className="text-5xl font-extrabold font-heading text-foreground">
+                {isHydrated ? summary.averageWpm : 640}
+              </span>
               <span className="text-xs font-mono text-primary uppercase">WPM</span>
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs font-mono text-emerald-500 dark:text-emerald-400">
               <span className="material-symbols-outlined text-sm">trending_up</span>
-              <span>+12% vs last week</span>
+              <span>{isHydrated ? `Total time: ${summary.totalReadingTimeMinutes} mins` : "+12% vs last week"}</span>
             </div>
           </div>
 
@@ -70,11 +102,16 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Current streak</h3>
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-extrabold font-heading text-foreground">14</span>
+              <span className="text-5xl font-extrabold font-heading text-foreground">
+                {isHydrated ? summary.currentStreakDays : 14}
+              </span>
               <span className="text-xs font-mono text-muted-foreground uppercase">Days</span>
             </div>
             <div className="mt-4 w-full bg-accent h-1.5 rounded-full overflow-hidden">
-              <div className="bg-primary h-full w-[80%] rounded-full"></div>
+              <div 
+                className="bg-primary h-full rounded-full transition-all duration-500" 
+                style={{ width: isHydrated ? `${Math.min(100, summary.currentStreakDays * 7)}%` : "80%" }}
+              ></div>
             </div>
           </div>
 
@@ -85,12 +122,14 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Comprehension</h3>
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-extrabold font-heading text-foreground">92</span>
+              <span className="text-5xl font-extrabold font-heading text-foreground">
+                {isHydrated ? averageAccuracy : 92}
+              </span>
               <span className="text-xs font-mono text-muted-foreground">%</span>
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs font-mono text-muted-foreground">
               <span className="material-symbols-outlined text-sm">check_circle</span>
-              <span>Based on post-session quizzes</span>
+              <span>Based on reading telemetry logs</span>
             </div>
           </div>
         </section>
@@ -113,20 +152,36 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/10 text-sm font-sans">
-                {[
-                  { title: "Neuromancer Excerpt", mode: "RSVP", speed: "650 WPM", duration: "14m 22s", accuracy: "95%" },
-                  { title: "Clean Architecture Chapter 1", mode: "Cluster", speed: "480 WPM", duration: "25m 10s", accuracy: "90%" },
-                  { title: "React Performance Tuning Guide", mode: "RSVP", speed: "700 WPM", duration: "8m 45s", accuracy: "92%" },
-                  { title: "Clean Code Handbook", mode: "Cluster", speed: "500 WPM", duration: "18m 30s", accuracy: "94%" }
-                ].map((log, index) => (
-                  <tr key={index} className="hover:bg-accent/40 transition-colors">
-                    <td className="py-4 font-semibold text-foreground">{log.title}</td>
-                    <td className="py-4 font-mono text-xs">{log.mode}</td>
-                    <td className="py-4 font-mono text-xs text-primary">{log.speed}</td>
-                    <td className="py-4 font-mono text-xs text-muted-foreground">{log.duration}</td>
-                    <td className="py-4 font-mono text-xs text-emerald-500 dark:text-emerald-400 font-bold">{log.accuracy}</td>
+                {isHydrated ? (
+                  logs.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-muted-foreground text-xs font-mono">
+                        No reading activity logged yet. Finish a book to see telemetries!
+                      </td>
+                    </tr>
+                  ) : (
+                    logs.map((log) => (
+                      <tr key={log.id} className="hover:bg-accent/40 transition-colors">
+                        <td className="py-4 font-semibold text-foreground">{log.bookTitle}</td>
+                        <td className="py-4 font-mono text-xs uppercase">{log.mode}</td>
+                        <td className="py-4 font-mono text-xs text-primary">{log.speedWpm} WPM</td>
+                        <td className="py-4 font-mono text-xs text-muted-foreground">
+                          {log.durationSeconds >= 60 
+                            ? `${Math.floor(log.durationSeconds / 60)}m ${log.durationSeconds % 60}s` 
+                            : `${log.durationSeconds}s`
+                          }
+                        </td>
+                        <td className="py-4 font-mono text-xs text-emerald-500 dark:text-emerald-400 font-bold">{log.accuracy}%</td>
+                      </tr>
+                    ))
+                  )
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-muted-foreground text-xs font-mono">
+                      Loading telemetry logs...
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
