@@ -102,11 +102,15 @@ export function TableOfContents({
                 }}
                 className={`w-full text-left px-2.5 py-1.5 rounded text-[11px] font-sans transition-all flex items-start gap-2 ${
                   activeChapterIndex === idx
-                    ? "bg-primary/15 border border-primary/20 text-primary font-semibold shadow-sm"
+                    ? "bg-primary border border-primary text-primary-foreground font-bold shadow-md"
                     : "hover:bg-accent hover:text-foreground text-muted-foreground border border-transparent"
                 }`}
               >
-                <span className="font-mono text-[8px] bg-muted dark:bg-accent/40 px-1 rounded font-bold shrink-0 mt-0.5">
+                <span className={`font-mono text-[8px] px-1 rounded font-bold shrink-0 mt-0.5 ${
+                  activeChapterIndex === idx 
+                    ? "bg-primary-foreground/20 text-primary-foreground" 
+                    : "bg-muted dark:bg-accent/40"
+                }`}>
                   {idx + 1}
                 </span>
                 <span className="truncate">{ch.title}</span>

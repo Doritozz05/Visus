@@ -11,7 +11,7 @@ interface LibraryContextType {
   addBook: (
     title: string,
     author: string,
-    format: "PDF" | "EPUB" | "TXT",
+    format: "PDF" | "EPUB" | "TXT" | "PHYSICAL",
     content?: string,
     chapters?: BookChapter[],
     metadata?: {
@@ -21,6 +21,8 @@ interface LibraryContextType {
       publisher?: string;
       publishDate?: string;
       language?: string;
+      currentPage?: number;
+      totalPages?: number;
     }
   ) => string;
   updateBook: (id: string, updates: Partial<Book>) => void;
@@ -83,7 +85,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const addBook = React.useCallback((
     title: string,
     author: string,
-    format: "PDF" | "EPUB" | "TXT",
+    format: "PDF" | "EPUB" | "TXT" | "PHYSICAL",
     content?: string,
     chapters?: BookChapter[],
     metadata?: {
@@ -93,6 +95,8 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       publisher?: string;
       publishDate?: string;
       language?: string;
+      currentPage?: number;
+      totalPages?: number;
     }
   ) => {
     const bookId = `book-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -111,7 +115,9 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
       title: title.trim(),
       author: author.trim() || "Unknown Author",
       format,
-      progress: 0,
+      progress: metadata?.totalPages && metadata?.currentPage !== undefined 
+        ? Math.min(100, Math.round((metadata.currentPage / metadata.totalPages) * 100)) 
+        : 0,
       estimatedReadingTime: "Not started",
       status: "active",
       content: content ? content.trim() : placeholderContent,
@@ -123,6 +129,8 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
       publisher: metadata?.publisher,
       publishDate: metadata?.publishDate,
       language: metadata?.language,
+      currentPage: metadata?.currentPage,
+      totalPages: metadata?.totalPages,
     };
 
     setBooks((prev) => [newBook, ...prev]);
@@ -158,15 +166,28 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
         const mergedBook = { ...book, ...updates };
 
         // Calculate status and estimated reading time based on progress
+        if (mergedBook.format === "PHYSICAL" && mergedBook.currentPage !== undefined && mergedBook.totalPages) {
+          mergedBook.progress = Math.min(100, Math.round((mergedBook.currentPage / mergedBook.totalPages) * 100));
+        }
+
+        let naturalStatus: "active" | "completed" = "active";
         if (mergedBook.progress === 100) {
           mergedBook.estimatedReadingTime = "Completed";
-          mergedBook.status = "completed";
+          naturalStatus = "completed";
         } else if (mergedBook.progress > 0 && mergedBook.progress < 100) {
-          mergedBook.status = "active";
-          mergedBook.estimatedReadingTime = `${mergedBook.progress}% completed`;
+          naturalStatus = "active";
+          mergedBook.estimatedReadingTime = mergedBook.format === "PHYSICAL" 
+            ? `${mergedBook.currentPage}/${mergedBook.totalPages} pages`
+            : `${mergedBook.progress}% completed`;
         } else {
-          mergedBook.status = "active";
+          naturalStatus = "active";
           mergedBook.estimatedReadingTime = "Not started";
+        }
+
+        if (updates.status) {
+          mergedBook.status = updates.status;
+        } else if (mergedBook.status !== "archived") {
+          mergedBook.status = naturalStatus;
         }
 
         // Save individual book updates to IndexedDB asynchronously (non-blocking, O(1))

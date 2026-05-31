@@ -266,6 +266,7 @@ export default function ReaderPage() {
               fontSize={settings.general.readerFontSize || 16}
               onPrevChapter={handlePrevChapter}
               onNextChapter={handleNextChapter}
+              setActiveChapterIndex={handleChapterChange}
               bookmarks={activeBook.bookmarks || []}
               onAddBookmark={handleAddBookmark}
               onRemoveBookmark={handleRemoveBookmark}

@@ -67,7 +67,7 @@ export function BookmarkCorner({
       {/* Visual bookmark ribbon hanging from container top */}
       <button
         onClick={handleTogglePopover}
-        className="group relative transition-all duration-300 transform origin-top hover:translate-y-0.5 focus:outline-none"
+        className="group relative transition-all duration-300 transform origin-top hover:scale-y-110 focus:outline-none"
         title={activeBookmark ? "Edit bookmark" : "Add bookmark"}
       >
         <svg

@@ -102,6 +102,7 @@ interface PagesVisualBoxProps {
   fontSize: number;
   onPrevChapter: () => void;
   onNextChapter: () => void;
+  setActiveChapterIndex: (index: number) => void;
   bookmarks: Bookmark[];
   onAddBookmark: (name: string, chapterIndex: number, wordIndex: number) => void;
   onRemoveBookmark: (id: string) => void;
@@ -120,6 +121,7 @@ export function PagesVisualBox({
   fontSize,
   onPrevChapter,
   onNextChapter,
+  setActiveChapterIndex,
   bookmarks,
   onAddBookmark,
   onRemoveBookmark,
@@ -425,16 +427,6 @@ export function PagesVisualBox({
     );
   }, [bookmarks, currentChapter.index, pageStartWordIndex, pageEndWordIndex]);
 
-  const defaultBookmarkName = React.useMemo(() => {
-    return `Chapter ${currentChapter.index + 1}, Page ${currentPageIndex + 1}`;
-  }, [currentChapter.index, currentPageIndex]);
-
-  const isLastChapter = currentChapter.index === chaptersData.length - 1;
-
-  const showPrevChapter = currentPageIndex === 0;
-  const showCompleteBook = currentPageIndex === totalPages - 1 && isLastChapter;
-  const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter;
-
   // Compute global page numbers across the entire book chapters.
   // Uses currentPageIndex (DOM-accurate from visible container) offset by the chapter's
   // starting position in allBookPages. This prevents accumulated counter errors in
@@ -460,6 +452,18 @@ export function PagesVisualBox({
       total: allBookPages.length,
     };
   }, [allBookPages, currentChapter.index, currentPageIndex, totalPages]);
+
+  const defaultBookmarkName = React.useMemo(() => {
+    return `Page ${globalPageDetails.current} of ${globalPageDetails.total}`;
+  }, [globalPageDetails.current, globalPageDetails.total]);
+
+  const isLastChapter = currentChapter.index === chaptersData.length - 1;
+
+  const showPrevChapter = currentPageIndex === 0;
+  const showCompleteBook = currentPageIndex === totalPages - 1 && isLastChapter;
+  const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter;
+
+
 
   const handlePrev = () => {
     if (currentPageIndex > 0) {
@@ -653,7 +657,7 @@ export function PagesVisualBox({
       </div>
 
       {/* Footer Navigation (strictly fixed height to eliminate sub-pixel layout feedback loops) */}
-      <div className="h-10 min-h-[40px] max-h-[40px] flex justify-between items-center pt-3 border-t border-border/10 mt-3 text-xs font-mono text-muted-foreground relative shrink-0">
+      <div className="h-12 min-h-[48px] max-h-[48px] flex justify-between items-center pt-3 border-t border-border/10 mt-1 text-xs font-mono text-muted-foreground relative shrink-0">
         <button
           onClick={handlePrev}
           disabled={currentPageIndex === 0 && currentChapter.index === 0}
@@ -663,9 +667,31 @@ export function PagesVisualBox({
           {showPrevChapter ? "Previous Chapter" : "Previous Page"}
         </button>
 
-        {/* Page indicator (Discrete, deterministic global X of Y) */}
-        <div className="absolute left-1/2 -translate-x-1/2 text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60 pointer-events-none">
-          Page {globalPageDetails.current} of {globalPageDetails.total}
+        {/* Page indicator & Slider */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5">
+          <div className="text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60 pointer-events-none leading-none">
+            Page {globalPageDetails.current} of {globalPageDetails.total}
+          </div>
+          {allBookPages.length > 0 && (
+            <input
+              type="range"
+              min="1"
+              max={globalPageDetails.total}
+              value={globalPageDetails.current}
+              onChange={(e) => {
+                const targetPageNum = Number(e.target.value);
+                const targetPage = allBookPages.find(p => p.absolutePageIndex === targetPageNum - 1);
+                if (targetPage) {
+                  if (targetPage.chapterIndex !== currentChapter.index) {
+                    setActiveChapterIndex(targetPage.chapterIndex);
+                  }
+                  setWordIndex(targetPage.startWordIndex);
+                }
+              }}
+              className="w-32 accent-primary h-1 bg-border/40 hover:bg-border/60 rounded-lg appearance-none cursor-pointer transition-colors z-30"
+              title={`Page ${globalPageDetails.current} of ${globalPageDetails.total}`}
+            />
+          )}
         </div>
 
         <button

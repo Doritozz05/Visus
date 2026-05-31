@@ -18,6 +18,7 @@ export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [activeTab, setActiveTab] = React.useState<"active" | "completed" | "archived">("active");
   const [isDragOver, setIsDragOver] = React.useState(false);
+  const [activeGenre, setActiveGenre] = React.useState<string | null>(null);
   const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null);
   const [isIngesting, setIsIngesting] = React.useState(false);
   const [detailsBook, setDetailsBook] = React.useState<Book | null>(null);
@@ -29,15 +30,21 @@ export default function LibraryPage() {
   // Add Form State
   const [newTitle, setNewTitle] = React.useState("");
   const [newAuthor, setNewAuthor] = React.useState("");
-  const [newFormat, setNewFormat] = React.useState<"PDF" | "EPUB" | "TXT">("EPUB");
+  const [newFormat, setNewFormat] = React.useState<"PDF" | "EPUB" | "TXT" | "PHYSICAL">("PHYSICAL");
+  const [newCoverUrl, setNewCoverUrl] = React.useState("");
+  const [newCurrentPage, setNewCurrentPage] = React.useState<number | "">("");
+  const [newTotalPages, setNewTotalPages] = React.useState<number | "">("");
+  const [newTags, setNewTags] = React.useState("");
 
   // Edit Form State
   const [editingBookId, setEditingBookId] = React.useState<string | null>(null);
   const [editTitle, setEditTitle] = React.useState("");
   const [editAuthor, setEditAuthor] = React.useState("");
-  const [editFormat, setEditFormat] = React.useState<"PDF" | "EPUB" | "TXT">("EPUB");
+  const [editFormat, setEditFormat] = React.useState<"PDF" | "EPUB" | "TXT" | "PHYSICAL">("EPUB");
   const [editProgress, setEditProgress] = React.useState(0);
   const [editStatus, setEditStatus] = React.useState<"active" | "completed" | "archived">("active");
+  const [editCurrentPage, setEditCurrentPage] = React.useState<number | "">("");
+  const [editTotalPages, setEditTotalPages] = React.useState<number | "">("");
 
   // File input ref for browsing files
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -198,11 +205,20 @@ export default function LibraryPage() {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
-    addBook(newTitle, newAuthor, newFormat);
+    addBook(newTitle, newAuthor, newFormat, undefined, undefined, {
+      coverUrl: newCoverUrl || undefined,
+      genres: newTags ? newTags.split(",").map(t => t.trim()).filter(Boolean) : undefined,
+      currentPage: newFormat === "PHYSICAL" && newCurrentPage !== "" ? Number(newCurrentPage) : undefined,
+      totalPages: newFormat === "PHYSICAL" && newTotalPages !== "" ? Number(newTotalPages) : undefined,
+    });
     
     setNewTitle("");
     setNewAuthor("");
-    setNewFormat("EPUB");
+    setNewFormat("PHYSICAL");
+    setNewCoverUrl("");
+    setNewCurrentPage("");
+    setNewTotalPages("");
+    setNewTags("");
     setIsAddModalOpen(false);
   };
 
@@ -210,18 +226,27 @@ export default function LibraryPage() {
     e.preventDefault();
     if (!editingBookId || !editTitle.trim()) return;
 
-    updateBook(editingBookId, {
+    const updates: Partial<Book> = {
       title: editTitle.trim(),
       author: editAuthor.trim() || "Unknown Author",
       format: editFormat,
-      progress: editProgress,
       status: editStatus,
-      estimatedReadingTime: editProgress === 100 
+    };
+    
+    if (editFormat === "PHYSICAL") {
+      updates.currentPage = editCurrentPage !== "" ? Number(editCurrentPage) : undefined;
+      updates.totalPages = editTotalPages !== "" ? Number(editTotalPages) : undefined;
+      // Progress calculation is handled in useLibrary
+    } else {
+      updates.progress = editProgress;
+      updates.estimatedReadingTime = editProgress === 100 
         ? "Completed" 
         : editProgress > 0 
           ? `${Math.ceil((100 - editProgress) * 0.15)}h remaining at 450 WPM`
-          : "Not started"
-    });
+          : "Not started";
+    }
+
+    updateBook(editingBookId, updates);
 
     setIsEditModalOpen(false);
     setEditingBookId(null);
@@ -234,6 +259,8 @@ export default function LibraryPage() {
     setEditFormat(book.format);
     setEditProgress(book.progress);
     setEditStatus(book.status);
+    setEditCurrentPage(book.currentPage ?? "");
+    setEditTotalPages(book.totalPages ?? "");
     setIsEditModalOpen(true);
   };
 
@@ -250,6 +277,16 @@ export default function LibraryPage() {
   const yearlyGoal = 15;
   const goalProgressPercentage = Math.min(Math.round((completedBooksCount / yearlyGoal) * 100), 100);
 
+  const availableGenres = React.useMemo(() => {
+    const genres = new Set<string>();
+    books.forEach(b => {
+      if (b.genres) {
+        b.genres.forEach(g => genres.add(g));
+      }
+    });
+    return Array.from(genres).sort();
+  }, [books]);
+
   // Filter books reactively
   const filteredBooks = React.useMemo(() => {
     return books.filter((book) => {
@@ -258,9 +295,12 @@ export default function LibraryPage() {
         book.author.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesTab = book.status === activeTab;
-      return matchesSearch && matchesTab;
+      
+      const matchesGenre = activeGenre ? book.genres?.includes(activeGenre) : true;
+      
+      return matchesSearch && matchesTab && matchesGenre;
     });
-  }, [books, searchQuery, activeTab]);
+  }, [books, searchQuery, activeTab, activeGenre]);
 
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300">
@@ -422,6 +462,25 @@ export default function LibraryPage() {
                 </div>
               </div>
 
+              {/* Tags/Genres Filter */}
+              {availableGenres.length > 0 && (
+                <div className="flex gap-2 px-2 items-center">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Filter by Tag:</span>
+                  <select
+                    value={activeGenre || ""}
+                    onChange={(e) => setActiveGenre(e.target.value || null)}
+                    className="px-3 py-1.5 bg-card border border-border/40 rounded-lg text-xs font-mono focus:outline-none focus:border-primary/80 transition-colors w-48 shadow-sm cursor-pointer hover:border-primary/50"
+                  >
+                    <option value="">All Tags</option>
+                    {availableGenres.map((genre) => (
+                      <option key={genre} value={genre}>
+                        {genre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               {/* Book List Scrollable Grid Panel */}
               <div className="flex-1 max-h-[58vh] overflow-y-auto scrollbar-none pr-1">
                 {filteredBooks.length === 0 ? (
@@ -511,6 +570,18 @@ export default function LibraryPage() {
                                   <span className="material-symbols-outlined text-sm">edit</span>
                                   Edit Details
                                 </button>
+                                <button
+                                  onClick={() => {
+                                    updateBook(book.id, { status: book.status === "archived" ? "active" : "archived" });
+                                    setActiveDropdownId(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors border-t border-border/10"
+                                >
+                                  <span className="material-symbols-outlined text-sm">
+                                    {book.status === "archived" ? "unarchive" : "archive"}
+                                  </span>
+                                  {book.status === "archived" ? "Unarchive Book" : "Archive Book"}
+                                </button>
                               </div>
                             )}
                           </div>
@@ -535,14 +606,32 @@ export default function LibraryPage() {
                             <h3 className="text-sm font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">{book.title}</h3>
                             <p className="text-[11px] text-muted-foreground font-mono truncate mt-0.5 mb-2">{book.author}</p>
                             
+                            {/* Tags */}
+                            {book.genres && book.genres.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {book.genres.slice(0, 2).map((genre) => (
+                                  <span key={genre} className="px-1.5 py-0.5 bg-accent text-muted-foreground rounded text-[8px] font-mono uppercase tracking-widest border border-border/40">
+                                    {genre}
+                                  </span>
+                                ))}
+                                {book.genres.length > 2 && (
+                                  <span className="px-1.5 py-0.5 bg-accent/50 text-muted-foreground/70 rounded text-[8px] font-mono uppercase tracking-widest border border-border/20">
+                                    +{book.genres.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
                             {/* Prominent Read Book Button */}
-                            <button
-                              onClick={() => handleReadBook(book.id)}
-                              className="flex items-center gap-1 px-3 py-1 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded transition-all shadow-sm"
-                            >
-                              <span className="material-symbols-outlined text-xs">chrome_reader_mode</span>
-                              Read Book
-                            </button>
+                            {book.format !== "PHYSICAL" && (
+                              <button
+                                onClick={() => handleReadBook(book.id)}
+                                className="flex items-center gap-1 px-3 py-1 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded transition-all shadow-sm"
+                              >
+                                <span className="material-symbols-outlined text-xs">chrome_reader_mode</span>
+                                Read Book
+                              </button>
+                            )}
                           </div>
                         </div>
 
@@ -622,23 +711,52 @@ export default function LibraryPage() {
                 />
               </div>
 
+
+
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Format</label>
-                <div className="flex gap-2">
-                  {(["EPUB", "PDF", "TXT"] as const).map((format) => (
-                    <button
-                      key={format}
-                      type="button"
-                      onClick={() => setNewFormat(format)}
-                      className={`flex-1 py-2 rounded-lg border text-xs font-mono transition-all ${
-                        newFormat === format 
-                          ? "border-primary bg-primary/10 text-primary font-bold shadow-sm"
-                          : "border-border/30 bg-card hover:bg-accent text-muted-foreground"
-                      }`}
-                    >
-                      {format}
-                    </button>
-                  ))}
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Cover Image URL (Optional)</label>
+                <input 
+                  type="text" 
+                  value={newCoverUrl}
+                  onChange={(e) => setNewCoverUrl(e.target.value)}
+                  className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                  placeholder="https://example.com/cover.jpg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Tags (Comma separated)</label>
+                <input 
+                  type="text" 
+                  value={newTags}
+                  onChange={(e) => setNewTags(e.target.value)}
+                  className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                  placeholder="Fiction, Classic, Adventure"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Current Page</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    value={newCurrentPage}
+                    onChange={(e) => setNewCurrentPage(e.target.value ? Number(e.target.value) : "")}
+                    className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                    placeholder="e.g., 45"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Total Pages</label>
+                  <input 
+                    type="number" 
+                    min="1"
+                    value={newTotalPages}
+                    onChange={(e) => setNewTotalPages(e.target.value ? Number(e.target.value) : "")}
+                    className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                    placeholder="e.g., 300"
+                  />
                 </div>
               </div>
 
@@ -722,6 +840,7 @@ export default function LibraryPage() {
                     <option value="EPUB">EPUB</option>
                     <option value="PDF">PDF</option>
                     <option value="TXT">TXT</option>
+                    <option value="PHYSICAL">PHYSICAL</option>
                   </select>
                 </div>
                 <div>
@@ -738,30 +857,56 @@ export default function LibraryPage() {
                 </div>
               </div>
 
-              {/* Progress slider */}
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Progress</label>
-                  <span className="text-xs font-mono text-primary font-bold">{editProgress}%</span>
+              {editFormat === "PHYSICAL" ? (
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Current Page</label>
+                    <input 
+                      type="number" 
+                      min="0"
+                      value={editCurrentPage}
+                      onChange={(e) => setEditCurrentPage(e.target.value ? Number(e.target.value) : "")}
+                      className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                      placeholder="e.g., 45"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Total Pages</label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      value={editTotalPages}
+                      onChange={(e) => setEditTotalPages(e.target.value ? Number(e.target.value) : "")}
+                      className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
+                      placeholder="e.g., 300"
+                    />
+                  </div>
                 </div>
-                <input 
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={editProgress}
-                  onChange={(e) => {
-                    const progressVal = Number(e.target.value);
-                    setEditProgress(progressVal);
-                    
-                    if (progressVal === 100) {
-                      setEditStatus("completed");
-                    } else if (progressVal < 100 && editStatus === "completed") {
-                      setEditStatus("active");
-                    }
-                  }}
-                  className="w-full accent-primary h-1 bg-border/40 rounded-lg appearance-none cursor-pointer my-2"
-                />
-              </div>
+              ) : (
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Progress</label>
+                    <span className="text-xs font-mono text-primary font-bold">{editProgress}%</span>
+                  </div>
+                  <input 
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={editProgress}
+                    onChange={(e) => {
+                      const progressVal = Number(e.target.value);
+                      setEditProgress(progressVal);
+                      
+                      if (progressVal === 100) {
+                        setEditStatus("completed");
+                      } else if (progressVal < 100 && editStatus === "completed") {
+                        setEditStatus("active");
+                      }
+                    }}
+                    className="w-full accent-primary h-1 bg-border/40 rounded-lg appearance-none cursor-pointer my-2"
+                  />
+                </div>
+              )}
 
               <div className="pt-4 flex gap-3">
                 <button

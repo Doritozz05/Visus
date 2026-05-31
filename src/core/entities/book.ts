@@ -23,7 +23,7 @@ export interface Book {
   id: string;
   title: string;
   author: string;
-  format: "PDF" | "EPUB" | "TXT";
+  format: "PDF" | "EPUB" | "TXT" | "PHYSICAL";
   progress: number; // Percentage complete (0 to 100)
   estimatedReadingTime: string; // Dynamic text, e.g., "2h 15m remaining"
   status: "active" | "completed" | "archived";
@@ -47,6 +47,9 @@ export interface Book {
   publisher?: string; // Book publisher
   publishDate?: string; // Book publication date
   language?: string; // Language (e.g. 'en', 'es')
+  /** Physical book tracking properties */
+  currentPage?: number;
+  totalPages?: number;
 }
 
 /**
