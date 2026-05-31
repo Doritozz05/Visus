@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { useLibrary } from "@/context/library-context";
 import { Book } from "@/core/entities/book";
 import { useRouter } from "next/navigation";
+import { Eraser } from "lucide-react";
 
 import { parseEpub } from "@/lib/parser/epub";
 import { parsePdf } from "@/lib/parser/pdf";
@@ -45,6 +47,19 @@ export default function LibraryPage() {
   const [editStatus, setEditStatus] = React.useState<"active" | "completed" | "archived">("active");
   const [editCurrentPage, setEditCurrentPage] = React.useState<number | "">("");
   const [editTotalPages, setEditTotalPages] = React.useState<number | "">("");
+
+  const formatOptions = [
+    { value: "EPUB", label: "EPUB" },
+    { value: "PDF", label: "PDF" },
+    { value: "TXT", label: "TXT" },
+    { value: "PHYSICAL", label: "PHYSICAL" },
+  ];
+
+  const statusOptions = [
+    { value: "active", label: "Active" },
+    { value: "completed", label: "Completed" },
+    { value: "archived", label: "Archived" },
+  ];
 
   // File input ref for browsing files
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -302,6 +317,13 @@ export default function LibraryPage() {
     });
   }, [books, searchQuery, activeTab, activeGenre]);
 
+  const handleResetFilters = React.useCallback(() => {
+    setSearchQuery("");
+    setActiveGenre(null);
+    setActiveTab("active");
+    setActiveDropdownId(null);
+  }, []);
+
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300">
       <Sidebar activePath="/library" />
@@ -352,7 +374,7 @@ export default function LibraryPage() {
             <div className="lg:col-span-4 flex flex-col gap-6">
               
               {/* Drag & Drop Upload Panel */}
-              <div className="bg-card border border-border/20 rounded-xl p-6 flex flex-col flex-1 relative overflow-hidden group shadow-xl glass-panel min-h-[250px]">
+              <div className="bg-card border border-border/20 rounded-xl p-6 flex flex-col flex-1 relative overflow-hidden group shadow-xl glass-panel min-h-[360px] lg:min-h-[calc(58vh-4rem)]">
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent opacity-50"></div>
                 <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 relative z-10">Ingestion</h2>
                 
@@ -464,20 +486,36 @@ export default function LibraryPage() {
 
               {/* Tags/Genres Filter */}
               {availableGenres.length > 0 && (
-                <div className="flex gap-2 px-2 items-center">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Filter by Tag:</span>
-                  <select
-                    value={activeGenre || ""}
-                    onChange={(e) => setActiveGenre(e.target.value || null)}
-                    className="px-3 py-1.5 bg-card border border-border/40 rounded-lg text-xs font-mono focus:outline-none focus:border-primary/80 transition-colors w-48 shadow-sm cursor-pointer hover:border-primary/50"
+                <div className="flex gap-2 px-2 items-center flex-wrap w-full">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground shrink-0">Filter by Tag:</span>
+                  <div className="w-full sm:w-[20rem] md:w-[24rem] lg:w-[28rem] shrink-0">
+                    <FancyDropdown
+                      value={activeGenre || ""}
+                      onChange={(nextValue) => setActiveGenre(nextValue || null)}
+                      placeholder="All Tags"
+                      ariaLabel="Filter books by tag"
+                      align="start"
+                      searchable
+                      searchPlaceholder="Search tags..."
+                      maxMenuHeightClassName="max-h-64"
+                      options={[
+                        { value: "", label: "All Tags" },
+                        ...availableGenres.map((genre) => ({
+                          value: genre,
+                          label: genre,
+                        })),
+                      ]}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleResetFilters}
+                    className="h-9 w-9 shrink-0 rounded-lg border border-border/40 bg-card/80 text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-accent/80 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 flex items-center justify-center"
+                    aria-label="Reset filters"
+                    title="Reset filters"
                   >
-                    <option value="">All Tags</option>
-                    {availableGenres.map((genre) => (
-                      <option key={genre} value={genre}>
-                        {genre}
-                      </option>
-                    ))}
-                  </select>
+                    <Eraser className="h-4 w-4" strokeWidth={1.6} aria-hidden="true" />
+                  </button>
                 </div>
               )}
 
@@ -537,16 +575,16 @@ export default function LibraryPage() {
                               {activeDropdownId === book.id && (
                                 <div
                                   onClick={(e) => e.stopPropagation()}
-                                  className="absolute right-0 top-8 z-30 w-44 bg-[#ffffff] dark:bg-[#1c1c1f] border border-border/40 rounded-lg shadow-2xl py-1 animate-fade-in opacity-100"
+                                  className="absolute right-0 top-8 z-30 w-52 overflow-hidden rounded-2xl border border-border/40 bg-card/95 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl animate-fade-in opacity-100"
                                 >
                                   <button
                                     onClick={() => {
                                       setDetailsBook(book);
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors border-b border-border/10"
+                                    className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-b border-border/10"
                                   >
-                                    <span className="material-symbols-outlined text-sm">info</span>
+                                    <span className="material-symbols-outlined text-sm text-muted-foreground">info</span>
                                     View Details
                                   </button>
                                   <button
@@ -554,9 +592,9 @@ export default function LibraryPage() {
                                       toggleCompleted(book.id);
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors"
+                                    className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors"
                                   >
-                                    <span className="material-symbols-outlined text-sm">
+                                    <span className="material-symbols-outlined text-sm text-muted-foreground">
                                       {book.status === "completed" ? "unpublished" : "task_alt"}
                                     </span>
                                     {book.status === "completed" ? "Mark as Active" : "Mark as Completed"}
@@ -566,9 +604,9 @@ export default function LibraryPage() {
                                       openEditModal(book);
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors"
+                                    className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors"
                                   >
-                                    <span className="material-symbols-outlined text-sm">edit</span>
+                                    <span className="material-symbols-outlined text-sm text-muted-foreground">edit</span>
                                     Edit Details
                                   </button>
                                   <button
@@ -576,9 +614,9 @@ export default function LibraryPage() {
                                       updateBook(book.id, { status: book.status === "archived" ? "active" : "archived" });
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors border-t border-border/10"
+                                    className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-t border-border/10"
                                   >
-                                    <span className="material-symbols-outlined text-sm">
+                                    <span className="material-symbols-outlined text-sm text-muted-foreground">
                                       {book.status === "archived" ? "unarchive" : "archive"}
                                     </span>
                                     {book.status === "archived" ? "Unarchive Book" : "Archive Book"}
@@ -834,28 +872,27 @@ export default function LibraryPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Format</label>
-                  <select
+                  <FancyDropdown
                     value={editFormat}
-                    onChange={(e) => setEditFormat(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-xs font-mono h-10 transition-colors"
-                  >
-                    <option value="EPUB">EPUB</option>
-                    <option value="PDF">PDF</option>
-                    <option value="TXT">TXT</option>
-                    <option value="PHYSICAL">PHYSICAL</option>
-                  </select>
+                    onChange={(nextValue) => setEditFormat(nextValue as any)}
+                    placeholder="EPUB"
+                    ariaLabel="Select book format"
+                    className="w-full"
+                    triggerClassName="flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-background/50 px-3 text-left text-xs font-mono text-foreground shadow-sm transition-all hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    options={formatOptions}
+                  />
                 </div>
                 <div>
                   <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Status</label>
-                  <select
+                  <FancyDropdown
                     value={editStatus}
-                    onChange={(e) => setEditStatus(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-xs font-mono h-10 transition-colors"
-                  >
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                    <option value="archived">Archived</option>
-                  </select>
+                    onChange={(nextValue) => setEditStatus(nextValue as any)}
+                    placeholder="Active"
+                    ariaLabel="Select book status"
+                    className="w-full"
+                    triggerClassName="flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-background/50 px-3 text-left text-xs font-mono text-foreground shadow-sm transition-all hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    options={statusOptions}
+                  />
                 </div>
               </div>
 
