@@ -114,3 +114,53 @@ function findSmartSplitPoint(text: string): number {
   
   return bestIndex;
 }
+
+/**
+ * Safely parses and tags typical HTML block elements (paragraphs, headers, list items)
+ * with their absolute start and end word indices in the chapter.
+ * Works strictly in the browser context (client-side).
+ */
+export function tagHtmlBlocksWithWordIndices(htmlContent: string): { html: string; totalWords: number } {
+  if (typeof window === "undefined" || !htmlContent) {
+    return { html: htmlContent, totalWords: 0 };
+  }
+
+  try {
+    const parser = new DOMParser();
+    // Wrap in a parent element to guarantee a single root for parsing
+    const doc = parser.parseFromString(`<div>${htmlContent}</div>`, "text/html");
+    const container = doc.body.firstElementChild as HTMLElement;
+    if (!container) return { html: htmlContent, totalWords: 0 };
+
+    // Select typical block-level elements that contain readable text
+    const blocks = container.querySelectorAll("p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, td");
+    
+    let wordCount = 0;
+    
+    blocks.forEach((block) => {
+      // Extract text content of this block and count words
+      const text = block.textContent || "";
+      const words = text.split(/\s+/).filter(w => w.trim() !== "");
+      const count = words.length;
+      
+      if (count > 0) {
+        const startIdx = wordCount;
+        const endIdx = wordCount + count - 1;
+        
+        block.setAttribute("data-start-word-idx", startIdx.toString());
+        block.setAttribute("data-end-word-idx", endIdx.toString());
+        
+        wordCount += count;
+      }
+    });
+    
+    return {
+      html: container.innerHTML,
+      totalWords: wordCount
+    };
+  } catch (err) {
+    console.error("Failed to tag HTML blocks with word indices:", err);
+    return { html: htmlContent, totalWords: 0 };
+  }
+}
+

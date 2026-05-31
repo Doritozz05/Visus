@@ -77,6 +77,7 @@ export default function ReaderPage() {
     setIsCompletionModalOpen,
     chaptersData,
     allBookPages,
+    setAllBookPages,
     activePage,
     currentChapter,
     words,
@@ -258,6 +259,7 @@ export default function ReaderPage() {
               chaptersData={chaptersData}
               activePage={activePage}
               allBookPages={allBookPages}
+              onPagesComputed={setAllBookPages}
               wordIndex={wordIndex}
               setWordIndex={setWordIndex}
               readerFontClass={readerFontClass}

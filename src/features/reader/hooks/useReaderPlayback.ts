@@ -78,12 +78,18 @@ export function useReaderPlayback({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeBookId]);
 
-  // Derive pages globally across the entire book chapters
-  const allBookPages = React.useMemo(() => {
-    if (chaptersData.length === 0) return [];
+  // Manage pages globally across the entire book chapters.
+  // We initialize with a static estimation as fallback, which is overridden by the dynamic background paginator when normal mode mounts.
+  const [allBookPages, setAllBookPages] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    if (chaptersData.length === 0) {
+      setAllBookPages([]);
+      return;
+    }
     
     let absolutePageIndex = 0;
-    return chaptersData.flatMap((ch, chIdx) => {
+    const staticPages = chaptersData.flatMap((ch, chIdx) => {
       const chPages = paginateChapter(ch.content, wordsPerPage);
       return chPages.map((page) => {
         const absPageIdx = absolutePageIndex++;
@@ -94,6 +100,7 @@ export function useReaderPlayback({
         };
       });
     });
+    setAllBookPages(staticPages);
   }, [chaptersData, wordsPerPage]);
 
   // Derive active visual page object
@@ -531,6 +538,7 @@ export function useReaderPlayback({
     setIsCompletionModalOpen,
     chaptersData,
     allBookPages,
+    setAllBookPages,
     activePage,
     currentChapter,
     words,
