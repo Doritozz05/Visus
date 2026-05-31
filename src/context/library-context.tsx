@@ -9,10 +9,10 @@ interface LibraryContextType {
   activeBookId: string | null;
   setActiveBookId: (id: string | null) => void;
   addBook: (
-    title: string, 
-    author: string, 
-    format: "PDF" | "EPUB" | "TXT", 
-    content?: string, 
+    title: string,
+    author: string,
+    format: "PDF" | "EPUB" | "TXT",
+    content?: string,
     chapters?: BookChapter[],
     metadata?: {
       coverUrl?: string;
@@ -38,46 +38,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const [activeBookId, setActiveBookIdState] = React.useState<string | null>(null);
   const [isHydrated, setIsHydrated] = React.useState(false);
 
-  // 1. Hydrate state from IndexedDB on component mount, with legacy LocalStorage migration
+  // 1. Hydrate state from IndexedDB on component mount
   React.useEffect(() => {
     const hydrate = async () => {
       try {
-        // --- ONE-TIME LEGACY MIGRATION ---
-        const legacyLibraryStr = localStorage.getItem("visus_library");
-        if (legacyLibraryStr && legacyLibraryStr.trim() !== "") {
-          try {
-            const parsed = JSON.parse(legacyLibraryStr);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              console.log(`Migrating ${parsed.length} books from LocalStorage to IndexedDB...`);
-              for (const book of parsed) {
-                await dbService.saveBook(book);
-              }
-            }
-          } catch (e) {
-            console.error("Failed to migrate legacy library:", e);
-          } finally {
-            localStorage.removeItem("visus_library");
-          }
-        }
-
-        const legacyLogsStr = localStorage.getItem("visus_telemetry_logs");
-        if (legacyLogsStr && legacyLogsStr.trim() !== "") {
-          try {
-            const parsed = JSON.parse(legacyLogsStr);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              console.log(`Migrating ${parsed.length} telemetry logs from LocalStorage to IndexedDB...`);
-              for (const log of parsed) {
-                await dbService.saveLog(log);
-              }
-            }
-          } catch (e) {
-            console.error("Failed to migrate legacy telemetry logs:", e);
-          } finally {
-            localStorage.removeItem("visus_telemetry_logs");
-          }
-        }
-        // ---------------------------------
-
         const dbBooks = await dbService.getAllBooks();
         if (dbBooks && dbBooks.length > 0) {
           setBooks(dbBooks);
@@ -117,10 +81,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   // CRUD Implementations
 
   const addBook = React.useCallback((
-    title: string, 
-    author: string, 
-    format: "PDF" | "EPUB" | "TXT", 
-    content?: string, 
+    title: string,
+    author: string,
+    format: "PDF" | "EPUB" | "TXT",
+    content?: string,
     chapters?: BookChapter[],
     metadata?: {
       coverUrl?: string;
@@ -132,7 +96,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     }
   ) => {
     const bookId = `book-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    
+
     // Default placeholder content if none is provided (e.g. for PDF/EPUB uploads)
     const placeholderContent = `Welcome to your Visus Reading Room!
  
@@ -141,7 +105,7 @@ You are currently reading "${title}" by ${author || "Unknown Author"}. This high
 By stabilizing your eye alignment and moving foveal targets rapidly, RSVP enables your brain to absorb information at extreme visual speeds. Together with foveal cluster semantic chunking, you can train your foveal reading path to expand its peripheral field of vision.
  
 Keep calibrating your target words per minute (WPM), relax your foveal field, and let foveal visual processing take over as your eyes settle on the foveal alignment guides. Visus is designed to minimize cognitive visual friction, letting you enter a seamless, deep flow state.`;
- 
+
     const newBook: Book = {
       id: bookId,
       title: title.trim(),
@@ -192,7 +156,7 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
 
         changed = true;
         const mergedBook = { ...book, ...updates };
-        
+
         // Calculate status and estimated reading time based on progress
         if (mergedBook.progress === 100) {
           mergedBook.estimatedReadingTime = "Completed";
@@ -219,7 +183,7 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
 
   const deleteBook = React.useCallback((id: string) => {
     setBooks((prev) => prev.filter((book) => book.id !== id));
-    
+
     // Delete from IndexedDB asynchronously (non-blocking)
     dbService.deleteBook(id).catch((err) => {
       console.warn("Could not delete book from IndexedDB:", err);
@@ -229,7 +193,7 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
       if (prevActiveId === id) {
         try {
           localStorage.removeItem(ACTIVE_BOOK_KEY);
-        } catch (_) {}
+        } catch (_) { }
         return null;
       }
       return prevActiveId;
@@ -240,7 +204,7 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
     setBooks((prev) =>
       prev.map((book) => {
         if (book.id !== id) return book;
-        
+
         const isCurrentlyCompleted = book.status === "completed";
         const newStatus: "active" | "completed" = isCurrentlyCompleted ? "active" : "completed";
         const newProgress = isCurrentlyCompleted ? 0 : 100;
