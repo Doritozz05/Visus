@@ -55,6 +55,20 @@ export default function ReaderPage() {
     wordsCount: number;
   } | null>(null);
 
+  // Dynamic layout words-per-page state
+  const [dynamicWordsPerPage, setDynamicWordsPerPage] = React.useState<number | null>(null);
+
+  // Active book reference to prevent state loops
+  const activeBookRef = React.useRef(activeBook);
+  React.useEffect(() => {
+    activeBookRef.current = activeBook;
+  }, [activeBook]);
+
+  // Reset dynamicWordsPerPage when font/settings change, so we start with a clean slate
+  React.useEffect(() => {
+    setDynamicWordsPerPage(null);
+  }, [settings.general.readerFontSize, settings.general.readerFontFamily, settings.general.readerWordsPerPage]);
+
   // Ingestion File input reference
   const localFileInputRef = React.useRef<HTMLInputElement>(null);
   const initializedBookIdRef = React.useRef<string | null>(null);
@@ -65,14 +79,14 @@ export default function ReaderPage() {
   // Dynamic parser turning any plain text content or structural parsed chapters into visual chapters/pages.
   // Memoized strictly by static content keys to avoid recalculation on page progress/bookmark updates.
   const chaptersData = React.useMemo(() => {
-    if (!activeBookId) return [];
+    if (!activeBookId || !activeBook) return [];
     
     // Use pre-parsed chapters if available on the book object, otherwise segment content as fallback
-    let rawChapters = activeBookChapters || [];
+    let rawChapters = activeBook.chapters || [];
     
-    if (rawChapters.length === 0 && activeBookContent) {
+    if (rawChapters.length === 0 && activeBook.content) {
       // Split content by double newlines or paragraph breaks as fallback
-      const paragraphs = activeBookContent.split(/\n\s*\n+/).filter(p => p.trim() !== "");
+      const paragraphs = activeBook.content.split(/\n\s*\n+/).filter(p => p.trim() !== "");
       const legacyChapters = [];
       for (let i = 0; i < paragraphs.length; i += 6) {
         const title = `Section ${Math.floor(i / 6) + 1}`;
@@ -85,7 +99,7 @@ export default function ReaderPage() {
     if (rawChapters.length === 0) {
       rawChapters = [{
         title: "Section 1",
-        content: activeBookContent || "Empty book content."
+        content: activeBook.content || "Empty book content."
       }];
     }
 
@@ -94,7 +108,8 @@ export default function ReaderPage() {
       ...ch,
       index: idx,
     }));
-  }, [activeBookId, activeBookChapters, activeBookContent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeBookId]);
 
   // Derived properties from active chapter index, computing sequences just-in-time for the active chapter only
   const currentChapter = React.useMemo(() => {
@@ -137,10 +152,20 @@ export default function ReaderPage() {
   }, []);
 
   const wordsPerPage = React.useMemo(() => {
+    if (dynamicWordsPerPage !== null) {
+      return dynamicWordsPerPage;
+    }
     const baseWords = settings.general.readerWordsPerPage || 300;
     const fontSize = settings.general.readerFontSize || 16;
     return getSafeWordsPerPage(fontSize, baseWords);
-  }, [settings.general.readerWordsPerPage, settings.general.readerFontSize, getSafeWordsPerPage]);
+  }, [dynamicWordsPerPage, settings.general.readerWordsPerPage, settings.general.readerFontSize, getSafeWordsPerPage]);
+
+  const handleLayoutMeasured = React.useCallback((measuredWPP: number) => {
+    setDynamicWordsPerPage((prev) => {
+      if (prev === measuredWPP) return prev;
+      return measuredWPP;
+    });
+  }, []);
   const allBookPages = React.useMemo(() => {
     if (chaptersData.length === 0) return [];
     
@@ -177,6 +202,11 @@ export default function ReaderPage() {
   // Core callback to save book progress to database context
   const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number) => {
     if (chaptersData.length === 0) return;
+    
+    // Do NOT overwrite completed status!
+    if (activeBookRef.current?.id === bookId && activeBookRef.current?.status === "completed") {
+      return;
+    }
     
     const targetChapter = chaptersData[chIdx];
     if (!targetChapter) return;
@@ -268,9 +298,10 @@ export default function ReaderPage() {
   const handleChapterChange = React.useCallback((chapterIndex: number) => {
     setIsPlaying(false);
     
-    if (activeBook && initializedBookIdRef.current === activeBook.id) {
+    const activeBookVal = activeBookRef.current;
+    if (activeBookVal && initializedBookIdRef.current === activeBookVal.id) {
       saveProgressForBook(
-        activeBook.id,
+        activeBookVal.id,
         latestPositionRef.current.activeChapterIndex,
         latestPositionRef.current.wordIndex
       );
@@ -279,10 +310,10 @@ export default function ReaderPage() {
     setActiveChapterIndex(chapterIndex);
     setWordIndex(0);
     
-    if (activeBook) {
-      saveProgressForBook(activeBook.id, chapterIndex, 0);
+    if (activeBookVal) {
+      saveProgressForBook(activeBookVal.id, chapterIndex, 0);
     }
-  }, [activeBook, saveProgressForBook]);
+  }, [saveProgressForBook]);
 
   // Reset player indexes when active book changes, resuming from exact saved position
   React.useEffect(() => {
@@ -374,25 +405,22 @@ export default function ReaderPage() {
     return () => clearTimeout(interval);
   }, [isPlaying, wordIndex, wpm, rsvpSequence, mode, clusterChunks, activeClusterIndex, currentChapter]);
 
-  const handlePageChange = (direction: "prev" | "next") => {
-    if (allBookPages.length === 0 || !activePage || !activeBook) return;
+  const handlePageChange = React.useCallback((direction: "prev" | "next", forceComplete: boolean = false) => {
+    if (allBookPages.length === 0 || !activePage || !activeBookRef.current) return;
+    
+    const activeBookVal = activeBookRef.current;
     
     if (direction === "prev") {
       if (activePage.absolutePageIndex > 0) {
         const prevPageObj = allBookPages[activePage.absolutePageIndex - 1];
         setActiveChapterIndex(prevPageObj.chapterIndex);
         setWordIndex(prevPageObj.startWordIndex);
-        saveProgressForBook(activeBook.id, prevPageObj.chapterIndex, prevPageObj.startWordIndex);
+        saveProgressForBook(activeBookVal.id, prevPageObj.chapterIndex, prevPageObj.startWordIndex);
       }
     } else {
-      if (activePage.absolutePageIndex < allBookPages.length - 1) {
-        const nextPageObj = allBookPages[activePage.absolutePageIndex + 1];
-        setActiveChapterIndex(nextPageObj.chapterIndex);
-        setWordIndex(nextPageObj.startWordIndex);
-        saveProgressForBook(activeBook.id, nextPageObj.chapterIndex, nextPageObj.startWordIndex);
-      } else {
+      if (forceComplete || activePage.absolutePageIndex >= allBookPages.length - 1) {
         // Last page "Next" button clicked -> COMPLETE BOOK!
-        const totalWords = activeBook.chapters?.reduce((acc, c) => acc + c.content.split(/\s+/).filter(Boolean).length, 0) || activeBook.content?.split(/\s+/).filter(Boolean).length || 4500;
+        const totalWords = activeBookVal.chapters?.reduce((acc, c) => acc + c.content.split(/\s+/).filter(Boolean).length, 0) || activeBookVal.content?.split(/\s+/).filter(Boolean).length || 4500;
         const currentSpeed = mode === "normal" ? 280 : wpm;
         const calculatedSeconds = Math.round(totalWords / (currentSpeed / 60));
         const accuracyRating = Math.floor(Math.random() * 8) + 92; // 92% - 99%
@@ -408,8 +436,8 @@ export default function ReaderPage() {
         
         // Save session telemetry log in local database
         StatsService.recordSession({
-          bookId: activeBook.id,
-          bookTitle: activeBook.title,
+          bookId: activeBookVal.id,
+          bookTitle: activeBookVal.title,
           mode: mode,
           speedWpm: currentSpeed,
           durationSeconds: calculatedSeconds,
@@ -417,16 +445,64 @@ export default function ReaderPage() {
         });
         
         // Force book state to completed
-        updateBook(activeBook.id, {
+        updateBook(activeBookVal.id, {
           progress: 100,
           status: "completed",
           estimatedReadingTime: "Completed"
         });
         
         setIsCompletionModalOpen(true);
+      } else {
+        const nextPageObj = allBookPages[activePage.absolutePageIndex + 1];
+        setActiveChapterIndex(nextPageObj.chapterIndex);
+        setWordIndex(nextPageObj.startWordIndex);
+        saveProgressForBook(activeBookVal.id, nextPageObj.chapterIndex, nextPageObj.startWordIndex);
       }
     }
-  };
+  }, [allBookPages, activePage, mode, wpm, saveProgressForBook, updateBook]);
+
+  const handlePrevChapter = React.useCallback(() => {
+    if (activeChapterIndex > 0) {
+      const prevChapterIdx = activeChapterIndex - 1;
+      const prevCh = chaptersData[prevChapterIdx];
+      const prevWords = prevCh ? prevCh.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+      const lastWordIdx = Math.max(0, prevWords.length - 1);
+      
+      setIsPlaying(false);
+      const activeBookVal = activeBookRef.current;
+      if (activeBookVal && initializedBookIdRef.current === activeBookVal.id) {
+        saveProgressForBook(activeBookVal.id, activeChapterIndex, wordIndex);
+      }
+      
+      setActiveChapterIndex(prevChapterIdx);
+      setWordIndex(lastWordIdx);
+      
+      if (activeBookVal) {
+        saveProgressForBook(activeBookVal.id, prevChapterIdx, lastWordIdx);
+      }
+    }
+  }, [activeChapterIndex, chaptersData, saveProgressForBook, wordIndex]);
+
+  const handleNextChapter = React.useCallback(() => {
+    if (activeChapterIndex < chaptersData.length - 1) {
+      const nextChapterIdx = activeChapterIndex + 1;
+      
+      setIsPlaying(false);
+      const activeBookVal = activeBookRef.current;
+      if (activeBookVal && initializedBookIdRef.current === activeBookVal.id) {
+        saveProgressForBook(activeBookVal.id, activeChapterIndex, wordIndex);
+      }
+      
+      setActiveChapterIndex(nextChapterIdx);
+      setWordIndex(0);
+      
+      if (activeBookVal) {
+        saveProgressForBook(activeBookVal.id, nextChapterIdx, 0);
+      }
+    } else {
+      handlePageChange("next", true);
+    }
+  }, [activeChapterIndex, chaptersData.length, saveProgressForBook, wordIndex, handlePageChange]);
 
   const openQuickSettings = () => {
     setIsPlaying(false);
@@ -483,10 +559,11 @@ export default function ReaderPage() {
     setIsPlaying(false);
     setActiveChapterIndex(chapterIndex);
     setWordIndex(wordIndex);
-    if (activeBook) {
-      saveProgressForBook(activeBook.id, chapterIndex, wordIndex);
+    const activeBookVal = activeBookRef.current;
+    if (activeBookVal) {
+      saveProgressForBook(activeBookVal.id, chapterIndex, wordIndex);
     }
-  }, [setActiveChapterIndex, setWordIndex, activeBook, saveProgressForBook]);
+  }, [saveProgressForBook]);
 
 
   // Parse a file name helper
@@ -725,17 +802,20 @@ export default function ReaderPage() {
           {mode === "normal" ? (
             <PagesVisualBox
               currentChapter={currentChapter}
+              chaptersData={chaptersData}
               activePage={activePage}
               allBookPages={allBookPages}
               wordIndex={wordIndex}
               setWordIndex={setWordIndex}
               readerFontClass={readerFontClass}
               fontSize={settings.general.readerFontSize || 16}
-              handlePageChange={handlePageChange}
+              onPrevChapter={handlePrevChapter}
+              onNextChapter={handleNextChapter}
               bookmarks={activeBook.bookmarks || []}
               onAddBookmark={handleAddBookmark}
               onRemoveBookmark={handleRemoveBookmark}
               onUpdateBookmarkName={handleUpdateBookmarkName}
+              onLayoutMeasured={handleLayoutMeasured}
             />
           ) : mode === "rsvp" ? (
             <RsvpVisualBox
