@@ -156,11 +156,14 @@ export function PagesVisualBox({
     // Find the block containing this word
     const blocks = el.querySelectorAll("[data-start-word-idx]");
     let activeBlock: HTMLElement | null = null;
+    let lastBlock: HTMLElement | null = null;
     
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i] as HTMLElement;
       const start = parseInt(block.getAttribute("data-start-word-idx") || "0", 10);
       const end = parseInt(block.getAttribute("data-end-word-idx") || "0", 10);
+      
+      lastBlock = block;
       
       if (wIdx >= start && wIdx <= end) {
         activeBlock = block;
@@ -171,6 +174,12 @@ export function PagesVisualBox({
     if (activeBlock) {
       // Use Math.round to handle minor column gaps, sub-pixel offsets, and margin differences safely!
       return Math.round(activeBlock.offsetLeft / width);
+    }
+    
+    // Fallback: if wordIndex exceeds tagged block range (structural chapters like TOC/licenses),
+    // return the last page instead of 0 to prevent navigation jumping to the start
+    if (lastBlock) {
+      return Math.round(lastBlock.offsetLeft / width);
     }
     
     return 0;
@@ -288,14 +297,14 @@ export function PagesVisualBox({
           return closestBlockStart;
         };
 
-        const chapterPages: VisualPage[] = [];
+        const rawChapterPages: VisualPage[] = [];
         for (let pIdx = 0; pIdx < totalPagesInChapter; pIdx++) {
           const startWordIndex = findStartWordForPage(pIdx);
           
-          chapterPages.push({
+          rawChapterPages.push({
             pageIndex: pIdx,
             chapterIndex: chIdx,
-            absolutePageIndex: absolutePageIndex++,
+            absolutePageIndex: 0, // Recomputed after deduplication
             title: `Page ${pIdx + 1}`,
             content: "",
             leftColumn: "",
@@ -305,7 +314,22 @@ export function PagesVisualBox({
           });
         }
         
+        // Deduplicate phantom pages: collapse consecutive pages with identical startWordIndex.
+        // This happens in structural chapters (TOC, licenses) where few tagged blocks exist
+        // relative to the visual column count, causing multiple pages to map to word index 0.
+        const chapterPages: VisualPage[] = [];
+        for (let i = 0; i < rawChapterPages.length; i++) {
+          if (i === 0 || rawChapterPages[i].startWordIndex !== rawChapterPages[i - 1].startWordIndex) {
+            chapterPages.push(rawChapterPages[i]);
+          }
+        }
+        
+        // Assign correct sequential page indices and word ranges after deduplication
         for (let i = 0; i < chapterPages.length; i++) {
+          chapterPages[i].pageIndex = i;
+          chapterPages[i].absolutePageIndex = absolutePageIndex++;
+          chapterPages[i].title = `Page ${i + 1}`;
+          
           if (i < chapterPages.length - 1) {
             chapterPages[i].endWordIndex = chapterPages[i + 1].startWordIndex - 1;
           } else {
@@ -411,27 +435,32 @@ export function PagesVisualBox({
   const showCompleteBook = currentPageIndex === totalPages - 1 && isLastChapter;
   const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter;
 
-  // Compute global page numbers across the entire book to help the reader track progress globally
-  // 100% Constant and Immutable: total pages is strictly the length of allBookPages!
+  // Compute global page numbers across the entire book chapters.
+  // Uses currentPageIndex (DOM-accurate from visible container) offset by the chapter's
+  // starting position in allBookPages. This prevents accumulated counter errors in
+  // structural chapters (TOC, licenses) where wordIndex-to-page mapping can be unreliable.
   const globalPageDetails = React.useMemo(() => {
     if (allBookPages.length === 0) {
       return { current: currentPageIndex + 1, total: totalPages };
     }
     
-    // Find estimated page in this chapter containing current wordIndex
-    const foundPage = allBookPages.find(
-      (p) => p.chapterIndex === currentChapter.index && wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
-    );
+    // Find the first page of the current chapter in allBookPages to get the absolute offset
+    const chapterFirstPage = allBookPages.find(p => p.chapterIndex === currentChapter.index);
+    if (!chapterFirstPage) {
+      return { current: currentPageIndex + 1, total: allBookPages.length };
+    }
     
-    const activePageObj = foundPage || allBookPages.find(p => p.chapterIndex === currentChapter.index) || allBookPages[0];
+    // Count how many pages this chapter has in allBookPages to clamp safely
+    // (in case visible container and background paginator slightly disagree on page count)
+    const chapterPageCount = allBookPages.filter(p => p.chapterIndex === currentChapter.index).length;
+    const clampedPageIndex = Math.min(currentPageIndex, Math.max(0, chapterPageCount - 1));
     
     return {
-      current: activePageObj.absolutePageIndex + 1,
+      current: chapterFirstPage.absolutePageIndex + clampedPageIndex + 1,
       total: allBookPages.length,
     };
-  }, [allBookPages, currentChapter.index, wordIndex, currentPageIndex, totalPages]);
+  }, [allBookPages, currentChapter.index, currentPageIndex, totalPages]);
 
-  // Page Navigation Triggers (Local source of truth - zero rounding snapping desyncs!)
   const handlePrev = () => {
     if (currentPageIndex > 0) {
       const prevPageIndex = currentPageIndex - 1;

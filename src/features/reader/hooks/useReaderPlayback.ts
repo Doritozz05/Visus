@@ -419,9 +419,21 @@ export function useReaderPlayback({
   const handlePrevChapter = React.useCallback(() => {
     if (activeChapterIndex > 0) {
       const prevChapterIdx = activeChapterIndex - 1;
-      const prevCh = chaptersData[prevChapterIdx];
-      const prevWords = prevCh ? prevCh.content.split(/\s+/).filter(w => w.trim() !== "") : [];
-      const lastWordIdx = Math.max(0, prevWords.length - 1);
+      
+      // Use DOM-measured page data from allBookPages when available to get the correct
+      // last page word index. This prevents landing on a mismatched wordIndex for structural
+      // chapters (TOC, licenses) where content.split() word count differs from tagged HTML word count.
+      const prevChapterPages = allBookPages.filter(p => p.chapterIndex === prevChapterIdx);
+      const lastPage = prevChapterPages.length > 0 ? prevChapterPages[prevChapterPages.length - 1] : null;
+      
+      const lastWordIdx = lastPage
+        ? lastPage.startWordIndex
+        : (() => {
+            // Fallback: use content.split() when allBookPages is not yet available
+            const prevCh = chaptersData[prevChapterIdx];
+            const prevWords = prevCh ? prevCh.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+            return Math.max(0, prevWords.length - 1);
+          })();
       
       setIsPlaying(false);
       const activeBookVal = activeBookRef.current;
@@ -436,7 +448,7 @@ export function useReaderPlayback({
         saveProgressForBook(activeBookVal.id, prevChapterIdx, lastWordIdx);
       }
     }
-  }, [activeChapterIndex, chaptersData, saveProgressForBook, wordIndex]);
+  }, [activeChapterIndex, chaptersData, saveProgressForBook, wordIndex, allBookPages]);
 
   const handleNextChapter = React.useCallback(() => {
     if (activeChapterIndex < chaptersData.length - 1) {
