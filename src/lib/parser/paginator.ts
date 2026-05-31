@@ -13,16 +13,39 @@ export interface VisualPage {
  */
 export function paginateChapter(chapterContent: string, targetWordsPerPage: number = 300): VisualPage[] {
   const cleanContent = chapterContent.replace(/\r\n/g, "\n");
-  const words = cleanContent.split(/\s+/).filter(w => w.trim() !== "");
   
-  if (words.length === 0) return [];
+  // Regex mapping all non-whitespace tokens (words) with start/end character offsets
+  const wordRegex = /\S+/g;
+  interface Token {
+    text: string;
+    start: number;
+    end: number;
+  }
+  const tokens: Token[] = [];
+  let match;
+  while ((match = wordRegex.exec(cleanContent)) !== null) {
+    tokens.push({
+      text: match[0],
+      start: match.index,
+      end: match.index + match[0].length
+    });
+  }
+  
+  if (tokens.length === 0) return [];
   
   const pages: VisualPage[] = [];
   let currentWordOffset = 0;
   
-  while (currentWordOffset < words.length) {
-    const pageWords = words.slice(currentWordOffset, currentWordOffset + targetWordsPerPage);
-    const pageText = pageWords.join(" ");
+  while (currentWordOffset < tokens.length) {
+    const endOffset = Math.min(currentWordOffset + targetWordsPerPage, tokens.length);
+    const pageTokens = tokens.slice(currentWordOffset, endOffset);
+    
+    if (pageTokens.length === 0) break;
+    
+    // Extract exact substring from start of first word to end of last word
+    const pageStartChar = pageTokens[0].start;
+    const pageEndChar = pageTokens[pageTokens.length - 1].end;
+    const pageText = cleanContent.substring(pageStartChar, pageEndChar);
     
     // Find absolute split index for columns, aligning at the nearest sentence boundary
     const splitIndex = findSmartSplitPoint(pageText);
@@ -36,10 +59,10 @@ export function paginateChapter(chapterContent: string, targetWordsPerPage: numb
       leftColumn,
       rightColumn,
       startWordIndex: currentWordOffset,
-      endWordIndex: currentWordOffset + pageWords.length
+      endWordIndex: endOffset
     });
     
-    currentWordOffset += pageWords.length;
+    currentWordOffset = endOffset;
   }
   
   return pages;

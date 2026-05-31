@@ -79,6 +79,46 @@ export function PagesVisualBox({
     return `Section ${currentChapter.index + 1}, page ${pageNum}`;
   }, [currentChapter.index, activePage]);
 
+  // Premium parser to style headings in primary theme color, and clean premature word-wrapping newlines inside text bodies
+  const formatParagraphs = React.useCallback((text: string) => {
+    if (!text) return "";
+    return text
+      .split(/\n\n+/)
+      .map((p: string) => {
+        const clean = p.trim();
+        if (clean.length === 0) return "";
+        
+        // Matches exact chapter title or generic section markers
+        const isHeading = 
+          clean.toLowerCase() === currentChapter.title.toLowerCase() ||
+          /^(chapter|capítulo|section|sección|capitulo|seccion)\s+\d+/i.test(clean) ||
+          /^(chapter|capítulo|section|sección|capitulo|seccion)\s+[ivxlcdm]+/i.test(clean) ||
+          (clean.length < 60 && clean === clean.toUpperCase() && /[A-Z]/.test(clean));
+          
+        if (isHeading) {
+          return `<h2 class="text-base md:text-lg font-bold font-heading text-primary mb-4 mt-2 tracking-tight leading-tight uppercase select-none">${clean}</h2>`;
+        }
+        
+        // Clean single internal newlines (\n) within a paragraph to allow seamless justified wrapping
+        const sentenceFlow = clean.replace(/\n+/g, " ");
+        return `<p class="mb-4 text-justify leading-relaxed text-foreground/90">${sentenceFlow}</p>`;
+      })
+      .join("");
+  }, [currentChapter.title]);
+
+  // Checks if the text starts with a paragraph formatted as a heading
+  const startsWithHeading = React.useCallback((text: string) => {
+    if (!text) return false;
+    const firstParagraph = text.split(/\n\n+/)[0]?.trim();
+    if (!firstParagraph) return false;
+    return (
+      firstParagraph.toLowerCase() === currentChapter.title.toLowerCase() ||
+      /^(chapter|capítulo|section|sección|capitulo|seccion)\s+\d+/i.test(firstParagraph) ||
+      /^(chapter|capítulo|section|sección|capitulo|seccion)\s+[ivxlcdm]+/i.test(firstParagraph) ||
+      (firstParagraph.length < 60 && firstParagraph === firstParagraph.toUpperCase() && /[A-Z]/.test(firstParagraph))
+    );
+  }, [currentChapter.title]);
+
   return (
     <div className="w-full bg-card/65 dark:bg-card/45 border border-border/20 rounded-2xl px-5 pb-4 pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl glass-panel relative overflow-hidden transition-opacity duration-300 flex flex-col h-[660px] min-h-[660px] max-h-[660px]">
       
@@ -118,36 +158,34 @@ export function PagesVisualBox({
             }}
           >
             {/* Mobile View: Shows full page content in one column */}
-            <div 
-              className="md:hidden text-justify text-foreground/90 whitespace-pre-wrap break-words leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: activePage.content
-                  .split(/\n\n+/)
-                  .map((p: string) => `<p class="mb-5 text-justify leading-relaxed text-foreground/90">${p.trim()}</p>`)
-                  .join("")
-              }}
-            />
+            <div className="md:hidden text-justify text-foreground/90 whitespace-normal break-words leading-relaxed">
+              {activePage.pageIndex === 0 && !startsWithHeading(activePage.content) && (
+                <h2 className="text-lg md:text-xl font-bold font-heading text-primary mb-4 mt-2 tracking-tight leading-tight uppercase select-none">
+                  {currentChapter.title}
+                </h2>
+              )}
+              <div dangerouslySetInnerHTML={{
+                __html: formatParagraphs(activePage.content)
+              }} />
+            </div>
 
             {/* Desktop Left Column */}
-            <div 
-              className="hidden md:block text-justify text-foreground/90 whitespace-pre-wrap break-words leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: activePage.leftColumn
-                  .split(/\n\n+/)
-                  .map((p: string) => `<p class="mb-5 text-justify leading-relaxed text-foreground/90">${p.trim()}</p>`)
-                  .join("")
-              }}
-            />
+            <div className="hidden md:block text-justify text-foreground/90 whitespace-normal break-words leading-relaxed">
+              {activePage.pageIndex === 0 && !startsWithHeading(activePage.leftColumn) && (
+                <h2 className="text-lg md:text-xl font-bold font-heading text-primary mb-4 mt-2 tracking-tight leading-tight uppercase select-none">
+                  {currentChapter.title}
+                </h2>
+              )}
+              <div dangerouslySetInnerHTML={{
+                __html: formatParagraphs(activePage.leftColumn)
+              }} />
+            </div>
             {/* Desktop Right Column */}
-            <div 
-              className="hidden md:block text-justify text-foreground/90 whitespace-pre-wrap break-words leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: activePage.rightColumn
-                  .split(/\n\n+/)
-                  .map((p: string) => `<p class="mb-5 text-justify leading-relaxed text-foreground/90">${p.trim()}</p>`)
-                  .join("")
-              }}
-            />
+            <div className="hidden md:block text-justify text-foreground/90 whitespace-normal break-words leading-relaxed">
+              <div dangerouslySetInnerHTML={{
+                __html: formatParagraphs(activePage.rightColumn)
+              }} />
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground font-mono text-xs">
