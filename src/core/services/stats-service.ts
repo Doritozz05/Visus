@@ -4,8 +4,7 @@
  */
 
 import { ReadingSessionLog, LibraryStatsSummary, ReadingMode } from "../entities/stats";
-
-const STATS_STORAGE_KEY = "visus_telemetry_logs";
+import { dbService } from "./db-service";
 
 const DEFAULT_SEEDED_LOGS: ReadingSessionLog[] = [
   {
@@ -52,20 +51,22 @@ const DEFAULT_SEEDED_LOGS: ReadingSessionLog[] = [
 
 export class StatsService {
   /**
-   * Fetch all recorded reading session logs from local database (localStorage)
+   * Fetch all recorded reading session logs from local database (IndexedDB)
    */
-  static getSessionLogs(): ReadingSessionLog[] {
+  static async getSessionLogs(): Promise<ReadingSessionLog[]> {
     if (typeof window === "undefined") return [];
     try {
-      const stored = localStorage.getItem(STATS_STORAGE_KEY);
-      if (stored && stored.trim() !== "") {
-        return JSON.parse(stored) as ReadingSessionLog[];
+      const logs = await dbService.getAllLogs();
+      if (logs && logs.length > 0) {
+        return logs;
       }
       // Seed default logs if nothing has been recorded yet
-      localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(DEFAULT_SEEDED_LOGS));
+      for (const log of DEFAULT_SEEDED_LOGS) {
+        await dbService.saveLog(log);
+      }
       return DEFAULT_SEEDED_LOGS;
     } catch (err) {
-      console.warn("Could not retrieve reading logs from localStorage:", err);
+      console.warn("Could not retrieve reading logs from IndexedDB:", err);
       return DEFAULT_SEEDED_LOGS;
     }
   }
@@ -73,7 +74,7 @@ export class StatsService {
   /**
    * Save a new reading session telemetry log
    */
-  static recordSession(session: Omit<ReadingSessionLog, "id" | "completedAt">): ReadingSessionLog {
+  static async recordSession(session: Omit<ReadingSessionLog, "id" | "completedAt">): Promise<ReadingSessionLog> {
     const newLog: ReadingSessionLog = {
       ...session,
       id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -82,11 +83,9 @@ export class StatsService {
 
     if (typeof window !== "undefined") {
       try {
-        const logs = this.getSessionLogs();
-        const updatedLogs = [newLog, ...logs];
-        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(updatedLogs));
+        await dbService.saveLog(newLog);
       } catch (err) {
-        console.warn("Could not save reading log to localStorage:", err);
+        console.warn("Could not save reading log to IndexedDB:", err);
       }
     }
     return newLog;
@@ -95,8 +94,8 @@ export class StatsService {
   /**
    * Calculate summary statistics for the user based on logged sessions
    */
-  static getStatsSummary(booksReadCount: number): LibraryStatsSummary {
-    const logs = this.getSessionLogs();
+  static async getStatsSummary(booksReadCount: number): Promise<LibraryStatsSummary> {
+    const logs = await this.getSessionLogs();
     
     const totalWpm = logs.reduce((sum, log) => sum + log.speedWpm, 0);
     const averageWpm = logs.length > 0 ? Math.round(totalWpm / logs.length) : 550;
@@ -127,11 +126,12 @@ export class StatsService {
   /**
    * Clear all reading session history
    */
-  static resetStats(): void {
+  static async resetStats(): Promise<void> {
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify([]));
+        await dbService.clearAllLogs();
       } catch (_) {}
     }
   }
 }
+

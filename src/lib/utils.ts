@@ -2,11 +2,11 @@ import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 /**
- * Combina dinámicamente clases de Tailwind CSS resolviendo colisiones de forma inteligente.
- * Es una dependencia fundamental para la composición de variantes en componentes de Shadcn UI.
+ * Dynamically combines Tailwind CSS classes, resolving collisions intelligently.
+ * It is a fundamental dependency for variant composition in Shadcn UI components.
  * 
- * @param inputs - Lista o matriz de nombres de clase opcionales, booleanos u objetos.
- * @returns Cadena limpia y optimizada de clases unificadas.
+ * @param inputs - List or array of optional class names, booleans, or objects.
+ * @returns Clean and optimized string of unified classes.
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

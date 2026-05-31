@@ -18,13 +18,17 @@ export default function DashboardPage() {
   });
 
   React.useEffect(() => {
-    const completedBooksCount = books.filter((b) => b.status === "completed").length;
-    const sessionLogs = StatsService.getSessionLogs();
-    const statsSummary = StatsService.getStatsSummary(completedBooksCount);
-    
-    setLogs(sessionLogs);
-    setSummary(statsSummary);
-    setIsHydrated(true);
+    const fetchStats = async () => {
+      const completedBooksCount = books.filter((b) => b.status === "completed").length;
+      const sessionLogs = await StatsService.getSessionLogs();
+      const statsSummary = await StatsService.getStatsSummary(completedBooksCount);
+      
+      setLogs(sessionLogs);
+      setSummary(statsSummary);
+      setIsHydrated(true);
+    };
+
+    fetchStats();
   }, [books]);
 
   // Derived average accuracy

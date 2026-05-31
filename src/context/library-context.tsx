@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Book, DEFAULT_BOOKS, BookChapter } from "@/core/entities/book";
+import { dbService } from "@/core/services/db-service";
 
 interface LibraryContextType {
   books: Book[];
@@ -30,7 +31,6 @@ interface LibraryContextType {
 
 const LibraryContext = React.createContext<LibraryContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = "visus_library";
 const ACTIVE_BOOK_KEY = "visus_active_book_id";
 
 export function LibraryProvider({ children }: { children: React.ReactNode }) {
@@ -38,44 +38,69 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const [activeBookId, setActiveBookIdState] = React.useState<string | null>(null);
   const [isHydrated, setIsHydrated] = React.useState(false);
 
-  // 1. Hydrate state from localStorage on component mount
+  // 1. Hydrate state from IndexedDB on component mount, with legacy LocalStorage migration
   React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored && stored.trim() !== "") {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setBooks(parsed);
+    const hydrate = async () => {
+      try {
+        // --- ONE-TIME LEGACY MIGRATION ---
+        const legacyLibraryStr = localStorage.getItem("visus_library");
+        if (legacyLibraryStr && legacyLibraryStr.trim() !== "") {
+          try {
+            const parsed = JSON.parse(legacyLibraryStr);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              console.log(`Migrating ${parsed.length} books from LocalStorage to IndexedDB...`);
+              for (const book of parsed) {
+                await dbService.saveBook(book);
+              }
+            }
+          } catch (e) {
+            console.error("Failed to migrate legacy library:", e);
+          } finally {
+            localStorage.removeItem("visus_library");
+          }
+        }
+
+        const legacyLogsStr = localStorage.getItem("visus_telemetry_logs");
+        if (legacyLogsStr && legacyLogsStr.trim() !== "") {
+          try {
+            const parsed = JSON.parse(legacyLogsStr);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              console.log(`Migrating ${parsed.length} telemetry logs from LocalStorage to IndexedDB...`);
+              for (const log of parsed) {
+                await dbService.saveLog(log);
+              }
+            }
+          } catch (e) {
+            console.error("Failed to migrate legacy telemetry logs:", e);
+          } finally {
+            localStorage.removeItem("visus_telemetry_logs");
+          }
+        }
+        // ---------------------------------
+
+        const dbBooks = await dbService.getAllBooks();
+        if (dbBooks && dbBooks.length > 0) {
+          setBooks(dbBooks);
         } else {
           setBooks(DEFAULT_BOOKS);
         }
-      } else {
-        setBooks(DEFAULT_BOOKS);
-      }
 
-      const activeId = localStorage.getItem(ACTIVE_BOOK_KEY);
-      if (activeId) {
-        setActiveBookIdState(activeId);
+        const activeId = localStorage.getItem(ACTIVE_BOOK_KEY);
+        if (activeId) {
+          setActiveBookIdState(activeId);
+        }
+      } catch (err) {
+        console.warn("Could not parse library from IndexedDB. Seeding default library data.", err);
+        setBooks(DEFAULT_BOOKS);
+      } finally {
+        setIsHydrated(true);
       }
-    } catch (err) {
-      console.warn("Could not parse library or active book from localStorage. Seeding default library data.", err);
-      setBooks(DEFAULT_BOOKS);
-    } finally {
-      setIsHydrated(true);
-    }
+    };
+
+    hydrate();
   }, []);
 
-  // 2. Persist books state to localStorage on any state changes
-  React.useEffect(() => {
-    if (!isHydrated) return;
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(books));
-    } catch (err) {
-      console.warn("Could not save library data to localStorage:", err);
-    }
-  }, [books, isHydrated]);
-
-  // 3. Persist activeBookId to localStorage on change
+  // 2. Persist activeBookId to localStorage on change (tiny key, safe for localStorage)
   const setActiveBookId = React.useCallback((id: string | null) => {
     setActiveBookIdState(id);
     try {
@@ -137,6 +162,12 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
     };
 
     setBooks((prev) => [newBook, ...prev]);
+
+    // Save to IndexedDB asynchronously (non-blocking, O(1))
+    dbService.saveBook(newBook).catch((err) => {
+      console.warn("Could not save new book to IndexedDB:", err);
+    });
+
     return bookId;
   }, []);
 
@@ -174,6 +205,11 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
           mergedBook.estimatedReadingTime = "Not started";
         }
 
+        // Save individual book updates to IndexedDB asynchronously (non-blocking, O(1))
+        dbService.saveBook(mergedBook).catch((err) => {
+          console.warn("Could not save updated book to IndexedDB:", err);
+        });
+
         return mergedBook;
       });
 
@@ -183,6 +219,12 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
 
   const deleteBook = React.useCallback((id: string) => {
     setBooks((prev) => prev.filter((book) => book.id !== id));
+    
+    // Delete from IndexedDB asynchronously (non-blocking)
+    dbService.deleteBook(id).catch((err) => {
+      console.warn("Could not delete book from IndexedDB:", err);
+    });
+
     setActiveBookIdState((prevActiveId) => {
       if (prevActiveId === id) {
         try {
@@ -200,16 +242,23 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
         if (book.id !== id) return book;
         
         const isCurrentlyCompleted = book.status === "completed";
-        const newStatus = isCurrentlyCompleted ? "active" : "completed";
+        const newStatus: "active" | "completed" = isCurrentlyCompleted ? "active" : "completed";
         const newProgress = isCurrentlyCompleted ? 0 : 100;
         const newEstTime = isCurrentlyCompleted ? "Not started" : "Completed";
 
-        return {
+        const updatedBook = {
           ...book,
           status: newStatus,
           progress: newProgress,
           estimatedReadingTime: newEstTime,
         };
+
+        // Save to IndexedDB asynchronously (non-blocking)
+        dbService.saveBook(updatedBook).catch((err) => {
+          console.warn("Could not save toggled book to IndexedDB:", err);
+        });
+
+        return updatedBook;
       })
     );
   }, []);
@@ -217,6 +266,11 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
   const resetLibrary = React.useCallback(() => {
     setBooks(DEFAULT_BOOKS);
     setActiveBookId(null);
+
+    // Clear IndexedDB asynchronously (non-blocking)
+    dbService.clearAllBooks().catch((err) => {
+      console.warn("Could not reset library in IndexedDB:", err);
+    });
   }, [setActiveBookId]);
 
   return (
@@ -244,3 +298,4 @@ export function useLibrary() {
   }
   return context;
 }
+
