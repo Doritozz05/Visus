@@ -26,15 +26,11 @@ export default function ReaderPage() {
   const { settings } = useSettings();
   const { books, activeBookId, setActiveBookId, updateBook } = useLibrary();
 
-  const activeBooks = React.useMemo(() => {
-    return books.filter((book) => book.status === "active");
-  }, [books]);
-
   // Active book derivation
   const activeBook = React.useMemo(() => {
     if (!activeBookId) return null;
-    return activeBooks.find((book) => book.id === activeBookId) || null;
-  }, [activeBooks, activeBookId]);
+    return books.find((book) => book.id === activeBookId) || null;
+  }, [books, activeBookId]);
 
   // Drawer / UI toggles
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
@@ -152,7 +148,7 @@ export default function ReaderPage() {
   if (!activeBook) {
     return (
       <BookshelfSelector
-        books={activeBooks}
+        books={books.filter((book) => book.status === "active")}
         setActiveBookId={setActiveBookId}
       />
     );
