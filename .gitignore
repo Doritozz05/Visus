@@ -12,6 +12,7 @@
 
 # production
 /build
+/epub
 
 # debug
 npm-debug.log*
