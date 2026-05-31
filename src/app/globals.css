@@ -198,6 +198,11 @@ body[data-glass="disabled"] .glass-panel {
   scrollbar-width: none;  /* Firefox */
 }
 
+.scroll-fade-bottom {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 84%, transparent 100%);
+}
+
 /* Premium smooth text-shadow glows for spotlight reading focus */
 .text-shadow-glow-orange {
   text-shadow: 0 0 12px rgba(255, 185, 95, 0.55), 0 0 2px rgba(255, 185, 95, 0.3);

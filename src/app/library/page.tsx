@@ -482,177 +482,179 @@ export default function LibraryPage() {
               )}
 
               {/* Book List Scrollable Grid Panel */}
-              <div className="flex-1 max-h-[58vh] overflow-y-auto scrollbar-none pr-1">
-                {filteredBooks.length === 0 ? (
-                  <div className="border border-dashed border-border/40 rounded-xl flex flex-col items-center justify-center p-12 text-center bg-card/10 h-full min-h-[300px]">
-                    <span className="material-symbols-outlined text-4xl text-muted-foreground/60 mb-3">library_books</span>
-                    <p className="text-sm font-semibold text-muted-foreground">No books found</p>
-                    <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs leading-relaxed">
-                      Try adjusting your search criteria, switching tabs, or uploading a new file in the ingestion area.
-                    </p>
-                    {books.length === 0 && (
-                      <button 
-                        onClick={resetLibrary}
-                        className="mt-4 px-3 py-1.5 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary bg-primary/5 hover:bg-primary/10 rounded transition-all"
-                      >
-                        Reload seed data
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {filteredBooks.map((book) => (
-                      <div 
-                        key={book.id}
-                        className="bg-card border border-border/20 rounded-xl p-5 flex flex-col justify-between relative hover:border-primary/50 transition-all shadow-md glass-panel min-h-[160px]"
-                      >
-                        {/* Option Actions Row */}
-                        <div className="absolute top-4 right-4 flex items-center gap-1 z-20">
-                          {/* Direct Trash Icon Delete Button */}
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteBook(book.id);
-                            }}
-                            className="w-7 h-7 rounded-full hover:bg-rose-500/10 flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-all animate-fade-in"
-                            title="Delete Book"
-                          >
-                            <span className="material-symbols-outlined text-base">delete</span>
-                          </button>
-
-                          {/* Options Dropdown Trigger */}
-                          <div className="relative">
-                            <button 
+              <div className="relative flex-1 max-h-[58vh]">
+                <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pr-1 pb-10">
+                  {filteredBooks.length === 0 ? (
+                    <div className="border border-dashed border-border/40 rounded-xl flex flex-col items-center justify-center p-12 text-center bg-card/10 h-full min-h-[300px]">
+                      <span className="material-symbols-outlined text-4xl text-muted-foreground/60 mb-3">library_books</span>
+                      <p className="text-sm font-semibold text-muted-foreground">No books found</p>
+                      <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs leading-relaxed">
+                        Try adjusting your search criteria, switching tabs, or uploading a new file in the ingestion area.
+                      </p>
+                      {books.length === 0 && (
+                        <button
+                          onClick={resetLibrary}
+                          className="mt-4 px-3 py-1.5 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary bg-primary/5 hover:bg-primary/10 rounded transition-all"
+                        >
+                          Reload seed data
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {filteredBooks.map((book) => (
+                        <div
+                          key={book.id}
+                          className="bg-card border border-border/20 rounded-xl p-5 flex flex-col justify-between relative hover:border-primary/50 transition-all shadow-md glass-panel min-h-[160px]"
+                        >
+                          {/* Option Actions Row */}
+                          <div className="absolute top-4 right-4 flex items-center gap-1 z-20">
+                            {/* Direct Trash Icon Delete Button */}
+                            <button
                               onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveDropdownId(activeDropdownId === book.id ? null : book.id);
+                                e.stopPropagation();
+                                deleteBook(book.id);
                               }}
-                              className="w-7 h-7 rounded-full hover:bg-accent/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+                              className="w-7 h-7 rounded-full hover:bg-rose-500/10 flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-all animate-fade-in"
+                              title="Delete Book"
                             >
-                              <span className="material-symbols-outlined text-base">more_vert</span>
+                              <span className="material-symbols-outlined text-base">delete</span>
                             </button>
 
-                            {/* Dropdown Menu (floats dynamically outside card, NEVER clipped, completely opaque) */}
-                            {activeDropdownId === book.id && (
-                              <div 
-                                onClick={(e) => e.stopPropagation()}
-                                className="absolute right-0 top-8 z-30 w-44 bg-[#ffffff] dark:bg-[#1c1c1f] border border-border/40 rounded-lg shadow-2xl py-1 animate-fade-in opacity-100"
-                              >
-                                <button
-                                  onClick={() => {
-                                    setDetailsBook(book);
-                                    setActiveDropdownId(null);
-                                  }}
-                                  className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors border-b border-border/10"
-                                >
-                                  <span className="material-symbols-outlined text-sm">info</span>
-                                  View Details
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    toggleCompleted(book.id);
-                                    setActiveDropdownId(null);
-                                  }}
-                                  className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors"
-                                >
-                                  <span className="material-symbols-outlined text-sm">
-                                    {book.status === "completed" ? "unpublished" : "task_alt"}
-                                  </span>
-                                  {book.status === "completed" ? "Mark as Active" : "Mark as Completed"}
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    openEditModal(book);
-                                    setActiveDropdownId(null);
-                                  }}
-                                  className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors"
-                                >
-                                  <span className="material-symbols-outlined text-sm">edit</span>
-                                  Edit Details
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    updateBook(book.id, { status: book.status === "archived" ? "active" : "archived" });
-                                    setActiveDropdownId(null);
-                                  }}
-                                  className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors border-t border-border/10"
-                                >
-                                  <span className="material-symbols-outlined text-sm">
-                                    {book.status === "archived" ? "unarchive" : "archive"}
-                                  </span>
-                                  {book.status === "archived" ? "Unarchive Book" : "Archive Book"}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Card Info Cover Row */}
-                        <div className="flex gap-4 items-start pr-16 mb-4">
-                          <div className="w-12 h-16 bg-gradient-to-br from-primary/10 to-primary/5 border border-border/30 rounded-lg flex items-center justify-center shrink-0 relative shadow-inner overflow-hidden cursor-pointer" onClick={() => setDetailsBook(book)}>
-                            {book.coverUrl ? (
-                              <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-                            ) : (
-                              <div className="flex flex-col items-center justify-center h-full w-full bg-accent/30">
-                                <span className="text-[10px] font-extrabold text-primary/70 font-mono tracking-tighter uppercase leading-none mb-1">
-                                  {book.title.slice(0, 2)}
-                                </span>
-                                <span className="material-symbols-outlined text-muted-foreground/40 text-xs">menu_book</span>
-                              </div>
-                            )}
-                            <div className="absolute bottom-0.5 right-0.5 bg-accent/90 border border-border/10 px-1 rounded text-[7px] font-mono text-primary font-bold shadow-sm">{book.format}</div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-sm font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">{book.title}</h3>
-                            <p className="text-[11px] text-muted-foreground font-mono truncate mt-0.5 mb-2">{book.author}</p>
-                            
-                            {/* Tags */}
-                            {book.genres && book.genres.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mb-2">
-                                {book.genres.slice(0, 2).map((genre) => (
-                                  <span key={genre} className="px-1.5 py-0.5 bg-accent text-muted-foreground rounded text-[8px] font-mono uppercase tracking-widest border border-border/40">
-                                    {genre}
-                                  </span>
-                                ))}
-                                {book.genres.length > 2 && (
-                                  <span className="px-1.5 py-0.5 bg-accent/50 text-muted-foreground/70 rounded text-[8px] font-mono uppercase tracking-widest border border-border/20">
-                                    +{book.genres.length - 2}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Prominent Read Book Button */}
-                            {book.format !== "PHYSICAL" && (
+                            {/* Options Dropdown Trigger */}
+                            <div className="relative">
                               <button
-                                onClick={() => handleReadBook(book.id)}
-                                className="flex items-center gap-1 px-3 py-1 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded transition-all shadow-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveDropdownId(activeDropdownId === book.id ? null : book.id);
+                                }}
+                                className="w-7 h-7 rounded-full hover:bg-accent/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
                               >
-                                <span className="material-symbols-outlined text-xs">chrome_reader_mode</span>
-                                Read Book
+                                <span className="material-symbols-outlined text-base">more_vert</span>
                               </button>
-                            )}
-                          </div>
-                        </div>
 
-                        {/* Progress Bar & Reading Stats */}
-                        <div className="mt-auto pt-2 flex flex-col gap-1.5">
-                          <div className="flex justify-between items-end text-[10px] font-mono">
-                            <span className="text-primary font-bold">{book.progress}%</span>
-                            <span className="text-muted-foreground/80 truncate max-w-[120px]">{book.estimatedReadingTime}</span>
+                              {/* Dropdown Menu (floats dynamically outside card, NEVER clipped, completely opaque) */}
+                              {activeDropdownId === book.id && (
+                                <div
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="absolute right-0 top-8 z-30 w-44 bg-[#ffffff] dark:bg-[#1c1c1f] border border-border/40 rounded-lg shadow-2xl py-1 animate-fade-in opacity-100"
+                                >
+                                  <button
+                                    onClick={() => {
+                                      setDetailsBook(book);
+                                      setActiveDropdownId(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors border-b border-border/10"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">info</span>
+                                    View Details
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      toggleCompleted(book.id);
+                                      setActiveDropdownId(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">
+                                      {book.status === "completed" ? "unpublished" : "task_alt"}
+                                    </span>
+                                    {book.status === "completed" ? "Mark as Active" : "Mark as Completed"}
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      openEditModal(book);
+                                      setActiveDropdownId(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">edit</span>
+                                    Edit Details
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      updateBook(book.id, { status: book.status === "archived" ? "active" : "archived" });
+                                      setActiveDropdownId(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-xs hover:bg-accent flex items-center gap-2 hover:text-primary transition-colors border-t border-border/10"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">
+                                      {book.status === "archived" ? "unarchive" : "archive"}
+                                    </span>
+                                    {book.status === "archived" ? "Unarchive Book" : "Archive Book"}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="w-full h-1 bg-background border border-border/5 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300" 
-                              style={{ width: `${book.progress}%` }}
-                            />
-                          </div>
-                        </div>
 
-                      </div>
-                    ))}
-                  </div>
-                )}
+                          {/* Card Info Cover Row */}
+                          <div className="flex gap-4 items-start pr-16 mb-4">
+                            <div className="w-12 h-16 bg-gradient-to-br from-primary/10 to-primary/5 border border-border/30 rounded-lg flex items-center justify-center shrink-0 relative shadow-inner overflow-hidden cursor-pointer" onClick={() => setDetailsBook(book)}>
+                              {book.coverUrl ? (
+                                <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center h-full w-full bg-accent/30">
+                                  <span className="text-[10px] font-extrabold text-primary/70 font-mono tracking-tighter uppercase leading-none mb-1">
+                                    {book.title.slice(0, 2)}
+                                  </span>
+                                  <span className="material-symbols-outlined text-muted-foreground/40 text-xs">menu_book</span>
+                                </div>
+                              )}
+                              <div className="absolute bottom-0.5 right-0.5 bg-accent/90 border border-border/10 px-1 rounded text-[7px] font-mono text-primary font-bold shadow-sm">{book.format}</div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">{book.title}</h3>
+                              <p className="text-[11px] text-muted-foreground font-mono truncate mt-0.5 mb-2">{book.author}</p>
+
+                              {/* Tags */}
+                              {book.genres && book.genres.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-2">
+                                  {book.genres.slice(0, 2).map((genre) => (
+                                    <span key={genre} className="px-1.5 py-0.5 bg-accent text-muted-foreground rounded text-[8px] font-mono uppercase tracking-widest border border-border/40">
+                                      {genre}
+                                    </span>
+                                  ))}
+                                  {book.genres.length > 2 && (
+                                    <span className="px-1.5 py-0.5 bg-accent/50 text-muted-foreground/70 rounded text-[8px] font-mono uppercase tracking-widest border border-border/20">
+                                      +{book.genres.length - 2}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Prominent Read Book Button */}
+                              {book.format !== "PHYSICAL" && (
+                                <button
+                                  onClick={() => handleReadBook(book.id)}
+                                  className="flex items-center gap-1 px-3 py-1 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded transition-all shadow-sm"
+                                >
+                                  <span className="material-symbols-outlined text-xs">chrome_reader_mode</span>
+                                  Read Book
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Progress Bar & Reading Stats */}
+                          <div className="mt-auto pt-2 flex flex-col gap-1.5">
+                            <div className="flex justify-between items-end text-[10px] font-mono">
+                              <span className="text-primary font-bold">{book.progress}%</span>
+                              <span className="text-muted-foreground/80 truncate max-w-[120px]">{book.estimatedReadingTime}</span>
+                            </div>
+                            <div className="w-full h-1 bg-background border border-border/5 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300"
+                                style={{ width: `${book.progress}%` }}
+                              />
+                            </div>
+                          </div>
+
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
             </div>
