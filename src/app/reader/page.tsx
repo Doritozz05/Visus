@@ -37,13 +37,7 @@ export default function ReaderPage() {
   const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster">("rsvp");
   const [isTocOpen, setIsTocOpen] = React.useState(false);
 
-  // Dynamic layout words-per-page state
-  const [dynamicWordsPerPage, setDynamicWordsPerPage] = React.useState<number | null>(null);
 
-  // Reset dynamicWordsPerPage when font/settings change, so we start with a clean slate
-  React.useEffect(() => {
-    setDynamicWordsPerPage(null);
-  }, [settings.general.readerFontSize, settings.general.readerFontFamily, settings.general.readerWordsPerPage]);
 
   // Consuming modular custom hooks
   const {
@@ -60,20 +54,10 @@ export default function ReaderPage() {
   }, []);
 
   const wordsPerPage = React.useMemo(() => {
-    if (dynamicWordsPerPage !== null) {
-      return dynamicWordsPerPage;
-    }
     const baseWords = settings.general.readerWordsPerPage || 300;
     const fontSize = settings.general.readerFontSize || 16;
     return getSafeWordsPerPage(fontSize, baseWords);
-  }, [dynamicWordsPerPage, settings.general.readerWordsPerPage, settings.general.readerFontSize, getSafeWordsPerPage]);
-
-  const handleLayoutMeasured = React.useCallback((measuredWPP: number) => {
-    setDynamicWordsPerPage((prev) => {
-      if (prev === measuredWPP) return prev;
-      return measuredWPP;
-    });
-  }, []);
+  }, [settings.general.readerWordsPerPage, settings.general.readerFontSize, getSafeWordsPerPage]);
 
   // Consuming the core speed reading engine playback hook
   const {
@@ -284,7 +268,6 @@ export default function ReaderPage() {
               onAddBookmark={handleAddBookmark}
               onRemoveBookmark={handleRemoveBookmark}
               onUpdateBookmarkName={handleUpdateBookmarkName}
-              onLayoutMeasured={handleLayoutMeasured}
             />
           ) : mode === "rsvp" ? (
             <RsvpVisualBox

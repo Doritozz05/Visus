@@ -1,6 +1,10 @@
 import JSZip from "jszip";
 import { BookChapter } from "@/core/entities/book";
 
+function cleanTitle(rawTitle: string): string {
+  return rawTitle.replace(/\s+/g, " ").trim();
+}
+
 export interface ParsedEpub {
   title: string;
   author: string;
@@ -51,8 +55,8 @@ export async function parseEpub(arrayBuffer: ArrayBuffer): Promise<ParsedEpub> {
   // Extract Metadata
   const titleEl = opfXml.querySelector("title, dc\\:title");
   const creatorEl = opfXml.querySelector("creator, dc\\:creator");
-  const title = titleEl?.textContent?.trim() || "Unknown Title";
-  const author = creatorEl?.textContent?.trim() || "Unknown Author";
+  const title = titleEl?.textContent ? cleanTitle(titleEl.textContent) : "Unknown Title";
+  const author = creatorEl?.textContent ? cleanTitle(creatorEl.textContent) : "Unknown Author";
   
   const descriptionEl = opfXml.querySelector("description, dc\\:description");
   const description = descriptionEl?.textContent?.trim() || undefined;
@@ -287,7 +291,7 @@ export async function parseEpub(arrayBuffer: ArrayBuffer): Promise<ParsedEpub> {
       // Fallback spine file (not listed in TOC, e.g. cover pages or custom files)
       // Check if file is huge and has internal headings to split dynamically
       const headings = doc.querySelectorAll("h1, h2, h3");
-      if (htmlStr.length > 80000 && headings.length >= 2) {
+      if (htmlStr.length > 25000 && headings.length >= 2) {
         const foundHeadings = Array.from(headings) as HTMLElement[];
         
         // Split huge file by headings automatically
@@ -302,7 +306,8 @@ export async function parseEpub(arrayBuffer: ArrayBuffer): Promise<ParsedEpub> {
             chapterHtml = extractHtmlBetweenRange(doc, current, 0, doc.body, true);
           }
           
-          const currentTitle = current.textContent?.trim() || `Chapter ${chapters.length + 1}`;
+          const rawTitle = current.textContent ? cleanTitle(current.textContent) : "";
+          const currentTitle = (rawTitle && rawTitle.length <= 80) ? rawTitle : `Chapter ${chapters.length + 1}`;
           if (chapterHtml.trim()) {
             chapters.push({
               title: currentTitle,
@@ -316,12 +321,16 @@ export async function parseEpub(arrayBuffer: ArrayBuffer): Promise<ParsedEpub> {
         let chapterTitle = "";
         const hEl = doc.querySelector("h1, h2, h3, h4");
         if (hEl && hEl.textContent) {
-          chapterTitle = hEl.textContent.trim();
+          const possibleTitle = cleanTitle(hEl.textContent);
+          if (possibleTitle.length > 0 && possibleTitle.length <= 80) {
+            chapterTitle = possibleTitle;
+          }
         }
         if (!chapterTitle) {
           chapterTitle = spinePath.substring(spinePath.lastIndexOf("/") + 1)
             .replace(/\.xhtml$|\.html$|\.htm$/gi, "")
             .replace(/[_-]/g, " ");
+          chapterTitle = cleanTitle(chapterTitle);
           chapterTitle = chapterTitle.charAt(0).toUpperCase() + chapterTitle.slice(1);
         }
         
@@ -368,7 +377,7 @@ async function parseNcx(zip: JSZip, ncxPath: string): Promise<TocEntry[]> {
   navPoints.forEach((navPoint) => {
     const textEl = navPoint.querySelector("navLabel > text");
     const contentEl = navPoint.querySelector("content");
-    const title = textEl?.textContent?.trim() || "Untitled Section";
+    const title = textEl?.textContent ? cleanTitle(textEl.textContent) : "Untitled Section";
     const relativeSrc = contentEl?.getAttribute("src");
     
     if (relativeSrc) {
@@ -401,7 +410,7 @@ async function parseNav(zip: JSZip, navPath: string): Promise<TocEntry[]> {
   const aEls = (navEl || doc).querySelectorAll("a");
   
   aEls.forEach((a) => {
-    const title = a.textContent?.trim() || "Untitled Section";
+    const title = a.textContent ? cleanTitle(a.textContent) : "Untitled Section";
     const relativeSrc = a.getAttribute("href");
     
     if (relativeSrc) {
@@ -422,6 +431,25 @@ async function parseNav(zip: JSZip, navPath: string): Promise<TocEntry[]> {
 
 // --- CHAPTER POST-PROCESSING PIPELINE ---
 
+function isStandaloneSection(title: string): boolean {
+  const t = title.toUpperCase().trim();
+  return (
+    t.includes("TITLE PAGE") ||
+    t.includes("CONTENTS") ||
+    t.includes("TABLE OF CONTENTS") ||
+    t.includes("PROLOGUE") ||
+    t.includes("PREFACE") ||
+    t.includes("ACT ") ||
+    t.includes("ACTI") ||
+    t.includes("SCENE") ||
+    t.includes("CHAPTER") ||
+    t.includes("EPILOGUE") ||
+    t.includes("DEDICATION") ||
+    t.includes("INTRODUCTION") ||
+    t.includes("INTRO")
+  );
+}
+
 function postProcessChapters(rawChapters: BookChapter[]): BookChapter[] {
   if (rawChapters.length <= 1) return rawChapters;
   
@@ -434,6 +462,16 @@ function postProcessChapters(rawChapters: BookChapter[]): BookChapter[] {
     const currentWordCount = current.content.split(/\s+/).filter(Boolean).length;
     const nextWordCount = next.content.split(/\s+/).filter(Boolean).length;
     
+    // Standalone sections should NEVER be merged
+    const currentIsStandalone = isStandaloneSection(current.title);
+    const nextIsStandalone = isStandaloneSection(next.title);
+    
+    if (currentIsStandalone || nextIsStandalone) {
+      processed.push(current);
+      current = { ...next };
+      continue;
+    }
+    
     // Heuristics 1: Merge adjacent cover title & subtitle fragments
     const isContinuation = 
       /^[a-z]/.test(next.title) || 
@@ -442,14 +480,10 @@ function postProcessChapters(rawChapters: BookChapter[]): BookChapter[] {
       current.title.endsWith(";") || 
       current.title.endsWith(",");
       
-    // Heuristics 2: Merge extremely small helper/intro chapters (like contents, title page, blank spacers)
-    const isHeaderOrFooterFragment = 
-      next.title.toUpperCase() === "CONTENTS" || 
-      next.title.toUpperCase() === "TITLE PAGE" ||
-      nextWordCount < 60 || 
-      (next.title.toUpperCase().includes("GUTENBERG") && nextWordCount < 300);
-      
-    if ((nextWordCount < 150 && isContinuation) || isHeaderOrFooterFragment) {
+    // Only merge if it's a clear continuation and very short, OR if next is an extremely tiny fragment without substantive content (e.g. < 15 words)
+    const isTinyFragment = nextWordCount < 15;
+    
+    if ((nextWordCount < 150 && isContinuation) || isTinyFragment) {
       // Merge titles cleanly
       if (current.title.endsWith(";")) {
         current.title = `${current.title} ${next.title}`;
@@ -472,22 +506,6 @@ function postProcessChapters(rawChapters: BookChapter[]): BookChapter[] {
     }
   }
   processed.push(current);
-  
-  // Heuristics 3: Merge any tiny trailing fragments at the very end of the book (copyright footers or colophons)
-  if (processed.length > 1) {
-    const lastIdx = processed.length - 1;
-    const lastCh = processed[lastIdx];
-    const lastWordCount = lastCh.content.split(/\s+/).filter(Boolean).length;
-    
-    if (lastWordCount < 250 || lastCh.title.toLowerCase().includes("footer") || lastCh.title.toLowerCase().includes("colophon")) {
-      const prevCh = processed[lastIdx - 1];
-      prevCh.content = `${prevCh.content}\n\n${lastCh.content}`;
-      if (prevCh.htmlContent && lastCh.htmlContent) {
-        prevCh.htmlContent = `${prevCh.htmlContent}\n${lastCh.htmlContent}`;
-      }
-      processed.pop();
-    }
-  }
   
   return processed;
 }

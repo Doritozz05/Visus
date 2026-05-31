@@ -39,7 +39,6 @@ interface PagesVisualBoxProps {
   onAddBookmark: (name: string, chapterIndex: number, wordIndex: number) => void;
   onRemoveBookmark: (id: string) => void;
   onUpdateBookmarkName: (id: string, name: string) => void;
-  onLayoutMeasured?: (wordsPerPage: number) => void;
 }
 
 export function PagesVisualBox({
@@ -57,7 +56,6 @@ export function PagesVisualBox({
   onAddBookmark,
   onRemoveBookmark,
   onUpdateBookmarkName,
-  onLayoutMeasured,
 }: PagesVisualBoxProps) {
   const [totalPages, setTotalPages] = React.useState(1);
   const [currentPageIndex, setCurrentPageIndex] = React.useState(0);
@@ -185,12 +183,6 @@ export function PagesVisualBox({
         // Compute and set current page index in the same batch using our robust helper
         const initialPage = getPageIndexForWord(wordIndex, pages, totalWords);
         setCurrentPageIndex(initialPage);
-
-        // Call the callback to synchronize page counts dynamically
-        if (onLayoutMeasured) {
-          const measuredWPP = Math.max(50, Math.round(totalWords / pages));
-          onLayoutMeasured(measuredWPP);
-        }
       }
       setIsMeasuring(false);
     }, 120);
@@ -259,9 +251,10 @@ export function PagesVisualBox({
     }
     const chapterPagesInStatic = allBookPages.filter((p) => p.chapterIndex === currentChapter.index);
     const staticPagesCount = chapterPagesInStatic.length || 1;
+    const chapterPercentage = totalPages > 1 ? currentPageIndex / (totalPages - 1) : 0;
     const mappedPageIndex = Math.min(
       staticPagesCount - 1,
-      Math.max(0, Math.floor((currentPageIndex / totalPages) * staticPagesCount))
+      Math.max(0, Math.round(chapterPercentage * (staticPagesCount - 1)))
     );
     const activeStaticPage = chapterPagesInStatic[mappedPageIndex];
     const globalCurrent = activeStaticPage ? activeStaticPage.absolutePageIndex + 1 : currentPageIndex + 1;
@@ -475,7 +468,7 @@ export function PagesVisualBox({
         </button>
 
         {/* Page indicator (Discrete, deterministic global X of Y) */}
-        <div className="text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60">
+        <div className="absolute left-1/2 -translate-x-1/2 text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60 pointer-events-none">
           Page {globalPageDetails.current} of {globalPageDetails.total}
         </div>
 

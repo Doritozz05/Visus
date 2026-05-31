@@ -504,10 +504,14 @@ export function useReaderPlayback({
   }, [saveProgressForBook]);
 
   const progressPercentage = React.useMemo(() => {
-    return words.length > 0 
-      ? Math.round((Math.min(wordIndex + 1, words.length) / words.length) * 100) 
-      : 0;
-  }, [words.length, wordIndex]);
+    if (chaptersData.length === 0) return 0;
+    const currentChapterWordsCount = words.length || 1;
+    const progressInChapter = wordIndex / currentChapterWordsCount;
+    return Math.min(
+      100,
+      Math.round(((activeChapterIndex + progressInChapter) / chaptersData.length) * 100)
+    );
+  }, [chaptersData.length, activeChapterIndex, wordIndex, words.length]);
 
   return {
     activeChapterIndex,

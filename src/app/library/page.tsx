@@ -83,8 +83,7 @@ export default function LibraryPage() {
         reader.onload = (event) => {
           const textContent = event.target?.result as string;
           const parsedChapters = parseTxt(textContent);
-          const newId = addBook(title, author, format, textContent, parsedChapters);
-          setActiveBookId(newId);
+          addBook(title, author, format, textContent, parsedChapters);
           resolve();
         };
         reader.readAsText(file);
@@ -99,13 +98,11 @@ export default function LibraryPage() {
             const finalTitle = parsed.title && parsed.title !== "Unknown PDF" ? parsed.title : title;
             const finalAuthor = parsed.author && parsed.author !== "Unknown Author" ? parsed.author : author;
             const fullContent = parsed.chapters.map(c => c.content).join("\n\n");
-            const newId = addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters);
-            setActiveBookId(newId);
+            addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters);
             resolve();
           } catch (pdfErr) {
             console.error("PDF Parsing failed:", pdfErr);
-            const newId = addBook(title, author, format);
-            setActiveBookId(newId);
+            addBook(title, author, format);
             resolve();
           }
         };
@@ -121,7 +118,7 @@ export default function LibraryPage() {
             const finalTitle = parsed.title && parsed.title !== "Unknown Title" ? parsed.title : title;
             const finalAuthor = parsed.author && parsed.author !== "Unknown Author" ? parsed.author : author;
             const fullContent = parsed.chapters.map(c => c.content).join("\n\n");
-            const newId = addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters, {
+            addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters, {
               coverUrl: parsed.coverUrl,
               description: parsed.description,
               genres: parsed.genres,
@@ -129,20 +126,17 @@ export default function LibraryPage() {
               publishDate: parsed.publishDate,
               language: parsed.language
             });
-            setActiveBookId(newId);
             resolve();
           } catch (epubErr) {
             console.error("EPUB Parsing failed:", epubErr);
-            const newId = addBook(title, author, format);
-            setActiveBookId(newId);
+            addBook(title, author, format);
             resolve();
           }
         };
         reader.readAsArrayBuffer(file);
       });
     } else {
-      const newId = addBook(title, author, format);
-      setActiveBookId(newId);
+      addBook(title, author, format);
     }
   };
 
@@ -156,9 +150,6 @@ export default function LibraryPage() {
       for (let i = 0; i < files.length; i++) {
         await processAndAddFile(files[i]);
       }
-      
-      // Navigate instantly to reader once finished ingesting
-      router.push("/reader");
     } catch (err) {
       console.error("File ingestion failed:", err);
     } finally {
@@ -189,8 +180,6 @@ export default function LibraryPage() {
       for (let i = 0; i < files.length; i++) {
         await processAndAddFile(files[i]);
       }
-      
-      router.push("/reader");
     } catch (err) {
       console.error("Drag and drop ingestion failed:", err);
     } finally {
@@ -209,15 +198,12 @@ export default function LibraryPage() {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
-    const newId = addBook(newTitle, newAuthor, newFormat);
-    setActiveBookId(newId);
+    addBook(newTitle, newAuthor, newFormat);
     
     setNewTitle("");
     setNewAuthor("");
     setNewFormat("EPUB");
     setIsAddModalOpen(false);
-    
-    router.push("/reader");
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {

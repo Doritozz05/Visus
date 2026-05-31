@@ -5,7 +5,7 @@ import { parsePdf } from "@/lib/parser/pdf";
 import { parseTxt } from "@/lib/parser/txt";
 
 export function useBookIngestion() {
-  const { addBook, setActiveBookId } = useLibrary();
+  const { addBook } = useLibrary();
   const localFileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Parse a file name helper
@@ -36,8 +36,7 @@ export function useBookIngestion() {
       reader.onload = (event) => {
         const textContent = event.target?.result as string;
         const parsedChapters = parseTxt(textContent);
-        const newId = addBook(title, author, format, textContent, parsedChapters);
-        setActiveBookId(newId);
+        addBook(title, author, format, textContent, parsedChapters);
       };
       reader.readAsText(file);
     } else if (format === "PDF") {
@@ -49,12 +48,10 @@ export function useBookIngestion() {
           const finalTitle = parsed.title && parsed.title !== "Unknown PDF" ? parsed.title : title;
           const finalAuthor = parsed.author && parsed.author !== "Unknown Author" ? parsed.author : author;
           const fullContent = parsed.chapters.map(c => c.content).join("\n\n");
-          const newId = addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters);
-          setActiveBookId(newId);
+          addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters);
         } catch (pdfErr) {
           console.error("Local PDF Parsing failed:", pdfErr);
-          const newId = addBook(title, author, format);
-          setActiveBookId(newId);
+          addBook(title, author, format);
         }
       };
       reader.readAsArrayBuffer(file);
@@ -67,7 +64,7 @@ export function useBookIngestion() {
           const finalTitle = parsed.title && parsed.title !== "Unknown Title" ? parsed.title : title;
           const finalAuthor = parsed.author && parsed.author !== "Unknown Author" ? parsed.author : author;
           const fullContent = parsed.chapters.map(c => c.content).join("\n\n");
-          const newId = addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters, {
+          addBook(finalTitle, finalAuthor, format, fullContent, parsed.chapters, {
             coverUrl: parsed.coverUrl,
             description: parsed.description,
             genres: parsed.genres,
@@ -75,17 +72,14 @@ export function useBookIngestion() {
             publishDate: parsed.publishDate,
             language: parsed.language
           });
-          setActiveBookId(newId);
         } catch (epubErr) {
           console.error("Local EPUB Parsing failed:", epubErr);
-          const newId = addBook(title, author, format);
-          setActiveBookId(newId);
+          addBook(title, author, format);
         }
       };
       reader.readAsArrayBuffer(file);
     } else {
-      const newId = addBook(title, author, format);
-      setActiveBookId(newId);
+      addBook(title, author, format);
     }
   };
 
