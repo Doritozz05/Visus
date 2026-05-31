@@ -57,7 +57,7 @@ export function generateSemanticChunks(paragraph: string, targetChunkSize: numbe
 }
 
 /**
- * Representación estructurada de un cúmulo dinámico para lectura rápida.
+ * Structured representation of a dynamic cluster for speed reading.
  */
 export interface DynamicCluster {
   text: string;
@@ -67,13 +67,13 @@ export interface DynamicCluster {
 }
 
 /**
- * Agrupa texto de forma dinámica basándose en principios cognitivos de lectura.
- * Controla la longitud visual (visión parafoveal) y las pausas gramaticales,
- * asignando un factor de retardo adaptativo a cada bloque.
+ * Groups text dynamically based on cognitive reading principles.
+ * Controls visual length (parafoveal vision) and grammatical pauses,
+ * assigning an adaptive delay factor to each block.
  *
- * @param paragraph - Texto del párrafo a procesar.
- * @param targetChunkSize - Cantidad ideal de palabras por cúmulo.
- * @returns Listado de cúmulos dinámicos estructurados.
+ * @param paragraphOrWords - Text or words matrix to process.
+ * @param targetChunkSize - Ideal words count per visual cluster.
+ * @returns Structured list of dynamic clusters.
  */
 export function generateDynamicClusters(paragraphOrWords: string | string[], targetChunkSize: number = 3): DynamicCluster[] {
   if (!paragraphOrWords) return [];
@@ -95,23 +95,23 @@ export function generateDynamicClusters(paragraphOrWords: string | string[], tar
     const wordCount = currentWords.length;
     const charCount = text.length;
 
-    // Calcular multiplicador de retardo cognitivo
+    // Calculate cognitive delay multiplier
     let delayMultiplier = 1.0;
     const lastWord = currentWords[currentWords.length - 1];
 
     if (/[.?!]$/.test(lastWord)) {
-      delayMultiplier = 1.6; // Pausa mayor al final de frases
+      delayMultiplier = 1.6; // Longer pause at sentence endings
     } else if (/[,;:—]$/.test(lastWord)) {
-      delayMultiplier = 1.3; // Pausa media en comas y pausas sintácticas
+      delayMultiplier = 1.3; // Medium pause for commas and syntactic breaks
     }
 
-    // Incrementar retardo si contiene palabras complejas o largas (Spanish accent friendly)
+    // Increase delay if it contains complex or long words (Spanish accent friendly)
     const hasLongWord = currentWords.some((w) => w.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜíïöëàèìòù]/g, "").length >= 9);
     if (hasLongWord) {
       delayMultiplier += 0.2;
     }
 
-    // Acelerar si son palabras muy cortas y simples
+    // Accelerate if words are extremely short and simple
     const avgLength = currentWords.reduce((sum, w) => sum + w.length, 0) / wordCount;
     if (avgLength <= 3.5 && delayMultiplier === 1.0) {
       delayMultiplier = 0.85;
@@ -131,7 +131,7 @@ export function generateDynamicClusters(paragraphOrWords: string | string[], tar
   for (const word of words) {
     const wordLength = word.length;
     
-    // Reglas de corte foveal y longitud (visión parafoveal max ~22 caracteres)
+    // Foveal cut and length rules (parafoveal vision max ~22 chars)
     const wouldExceedCharLimit = currentWords.length > 0 && (currentCharCount + wordLength + 1 > 22);
     const wouldExceedWordLimit = currentWords.length >= targetChunkSize;
 
@@ -142,13 +142,13 @@ export function generateDynamicClusters(paragraphOrWords: string | string[], tar
     currentWords.push(word);
     currentCharCount += (currentCharCount === 0 ? 0 : 1) + wordLength;
 
-    // Corte obligatorio por puntuación sintáctica pesada o media
+    // Mandatory cut on heavy or medium syntactic punctuation
     if (/[.?!,;:—]$/.test(word)) {
       pushCurrentCluster();
     }
   }
 
-  // Empujar residuo final
+  // Push final trailing remainder
   pushCurrentCluster();
 
   return clusters;

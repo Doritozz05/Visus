@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import DOMPurify from "dompurify";
 import { Bookmark } from "@/core/entities/book";
 import { BookmarkCorner } from "./BookmarkCorner";
 
@@ -80,6 +81,8 @@ export function PagesVisualBox({
         .join("");
     }
 
+    let finalHtml = rawHtml;
+
     // Clean trailing empty elements to prevent empty overflow columns
     try {
       const parser = new DOMParser();
@@ -111,13 +114,17 @@ export function PagesVisualBox({
         };
 
         cleanTrailing(container);
-        return container.innerHTML;
+        finalHtml = container.innerHTML;
       }
     } catch (e) {
       console.warn("Failed to sanitize/trim trailing empty tags:", e);
     }
 
-    return rawHtml;
+    // Safely sanitize HTML to prevent XSS attacks while preserving structure
+    if (typeof window !== "undefined") {
+      return DOMPurify.sanitize(finalHtml);
+    }
+    return finalHtml;
   }, [currentChapter.htmlContent, currentChapter.content]);
 
   // Bi-directional word mapping conversions

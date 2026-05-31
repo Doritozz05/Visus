@@ -49,7 +49,7 @@ export default function RootLayout({
       <head>
         {/* Load Material Symbols Outlined for prototype screen icons */}
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-        {/* Load Hanken Grotesk for Lectura Pro aesthetic matches */}
+        {/* Load Hanken Grotesk for Visus Pro aesthetic matches */}
         <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
