@@ -59,8 +59,10 @@ export function PagesVisualBox({
 }: PagesVisualBoxProps) {
   const [totalPages, setTotalPages] = React.useState(1);
   const [currentPageIndex, setCurrentPageIndex] = React.useState(0);
-  const [isMeasuring, setIsMeasuring] = React.useState(true);
   const columnsContainerRef = React.useRef<HTMLDivElement>(null);
+  
+  // Track local word index updates to avoid synchronization render loops
+  const localWordIndexChangeRef = React.useRef<number | null>(null);
 
   // Compute standard HTML markup to feed our reading layout
   const formattedHtml = React.useMemo(() => {
@@ -164,41 +166,34 @@ export function PagesVisualBox({
     }
   }, []);
 
-  // Lock visibility and set isMeasuring to true when chapter changes
-  React.useEffect(() => {
-    setIsMeasuring(true);
-  }, [currentChapter.index]);
-
-  // Measure after layout stabilizes, content changes, font adjustments, or resize actions
+  // Measure synchronously after layout is computed but before the browser paints!
+  // This completely eliminates any blank flickering or jumping movements!
   React.useLayoutEffect(() => {
-    setIsMeasuring(true);
-    const timer = setTimeout(() => {
-      const el = columnsContainerRef.current;
-      if (el) {
-        const width = el.clientWidth || 1;
-        const scrollWidth = el.scrollWidth;
-        const pages = Math.max(1, Math.ceil(scrollWidth / width));
-        setTotalPages(pages);
-        
-        // Compute and set current page index in the same batch using our robust helper
-        const initialPage = getPageIndexForWord(wordIndex, pages, totalWords);
-        setCurrentPageIndex(initialPage);
-      }
-      setIsMeasuring(false);
-    }, 120);
-    return () => clearTimeout(timer);
+    const el = columnsContainerRef.current;
+    if (el) {
+      const width = el.clientWidth || 1;
+      const scrollWidth = el.scrollWidth;
+      const pages = Math.max(1, Math.ceil(scrollWidth / width));
+      setTotalPages(pages);
+      
+      // Compute and set current page index synchronously in the same batch
+      const initialPage = getPageIndexForWord(wordIndex, pages, totalWords);
+      setCurrentPageIndex(initialPage);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formattedHtml, fontSize, readerFontClass, totalWords]); // Exclude wordIndex from measurements to avoid transition flickers!
+  }, [formattedHtml, fontSize, readerFontClass, totalWords]);
 
   // Instant synchronization for wordIndex shifts (e.g. page turns, bookmark jumps, TOC clicks)
   React.useEffect(() => {
-    if (!isMeasuring) {
-      const page = getPageIndexForWord(wordIndex, totalPages, totalWords);
-      if (page !== currentPageIndex) {
-        setCurrentPageIndex(page);
-      }
+    // Skip synchronization if it is a local page transition already handled
+    if (wordIndex === localWordIndexChangeRef.current) {
+      return;
     }
-  }, [wordIndex, totalPages, totalWords, isMeasuring, currentPageIndex, getPageIndexForWord]);
+    const page = getPageIndexForWord(wordIndex, totalPages, totalWords);
+    if (page !== currentPageIndex) {
+      setCurrentPageIndex(page);
+    }
+  }, [wordIndex, totalPages, totalWords, currentPageIndex, getPageIndexForWord]);
 
   React.useEffect(() => {
     const el = columnsContainerRef.current;
@@ -240,24 +235,38 @@ export function PagesVisualBox({
 
   const isLastChapter = currentChapter.index === chaptersData.length - 1;
 
-  const showPrevChapter = currentPageIndex === 0 && !isMeasuring;
-  const showCompleteBook = currentPageIndex === totalPages - 1 && isLastChapter && !isMeasuring;
-  const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter && !isMeasuring;
+  const showPrevChapter = currentPageIndex === 0;
+  const showCompleteBook = currentPageIndex === totalPages - 1 && isLastChapter;
+  const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter;
 
   // Compute global page numbers across the entire book to help the reader track progress globally
+  // 100% Constant and Immutable: total pages is strictly the length of allBookPages!
   const globalPageDetails = React.useMemo(() => {
     if (allBookPages.length === 0) {
       return { current: currentPageIndex + 1, total: totalPages };
     }
+    
+    // Find estimated pages in previous chapters
+    const prevChaptersStaticPages = allBookPages
+      .filter((p) => p.chapterIndex < currentChapter.index)
+      .length;
+      
+    // Find estimated pages in the active chapter
     const chapterPagesInStatic = allBookPages.filter((p) => p.chapterIndex === currentChapter.index);
     const staticPagesCount = chapterPagesInStatic.length || 1;
+    
+    // Proportional mapping of dynamic index to static page index within the chapter
     const chapterPercentage = totalPages > 1 ? currentPageIndex / (totalPages - 1) : 0;
     const mappedPageIndex = Math.min(
       staticPagesCount - 1,
       Math.max(0, Math.round(chapterPercentage * (staticPagesCount - 1)))
     );
+    
     const activeStaticPage = chapterPagesInStatic[mappedPageIndex];
-    const globalCurrent = activeStaticPage ? activeStaticPage.absolutePageIndex + 1 : currentPageIndex + 1;
+    const globalCurrent = activeStaticPage 
+      ? activeStaticPage.absolutePageIndex + 1 
+      : prevChaptersStaticPages + currentPageIndex + 1;
+      
     return {
       current: globalCurrent,
       total: allBookPages.length,
@@ -448,8 +457,6 @@ export function PagesVisualBox({
               transform: `translateX(-${currentPageIndex * 100}%)`,
               fontSize: `${fontSize}px`,
               lineHeight: "1.75",
-              opacity: isMeasuring ? 0 : 1,
-              transition: isMeasuring ? "none" : "opacity 100ms ease-in-out",
             }}
             dangerouslySetInnerHTML={{ __html: formattedHtml }}
           />
