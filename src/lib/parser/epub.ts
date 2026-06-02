@@ -17,6 +17,46 @@ export interface ParsedEpub {
   language?: string;
 }
 
+export function normalizeEpubSubject(subject: string): string | null {
+  const cleaned = subject.replace(/\s+/g, " ").trim();
+  if (!cleaned) return null;
+
+  const subdivisionParts = cleaned
+    .split(/\s+--\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  let normalized = subdivisionParts.length > 1
+    ? subdivisionParts[subdivisionParts.length - 1]
+    : cleaned;
+
+  const trailingParenthetical = normalized.match(/\(([^)]+)\)\s*$/);
+  if (trailingParenthetical) {
+    normalized = trailingParenthetical[1].trim();
+  }
+
+  normalized = normalized.replace(/\s+/g, " ").trim();
+  return normalized || null;
+}
+
+export function getGeneralEpubGenres(subjects: string[]): string[] {
+  const genres: string[] = [];
+  const seen = new Set<string>();
+
+  subjects.forEach((subject) => {
+    const normalized = normalizeEpubSubject(subject);
+    if (!normalized) return;
+
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) return;
+
+    seen.add(key);
+    genres.push(normalized);
+  });
+
+  return genres;
+}
+
 interface TocEntry {
   title: string;
   href: string; // Zip path with anchor, e.g. "OEBPS/text/chap1.xhtml#sec1"
@@ -71,11 +111,12 @@ export async function parseEpub(arrayBuffer: ArrayBuffer): Promise<ParsedEpub> {
   const language = languageEl?.textContent?.trim() || undefined;
   
   const subjectEls = opfXml.querySelectorAll("subject, dc\\:subject");
-  const genres: string[] = [];
-  subjectEls.forEach(el => {
+  const rawSubjects: string[] = [];
+  subjectEls.forEach((el) => {
     const text = el.textContent?.trim();
-    if (text) genres.push(text);
+    if (text) rawSubjects.push(text);
   });
+  const genres = getGeneralEpubGenres(rawSubjects);
   
   // Parse Manifest (id -> href)
   const manifestItems = new Map<string, string>();
