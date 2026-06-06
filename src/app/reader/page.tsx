@@ -94,6 +94,7 @@ export default function ReaderPage() {
     handleRemoveBookmark,
     handleUpdateBookmarkName,
     handleGoToBookmark,
+    subscribeToPlayback,
   } = useReaderPlayback({
     activeBook,
     updateBook,
@@ -110,14 +111,6 @@ export default function ReaderPage() {
     }
     setIsDrawerOpen(true);
   };
-
-  // Calculations for current active RSVP word
-  const currentWordObj = rsvpSequence[wordIndex] || { text: "Ready", orpIndex: 1, delayMultiplier: 1.0 };
-  const currentWordText = currentWordObj.text;
-  const orpIndex = currentWordObj.orpIndex;
-  const leftPart = currentWordText.slice(0, orpIndex);
-  const focusLetter = currentWordText.charAt(orpIndex);
-  const rightPart = currentWordText.slice(orpIndex + 1);
 
   const readerFontClass = React.useMemo(() => {
     const ff = settings.general.readerFontFamily || "serif";
@@ -281,15 +274,16 @@ export default function ReaderPage() {
             />
           ) : mode === "rsvp" ? (
             <RsvpVisualBox
-              leftPart={leftPart}
-              focusLetter={focusLetter}
-              rightPart={rightPart}
+              rsvpSequence={rsvpSequence}
+              initialWordIndex={wordIndex}
+              subscribeToPlayback={subscribeToPlayback}
               settings={settings.rsvp}
             />
           ) : (
             <ClusterVisualBox
               clusterChunks={clusterChunks}
-              activeClusterIndex={activeClusterIndex}
+              initialWordIndex={wordIndex}
+              subscribeToPlayback={subscribeToPlayback}
               settings={settings.cluster}
             />
           )}

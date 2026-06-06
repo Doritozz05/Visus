@@ -4,13 +4,15 @@ import { ClusterSettings } from "@/core/entities/settings";
 
 interface ClusterVisualBoxProps {
   clusterChunks: string[] | DynamicCluster[];
-  activeClusterIndex: number;
+  initialWordIndex: number;
+  subscribeToPlayback: (callback: (idx: number) => void) => () => void;
   settings: ClusterSettings;
 }
 
 export function ClusterVisualBox({
   clusterChunks,
-  activeClusterIndex,
+  initialWordIndex,
+  subscribeToPlayback,
   settings,
 }: ClusterVisualBoxProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -19,18 +21,62 @@ export function ClusterVisualBox({
   const normalizedChunks = React.useMemo(() => {
     return clusterChunks.map((chunk) => {
       if (typeof chunk === "string") {
-        return { text: chunk };
+        return { text: chunk, wordCount: 1 };
+      }
+      return { ...chunk, wordCount: chunk.wordCount || 1 };
+    });
+  }, [clusterChunks]);
+
+  const getClusterIndexForWord = React.useCallback((wIdx: number) => {
+    let currentWordOffset = 0;
+    for (let i = 0; i < normalizedChunks.length; i++) {
+      const chunk = normalizedChunks[i];
+      const count = chunk.wordCount || 1;
+      if (wIdx >= currentWordOffset && wIdx < currentWordOffset + count) {
+        return i;
+      }
+      currentWordOffset += count;
+    }
+    return Math.max(0, normalizedChunks.length - 1);
+  }, [normalizedChunks]);
+
+  const [localActiveClusterIndex, setLocalActiveClusterIndex] = React.useState(() => {
+    let currentWordOffset = 0;
+    const initialChunks = clusterChunks.map((chunk) => {
+      if (typeof chunk === "string") {
+        return { text: chunk, wordCount: 1 };
       }
       return chunk;
     });
-  }, [clusterChunks]);
+    for (let i = 0; i < initialChunks.length; i++) {
+      const chunk = initialChunks[i];
+      const count = chunk.wordCount || 1;
+      if (initialWordIndex >= currentWordOffset && initialWordIndex < currentWordOffset + count) {
+        return i;
+      }
+      currentWordOffset += count;
+    }
+    return Math.max(0, initialChunks.length - 1);
+  });
+
+  // Sync state if initialWordIndex changes (such as manually moving bookmarks or skip/rewind)
+  React.useEffect(() => {
+    setLocalActiveClusterIndex(getClusterIndexForWord(initialWordIndex));
+  }, [initialWordIndex, getClusterIndexForWord]);
+
+  // Subscribe to high-frequency timer ticks
+  React.useEffect(() => {
+    return subscribeToPlayback((newWordIdx) => {
+      setLocalActiveClusterIndex(getClusterIndexForWord(newWordIdx));
+    });
+  }, [subscribeToPlayback, getClusterIndexForWord]);
 
   // High-performance foveal sliding window to avoid massive DOM trees and visual cognitive fatigue
   const windowConfig = React.useMemo(() => {
     const windowSize = 18; // optimal count for foveal visual tracking
     const half = Math.floor(windowSize / 2);
     
-    let start = Math.max(0, activeClusterIndex - half);
+    let start = Math.max(0, localActiveClusterIndex - half);
     let end = Math.min(normalizedChunks.length, start + windowSize);
     
     // Adjust start offset if near the end of the chapter
@@ -44,7 +90,7 @@ export function ClusterVisualBox({
       hasPreceding: start > 0,
       hasSucceeding: end < normalizedChunks.length,
     };
-  }, [normalizedChunks.length, activeClusterIndex]);
+  }, [normalizedChunks.length, localActiveClusterIndex]);
 
   // Auto-scroll inside container to keep active line centered if there is any minor overflow
   React.useEffect(() => {
@@ -64,7 +110,7 @@ export function ClusterVisualBox({
         behavior: "smooth",
       });
     }
-  }, [activeClusterIndex]);
+  }, [localActiveClusterIndex]);
 
   // Active color styling mapping
   const activeColors = {
@@ -105,10 +151,10 @@ export function ClusterVisualBox({
       return {
         ...chunk,
         absoluteIndex,
-        isActive: absoluteIndex === activeClusterIndex,
+        isActive: absoluteIndex === localActiveClusterIndex,
       };
     });
-  }, [normalizedChunks, windowConfig, activeClusterIndex]);
+  }, [normalizedChunks, windowConfig, localActiveClusterIndex]);
 
   return (
     <div

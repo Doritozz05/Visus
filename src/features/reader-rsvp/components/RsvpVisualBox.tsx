@@ -2,18 +2,39 @@ import * as React from "react";
 import { RsvpSettings } from "@/core/entities/settings";
 
 interface RsvpVisualBoxProps {
-  leftPart: string;
-  focusLetter: string;
-  rightPart: string;
+  rsvpSequence: any[];
+  initialWordIndex: number;
+  subscribeToPlayback: (callback: (idx: number) => void) => () => void;
   settings: RsvpSettings;
 }
 
 export function RsvpVisualBox({ 
-  leftPart, 
-  focusLetter, 
-  rightPart,
+  rsvpSequence, 
+  initialWordIndex,
+  subscribeToPlayback,
   settings,
 }: RsvpVisualBoxProps) {
+  const [localWordIndex, setLocalWordIndex] = React.useState(initialWordIndex);
+
+  // Sync state if initialWordIndex changes (such as manually moving bookmarks or skip/rewind)
+  React.useEffect(() => {
+    setLocalWordIndex(initialWordIndex);
+  }, [initialWordIndex]);
+
+  // Subscribe to high-frequency timer ticks
+  React.useEffect(() => {
+    return subscribeToPlayback((newIdx) => {
+      setLocalWordIndex(newIdx);
+    });
+  }, [subscribeToPlayback]);
+
+  // Calculations for current active RSVP word
+  const currentWordObj = rsvpSequence[localWordIndex] || { text: "Ready", orpIndex: 1, delayMultiplier: 1.0 };
+  const currentWordText = currentWordObj.text;
+  const orpIndex = currentWordObj.orpIndex;
+  const leftPart = currentWordText.slice(0, orpIndex);
+  const focusLetter = currentWordText.charAt(orpIndex);
+  const rightPart = currentWordText.slice(orpIndex + 1);
   const fontFamilies = {
     inter: "font-sans",
     atkinson: "font-sans font-medium tracking-wide",

@@ -456,12 +456,11 @@ export function PagesVisualBox({
       bookmarks.find((b) => {
         return (
           b.chapterIndex === currentChapter.index &&
-          b.wordIndex >= pageStartWordIndex &&
-          b.wordIndex <= pageEndWordIndex
+          getPageIndexForWord(b.wordIndex) === currentPageIndex
         );
       }) || null
     );
-  }, [bookmarks, currentChapter.index, pageStartWordIndex, pageEndWordIndex]);
+  }, [bookmarks, currentChapter.index, currentPageIndex, getPageIndexForWord]);
 
   // Compute global page numbers across the entire book chapters.
   // Uses currentPageIndex (DOM-accurate from visible container) offset by the chapter's

@@ -34,6 +34,25 @@ export function useReaderPlayback({
     wordsCount: number;
   } | null>(null);
 
+  // High-frequency word index ref and subscription listeners to avoid global React re-renders
+  const currentWordIndexRef = React.useRef(wordIndex);
+  const playbackListeners = React.useMemo(() => new Set<(idx: number) => void>(), []);
+
+  const subscribeToPlayback = React.useCallback((callback: (idx: number) => void) => {
+    playbackListeners.add(callback);
+    return () => {
+      playbackListeners.delete(callback);
+    };
+  }, [playbackListeners]);
+
+  // Synchronize internal ref and subscribers when wordIndex is updated from outside
+  React.useEffect(() => {
+    if (currentWordIndexRef.current !== wordIndex) {
+      currentWordIndexRef.current = wordIndex;
+      playbackListeners.forEach((cb) => cb(wordIndex));
+    }
+  }, [wordIndex, playbackListeners]);
+
   // Active book reference to prevent state loops
   const activeBookRef = React.useRef(activeBook);
   React.useEffect(() => {
@@ -251,10 +270,11 @@ export function useReaderPlayback({
   // Save position when the player pauses
   React.useEffect(() => {
     if (!isPlaying && initializedBookIdRef.current === activeBook?.id) {
+      setWordIndex(currentWordIndexRef.current);
       saveProgressRef.current(
         initializedBookIdRef.current,
         latestPositionRef.current.activeChapterIndex,
-        latestPositionRef.current.wordIndex
+        currentWordIndexRef.current
       );
     }
   }, [isPlaying, activeBook?.id]);
@@ -268,7 +288,7 @@ export function useReaderPlayback({
       saveProgressForBook(
         activeBookVal.id,
         latestPositionRef.current.activeChapterIndex,
-        latestPositionRef.current.wordIndex
+        currentWordIndexRef.current
       );
     }
     
@@ -333,42 +353,68 @@ export function useReaderPlayback({
   React.useEffect(() => {
     if (!isPlaying || rsvpSequence.length === 0) return;
 
-    const baseDelayMs = (60 * 1000) / wpm;
-    let finalDelay = baseDelayMs;
-    let wordsToAdvance = 1;
+    let timeoutId: NodeJS.Timeout | null = null;
 
-    if (mode === "rsvp") {
-      const currentWordObj = rsvpSequence[wordIndex];
-      const delayMultiplier = currentWordObj ? currentWordObj.delayMultiplier : 1.0;
-      finalDelay = baseDelayMs * delayMultiplier;
-      wordsToAdvance = 1;
-    } else if (mode === "cluster") {
-      const currentChunk = clusterChunks[activeClusterIndex];
-      if (currentChunk) {
-        const delayMultiplier = currentChunk.delayMultiplier || 1.0;
-        finalDelay = baseDelayMs * currentChunk.wordCount * delayMultiplier;
-        wordsToAdvance = currentChunk.wordCount;
+    const tick = () => {
+      const currentIdx = currentWordIndexRef.current;
+      const baseDelayMs = (60 * 1000) / wpm;
+      let finalDelay = baseDelayMs;
+      let wordsToAdvance = 1;
+
+      if (mode === "rsvp") {
+        const currentWordObj = rsvpSequence[currentIdx];
+        const delayMultiplier = currentWordObj ? currentWordObj.delayMultiplier : 1.0;
+        finalDelay = baseDelayMs * delayMultiplier;
+        wordsToAdvance = 1;
+      } else if (mode === "cluster") {
+        let activeClusterIdx = 0;
+        let currentWordOffset = 0;
+        for (let i = 0; i < clusterChunks.length; i++) {
+          const chunkWordsCount = clusterChunks[i].wordCount;
+          if (currentIdx >= currentWordOffset && currentIdx < currentWordOffset + chunkWordsCount) {
+            activeClusterIdx = i;
+            break;
+          }
+          currentWordOffset += chunkWordsCount;
+        }
+
+        const currentChunk = clusterChunks[activeClusterIdx];
+        if (currentChunk) {
+          const delayMultiplier = currentChunk.delayMultiplier || 1.0;
+          finalDelay = baseDelayMs * currentChunk.wordCount * delayMultiplier;
+          wordsToAdvance = currentChunk.wordCount;
+        }
+      } else {
+        setIsPlaying(false);
+        return;
       }
-    } else {
-      setIsPlaying(false);
-      return;
-    }
 
-    const interval = setTimeout(() => {
-      setWordIndex((prev) => {
-        const nextIndex = prev + wordsToAdvance;
+      timeoutId = setTimeout(() => {
+        const nextIndex = currentIdx + wordsToAdvance;
 
         if (nextIndex >= rsvpSequence.length) {
           setIsPlaying(false);
           setCompletedChapter(currentChapter.title);
-          return Math.min(nextIndex, rsvpSequence.length - 1);
-        }
-        return nextIndex;
-      });
-    }, finalDelay);
+          setWordIndex(Math.min(nextIndex, rsvpSequence.length - 1));
+        } else {
+          currentWordIndexRef.current = nextIndex;
+          latestPositionRef.current.wordIndex = nextIndex;
+          playbackListeners.forEach((cb) => cb(nextIndex));
 
-    return () => clearTimeout(interval);
-  }, [isPlaying, wordIndex, wpm, rsvpSequence, mode, clusterChunks, activeClusterIndex, currentChapter]);
+          if (nextIndex % 10 === 0) {
+            setWordIndex(nextIndex);
+          }
+          tick();
+        }
+      }, finalDelay);
+    };
+
+    tick();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isPlaying, wpm, rsvpSequence, mode, clusterChunks, currentChapter, playbackListeners]);
 
   const handlePageChange = React.useCallback((direction: "prev" | "next", forceComplete: boolean = false) => {
     if (allBookPages.length === 0 || !activePage || !activeBookRef.current) return;
@@ -576,5 +622,6 @@ export function useReaderPlayback({
     handleRemoveBookmark,
     handleUpdateBookmarkName,
     handleGoToBookmark,
+    subscribeToPlayback,
   };
 }
