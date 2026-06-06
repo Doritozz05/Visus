@@ -160,7 +160,7 @@ export function PagesVisualBox({
   const getPageIndexForWord = React.useCallback((wIdx: number): number => {
     const el = columnsContainerRef.current;
     if (!el) return 0;
-    const width = el.clientWidth || 1;
+    const width = Math.floor(el.clientWidth) || 1;
     
     // Find the block containing this word
     const blocks = el.querySelectorAll("[data-start-word-idx]");
@@ -198,7 +198,7 @@ export function PagesVisualBox({
   const getWordIndexForPage = React.useCallback((pIdx: number): number => {
     const el = columnsContainerRef.current;
     if (!el) return 0;
-    const width = el.clientWidth || 1;
+    const width = Math.floor(el.clientWidth) || 1;
     const targetOffset = pIdx * width;
     
     const blocks = el.querySelectorAll("[data-start-word-idx]");
@@ -231,7 +231,7 @@ export function PagesVisualBox({
   const updatePagesCount = React.useCallback(() => {
     const el = columnsContainerRef.current;
     if (el) {
-      const width = el.clientWidth || 1;
+      const width = Math.floor(el.clientWidth) || 1;
       const scrollWidth = el.scrollWidth;
       const pages = Math.max(1, Math.ceil(scrollWidth / width));
       setTotalPages((prev) => {
@@ -366,7 +366,7 @@ export function PagesVisualBox({
   React.useLayoutEffect(() => {
     const el = columnsContainerRef.current;
     if (el) {
-      const width = el.clientWidth || 1;
+      const width = Math.floor(el.clientWidth) || 1;
       const scrollWidth = el.scrollWidth;
       const pages = Math.max(1, Math.ceil(scrollWidth / width));
       setTotalPages(pages);
@@ -396,14 +396,14 @@ export function PagesVisualBox({
     
     // Initialize container dimensions on mount
     setContainerDimensions({
-      width: el.clientWidth,
+      width: Math.floor(el.clientWidth),
       height: el.clientHeight,
     });
     
     const observer = new ResizeObserver(() => {
       updatePagesCount();
       setContainerDimensions({
-        width: el.clientWidth,
+        width: Math.floor(el.clientWidth),
         height: el.clientHeight,
       });
     });
@@ -661,7 +661,7 @@ export function PagesVisualBox({
               columnCount: 1,
               columnGap: "0rem",
               columnFill: "auto",
-              transform: `translateX(-${currentPageIndex * 100}%)`,
+              transform: `translateX(-${currentPageIndex * (containerDimensions?.width || 0)}px)`,
               fontSize: `${scaledFontSize}px`,
               lineHeight: "1.75",
             }}
