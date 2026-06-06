@@ -108,7 +108,7 @@ export function useReaderPlayback({
   const activePage = React.useMemo(() => {
     if (allBookPages.length === 0) return null;
     const found = allBookPages.find(
-      (p) => p.chapterIndex === activeChapterIndex && wordIndex >= p.startWordIndex && wordIndex < p.endWordIndex
+      (p) => p.chapterIndex === activeChapterIndex && wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
     );
     return found || allBookPages.find(p => p.chapterIndex === activeChapterIndex) || allBookPages[0];
   }, [allBookPages, activeChapterIndex, wordIndex]);

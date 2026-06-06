@@ -20,11 +20,12 @@ import { CompletionModal } from "@/features/reader/components/CompletionModal";
 // Modular hooks
 import { useBookIngestion } from "@/features/reader/hooks/useBookIngestion";
 import { useReaderPlayback } from "@/features/reader/hooks/useReaderPlayback";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function ReaderPage() {
   const router = useRouter();
   const { settings } = useSettings();
-  const { books, activeBookId, setActiveBookId, updateBook } = useLibrary();
+  const { books, activeBookId, setActiveBookId, updateBook, isHydrated } = useLibrary();
 
   // Active book derivation
   const activeBook = React.useMemo(() => {
@@ -132,6 +133,11 @@ export default function ReaderPage() {
         return "font-serif antialiased text-justify tracking-normal text-foreground/90";
     }
   }, [settings.general.readerFontFamily]);
+
+  // Return full screen loading spinner during hydration phase to prevent layout flashes
+  if (!isHydrated) {
+    return <LoadingSpinner fullScreen />;
+  }
 
   // --- RENDERING STATE 1: COMPLETELY EMPTY LIBRARY ---
   if (books.length === 0) {

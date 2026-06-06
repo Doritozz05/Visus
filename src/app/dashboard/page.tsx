@@ -4,6 +4,7 @@ import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { useLibrary } from "@/context/library-context";
 import { StatsService } from "@/core/services/stats-service";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function DashboardPage() {
   const { books } = useLibrary();
@@ -181,8 +182,8 @@ export default function DashboardPage() {
                   )
                 ) : (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-muted-foreground text-xs font-mono">
-                      Loading telemetry logs...
+                    <td colSpan={5} className="py-8">
+                      <LoadingSpinner message="Loading telemetry logs..." className="min-h-[150px] p-0" />
                     </td>
                   </tr>
                 )}

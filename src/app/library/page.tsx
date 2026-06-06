@@ -11,9 +11,10 @@ import { Eraser } from "lucide-react";
 import { parseEpub } from "@/lib/parser/epub";
 import { parsePdf } from "@/lib/parser/pdf";
 import { parseTxt } from "@/lib/parser/txt";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function LibraryPage() {
-  const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, activeBookId, setActiveBookId } = useLibrary();
+  const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, activeBookId, setActiveBookId, isHydrated } = useLibrary();
   const router = useRouter();
 
   // State controls
@@ -340,6 +341,10 @@ export default function LibraryPage() {
     setActiveDropdownId(null);
   }, []);
 
+  if (!isHydrated) {
+    return <LoadingSpinner fullScreen />;
+  }
+
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300">
       <Sidebar activePath="/library" />
@@ -408,11 +413,10 @@ export default function LibraryPage() {
                   id="drop-zone"
                 >
                   {isIngesting ? (
-                    <div className="flex flex-col items-center justify-center">
-                      <span className="material-symbols-outlined text-4xl text-primary mb-3 animate-spin">sync</span>
-                      <p className="text-sm font-semibold text-foreground mb-1">Extracting text...</p>
-                      <p className="text-[10px] font-mono text-muted-foreground/80">Parsing foveal elements</p>
-                    </div>
+                    <LoadingSpinner 
+                      message="Extracting text..." 
+                      className="min-h-[160px] p-0" 
+                    />
                   ) : (
                     <>
                       <span className="material-symbols-outlined text-4xl text-muted-foreground mb-3 group-hover:text-primary transition-colors animate-pulse">upload_file</span>

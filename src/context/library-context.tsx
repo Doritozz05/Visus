@@ -7,6 +7,7 @@ import { dbService } from "@/core/services/db-service";
 interface LibraryContextType {
   books: Book[];
   activeBookId: string | null;
+  isHydrated: boolean;
   setActiveBookId: (id: string | null) => void;
   addBook: (
     title: string,
@@ -317,6 +318,7 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
       value={{
         books,
         activeBookId,
+        isHydrated,
         setActiveBookId,
         addBook,
         updateBook,
