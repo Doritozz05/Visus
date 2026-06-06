@@ -5,6 +5,7 @@ import DOMPurify from "isomorphic-dompurify";
 import { Bookmark } from "@/core/entities/book";
 import { BookmarkCorner } from "./BookmarkCorner";
 import { tagHtmlBlocksWithWordIndices, BookVisualPage } from "@/lib/parser/paginator";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 interface ChapterData {
   title: string;
@@ -84,6 +85,13 @@ interface PagesVisualBoxProps {
   onPagesComputed?: (computedPages: BookVisualPage[]) => void;
   wordIndex: number;
   setWordIndex: (w: number) => void;
+  /** The local page index (within the current chapter) saved from the previous session.
+   *  Used to restore currentPageIndex directly after DOM pagination completes, bypassing
+   *  the potentially-unstable wordIndex→page mapping. */
+  savedLocalPageIndex?: number;
+  /** Called after every page turn (handleNext/handlePrev) with the new local page index
+   *  so it can be persisted alongside lastWordIndex. */
+  onSavePageProgress?: (localPageIndex: number, wordIndex: number) => void;
   readerFontClass: string;
   fontSize: number;
   wordsPerPage: number;
@@ -104,6 +112,8 @@ export function PagesVisualBox({
   onPagesComputed,
   wordIndex,
   setWordIndex,
+  savedLocalPageIndex,
+  onSavePageProgress,
   readerFontClass,
   fontSize,
   wordsPerPage,
@@ -122,11 +132,24 @@ export function PagesVisualBox({
   const hiddenPaginatorRef = React.useRef<HTMLDivElement>(null);
   const canvasWrapperRef = React.useRef<HTMLDivElement>(null);
   
+  // Tracks whether the background DOM paginator has completed its first pass.
+  // While false, we show a spinner instead of the column content to prevent
+  // the page-0 flash that occurs before allBookPages is populated.
+  const [isPaginationReady, setIsPaginationReady] = React.useState(allBookPages.length > 0);
+  
   // Track visible container dimensions for offscreen DOM pagination
   const [containerDimensions, setContainerDimensions] = React.useState<{ width: number; height: number } | null>(null);
   
   // Track local word index updates to avoid synchronization render loops
   const localWordIndexChangeRef = React.useRef<number | null>(null);
+  
+  // Guards against the useLayoutEffect overriding a pending page restoration.
+  // When savedLocalPageIndex triggers a restore inside the pagination effect,
+  // this ref is set to the target page index. The useLayoutEffect checks this
+  // ref and skips its word→page mapping when a restore is pending, preventing
+  // the "always land on page 0" bug that occurs because allBookPages is empty
+  // during the initial render cycle after navigating back to the reader.
+  const pendingRestorePageRef = React.useRef<number | null>(null);
 
   const densityRatio = React.useMemo(() => {
     const standardCapacity = Math.max(100, Math.round(300 * (16 / fontSize) * 0.82));
@@ -268,6 +291,9 @@ export function PagesVisualBox({
       return;
     }
 
+    // Reset ready flag whenever we restart pagination (e.g. chapter/font change)
+    setIsPaginationReady(false);
+
     let active = true;
 
     const paginateAllChapters = async () => {
@@ -387,6 +413,38 @@ export function PagesVisualBox({
 
       if (active) {
         onPagesComputed(computedPages);
+
+        // --- Direct page restoration from saved local page index ---
+        // When a valid savedLocalPageIndex is stored, jump directly to that page
+        // within the current chapter WITHOUT going through the wordIndex→page mapping.
+        // This is the reliable restore path: it's immune to DOM measurement drift
+        // between sessions (different font loads, container sizes, etc.).
+        if (savedLocalPageIndex !== undefined) {
+          const chapterPages = computedPages.filter(p => p.chapterIndex === currentChapter.index);
+          const maxLocalPage = Math.max(0, chapterPages.length - 1);
+          const clampedPage = Math.min(savedLocalPageIndex, maxLocalPage);
+          // Prevent the useLayoutEffect from overriding this restoration
+          // by marking the page's startWordIndex as a "local change" AND
+          // setting the pending restore guard so the layoutEffect won't
+          // re-derive page 0 from wordIndex before allBookPages is ready.
+          if (chapterPages[clampedPage]) {
+            localWordIndexChangeRef.current = chapterPages[clampedPage].startWordIndex;
+          }
+          pendingRestorePageRef.current = clampedPage;
+          setCurrentPageIndex(clampedPage);
+        } else {
+          // No saved page index — derive from wordIndex using the freshly computed pages
+          const page = computedPages.find(
+            (p) => p.chapterIndex === currentChapter.index && wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
+          );
+          if (page) {
+            pendingRestorePageRef.current = page.pageIndex;
+            setCurrentPageIndex(page.pageIndex);
+          }
+        }
+
+        // Mark pagination as ready so the spinner is replaced by the actual content
+        setIsPaginationReady(true);
       }
     };
 
@@ -395,6 +453,7 @@ export function PagesVisualBox({
     return () => {
       active = false;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- currentChapter.index, savedLocalPageIndex, wordIndex are read as closures when async pagination completes, not as triggers
   }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage]);
 
   // Measure synchronously after layout is computed but before the browser paints!
@@ -406,6 +465,16 @@ export function PagesVisualBox({
       const scrollWidth = el.scrollWidth;
       const pages = Math.max(1, Math.ceil((scrollWidth + columnGap) / (width + columnGap)));
       setTotalPages(pages);
+      
+      // If the pagination effect just restored a page (via savedLocalPageIndex
+      // or wordIndex→page derivation), honour that value and don't override it
+      // with the potentially-stale getPageIndexForWord (which returns 0 when
+      // allBookPages is still empty during the initial render cycle).
+      if (pendingRestorePageRef.current !== null) {
+        pendingRestorePageRef.current = null;
+        localWordIndexChangeRef.current = null;
+        return;
+      }
       
       if (wordIndex !== localWordIndexChangeRef.current) {
         const initialPage = getPageIndexForWord(wordIndex);
@@ -508,6 +577,8 @@ export function PagesVisualBox({
       const targetWordIndex = getWordIndexForPage(prevPageIndex);
       localWordIndexChangeRef.current = targetWordIndex;
       setWordIndex(targetWordIndex);
+      // Persist the local page index on every page turn so restore is always exact
+      onSavePageProgress?.(prevPageIndex, targetWordIndex);
     } else {
       // Crossing chapter boundary to previous file
       onPrevChapter();
@@ -522,6 +593,8 @@ export function PagesVisualBox({
       const targetWordIndex = getWordIndexForPage(nextPageIndex);
       localWordIndexChangeRef.current = targetWordIndex;
       setWordIndex(targetWordIndex);
+      // Persist the local page index on every page turn so restore is always exact
+      onSavePageProgress?.(nextPageIndex, targetWordIndex);
     } else {
       // Crossing chapter boundary to next file or completing book
       onNextChapter();
@@ -692,11 +765,21 @@ export function PagesVisualBox({
         ref={canvasWrapperRef}
         className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start"
       >
+        {/* Pagination loading overlay: shown while the background DOM paginator hasn't finished yet.
+            This prevents the page-0 flash that previously occurred when wordIndex > 0 but allBookPages was still empty. */}
+        {!isPaginationReady && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-xl">
+            <LoadingSpinner message="Rendering pages..." />
+          </div>
+        )}
+
         <div 
           className="h-full overflow-hidden relative"
           style={{
             width: containerDimensions ? `${containerDimensions.width}px` : "100%",
-            margin: "0 auto"
+            margin: "0 auto",
+            opacity: isPaginationReady ? 1 : 0,
+            transition: isPaginationReady ? "opacity 0.25s ease-in" : "none",
           }}
         >
           <div
@@ -721,7 +804,7 @@ export function PagesVisualBox({
         <button
           data-testid="prev-page-button"
           onClick={handlePrev}
-          disabled={currentPageIndex === 0 && currentChapter.index === 0}
+          disabled={!isPaginationReady || (currentPageIndex === 0 && currentChapter.index === 0)}
           className="flex items-center gap-1.5 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none z-20"
         >
           <span className="material-symbols-outlined text-sm">arrow_back_ios</span>

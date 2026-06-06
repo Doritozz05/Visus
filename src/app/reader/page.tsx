@@ -261,6 +261,18 @@ export default function ReaderPage() {
               onPagesComputed={setAllBookPages}
               wordIndex={wordIndex}
               setWordIndex={setWordIndex}
+              savedLocalPageIndex={activeBook.lastChapterIndex === activeChapterIndex ? activeBook.lastLocalPageIndex : undefined}
+              onSavePageProgress={(localPageIdx, wIdx) => {
+                // Persist the exact page position on every page turn.
+                // updateBook is called directly with the local page index so the next
+                // session can restore the exact page without relying on the DOM
+                // word→page mapping (which can drift between sessions).
+                updateBook(activeBook.id, {
+                  lastChapterIndex: activeChapterIndex,
+                  lastWordIndex: wIdx,
+                  lastLocalPageIndex: localPageIdx,
+                });
+              }}
               readerFontClass={readerFontClass}
               fontSize={settings.general.readerFontSize || 16}
               wordsPerPage={wordsPerPage}

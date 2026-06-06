@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Book, BookChapter } from "@/core/entities/book";
+import { Book } from "@/core/entities/book";
 import { SettingsState } from "@/core/entities/settings";
 import { generateRSVPSequence } from "@/core/algorithms/rsvp";
 import { generateDynamicClusters } from "@/core/algorithms/clusters";
 import { StatsService } from "@/core/services/stats-service";
-import { paginateChapter, BookVisualPage } from "@/lib/parser/paginator";
+import { BookVisualPage } from "@/lib/parser/paginator";
 
 export interface UseReaderPlaybackProps {
   activeBook: Book | null;
@@ -98,30 +98,19 @@ export function useReaderPlayback({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeBookId]);
 
-  // Manage pages globally across the entire book chapters.
-  // We initialize with a static estimation as fallback, which is overridden by the dynamic background paginator when normal mode mounts.
+  // allBookPages is populated exclusively by PagesVisualBox's background DOM paginator.
+  // Do NOT pre-populate with static estimates (paginateChapter) - those produce different
+  // page boundaries than the real DOM layout, causing the page offset bug on restore.
   const [allBookPages, setAllBookPages] = React.useState<BookVisualPage[]>([]);
 
+  // Reset allBookPages when there is no book or chapters loaded (e.g. on book switch)
+  // so stale page data from a previous book cannot bleed into the new book's pagination.
   React.useEffect(() => {
     if (chaptersData.length === 0) {
       setAllBookPages([]);
-      return;
     }
-    
-    let absolutePageIndex = 0;
-    const staticPages = chaptersData.flatMap((ch, chIdx) => {
-      const chPages = paginateChapter(ch.content, wordsPerPage);
-      return chPages.map((page) => {
-        const absPageIdx = absolutePageIndex++;
-        return {
-          ...page,
-          chapterIndex: chIdx,
-          absolutePageIndex: absPageIdx,
-        };
-      });
-    });
-    setAllBookPages(staticPages);
-  }, [chaptersData, wordsPerPage]);
+  }, [chaptersData.length]);
+
 
   // Derive active visual page object
   const activePage = React.useMemo(() => {
@@ -175,7 +164,7 @@ export function useReaderPlayback({
   const prevBookIdRef = React.useRef<string | null>(null);
 
   // Core callback to save book progress to database context
-  const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number) => {
+  const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number, localPageIdx?: number) => {
     if (chaptersData.length === 0) return;
     
     // Do NOT overwrite completed status due to unmount cleanup races if we are still near the end
@@ -216,6 +205,10 @@ export function useReaderPlayback({
       progress: currentProgress,
       lastChapterIndex: chIdx,
       lastWordIndex: wIdx,
+      // Persist the exact within-chapter page index when available so that
+      // PagesVisualBox can restore directly without going through the
+      // wordIndex→page DOM mapping (which can shift slightly between sessions).
+      ...(localPageIdx !== undefined ? { lastLocalPageIndex: localPageIdx } : {}),
     });
   }, [chaptersData, updateBook]);
 
@@ -302,7 +295,8 @@ export function useReaderPlayback({
 
   // Reset player indexes when active book changes, resuming from exact saved position
   React.useEffect(() => {
-    if (!activeBook || chaptersData.length === 0) {
+    // Hard reset only when there is genuinely no active book
+    if (!activeBook) {
       setWordIndex(0);
       setActiveChapterIndex(0);
       setIsPlaying(false);
@@ -310,27 +304,42 @@ export function useReaderPlayback({
       initializedBookIdRef.current = null;
       return;
     }
+
+    // chaptersData is transiently empty while the memo re-runs for the new book.
+    // Do NOT reset position here — wait for the next render when data is ready.
+    if (chaptersData.length === 0) return;
     
     if (initializedBookIdRef.current !== activeBook.id) {
+      // Mark as initialized BEFORE setting state so the pause-save effect
+      // (which checks initializedBookIdRef === activeBook.id) does not fire
+      // with a stale currentWordIndexRef.current value of 0.
       initializedBookIdRef.current = activeBook.id;
 
       // Prefer the exact saved chapter/word position over the rough progress-based estimate
       const savedChapterIdx = activeBook.lastChapterIndex ?? null;
       const savedWordIdx = activeBook.lastWordIndex ?? null;
 
+      let restoredChapterIdx = 0;
+      let restoredWordIdx = 0;
+
       if (savedChapterIdx !== null && savedChapterIdx < chaptersData.length) {
-        setActiveChapterIndex(savedChapterIdx);
-        setWordIndex(savedWordIdx ?? 0);
+        restoredChapterIdx = savedChapterIdx;
+        restoredWordIdx = savedWordIdx ?? 0;
       } else {
         // Fallback for books saved before this update (only progress% available)
-        const targetChapterIdx = Math.min(
+        restoredChapterIdx = Math.min(
           chaptersData.length - 1,
           Math.max(0, Math.floor((activeBook.progress / 100) * chaptersData.length))
         );
-        setActiveChapterIndex(targetChapterIdx);
-        setWordIndex(0);
+        restoredWordIdx = 0;
       }
 
+      // Sync the ref immediately so the pause-save effect reads the correct value
+      currentWordIndexRef.current = restoredWordIdx;
+      latestPositionRef.current = { wordIndex: restoredWordIdx, activeChapterIndex: restoredChapterIdx };
+
+      setActiveChapterIndex(restoredChapterIdx);
+      setWordIndex(restoredWordIdx);
       setIsPlaying(false);
       setCompletedChapter(null);
     }

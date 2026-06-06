@@ -34,6 +34,10 @@ export interface Book {
   lastChapterIndex?: number;
   /** Exact word index (within the chapter) the user was on when they last left the reader */
   lastWordIndex?: number;
+  /** Exact local page index (within the chapter) the user was on when they last left the reader.
+   *  Stored alongside lastWordIndex to allow direct currentPageIndex restoration without
+   *  relying on the potentially unstable wordIndex→page DOM mapping. */
+  lastLocalPageIndex?: number;
   /** Optional saved bookmark position (legacy) */
   bookmarkChapterIndex?: number;
   /** Optional saved bookmark word index within the bookmarked chapter (legacy) */

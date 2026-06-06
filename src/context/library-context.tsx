@@ -65,6 +65,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
                     ...book,
                     lastChapterIndex: parsed.lastChapterIndex,
                     lastWordIndex: parsed.lastWordIndex,
+                    lastLocalPageIndex: parsed.lastLocalPageIndex ?? book.lastLocalPageIndex,
                     progress: parsed.progress,
                     estimatedReadingTime: parsed.estimatedReadingTime || book.estimatedReadingTime,
                     status: parsed.status || book.status
@@ -237,6 +238,7 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
             localStorage.setItem(cacheKey, JSON.stringify({
               lastChapterIndex: mergedBook.lastChapterIndex,
               lastWordIndex: mergedBook.lastWordIndex,
+              lastLocalPageIndex: mergedBook.lastLocalPageIndex,
               progress: mergedBook.progress,
               estimatedReadingTime: mergedBook.estimatedReadingTime,
               status: mergedBook.status,
