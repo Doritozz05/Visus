@@ -10,6 +10,15 @@ const STORES = {
 
 class DbService {
   private dbPromise: Promise<IDBDatabase> | null = null;
+  private writeQueue: Promise<any> = Promise.resolve();
+
+  // Enqueues transactional write operations to execute in strict sequential order,
+  // preventing concurrent database race conditions in rapid operations.
+  private enqueueWrite<T>(operation: () => Promise<T>): Promise<T> {
+    const nextPromise = this.writeQueue.then(() => operation());
+    this.writeQueue = nextPromise.catch(() => {});
+    return nextPromise;
+  }
 
   private getDb(): Promise<IDBDatabase> {
     if (typeof window === "undefined") {
@@ -66,53 +75,59 @@ class DbService {
   }
 
   async saveBook(book: Book): Promise<void> {
-    const db = await this.getDb();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.BOOKS, "readwrite");
-      const store = transaction.objectStore(STORES.BOOKS);
-      const request = store.put(book);
+    return this.enqueueWrite(async () => {
+      const db = await this.getDb();
+      return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.BOOKS, "readwrite");
+        const store = transaction.objectStore(STORES.BOOKS);
+        const request = store.put(book);
 
-      request.onsuccess = () => {
-        resolve();
-      };
+        request.onsuccess = () => {
+          resolve();
+        };
 
-      request.onerror = () => {
-        reject(request.error);
-      };
+        request.onerror = () => {
+          reject(request.error);
+        };
+      });
     });
   }
 
   async deleteBook(id: string): Promise<void> {
-    const db = await this.getDb();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.BOOKS, "readwrite");
-      const store = transaction.objectStore(STORES.BOOKS);
-      const request = store.delete(id);
+    return this.enqueueWrite(async () => {
+      const db = await this.getDb();
+      return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.BOOKS, "readwrite");
+        const store = transaction.objectStore(STORES.BOOKS);
+        const request = store.delete(id);
 
-      request.onsuccess = () => {
-        resolve();
-      };
+        request.onsuccess = () => {
+          resolve();
+        };
 
-      request.onerror = () => {
-        reject(request.error);
-      };
+        request.onerror = () => {
+          reject(request.error);
+        };
+      });
     });
   }
 
   async clearAllBooks(): Promise<void> {
-    const db = await this.getDb();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.BOOKS, "readwrite");
-      const store = transaction.objectStore(STORES.BOOKS);
-      const request = store.clear();
+    return this.enqueueWrite(async () => {
+      const db = await this.getDb();
+      return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.BOOKS, "readwrite");
+        const store = transaction.objectStore(STORES.BOOKS);
+        const request = store.clear();
 
-      request.onsuccess = () => {
-        resolve();
-      };
+        request.onsuccess = () => {
+          resolve();
+        };
 
-      request.onerror = () => {
-        reject(request.error);
-      };
+        request.onerror = () => {
+          reject(request.error);
+        };
+      });
     });
   }
 
@@ -136,36 +151,40 @@ class DbService {
   }
 
   async saveLog(log: ReadingSessionLog): Promise<void> {
-    const db = await this.getDb();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.STATS, "readwrite");
-      const store = transaction.objectStore(STORES.STATS);
-      const request = store.put(log);
+    return this.enqueueWrite(async () => {
+      const db = await this.getDb();
+      return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.STATS, "readwrite");
+        const store = transaction.objectStore(STORES.STATS);
+        const request = store.put(log);
 
-      request.onsuccess = () => {
-        resolve();
-      };
+        request.onsuccess = () => {
+          resolve();
+        };
 
-      request.onerror = () => {
-        reject(request.error);
-      };
+        request.onerror = () => {
+          reject(request.error);
+        };
+      });
     });
   }
 
   async clearAllLogs(): Promise<void> {
-    const db = await this.getDb();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.STATS, "readwrite");
-      const store = transaction.objectStore(STORES.STATS);
-      const request = store.clear();
+    return this.enqueueWrite(async () => {
+      const db = await this.getDb();
+      return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.STATS, "readwrite");
+        const store = transaction.objectStore(STORES.STATS);
+        const request = store.clear();
 
-      request.onsuccess = () => {
-        resolve();
-      };
+        request.onsuccess = () => {
+          resolve();
+        };
 
-      request.onerror = () => {
-        reject(request.error);
-      };
+        request.onerror = () => {
+          reject(request.error);
+        };
+      });
     });
   }
 }
