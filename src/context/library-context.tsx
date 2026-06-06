@@ -45,11 +45,40 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     const hydrate = async () => {
       try {
         const dbBooks = await dbService.getAllBooks();
-        if (dbBooks && dbBooks.length > 0) {
-          setBooks(dbBooks);
-        } else {
-          setBooks(DEFAULT_BOOKS);
-        }
+        let loadedBooks = dbBooks && dbBooks.length > 0 ? dbBooks : DEFAULT_BOOKS;
+
+        // Restore any newer progress cached synchronously in localStorage from unclosed sessions
+        loadedBooks = loadedBooks.map((book) => {
+          try {
+            const cacheKey = `visus_book_progress_${book.id}`;
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              if (parsed && typeof parsed === "object") {
+                const hasNewerProgress =
+                  parsed.lastChapterIndex !== undefined &&
+                  (parsed.lastChapterIndex !== book.lastChapterIndex || parsed.lastWordIndex !== book.lastWordIndex);
+
+                if (hasNewerProgress) {
+                  const updatedBook = {
+                    ...book,
+                    lastChapterIndex: parsed.lastChapterIndex,
+                    lastWordIndex: parsed.lastWordIndex,
+                    progress: parsed.progress,
+                    estimatedReadingTime: parsed.estimatedReadingTime || book.estimatedReadingTime,
+                    status: parsed.status || book.status
+                  };
+                  // Sync database back to cache level asynchronously
+                  dbService.saveBook(updatedBook).catch(() => {});
+                  return updatedBook;
+                }
+              }
+            }
+          } catch (_) {}
+          return book;
+        });
+
+        setBooks(loadedBooks);
 
         const activeId = localStorage.getItem(ACTIVE_BOOK_KEY);
         if (activeId) {
@@ -200,6 +229,21 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
           console.warn("Could not save updated book to IndexedDB:", err);
         });
 
+        // Cache progress synchronously in localStorage to prevent data loss on tab close / reload
+        if (mergedBook.format !== "PHYSICAL") {
+          try {
+            const cacheKey = `visus_book_progress_${mergedBook.id}`;
+            localStorage.setItem(cacheKey, JSON.stringify({
+              lastChapterIndex: mergedBook.lastChapterIndex,
+              lastWordIndex: mergedBook.lastWordIndex,
+              progress: mergedBook.progress,
+              estimatedReadingTime: mergedBook.estimatedReadingTime,
+              status: mergedBook.status,
+              updatedAt: new Date().toISOString()
+            }));
+          } catch (_) {}
+        }
+
         return mergedBook;
       });
 
@@ -214,6 +258,11 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
     dbService.deleteBook(id).catch((err) => {
       console.warn("Could not delete book from IndexedDB:", err);
     });
+
+    // Clean up temporary synchronous progress cache
+    try {
+      localStorage.removeItem(`visus_book_progress_${id}`);
+    } catch (_) {}
 
     setActiveBookIdState((prevActiveId) => {
       if (prevActiveId === id) {

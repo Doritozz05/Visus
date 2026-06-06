@@ -179,8 +179,7 @@ export async function parseEpub(arrayBuffer: ArrayBuffer): Promise<ParsedEpub> {
     if (!idref) return;
     const relativeHref = manifestItems.get(idref);
     if (!relativeHref) return;
-    const fullHref = opfDir + relativeHref;
-    const cleanHref = decodeURIComponent(fullHref.split("#")[0]);
+    const cleanHref = resolveRelativePath(opfDir, relativeHref.split("#")[0]);
     spineFilePaths.push(cleanHref);
   });
   
@@ -191,8 +190,11 @@ export async function parseEpub(arrayBuffer: ArrayBuffer): Promise<ParsedEpub> {
   items.forEach((item) => {
     const properties = item.getAttribute("properties");
     const href = item.getAttribute("href");
-    if (properties === "nav" && href) {
-      tocPath = opfDir + href;
+    if (properties && href) {
+      const propList = properties.split(/\s+/);
+      if (propList.includes("nav")) {
+        tocPath = resolveRelativePath(opfDir, href);
+      }
     }
   });
   
@@ -422,12 +424,11 @@ async function parseNcx(zip: JSZip, ncxPath: string): Promise<TocEntry[]> {
     const relativeSrc = contentEl?.getAttribute("src");
     
     if (relativeSrc) {
-      const fullSrc = ncxDir + relativeSrc;
-      const cleanSrc = decodeURIComponent(fullSrc);
-      const [filePath, anchor] = cleanSrc.split("#");
+      const cleanHref = resolveRelativePath(ncxDir, relativeSrc);
+      const [filePath, anchor] = cleanHref.split("#");
       entries.push({
         title,
-        href: cleanSrc,
+        href: decodeURIComponent(ncxDir + relativeSrc),
         filePath,
         anchor
       });
@@ -455,12 +456,11 @@ async function parseNav(zip: JSZip, navPath: string): Promise<TocEntry[]> {
     const relativeSrc = a.getAttribute("href");
     
     if (relativeSrc) {
-      const fullSrc = navDir + relativeSrc;
-      const cleanSrc = decodeURIComponent(fullSrc);
-      const [filePath, anchor] = cleanSrc.split("#");
+      const cleanHref = resolveRelativePath(navDir, relativeSrc);
+      const [filePath, anchor] = cleanHref.split("#");
       entries.push({
         title,
-        href: cleanSrc,
+        href: decodeURIComponent(navDir + relativeSrc),
         filePath,
         anchor
       });
