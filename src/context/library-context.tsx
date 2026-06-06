@@ -149,12 +149,17 @@ Keep calibrating your target words per minute (WPM), relax your foveal field, an
       const nextBooks = prev.map((book) => {
         if (book.id !== id) return book;
 
-        // Perform value-equality checks to avoid unnecessary state updates
+        // Perform shallow checks for primitives, fallback to JSON stringify only for objects
         let bookChanged = false;
         for (const key in updates) {
           const val1 = book[key as keyof Book];
           const val2 = updates[key as keyof Book];
-          if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+          if (typeof val1 === "object" && val1 !== null && typeof val2 === "object" && val2 !== null) {
+            if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+              bookChanged = true;
+              break;
+            }
+          } else if (val1 !== val2) {
             bookChanged = true;
             break;
           }

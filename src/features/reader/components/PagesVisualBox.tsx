@@ -1,22 +1,10 @@
 "use client";
 
 import * as React from "react";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 import { Bookmark } from "@/core/entities/book";
 import { BookmarkCorner } from "./BookmarkCorner";
-import { tagHtmlBlocksWithWordIndices } from "@/lib/parser/paginator";
-
-interface VisualPage {
-  pageIndex: number;
-  chapterIndex: number;
-  absolutePageIndex: number;
-  startWordIndex: number;
-  endWordIndex: number;
-  content: string;
-  leftColumn: string;
-  rightColumn: string;
-  title?: string;
-}
+import { tagHtmlBlocksWithWordIndices, BookVisualPage } from "@/lib/parser/paginator";
 
 interface ChapterData {
   title: string;
@@ -82,9 +70,7 @@ function prepareChapterHtml(chapter: ChapterData): string {
     console.warn("Failed to sanitize/trim trailing empty tags:", e);
   }
 
-  if (typeof window !== "undefined") {
-    finalHtml = DOMPurify.sanitize(finalHtml);
-  }
+  finalHtml = DOMPurify.sanitize(finalHtml);
 
   const tagged = tagHtmlBlocksWithWordIndices(finalHtml);
   return tagged.html;
@@ -93,13 +79,14 @@ function prepareChapterHtml(chapter: ChapterData): string {
 interface PagesVisualBoxProps {
   currentChapter: ChapterData;
   chaptersData: ChapterData[];
-  activePage: VisualPage | null;
-  allBookPages: VisualPage[];
-  onPagesComputed?: (computedPages: VisualPage[]) => void;
+  activePage: BookVisualPage | null;
+  allBookPages: BookVisualPage[];
+  onPagesComputed?: (computedPages: BookVisualPage[]) => void;
   wordIndex: number;
   setWordIndex: (w: number) => void;
   readerFontClass: string;
   fontSize: number;
+  wordsPerPage: number;
   onPrevChapter: () => void;
   onNextChapter: () => void;
   setActiveChapterIndex: (index: number) => void;
@@ -119,6 +106,7 @@ export function PagesVisualBox({
   setWordIndex,
   readerFontClass,
   fontSize,
+  wordsPerPage,
   onPrevChapter,
   onNextChapter,
   setActiveChapterIndex,
@@ -137,6 +125,25 @@ export function PagesVisualBox({
   
   // Track local word index updates to avoid synchronization render loops
   const localWordIndexChangeRef = React.useRef<number | null>(null);
+
+  const densityRatio = React.useMemo(() => {
+    const standardCapacity = Math.max(100, Math.round(300 * (16 / fontSize) * 0.82));
+    return wordsPerPage / standardCapacity;
+  }, [fontSize, wordsPerPage]);
+
+  const targetWidth = React.useMemo(() => {
+    return Math.round(800 * densityRatio);
+  }, [densityRatio]);
+
+  const scaledFontSize = React.useMemo(() => {
+    if (!containerDimensions || containerDimensions.width <= 0) {
+      return fontSize;
+    }
+    const actualWidth = containerDimensions.width;
+    const ratio = actualWidth / targetWidth;
+    const cappedRatio = Math.min(1.0, ratio);
+    return Math.max(10, fontSize * Math.sqrt(cappedRatio));
+  }, [containerDimensions, targetWidth, fontSize]);
 
   // Compute standard HTML markup to feed our reading layout
   const formattedHtml = React.useMemo(() => {
@@ -247,7 +254,7 @@ export function PagesVisualBox({
       const { width, height } = containerDimensions;
       if (width <= 0 || height <= 0) return;
 
-      const computedPages: VisualPage[] = [];
+      const computedPages: BookVisualPage[] = [];
       let absolutePageIndex = 0;
 
       for (let chIdx = 0; chIdx < chaptersData.length; chIdx++) {
@@ -299,7 +306,7 @@ export function PagesVisualBox({
           return closestBlockStart;
         };
 
-        const rawChapterPages: VisualPage[] = [];
+        const rawChapterPages: BookVisualPage[] = [];
         for (let pIdx = 0; pIdx < totalPagesInChapter; pIdx++) {
           const startWordIndex = findStartWordForPage(pIdx);
           
@@ -319,7 +326,7 @@ export function PagesVisualBox({
         // Deduplicate phantom pages: collapse consecutive pages with identical startWordIndex.
         // This happens in structural chapters (TOC, licenses) where few tagged blocks exist
         // relative to the visual column count, causing multiple pages to map to word index 0.
-        const chapterPages: VisualPage[] = [];
+        const chapterPages: BookVisualPage[] = [];
         for (let i = 0; i < rawChapterPages.length; i++) {
           if (i === 0 || rawChapterPages[i].startWordIndex !== rawChapterPages[i - 1].startWordIndex) {
             chapterPages.push(rawChapterPages[i]);
@@ -352,7 +359,7 @@ export function PagesVisualBox({
     return () => {
       active = false;
     };
-  }, [chaptersData, fontSize, readerFontClass, containerDimensions, onPagesComputed]);
+  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage]);
 
   // Measure synchronously after layout is computed but before the browser paints!
   // This completely eliminates any blank flickering or jumping movements!
@@ -369,7 +376,7 @@ export function PagesVisualBox({
       setCurrentPageIndex(initialPage);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formattedHtml, fontSize, readerFontClass]);
+  }, [formattedHtml, scaledFontSize, readerFontClass]);
 
   // Instant synchronization for wordIndex shifts (e.g. page turns, bookmark jumps, TOC clicks)
   React.useEffect(() => {
@@ -638,7 +645,14 @@ export function PagesVisualBox({
 
       {/* Static Kindle-Level Canvas using dynamic native CSS Multi-column layout set to EXACTLY ONE column */}
       <div className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start">
-        <div className="w-full h-full overflow-hidden relative">
+        <div 
+          className="h-full overflow-hidden relative"
+          style={{
+            maxWidth: `${Math.round(800 * densityRatio)}px`,
+            width: "100%",
+            margin: "0 auto"
+          }}
+        >
           <div
             ref={columnsContainerRef}
             className={`h-full epub-content ${readerFontClass}`}
@@ -648,7 +662,7 @@ export function PagesVisualBox({
               columnGap: "0rem",
               columnFill: "auto",
               transform: `translateX(-${currentPageIndex * 100}%)`,
-              fontSize: `${fontSize}px`,
+              fontSize: `${scaledFontSize}px`,
               lineHeight: "1.75",
             }}
             dangerouslySetInnerHTML={{ __html: formattedHtml }}
@@ -736,7 +750,7 @@ export function PagesVisualBox({
             columnCount: 1,
             columnGap: "0rem",
             columnFill: "auto",
-            fontSize: `${fontSize}px`,
+            fontSize: `${scaledFontSize}px`,
             lineHeight: "1.75",
           }}
         />

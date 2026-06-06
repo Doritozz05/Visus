@@ -264,6 +264,7 @@ export default function ReaderPage() {
               setWordIndex={setWordIndex}
               readerFontClass={readerFontClass}
               fontSize={settings.general.readerFontSize || 16}
+              wordsPerPage={wordsPerPage}
               onPrevChapter={handlePrevChapter}
               onNextChapter={handleNextChapter}
               setActiveChapterIndex={handleChapterChange}

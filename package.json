@@ -21,6 +21,7 @@
     "clsx": "^2.1.1",
     "dompurify": "^3.4.7",
     "framer-motion": "^11.11.17",
+    "isomorphic-dompurify": "^3.16.0",
     "jszip": "^3.10.1",
     "lucide-react": "^0.456.0",
     "next": "^15.5.18",

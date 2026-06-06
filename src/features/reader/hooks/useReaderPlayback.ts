@@ -1,14 +1,15 @@
 import * as React from "react";
 import { Book, BookChapter } from "@/core/entities/book";
+import { SettingsState } from "@/core/entities/settings";
 import { generateRSVPSequence } from "@/core/algorithms/rsvp";
 import { generateDynamicClusters } from "@/core/algorithms/clusters";
 import { StatsService } from "@/core/services/stats-service";
-import { paginateChapter } from "@/lib/parser/paginator";
+import { paginateChapter, BookVisualPage } from "@/lib/parser/paginator";
 
 export interface UseReaderPlaybackProps {
   activeBook: Book | null;
   updateBook: (id: string, updates: Partial<Book>) => void;
-  settings: any;
+  settings: SettingsState;
   wordsPerPage: number;
 }
 
@@ -80,7 +81,7 @@ export function useReaderPlayback({
 
   // Manage pages globally across the entire book chapters.
   // We initialize with a static estimation as fallback, which is overridden by the dynamic background paginator when normal mode mounts.
-  const [allBookPages, setAllBookPages] = React.useState<any[]>([]);
+  const [allBookPages, setAllBookPages] = React.useState<BookVisualPage[]>([]);
 
   React.useEffect(() => {
     if (chaptersData.length === 0) {

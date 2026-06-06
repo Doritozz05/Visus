@@ -8,6 +8,11 @@ export interface VisualPage {
   endWordIndex: number; // End relative word index in this chapter
 }
 
+export interface BookVisualPage extends VisualPage {
+  chapterIndex: number;
+  absolutePageIndex: number;
+}
+
 /**
  * Paginate a chapter's content into a list of visual pages.
  */

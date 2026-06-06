@@ -5,6 +5,7 @@
  */
 
 import { RSVPWord } from "../entities/text";
+import { ABBREVIATIONS } from "../config/abbreviations";
 
 /**
  * Calculates the index of the Optimal Recognition Point (ORP) within a word.
@@ -23,9 +24,9 @@ import { RSVPWord } from "../entities/text";
 export function calculateORP(word: string): number {
   if (!word) return 0;
 
-  // Let's identify the range of letter/number content in the raw word.
-  // We want to skip leading and trailing non-alphanumeric punctuation.
-  // In Spanish, this includes standard letters/numbers plus characters with accents/diacritics.
+  // Identify the range of letter/number content in the raw word.
+  // Skip leading and trailing non-alphanumeric punctuation.
+  // Supports standard letters/numbers plus accented characters and diacritics.
   const letterRegex = /[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜíïöëàèìòù]/;
 
   let firstLetterIdx = -1;
@@ -63,12 +64,7 @@ export function calculateORP(word: string): number {
   return firstLetterIdx + cleanOrpOffset;
 }
 
-// Common English and Spanish abbreviations that should not trigger standard sentence-end pauses
-const ABBREVIATIONS = new Set([
-  "etc.", "etc", "dr.", "dr", "dra.", "dra", "sr.", "sr", "sra.", "sra",
-  "av.", "av", "pág.", "pág", "pag.", "pag", "pp.", "pp", "vs.", "vs",
-  "art.", "art", "dcha.", "dcha", "izq.", "izq", "ee.uu.", "eeuu"
-]);
+
 
 /**
  * Calculates the dynamic delay multiplier associated with punctuation characters.

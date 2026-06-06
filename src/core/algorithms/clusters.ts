@@ -1,6 +1,6 @@
 /**
  * @file clusters.ts
- * @description Algorithms for visual word-chunking (Cúmulos).
+ * @description Algorithms for visual word-chunking (Clusters).
  * Provides utilities to group text into visual chunks that train and expand peripheral vision.
  */
 
@@ -105,7 +105,7 @@ export function generateDynamicClusters(paragraphOrWords: string | string[], tar
       delayMultiplier = 1.3; // Medium pause for commas and syntactic breaks
     }
 
-    // Increase delay if it contains complex or long words (Spanish accent friendly)
+    // Increase delay if it contains complex or long words (supports accented characters)
     const hasLongWord = currentWords.some((w) => w.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜíïöëàèìòù]/g, "").length >= 9);
     if (hasLongWord) {
       delayMultiplier += 0.2;
