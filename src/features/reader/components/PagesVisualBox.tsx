@@ -115,6 +115,7 @@ export function PagesVisualBox({
   onRemoveBookmark,
   onUpdateBookmarkName,
 }: PagesVisualBoxProps) {
+  const columnGap = 40;
   const [totalPages, setTotalPages] = React.useState(1);
   const [currentPageIndex, setCurrentPageIndex] = React.useState(0);
   const columnsContainerRef = React.useRef<HTMLDivElement>(null);
@@ -192,13 +193,13 @@ export function PagesVisualBox({
     
     if (activeBlock) {
       // Use Math.round to handle minor column gaps, sub-pixel offsets, and margin differences safely!
-      return Math.round(activeBlock.offsetLeft / width);
+      return Math.round(activeBlock.offsetLeft / (width + columnGap));
     }
     
     // Fallback: if wordIndex exceeds tagged block range (structural chapters like TOC/licenses),
     // return the last page instead of 0 to prevent navigation jumping to the start
     if (lastBlock) {
-      return Math.round(lastBlock.offsetLeft / width);
+      return Math.round(lastBlock.offsetLeft / (width + columnGap));
     }
     
     return 0;
@@ -218,7 +219,7 @@ export function PagesVisualBox({
     const el = columnsContainerRef.current;
     if (!el || !containerDimensions) return 0;
     const width = containerDimensions.width || 1;
-    const targetOffset = pIdx * width;
+    const targetOffset = pIdx * (width + columnGap);
     
     const blocks = el.querySelectorAll("[data-start-word-idx]");
     let closestBlock: HTMLElement | null = null;
@@ -252,7 +253,7 @@ export function PagesVisualBox({
     if (el && containerDimensions) {
       const width = containerDimensions.width || 1;
       const scrollWidth = el.scrollWidth;
-      const pages = Math.max(1, Math.ceil(scrollWidth / width));
+      const pages = Math.max(1, Math.ceil((scrollWidth + columnGap) / (width + columnGap)));
       setTotalPages((prev) => {
         if (prev === pages) return prev;
         return pages;
@@ -293,7 +294,7 @@ export function PagesVisualBox({
         if (!active) return;
         
         const scrollWidth = hiddenEl.scrollWidth;
-        const totalPagesInChapter = Math.max(1, Math.ceil(scrollWidth / width));
+        const totalPagesInChapter = Math.max(1, Math.ceil((scrollWidth + columnGap) / (width + columnGap)));
         
         const blocks = hiddenEl.querySelectorAll("[data-start-word-idx]");
         const blockPositions = Array.from(blocks).map((block) => {
@@ -309,7 +310,7 @@ export function PagesVisualBox({
         const totalWords = Math.max(1, wordsArr.length);
         
         const findStartWordForPage = (pIdx: number): number => {
-          const targetOffset = pIdx * width;
+          const targetOffset = pIdx * (width + columnGap);
           let closestBlockStart = 0;
           let minDiff = Infinity;
           
@@ -357,7 +358,7 @@ export function PagesVisualBox({
             const diff = endVal - startVal;
             
             for (let k = 1; k < runLength; k++) {
-              const step = Math.round((diff * k) / runLength);
+              const step = Math.round((runLength > 0 ? (diff * k) / runLength : 0));
               // Ensure strictly increasing indices where possible
               rawChapterPages[i + k].startWordIndex = Math.min(
                 endVal - (runLength - k),
@@ -394,7 +395,7 @@ export function PagesVisualBox({
     return () => {
       active = false;
     };
-  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage, allBookPages, currentChapter.index]);
+  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage]);
 
   // Measure synchronously after layout is computed but before the browser paints!
   // This completely eliminates any blank flickering or jumping movements!
@@ -403,7 +404,7 @@ export function PagesVisualBox({
     if (el && containerDimensions) {
       const width = containerDimensions.width || 1;
       const scrollWidth = el.scrollWidth;
-      const pages = Math.max(1, Math.ceil(scrollWidth / width));
+      const pages = Math.max(1, Math.ceil((scrollWidth + columnGap) / (width + columnGap)));
       setTotalPages(pages);
       
       if (wordIndex !== localWordIndexChangeRef.current) {
@@ -536,6 +537,13 @@ export function PagesVisualBox({
           .epub-content {
             font-family: var(--font-serif, serif);
             color: hsl(var(--foreground));
+          }
+
+          /* General reset for direct block tags inside columns to prevent clipping at the column edges */
+          .epub-content > * {
+            padding-left: 6px;
+            padding-right: 6px;
+            box-sizing: border-box;
           }
 
           .epub-content h1, .epub-content h2, .epub-content h3, .epub-content h4, .epub-content h5, .epub-content h6 {
@@ -689,9 +697,9 @@ export function PagesVisualBox({
             style={{
               columnWidth: "100%",
               columnCount: 1,
-              columnGap: "0rem",
+              columnGap: `${columnGap}px`,
               columnFill: "auto",
-              transform: `translateX(-${currentPageIndex * (containerDimensions?.width || 0)}px)`,
+              transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
               fontSize: `${scaledFontSize}px`,
               lineHeight: "1.75",
             }}
@@ -780,7 +788,7 @@ export function PagesVisualBox({
           style={{
             columnWidth: "100%",
             columnCount: 1,
-            columnGap: "0rem",
+            columnGap: `${columnGap}px`,
             columnFill: "auto",
             fontSize: `${scaledFontSize}px`,
             lineHeight: "1.75",
