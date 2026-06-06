@@ -99,25 +99,29 @@ export default function LibraryPage() {
   const processAndAddFile = async (file: File) => {
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     if (file.size > MAX_FILE_SIZE) {
-      alert(`The file "${file.name}" is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). The maximum allowed size is 5.0MB to prevent browser crashes.`);
-      return;
+      throw new Error(`The file "${file.name}" is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). The maximum allowed size is 5.0MB to prevent browser crashes.`);
     }
 
     const { title, author, format } = parseFileName(file.name);
     
     if (format === "TXT") {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (event) => {
-          const textContent = event.target?.result as string;
-          const parsedChapters = parseTxt(textContent);
-          addBook(title, author, format, textContent, parsedChapters);
-          resolve();
+          try {
+            const textContent = event.target?.result as string;
+            const parsedChapters = parseTxt(textContent);
+            addBook(title, author, format, textContent, parsedChapters);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
         };
+        reader.onerror = () => reject(new Error(`Failed to read "${file.name}"`));
         reader.readAsText(file);
       });
     } else if (format === "PDF") {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = async (event) => {
           try {
@@ -134,10 +138,11 @@ export default function LibraryPage() {
             resolve();
           }
         };
+        reader.onerror = () => reject(new Error(`Failed to read "${file.name}"`));
         reader.readAsArrayBuffer(file);
       });
     } else if (format === "EPUB") {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = async (event) => {
           try {
@@ -161,6 +166,7 @@ export default function LibraryPage() {
             resolve();
           }
         };
+        reader.onerror = () => reject(new Error(`Failed to read "${file.name}"`));
         reader.readAsArrayBuffer(file);
       });
     } else {
@@ -168,22 +174,36 @@ export default function LibraryPage() {
     }
   };
 
-  // Ingestion: File selection handler with FileReader and PDF/EPUB parsing
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    
+  const processFilesBatch = async (fileList: FileList) => {
     setIsIngesting(true);
+    const files = Array.from(fileList);
+    
     try {
-      for (let i = 0; i < files.length; i++) {
-        await processAndAddFile(files[i]);
+      const results = await Promise.allSettled(
+        files.map(file => processAndAddFile(file))
+      );
+      
+      const failures = results.filter(
+        (r): r is PromiseRejectedResult => r.status === "rejected"
+      );
+      
+      if (failures.length > 0) {
+        const errorMessages = failures.map(f => f.reason?.message || "Unknown file read error").join("\n");
+        alert(`Some files could not be imported:\n${errorMessages}`);
       }
     } catch (err) {
-      console.error("File ingestion failed:", err);
+      console.error("Batch file ingestion failed:", err);
     } finally {
       setIsIngesting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  // Ingestion: File selection handler with FileReader and PDF/EPUB parsing
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await processFilesBatch(files);
   };
 
   // Ingestion: Drag and drop handlers with PDF/TXT/EPUB extraction
@@ -202,17 +222,7 @@ export default function LibraryPage() {
 
     const files = e.dataTransfer.files;
     if (!files || files.length === 0) return;
-
-    setIsIngesting(true);
-    try {
-      for (let i = 0; i < files.length; i++) {
-        await processAndAddFile(files[i]);
-      }
-    } catch (err) {
-      console.error("Drag and drop ingestion failed:", err);
-    } finally {
-      setIsIngesting(false);
-    }
+    await processFilesBatch(files);
   };
 
   const triggerFileBrowser = () => {
