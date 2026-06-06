@@ -41,6 +41,7 @@ export function SettingsDrawer({
             <h3 className="font-heading font-bold text-base">Quick Calibration</h3>
           </div>
           <button 
+            data-testid="settings-close-button"
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground border border-border/20 transition-all"
           >

@@ -208,6 +208,7 @@ export function GeneralSettingsForm() {
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{readerFontSize || 16}px</span>
           </div>
           <input 
+            data-testid="reader-font-size"
             className="w-full accent-primary h-1 bg-accent rounded-lg appearance-none cursor-pointer"
             max="26" 
             min="14" 
@@ -228,6 +229,7 @@ export function GeneralSettingsForm() {
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{readerWordsPerPage || 300} words</span>
           </div>
           <input 
+            data-testid="reader-words-per-page"
             className="w-full accent-primary h-1 bg-accent rounded-lg appearance-none cursor-pointer"
             max="500" 
             min="200" 
@@ -254,6 +256,7 @@ export function GeneralSettingsForm() {
             ].map((tf) => (
               <button
                 key={tf.id}
+                data-testid={`font-family-button-${tf.id}`}
                 onClick={() => updateGeneralSettings({ readerFontFamily: tf.id as any })}
                 className={`p-2 border rounded text-left transition-all ${
                   readerFontFamily === tf.id

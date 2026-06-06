@@ -119,6 +119,7 @@ export function PagesVisualBox({
   const [currentPageIndex, setCurrentPageIndex] = React.useState(0);
   const columnsContainerRef = React.useRef<HTMLDivElement>(null);
   const hiddenPaginatorRef = React.useRef<HTMLDivElement>(null);
+  const canvasWrapperRef = React.useRef<HTMLDivElement>(null);
   
   // Track visible container dimensions for offscreen DOM pagination
   const [containerDimensions, setContainerDimensions] = React.useState<{ width: number; height: number } | null>(null);
@@ -158,9 +159,18 @@ export function PagesVisualBox({
 
   // Helper to map wordIndex to the exact page index using DOM coordinates!
   const getPageIndexForWord = React.useCallback((wIdx: number): number => {
+    if (allBookPages.length > 0) {
+      const page = allBookPages.find(
+        (p) => p.chapterIndex === currentChapter.index && wIdx >= p.startWordIndex && wIdx <= p.endWordIndex
+      );
+      if (page) {
+        return page.pageIndex;
+      }
+    }
+
     const el = columnsContainerRef.current;
-    if (!el) return 0;
-    const width = Math.floor(el.clientWidth) || 1;
+    if (!el || !containerDimensions) return 0;
+    const width = containerDimensions.width || 1;
     
     // Find the block containing this word
     const blocks = el.querySelectorAll("[data-start-word-idx]");
@@ -192,13 +202,22 @@ export function PagesVisualBox({
     }
     
     return 0;
-  }, []);
+  }, [containerDimensions, allBookPages, currentChapter.index]);
 
   // Helper to map page index to its starting word index using DOM coordinates!
   const getWordIndexForPage = React.useCallback((pIdx: number): number => {
+    if (allBookPages.length > 0) {
+      const page = allBookPages.find(
+        (p) => p.chapterIndex === currentChapter.index && p.pageIndex === pIdx
+      );
+      if (page) {
+        return page.startWordIndex;
+      }
+    }
+
     const el = columnsContainerRef.current;
-    if (!el) return 0;
-    const width = Math.floor(el.clientWidth) || 1;
+    if (!el || !containerDimensions) return 0;
+    const width = containerDimensions.width || 1;
     const targetOffset = pIdx * width;
     
     const blocks = el.querySelectorAll("[data-start-word-idx]");
@@ -225,13 +244,13 @@ export function PagesVisualBox({
     }
     
     return 0;
-  }, []);
+  }, [containerDimensions, allBookPages, currentChapter.index]);
 
   // Dynamic Page Count calculations based on element layout scrollWidth
   const updatePagesCount = React.useCallback(() => {
     const el = columnsContainerRef.current;
-    if (el) {
-      const width = Math.floor(el.clientWidth) || 1;
+    if (el && containerDimensions) {
+      const width = containerDimensions.width || 1;
       const scrollWidth = el.scrollWidth;
       const pages = Math.max(1, Math.ceil(scrollWidth / width));
       setTotalPages((prev) => {
@@ -239,7 +258,7 @@ export function PagesVisualBox({
         return pages;
       });
     }
-  }, []);
+  }, [containerDimensions]);
 
   // Background dynamic DOM pagination to get pixel-perfect 1:1 pages count for all chapters.
   // Performs measurements sequentially in requestAnimationFrame ticks to keep the thread fully responsive.
@@ -313,7 +332,7 @@ export function PagesVisualBox({
           rawChapterPages.push({
             pageIndex: pIdx,
             chapterIndex: chIdx,
-            absolutePageIndex: 0, // Recomputed after deduplication
+            absolutePageIndex: 0,
             title: `Page ${pIdx + 1}`,
             content: "",
             leftColumn: "",
@@ -323,30 +342,46 @@ export function PagesVisualBox({
           });
         }
         
-        // Deduplicate phantom pages: collapse consecutive pages with identical startWordIndex.
-        // This happens in structural chapters (TOC, licenses) where few tagged blocks exist
-        // relative to the visual column count, causing multiple pages to map to word index 0.
-        const chapterPages: BookVisualPage[] = [];
-        for (let i = 0; i < rawChapterPages.length; i++) {
-          if (i === 0 || rawChapterPages[i].startWordIndex !== rawChapterPages[i - 1].startWordIndex) {
-            chapterPages.push(rawChapterPages[i]);
+        // Interpolate duplicate startWordIndex values to ensure smooth traversal and avoid collapsing pages
+        let i = 0;
+        while (i < rawChapterPages.length) {
+          let j = i + 1;
+          while (j < rawChapterPages.length && rawChapterPages[j].startWordIndex === rawChapterPages[i].startWordIndex) {
+            j++;
           }
+          
+          const runLength = j - i;
+          if (runLength > 1) {
+            const startVal = rawChapterPages[i].startWordIndex;
+            const endVal = j < rawChapterPages.length ? rawChapterPages[j].startWordIndex : totalWords;
+            const diff = endVal - startVal;
+            
+            for (let k = 1; k < runLength; k++) {
+              const step = Math.round((diff * k) / runLength);
+              // Ensure strictly increasing indices where possible
+              rawChapterPages[i + k].startWordIndex = Math.min(
+                endVal - (runLength - k),
+                Math.max(startVal + k, startVal + step)
+              );
+            }
+          }
+          i = j;
         }
         
-        // Assign correct sequential page indices and word ranges after deduplication
-        for (let i = 0; i < chapterPages.length; i++) {
-          chapterPages[i].pageIndex = i;
-          chapterPages[i].absolutePageIndex = absolutePageIndex++;
-          chapterPages[i].title = `Page ${i + 1}`;
+        // Assign correct sequential page indices and word ranges without collapsing pages
+        for (let i = 0; i < rawChapterPages.length; i++) {
+          rawChapterPages[i].pageIndex = i;
+          rawChapterPages[i].absolutePageIndex = absolutePageIndex++;
+          rawChapterPages[i].title = `Page ${i + 1}`;
           
-          if (i < chapterPages.length - 1) {
-            chapterPages[i].endWordIndex = chapterPages[i + 1].startWordIndex - 1;
+          if (i < rawChapterPages.length - 1) {
+            rawChapterPages[i].endWordIndex = rawChapterPages[i + 1].startWordIndex - 1;
           } else {
-            chapterPages[i].endWordIndex = totalWords - 1;
+            rawChapterPages[i].endWordIndex = totalWords - 1;
           }
         }
 
-        computedPages.push(...chapterPages);
+        computedPages.push(...rawChapterPages);
       }
 
       if (active) {
@@ -359,58 +394,51 @@ export function PagesVisualBox({
     return () => {
       active = false;
     };
-  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage]);
+  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage, allBookPages, currentChapter.index]);
 
   // Measure synchronously after layout is computed but before the browser paints!
   // This completely eliminates any blank flickering or jumping movements!
   React.useLayoutEffect(() => {
     const el = columnsContainerRef.current;
-    if (el) {
-      const width = Math.floor(el.clientWidth) || 1;
+    if (el && containerDimensions) {
+      const width = containerDimensions.width || 1;
       const scrollWidth = el.scrollWidth;
       const pages = Math.max(1, Math.ceil(scrollWidth / width));
       setTotalPages(pages);
       
-      // Compute and set current page index synchronously in the same batch
-      const initialPage = getPageIndexForWord(wordIndex);
-      setCurrentPageIndex(initialPage);
+      if (wordIndex !== localWordIndexChangeRef.current) {
+        const initialPage = getPageIndexForWord(wordIndex);
+        setCurrentPageIndex(initialPage);
+      } else {
+        localWordIndexChangeRef.current = null;
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formattedHtml, scaledFontSize, readerFontClass]);
-
-  // Instant synchronization for wordIndex shifts (e.g. page turns, bookmark jumps, TOC clicks)
-  React.useEffect(() => {
-    // Skip synchronization if it is a local page transition already handled
-    if (wordIndex === localWordIndexChangeRef.current) {
-      return;
-    }
-    const page = getPageIndexForWord(wordIndex);
-    if (page !== currentPageIndex) {
-      setCurrentPageIndex(page);
-    }
-  }, [wordIndex, currentPageIndex, getPageIndexForWord]);
+  }, [formattedHtml, scaledFontSize, readerFontClass, containerDimensions, wordIndex, getPageIndexForWord]);
 
   React.useEffect(() => {
-    const el = columnsContainerRef.current;
-    if (!el) return;
+    const wrapper = canvasWrapperRef.current;
+    if (!wrapper) return;
     
-    // Initialize container dimensions on mount
-    setContainerDimensions({
-      width: Math.floor(el.clientWidth),
-      height: el.clientHeight,
-    });
+    const updateDimensions = () => {
+      const availableWidth = wrapper.clientWidth;
+      const targetW = Math.round(800 * densityRatio);
+      const widthVal = Math.floor(Math.min(availableWidth, targetW));
+      
+      setContainerDimensions({
+        width: widthVal,
+        height: wrapper.clientHeight,
+      });
+    };
+    
+    updateDimensions();
     
     const observer = new ResizeObserver(() => {
-      updatePagesCount();
-      setContainerDimensions({
-        width: Math.floor(el.clientWidth),
-        height: el.clientHeight,
-      });
+      updateDimensions();
     });
-    observer.observe(el);
+    observer.observe(wrapper);
     
     return () => observer.disconnect();
-  }, [updatePagesCount]);
+  }, [densityRatio]);
 
   // Bookmark alignments relative to current page boundaries
   const pageStartWordIndex = React.useMemo(() => {
@@ -644,12 +672,14 @@ export function PagesVisualBox({
       </div>
 
       {/* Static Kindle-Level Canvas using dynamic native CSS Multi-column layout set to EXACTLY ONE column */}
-      <div className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start">
+      <div 
+        ref={canvasWrapperRef}
+        className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start"
+      >
         <div 
           className="h-full overflow-hidden relative"
           style={{
-            maxWidth: `${Math.round(800 * densityRatio)}px`,
-            width: "100%",
+            width: containerDimensions ? `${containerDimensions.width}px` : "100%",
             margin: "0 auto"
           }}
         >
@@ -673,6 +703,7 @@ export function PagesVisualBox({
       {/* Footer Navigation (strictly fixed height to eliminate sub-pixel layout feedback loops) */}
       <div className="h-12 min-h-[48px] max-h-[48px] flex justify-between items-center pt-3 border-t border-border/10 mt-1 text-xs font-mono text-muted-foreground relative shrink-0">
         <button
+          data-testid="prev-page-button"
           onClick={handlePrev}
           disabled={currentPageIndex === 0 && currentChapter.index === 0}
           className="flex items-center gap-1.5 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none z-20"
@@ -709,6 +740,7 @@ export function PagesVisualBox({
         </div>
 
         <button
+          data-testid="next-page-button"
           onClick={handleNext}
           className={`flex items-center gap-1.5 transition-all z-20 hover:text-primary ${
             showCompleteBook

@@ -177,6 +177,7 @@ export function ReaderHeader({
 
         {/* Quick Settings Trigger (Desktop) */}
         <button
+          data-testid="desktop-settings-button"
           onClick={openQuickSettings}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
         >
