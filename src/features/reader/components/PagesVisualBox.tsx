@@ -604,7 +604,16 @@ export function PagesVisualBox({
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
           }
           
-          .epub-content ul, .epub-content ol {
+          .epub-content ul {
+            list-style-type: disc;
+            margin-bottom: 1em;
+            padding-left: 2em;
+            break-inside: avoid-column;
+            column-break-inside: avoid;
+          }
+          
+          .epub-content ol {
+            list-style-type: decimal;
             margin-bottom: 1em;
             padding-left: 2em;
             break-inside: avoid-column;

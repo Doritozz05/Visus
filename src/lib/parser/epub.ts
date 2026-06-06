@@ -646,7 +646,7 @@ function extractCleanText(htmlContent: string): string {
     } else if (tagName === "div" && !p.querySelector("p") && !p.querySelector("div")) {
       pTexts.push(text);
     } else if (tagName === "li") {
-      pTexts.push(`• ${text}`);
+      pTexts.push(text);
     }
   });
   
