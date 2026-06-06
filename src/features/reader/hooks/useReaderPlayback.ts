@@ -159,9 +159,18 @@ export function useReaderPlayback({
   const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number) => {
     if (chaptersData.length === 0) return;
     
-    // Do NOT overwrite completed status!
+    // Do NOT overwrite completed status due to unmount cleanup races if we are still near the end
     if (activeBookRef.current?.id === bookId && activeBookRef.current?.status === "completed") {
-      return;
+      const isLastChapter = chIdx === chaptersData.length - 1;
+      const targetChapter = chaptersData[chIdx];
+      if (targetChapter) {
+        const chWords = targetChapter.content ? targetChapter.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+        const chWordsLength = chWords.length || 1;
+        const isAtLastWords = wIdx >= chWordsLength - 10;
+        if (isLastChapter && isAtLastWords) {
+          return;
+        }
+      }
     }
     
     const targetChapter = chaptersData[chIdx];

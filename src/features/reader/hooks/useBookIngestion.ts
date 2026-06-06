@@ -29,6 +29,13 @@ export function useBookIngestion() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const file = files[0];
+    
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE) {
+      alert(`The file "${file.name}" is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). The maximum allowed size is 5.0MB to prevent browser crashes.`);
+      return;
+    }
+
     const { title, author, format } = parseFileName(file.name);
     
     if (format === "TXT") {
