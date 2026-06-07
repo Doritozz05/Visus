@@ -165,7 +165,10 @@ export function useReaderPlayback({
 
   // Core callback to save book progress to database context
   const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number, localPageIdx?: number) => {
-    if (chaptersData.length === 0) return;
+    if (chaptersData.length === 0) {
+      console.log(`[DEBUG SAVE] SKIPPED - chaptersData.length === 0 for bookId=${bookId}`);
+      return;
+    }
     
     // Do NOT overwrite completed status due to unmount cleanup races if we are still near the end
     if (activeBookRef.current?.id === bookId && activeBookRef.current?.status === "completed") {
@@ -182,7 +185,10 @@ export function useReaderPlayback({
     }
     
     const targetChapter = chaptersData[chIdx];
-    if (!targetChapter) return;
+    if (!targetChapter) {
+      console.log(`[DEBUG SAVE] SKIPPED - no chapter at index ${chIdx} for bookId=${bookId}`);
+      return;
+    }
     
     // Safely calculate words count from content as chaptersData is lightweight
     const chWords = targetChapter.content ? targetChapter.content.split(/\s+/).filter(w => w.trim() !== "") : [];
@@ -201,6 +207,7 @@ export function useReaderPlayback({
       currentProgress = 100;
     }
 
+    console.log(`[DEBUG SAVE] Calling updateBook: bookId=${bookId} chapter=${chIdx} wordIndex=${wIdx} localPage=${localPageIdx} progress=${currentProgress}`);
     updateBook(bookId, {
       progress: currentProgress,
       lastChapterIndex: chIdx,
@@ -235,11 +242,18 @@ export function useReaderPlayback({
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       if (initializedBookIdRef.current) {
-        saveProgressRef.current(
-          initializedBookIdRef.current,
-          latestPositionRef.current.activeChapterIndex,
-          latestPositionRef.current.wordIndex
-        );
+        const bookId = initializedBookIdRef.current;
+        const ch = latestPositionRef.current.activeChapterIndex;
+        const wi = latestPositionRef.current.wordIndex;
+        console.log(`[DEBUG UNMOUNT] Saving on unmount: bookId=${bookId} chapter=${ch} wordIndex=${wi}`);
+        saveProgressRef.current(bookId, ch, wi);
+        // Verify what localStorage has immediately after the save
+        try {
+          const cacheKey = `visus_book_progress_${bookId}`;
+          const cached = localStorage.getItem(cacheKey);
+          const parsed = cached ? JSON.parse(cached) : null;
+          console.log(`[DEBUG UNMOUNT] localStorage after save:`, JSON.stringify(parsed));
+        } catch (_) {}
       }
     };
   }, [activeBook?.id]);
@@ -260,9 +274,11 @@ export function useReaderPlayback({
     }
   }, [activeBook]);
 
+  const wasPlayingRef = React.useRef(false);
+
   // Save position when the player pauses
   React.useEffect(() => {
-    if (!isPlaying && initializedBookIdRef.current === activeBook?.id) {
+    if (!isPlaying && wasPlayingRef.current && initializedBookIdRef.current === activeBook?.id) {
       setWordIndex(currentWordIndexRef.current);
       saveProgressRef.current(
         initializedBookIdRef.current,
@@ -270,6 +286,7 @@ export function useReaderPlayback({
         currentWordIndexRef.current
       );
     }
+    wasPlayingRef.current = isPlaying;
   }, [isPlaying, activeBook?.id]);
 
   // Intercept and wrap chapter selection to trigger immediate saves
@@ -305,6 +322,8 @@ export function useReaderPlayback({
       return;
     }
 
+    console.log(`[DEBUG RESTORE EFFECT] Fired. bookId=${activeBook.id} initRef=${initializedBookIdRef.current} chaptersData.length=${chaptersData.length} activeBook.lastChapterIndex=${activeBook.lastChapterIndex} activeBook.lastWordIndex=${activeBook.lastWordIndex} activeBook.lastLocalPageIndex=${activeBook.lastLocalPageIndex}`);
+
     // chaptersData is transiently empty while the memo re-runs for the new book.
     // Do NOT reset position here — wait for the next render when data is ready.
     if (chaptersData.length === 0) return;
@@ -315,9 +334,38 @@ export function useReaderPlayback({
       // with a stale currentWordIndexRef.current value of 0.
       initializedBookIdRef.current = activeBook.id;
 
-      // Prefer the exact saved chapter/word position over the rough progress-based estimate
-      const savedChapterIdx = activeBook.lastChapterIndex ?? null;
-      const savedWordIdx = activeBook.lastWordIndex ?? null;
+      // Read the most recent progress from the synchronous localStorage cache.
+      // When navigating away via sidebar links, the unmount cleanup calls updateBook
+      // which writes to localStorage synchronously but enqueues the React setBooks
+      // state update asynchronously. On remount, activeBook may still have stale
+      // lastChapterIndex/lastWordIndex because React hasn't committed the batched
+      // update yet. The localStorage cache always has the freshest values.
+      let savedChapterIdx = activeBook.lastChapterIndex ?? null;
+      let savedWordIdx = activeBook.lastWordIndex ?? null;
+      let savedLocalPageIdx = activeBook.lastLocalPageIndex;
+
+      try {
+        const cacheKey = `visus_book_progress_${activeBook.id}`;
+        const cached = localStorage.getItem(cacheKey);
+        console.log(`[DEBUG RESTORE] localStorage raw for ${cacheKey}:`, cached);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === "object") {
+            if (parsed.lastChapterIndex !== undefined) {
+              savedChapterIdx = parsed.lastChapterIndex;
+            }
+            if (parsed.lastWordIndex !== undefined) {
+              savedWordIdx = parsed.lastWordIndex;
+            }
+            if (parsed.lastLocalPageIndex !== undefined) {
+              savedLocalPageIdx = parsed.lastLocalPageIndex;
+            }
+          }
+        }
+        console.log(`[DEBUG RESTORE] Final values: savedChapterIdx=${savedChapterIdx} savedWordIdx=${savedWordIdx} savedLocalPageIdx=${savedLocalPageIdx}`);
+      } catch (_) {
+        // Fallback to activeBook values (already set above)
+      }
 
       let restoredChapterIdx = 0;
       let restoredWordIdx = 0;
@@ -338,12 +386,32 @@ export function useReaderPlayback({
       currentWordIndexRef.current = restoredWordIdx;
       latestPositionRef.current = { wordIndex: restoredWordIdx, activeChapterIndex: restoredChapterIdx };
 
+      console.log(`[DEBUG RESTORE] SETTING STATE: chapter=${restoredChapterIdx} wordIndex=${restoredWordIdx} localPage=${savedLocalPageIdx}`);
       setActiveChapterIndex(restoredChapterIdx);
       setWordIndex(restoredWordIdx);
       setIsPlaying(false);
       setCompletedChapter(null);
+
+      // Reconcile the React state (activeBook) with the localStorage values when
+      // they differ. This ensures derived props like savedLocalPageIndex in
+      // PagesVisualBox also read the freshest values instead of the stale state.
+      if (
+        restoredChapterIdx !== (activeBook.lastChapterIndex ?? 0) ||
+        restoredWordIdx !== (activeBook.lastWordIndex ?? 0) ||
+        (savedLocalPageIdx !== undefined && savedLocalPageIdx !== activeBook.lastLocalPageIndex)
+      ) {
+        updateBook(activeBook.id, {
+          lastChapterIndex: restoredChapterIdx,
+          lastWordIndex: restoredWordIdx,
+          ...(savedLocalPageIdx !== undefined ? { lastLocalPageIndex: savedLocalPageIdx } : {}),
+        });
+      }
     }
-  }, [activeBook, chaptersData.length]);
+
+    return () => {
+      initializedBookIdRef.current = null;
+    };
+  }, [activeBook, chaptersData.length, updateBook]);
 
   // Map individual word index to correct dynamic semantic foveal cluster chunk
   const activeClusterIndex = React.useMemo(() => {

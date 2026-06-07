@@ -261,7 +261,11 @@ export default function ReaderPage() {
               onPagesComputed={setAllBookPages}
               wordIndex={wordIndex}
               setWordIndex={setWordIndex}
-              savedLocalPageIndex={activeBook.lastChapterIndex === activeChapterIndex ? activeBook.lastLocalPageIndex : undefined}
+              savedLocalPageIndex={(() => {
+                const val = activeBook.lastChapterIndex === activeChapterIndex ? activeBook.lastLocalPageIndex : undefined;
+                console.log(`[DEBUG reader/page] savedLocalPageIndex=${val} | activeBook.lastChapterIndex=${activeBook.lastChapterIndex} activeChapterIndex=${activeChapterIndex} activeBook.lastLocalPageIndex=${activeBook.lastLocalPageIndex} activeBook.lastWordIndex=${activeBook.lastWordIndex}`);
+                return val;
+              })()}
               onSavePageProgress={(localPageIdx, wIdx) => {
                 // Persist the exact page position on every page turn.
                 // updateBook is called directly with the local page index so the next

@@ -151,6 +151,30 @@ export function PagesVisualBox({
   // during the initial render cycle after navigating back to the reader.
   const pendingRestorePageRef = React.useRef<number | null>(null);
 
+  // Always-current ref for the values that the async paginateAllChapters needs
+  // at the END of its run (after all rAF ticks). Because paginateAllChapters is
+  // async, its closure captures stale values from the render that scheduled the
+  // effect. By reading from this ref instead of the closure, we always use the
+  // latest savedLocalPageIndex / wordIndex / currentChapter.index — even if the
+  // restore effect fired and updated state after the pagination effect started.
+  const latestRestoreTargetRef = React.useRef<{
+    savedLocalPageIndex: number | undefined;
+    wordIndex: number;
+    chapterIndex: number;
+  }>({
+    savedLocalPageIndex,
+    wordIndex,
+    chapterIndex: currentChapter.index,
+  });
+
+  // Keep the ref in sync on every render (runs before effects, so it's always
+  // fresh by the time any async code reads it).
+  latestRestoreTargetRef.current = {
+    savedLocalPageIndex,
+    wordIndex,
+    chapterIndex: currentChapter.index,
+  };
+
   const densityRatio = React.useMemo(() => {
     const standardCapacity = Math.max(100, Math.round(300 * (16 / fontSize) * 0.82));
     return wordsPerPage / standardCapacity;
@@ -415,18 +439,20 @@ export function PagesVisualBox({
         onPagesComputed(computedPages);
 
         // --- Direct page restoration from saved local page index ---
-        // When a valid savedLocalPageIndex is stored, jump directly to that page
-        // within the current chapter WITHOUT going through the wordIndex→page mapping.
-        // This is the reliable restore path: it's immune to DOM measurement drift
-        // between sessions (different font loads, container sizes, etc.).
-        if (savedLocalPageIndex !== undefined) {
-          const chapterPages = computedPages.filter(p => p.chapterIndex === currentChapter.index);
+        // Read from latestRestoreTargetRef so we always use the values that are
+        // current at the moment this async function finishes, not the stale
+        // closure values captured when the effect was first scheduled.
+        // This is critical because the restore effect in useReaderPlayback fires
+        // AFTER the pagination effect starts, and containerDimensions does not
+        // change between renders, so the effect would otherwise never cancel/
+        // restart with the correct chapter/wordIndex/savedLocalPageIndex.
+        const { savedLocalPageIndex: currentSLPI, wordIndex: currentWI, chapterIndex: currentCI } = latestRestoreTargetRef.current;
+        console.log(`[DEBUG PagesVisualBox PAGINATE] done. currentSLPI=${currentSLPI} currentWI=${currentWI} currentCI=${currentCI}`);
+        if (currentSLPI !== undefined) {
+          const chapterPages = computedPages.filter(p => p.chapterIndex === currentCI);
           const maxLocalPage = Math.max(0, chapterPages.length - 1);
-          const clampedPage = Math.min(savedLocalPageIndex, maxLocalPage);
-          // Prevent the useLayoutEffect from overriding this restoration
-          // by marking the page's startWordIndex as a "local change" AND
-          // setting the pending restore guard so the layoutEffect won't
-          // re-derive page 0 from wordIndex before allBookPages is ready.
+          const clampedPage = Math.min(currentSLPI, maxLocalPage);
+          console.log(`[DEBUG PagesVisualBox PAGINATE] Using savedLocalPageIndex=${currentSLPI} -> clampedPage=${clampedPage}`);
           if (chapterPages[clampedPage]) {
             localWordIndexChangeRef.current = chapterPages[clampedPage].startWordIndex;
           }
@@ -435,8 +461,9 @@ export function PagesVisualBox({
         } else {
           // No saved page index — derive from wordIndex using the freshly computed pages
           const page = computedPages.find(
-            (p) => p.chapterIndex === currentChapter.index && wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
+            (p) => p.chapterIndex === currentCI && currentWI >= p.startWordIndex && currentWI <= p.endWordIndex
           );
+          console.log(`[DEBUG PagesVisualBox PAGINATE] Using wordIndex=${currentWI} -> page.pageIndex=${page?.pageIndex}`);
           if (page) {
             pendingRestorePageRef.current = page.pageIndex;
             setCurrentPageIndex(page.pageIndex);
@@ -453,8 +480,25 @@ export function PagesVisualBox({
     return () => {
       active = false;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- currentChapter.index, savedLocalPageIndex, wordIndex are read as closures when async pagination completes, not as triggers
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- closures for savedLocalPageIndex/wordIndex/currentChapter.index are intentionally read via latestRestoreTargetRef at async completion time
   }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage]);
+
+  // Eagerly guard pendingRestorePageRef when we know there is a saved page to
+  // restore. This runs synchronously (useLayoutEffect) BEFORE the async
+  // paginateAllChapters completes, preventing the wordIndex-change layoutEffect
+  // below from calling getPageIndexForWord() and overwriting currentPageIndex
+  // with 0 while allBookPages is still empty or stale.
+  React.useLayoutEffect(() => {
+    if (savedLocalPageIndex !== undefined) {
+      // Signal that a restore is pending so the layout effect below skips its
+      // word→page derivation. The exact page number isn't known yet (pending
+      // async pagination), so store a sentinel (-1) to distinguish from the
+      // real page value set later by paginateAllChapters.
+      if (pendingRestorePageRef.current === null) {
+        pendingRestorePageRef.current = -1;
+      }
+    }
+  }, [savedLocalPageIndex]);
 
   // Measure synchronously after layout is computed but before the browser paints!
   // This completely eliminates any blank flickering or jumping movements!
@@ -466,13 +510,18 @@ export function PagesVisualBox({
       const pages = Math.max(1, Math.ceil((scrollWidth + columnGap) / (width + columnGap)));
       setTotalPages(pages);
       
-      // If the pagination effect just restored a page (via savedLocalPageIndex
-      // or wordIndex→page derivation), honour that value and don't override it
-      // with the potentially-stale getPageIndexForWord (which returns 0 when
-      // allBookPages is still empty during the initial render cycle).
+      // If the pagination effect has set (or is about to set) a specific page to
+      // restore to, skip the word→page derivation here to avoid overwriting it.
+      // pendingRestorePageRef is -1 (sentinel) while async pagination is still
+      // running and a restore is expected, or a real page index (>= 0) once
+      // paginateAllChapters has finished computing the target page.
       if (pendingRestorePageRef.current !== null) {
-        pendingRestorePageRef.current = null;
-        localWordIndexChangeRef.current = null;
+        if (pendingRestorePageRef.current >= 0) {
+          // Real page index set by paginateAllChapters — clear both guards now.
+          pendingRestorePageRef.current = null;
+          localWordIndexChangeRef.current = null;
+        }
+        // Either way (sentinel or real), skip the word→page derivation.
         return;
       }
       
