@@ -1,85 +1,19 @@
 "use client";
 
 import * as React from "react";
-import DOMPurify from "isomorphic-dompurify";
 import { Bookmark } from "@/core/entities/book";
 import { BookmarkCorner } from "./BookmarkCorner";
-import { tagHtmlBlocksWithWordIndices, BookVisualPage } from "@/lib/parser/paginator";
+import { BookVisualPage } from "@/lib/parser/paginator";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
-interface ChapterData {
-  title: string;
-  content: string;
-  htmlContent?: string;
-  index: number;
-  words?: string[];
-}
-
-// Helper function to prepare and tag chapter HTML in a standardized way
-function prepareChapterHtml(chapter: ChapterData): string {
-  let rawHtml = "";
-  if (chapter.htmlContent) {
-    rawHtml = chapter.htmlContent;
-  } else {
-    // Fallback convert plain text to simple paragraphs
-    rawHtml = chapter.content
-      .split(/\n\s*\n+/)
-      .map((p) => {
-        const clean = p.trim();
-        if (!clean) return "";
-        return `<p class="mb-4 text-justify leading-relaxed">${clean}</p>`;
-      })
-      .join("");
-  }
-
-  let finalHtml = rawHtml;
-
-  // Clean trailing empty elements
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(`<div>${rawHtml}</div>`, "text/html");
-    const container = doc.body.firstElementChild as HTMLElement;
-    if (container) {
-      const cleanTrailing = (el: HTMLElement): boolean => {
-        let modified = false;
-        const children = Array.from(el.children);
-        for (let i = children.length - 1; i >= 0; i--) {
-          const child = children[i] as HTMLElement;
-          const tagName = child.tagName.toLowerCase();
-          const text = child.textContent?.trim() || "";
-          const isMedia = child.querySelector("img, image, svg, iframe") || tagName === "img";
-          
-          if (!text && !isMedia && (tagName === "p" || tagName === "div" || tagName === "br" || tagName === "span" || tagName === "section")) {
-            child.remove();
-            modified = true;
-          } else {
-            if (tagName === "div" || tagName === "p" || tagName === "section") {
-              if (cleanTrailing(child)) {
-                modified = true;
-              }
-            }
-            break;
-          }
-        }
-        return modified;
-      };
-
-      cleanTrailing(container);
-      finalHtml = container.innerHTML;
-    }
-  } catch (e) {
-    console.warn("Failed to sanitize/trim trailing empty tags:", e);
-  }
-
-  finalHtml = DOMPurify.sanitize(finalHtml);
-
-  const tagged = tagHtmlBlocksWithWordIndices(finalHtml);
-  return tagged.html;
-}
+// Extracted Sub-Components and Utilities
+import { prepareChapterHtml, ChapterHtmlData } from "@/features/reader/utils/chapterHtml";
+import { ReaderEpubStyles } from "./ReaderEpubStyles";
+import { PagesFooter } from "./PagesFooter";
 
 interface PagesVisualBoxProps {
-  currentChapter: ChapterData;
-  chaptersData: ChapterData[];
+  currentChapter: ChapterHtmlData;
+  chaptersData: ChapterHtmlData[];
   activePage: BookVisualPage | null;
   allBookPages: BookVisualPage[];
   onPagesComputed?: (computedPages: BookVisualPage[]) => void;
@@ -293,20 +227,6 @@ export function PagesVisualBox({
     
     return 0;
   }, [containerDimensions, allBookPages, currentChapter.index]);
-
-  // Dynamic Page Count calculations based on element layout scrollWidth
-  const updatePagesCount = React.useCallback(() => {
-    const el = columnsContainerRef.current;
-    if (el && containerDimensions) {
-      const width = containerDimensions.width || 1;
-      const scrollWidth = el.scrollWidth;
-      const pages = Math.max(1, Math.ceil((scrollWidth + columnGap) / (width + columnGap)));
-      setTotalPages((prev) => {
-        if (prev === pages) return prev;
-        return pages;
-      });
-    }
-  }, [containerDimensions]);
 
   // Background dynamic DOM pagination to get pixel-perfect 1:1 pages count for all chapters.
   // Performs measurements sequentially in requestAnimationFrame ticks to keep the thread fully responsive.
@@ -561,10 +481,6 @@ export function PagesVisualBox({
     return getWordIndexForPage(currentPageIndex);
   }, [currentPageIndex, getWordIndexForPage]);
 
-  const pageEndWordIndex = React.useMemo(() => {
-    return Math.min(totalWords - 1, getWordIndexForPage(currentPageIndex + 1) - 1);
-  }, [currentPageIndex, totalWords, getWordIndexForPage]);
-
   const activeBookmark = React.useMemo(() => {
     if (!bookmarks) return null;
     return (
@@ -605,15 +521,13 @@ export function PagesVisualBox({
 
   const defaultBookmarkName = React.useMemo(() => {
     return `Page ${globalPageDetails.current} of ${globalPageDetails.total}`;
-  }, [globalPageDetails.current, globalPageDetails.total]);
+  }, [globalPageDetails]);
 
   const isLastChapter = currentChapter.index === chaptersData.length - 1;
 
   const showPrevChapter = currentPageIndex === 0;
   const showCompleteBook = currentPageIndex === totalPages - 1 && isLastChapter;
   const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter;
-
-
 
   const handlePrev = () => {
     if (currentPageIndex > 0) {
@@ -649,141 +563,9 @@ export function PagesVisualBox({
 
   return (
     <div className="w-full bg-card/65 dark:bg-card/45 border border-border/20 rounded-2xl px-5 pb-4 pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl glass-panel relative overflow-hidden transition-opacity duration-300 flex flex-col h-[660px] min-h-[660px] max-h-[660px]">
-      {/* Stylesheet reset for injected EPUB components to force premium visual styles, zero cuts, and dark-resiliency */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          .epub-content {
-            font-family: var(--font-serif, serif);
-            color: hsl(var(--foreground));
-          }
-
-          /* General reset for direct block tags inside columns to prevent clipping at the column edges */
-          .epub-content > * {
-            padding-left: 6px;
-            padding-right: 6px;
-            box-sizing: border-box;
-          }
-
-          .epub-content h1, .epub-content h2, .epub-content h3, .epub-content h4, .epub-content h5, .epub-content h6 {
-            color: hsl(var(--primary));
-            font-family: var(--font-heading, inherit);
-            font-weight: 700;
-            margin-top: 1.2em;
-            margin-bottom: 0.6em;
-            line-height: 1.25;
-            break-inside: avoid-column;
-            column-break-inside: avoid;
-            break-after: avoid;
-            column-break-after: avoid;
-          }
-          .epub-content h1 { font-size: 1.65em; }
-          .epub-content h2 { font-size: 1.45em; }
-          .epub-content h3 { font-size: 1.25em; }
-          
-          /* Spaced paragraphs for divisions and text segments */
-          .epub-content p {
-            margin-bottom: 1em;
-            text-align: justify;
-            line-height: 1.75;
-            text-indent: 1.5em;
-            /* Defensive column wrapping protection - absolutely zero cuts between pages! */
-            break-inside: avoid-column;
-            column-break-inside: avoid;
-            page-break-inside: avoid;
-          }
-          
-          /* Space bare div tags that act as paragraphs in Project Gutenberg EPUBs */
-          .epub-content div:not(:empty) {
-            margin-bottom: 0.8rem;
-            line-height: 1.75;
-            text-align: justify;
-            break-inside: avoid-column;
-            column-break-inside: avoid;
-          }
-          
-          .epub-content p:first-of-type, 
-          .epub-content h1 + p, 
-          .epub-content h2 + p, 
-          .epub-content h3 + p,
-          .epub-content div + p {
-            text-indent: 0;
-          }
-          
-          .epub-content img {
-            max-width: 100%;
-            max-height: 280px;
-            height: auto;
-            object-fit: contain;
-            display: block;
-            margin: 1.5em auto;
-            border-radius: 0.5rem;
-            break-inside: avoid;
-            column-break-inside: avoid;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-          }
-          
-          .epub-content ul {
-            list-style-type: disc;
-            margin-bottom: 1em;
-            padding-left: 2em;
-            break-inside: avoid-column;
-            column-break-inside: avoid;
-          }
-          
-          .epub-content ol {
-            list-style-type: decimal;
-            margin-bottom: 1em;
-            padding-left: 2em;
-            break-inside: avoid-column;
-            column-break-inside: avoid;
-          }
-          
-          .epub-content li {
-            margin-bottom: 0.5em;
-            line-height: 1.6;
-            break-inside: avoid-column;
-            column-break-inside: avoid;
-          }
-          
-          .epub-content blockquote {
-            border-left: 4px solid hsl(var(--primary));
-            padding-left: 1.2em;
-            margin: 1.5em 0;
-            color: hsl(var(--muted-foreground));
-            font-style: italic;
-            break-inside: avoid-column;
-            column-break-inside: avoid;
-          }
-          
-          .epub-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5em 0;
-            font-size: 0.9em;
-            break-inside: avoid-column;
-            column-break-inside: avoid;
-          }
-          
-          .epub-content th, .epub-content td {
-            border: 1px solid hsl(var(--border));
-            padding: 0.6em;
-            text-align: left;
-          }
-          
-          .epub-content th {
-            background-color: hsl(var(--accent));
-            font-weight: 700;
-          }
-          
-          /* Defensive links styles - completely overrides visited link purple and underline! */
-          .epub-content a, .epub-content a:visited, .epub-content a:hover, .epub-content a:active {
-            color: inherit !important;
-            text-decoration: none !important;
-            cursor: text !important;
-            pointer-events: none !important;
-          }
-        `
-      }} />
+      
+      {/* Stylesheet reset component */}
+      <ReaderEpubStyles />
 
       {/* Ribbon Bookmark Corner */}
       <BookmarkCorner
@@ -811,8 +593,7 @@ export function PagesVisualBox({
         ref={canvasWrapperRef}
         className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start"
       >
-        {/* Pagination loading overlay: shown while the background DOM paginator hasn't finished yet.
-            This prevents the page-0 flash that previously occurred when wordIndex > 0 but allBookPages was still empty. */}
+        {/* Pagination loading overlay */}
         {!isPaginationReady && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-xl">
             <LoadingSpinner message="Rendering pages..." />
@@ -845,67 +626,21 @@ export function PagesVisualBox({
         </div>
       </div>
 
-      {/* Footer Navigation (strictly fixed height to eliminate sub-pixel layout feedback loops) */}
-      <div className="h-12 min-h-[48px] max-h-[48px] flex justify-between items-center pt-3 border-t border-border/10 mt-1 text-xs font-mono text-muted-foreground relative shrink-0">
-        <button
-          data-testid="prev-page-button"
-          onClick={handlePrev}
-          disabled={!isPaginationReady || (currentPageIndex === 0 && currentChapter.index === 0)}
-          className="flex items-center gap-1.5 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none z-20"
-        >
-          <span className="material-symbols-outlined text-sm">arrow_back_ios</span>
-          {showPrevChapter ? "Previous Chapter" : "Previous Page"}
-        </button>
-
-        {/* Page indicator & Slider */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5">
-          <div className="text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60 pointer-events-none leading-none">
-            Page {globalPageDetails.current} of {globalPageDetails.total}
-          </div>
-          {allBookPages.length > 0 && (
-            <input
-              type="range"
-              min="1"
-              max={globalPageDetails.total}
-              value={globalPageDetails.current}
-              onChange={(e) => {
-                const targetPageNum = Number(e.target.value);
-                const targetPage = allBookPages.find(p => p.absolutePageIndex === targetPageNum - 1);
-                if (targetPage) {
-                  if (targetPage.chapterIndex !== currentChapter.index) {
-                    setActiveChapterIndex(targetPage.chapterIndex);
-                  }
-                  setWordIndex(targetPage.startWordIndex);
-                }
-              }}
-              className="w-32 accent-primary h-1 bg-border/40 hover:bg-border/60 rounded-lg appearance-none cursor-pointer transition-colors z-30"
-              title={`Page ${globalPageDetails.current} of ${globalPageDetails.total}`}
-            />
-          )}
-        </div>
-
-        <button
-          data-testid="next-page-button"
-          onClick={handleNext}
-          className={`flex items-center gap-1.5 transition-all z-20 hover:text-primary ${
-            showCompleteBook
-              ? "text-primary font-extrabold bg-primary/10 border border-primary/30 px-3 py-1 rounded hover:bg-primary hover:text-primary-foreground shadow-md shadow-primary/10"
-              : ""
-          }`}
-        >
-          {showCompleteBook ? (
-            <>
-              Complete Book
-              <span className="material-symbols-outlined text-base">task_alt</span>
-            </>
-          ) : (
-            <>
-              {showNextChapter ? "Next Chapter" : "Next Page"}
-              <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
-            </>
-          )}
-        </button>
-      </div>
+      {/* Footer Navigation Component */}
+      <PagesFooter
+        isPaginationReady={isPaginationReady}
+        currentPageIndex={currentPageIndex}
+        currentChapterIndex={currentChapter.index}
+        globalPageDetails={globalPageDetails}
+        allBookPages={allBookPages}
+        showPrevChapter={showPrevChapter}
+        showNextChapter={showNextChapter}
+        showCompleteBook={showCompleteBook}
+        handlePrev={handlePrev}
+        handleNext={handleNext}
+        setActiveChapterIndex={setActiveChapterIndex}
+        setWordIndex={setWordIndex}
+      />
 
       {/* Hidden offscreen container for background pagination */}
       <div

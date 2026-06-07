@@ -6,6 +6,10 @@ import { generateDynamicClusters } from "@/core/algorithms/clusters";
 import { StatsService } from "@/core/services/stats-service";
 import { BookVisualPage } from "@/lib/parser/paginator";
 
+// Extracted Sub-Hooks
+import { useReaderBookmarks } from "./useReaderBookmarks";
+import { useReaderAutosave } from "./useReaderAutosave";
+
 export interface UseReaderPlaybackProps {
   activeBook: Book | null;
   updateBook: (id: string, updates: Partial<Book>) => void;
@@ -160,9 +164,6 @@ export function useReaderPlayback({
     latestPositionRef.current = { wordIndex, activeChapterIndex };
   }, [wordIndex, activeChapterIndex]);
 
-  // Keep track of the active book ID to save progress before switching books
-  const prevBookIdRef = React.useRef<string | null>(null);
-
   // Core callback to save book progress to database context
   const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number, localPageIdx?: number) => {
     if (chaptersData.length === 0) {
@@ -217,67 +218,16 @@ export function useReaderPlayback({
     });
   }, [chaptersData, updateBook, mode]);
 
-  // Event Callback ref pattern to avoid infinite loops when saveProgressForBook changes reference
-  const saveProgressRef = React.useRef(saveProgressForBook);
-  React.useEffect(() => {
-    saveProgressRef.current = saveProgressForBook;
-  }, [saveProgressForBook]);
-
-  // Unmount cleanup and tab close safety hook
-  React.useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (initializedBookIdRef.current === activeBook?.id) {
-        saveProgressRef.current(
-          initializedBookIdRef.current,
-          latestPositionRef.current.activeChapterIndex,
-          latestPositionRef.current.wordIndex
-        );
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      if (initializedBookIdRef.current) {
-        const bookId = initializedBookIdRef.current;
-        const ch = latestPositionRef.current.activeChapterIndex;
-        const wi = latestPositionRef.current.wordIndex;
-        saveProgressRef.current(bookId, ch, wi);
-      }
-    };
-  }, [activeBook?.id]);
-
-  // Save previous book progress when activeBook changes
-  React.useEffect(() => {
-    if (activeBook) {
-      if (prevBookIdRef.current && prevBookIdRef.current !== activeBook.id) {
-        if (initializedBookIdRef.current === prevBookIdRef.current) {
-          saveProgressRef.current(
-            prevBookIdRef.current,
-            latestPositionRef.current.activeChapterIndex,
-            latestPositionRef.current.wordIndex
-          );
-        }
-      }
-      prevBookIdRef.current = activeBook.id;
-    }
-  }, [activeBook]);
-
-  const wasPlayingRef = React.useRef(false);
-
-  // Save position when the player pauses
-  React.useEffect(() => {
-    if (!isPlaying && wasPlayingRef.current && initializedBookIdRef.current === activeBook?.id) {
-      setWordIndex(currentWordIndexRef.current);
-      saveProgressRef.current(
-        initializedBookIdRef.current,
-        latestPositionRef.current.activeChapterIndex,
-        currentWordIndexRef.current
-      );
-    }
-    wasPlayingRef.current = isPlaying;
-  }, [isPlaying, activeBook?.id]);
+  // Consuming custom Autosave Hook
+  useReaderAutosave({
+    activeBook,
+    isPlaying,
+    currentWordIndexRef,
+    latestPositionRef,
+    initializedBookIdRef,
+    saveProgressForBook,
+    setWordIndex,
+  });
 
   // Intercept and wrap chapter selection to trigger immediate saves
   const handleChapterChange = React.useCallback((chapterIndex: number) => {
@@ -589,56 +539,21 @@ export function useReaderPlayback({
     }
   }, [activeChapterIndex, chaptersData.length, saveProgressForBook, wordIndex, handlePageChange]);
 
-  // Add a new named bookmark and persist it
-  const handleAddBookmark = React.useCallback((name: string, chapterIndex: number, wordIndex: number) => {
-    if (!activeBook) return;
-    const currentBookmarks = activeBook.bookmarks || [];
-    
-    // Find chapter title
-    const chapterTitle = chaptersData[chapterIndex]?.title || `Section ${chapterIndex + 1}`;
-    
-    const newBookmark = {
-      id: `bookmark-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      chapterIndex,
-      wordIndex,
-      name,
-      createdAt: new Date().toISOString(),
-      chapterTitle,
-    };
-    
-    updateBook(activeBook.id, {
-      bookmarks: [...currentBookmarks, newBookmark],
-    });
-  }, [activeBook, chaptersData, updateBook]);
-
-  // Remove an existing bookmark
-  const handleRemoveBookmark = React.useCallback((id: string) => {
-    if (!activeBook) return;
-    const currentBookmarks = activeBook.bookmarks || [];
-    updateBook(activeBook.id, {
-      bookmarks: currentBookmarks.filter((b) => b.id !== id),
-    });
-  }, [activeBook, updateBook]);
-
-  // Update a bookmark's custom name
-  const handleUpdateBookmarkName = React.useCallback((id: string, name: string) => {
-    if (!activeBook) return;
-    const currentBookmarks = activeBook.bookmarks || [];
-    updateBook(activeBook.id, {
-      bookmarks: currentBookmarks.map((b) => (b.id === id ? { ...b, name } : b)),
-    });
-  }, [activeBook, updateBook]);
-
-  // Jump to any saved bookmark position
-  const handleGoToBookmark = React.useCallback((chapterIndex: number, wordIndex: number) => {
-    setIsPlaying(false);
-    setActiveChapterIndex(chapterIndex);
-    setWordIndex(wordIndex);
-    const activeBookVal = activeBookRef.current;
-    if (activeBookVal) {
-      saveProgressForBook(activeBookVal.id, chapterIndex, wordIndex);
-    }
-  }, [saveProgressForBook]);
+  // Consuming custom Bookmarks Hook
+  const {
+    handleAddBookmark,
+    handleRemoveBookmark,
+    handleUpdateBookmarkName,
+    handleGoToBookmark,
+  } = useReaderBookmarks({
+    activeBook,
+    updateBook,
+    chaptersData,
+    setIsPlaying,
+    setActiveChapterIndex,
+    setWordIndex,
+    saveProgressForBook,
+  });
 
   const progressPercentage = React.useMemo(() => {
     if (chaptersData.length === 0) return 0;
