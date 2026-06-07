@@ -64,23 +64,22 @@ export function BookmarkCorner({
 
   return (
     <div className="absolute top-0 right-8 z-30 flex flex-col items-end">
-      {/* Visual bookmark ribbon hanging from container top */}
       <button
         onClick={handleTogglePopover}
-        className="group relative transition-all duration-300 transform origin-top hover:scale-y-110 focus:outline-none"
+        className="group relative focus:outline-none"
         title={activeBookmark ? "Edit bookmark" : "Add bookmark"}
       >
         <svg
           width="22"
           height="34"
           viewBox="0 0 22 34"
-          className={`transition-colors duration-300 ${
+          className={`transition-all duration-300 transform gpu origin-top group-hover:scale-y-110 will-change-transform ${
             activeBookmark
-              ? "fill-primary text-primary stroke-primary/30 drop-shadow-[0_2px_4px_rgba(var(--primary),0.3)]"
+              ? "fill-primary text-primary stroke-primary/30 drop-shadow-[0_2px_4px_hsl(var(--primary)/0.3)]"
               : "fill-muted-foreground/15 text-muted-foreground/15 stroke-muted-foreground/35 hover:fill-muted-foreground/35 hover:stroke-muted-foreground/50"
           }`}
         >
-          <path d="M0 0 H22 V30 L11 23 L0 30 Z" strokeWidth="1" />
+          <path d="M0.5 0 H21.5 V29.5 L11 22.5 L0.5 29.5 Z" strokeWidth="1" />
         </svg>
 
         {/* Small dot inside active bookmark to make it feel extra premium */}
