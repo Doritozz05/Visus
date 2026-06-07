@@ -9,6 +9,9 @@ import { BookVisualPage } from "@/lib/parser/paginator";
 // Extracted Sub-Hooks
 import { useReaderBookmarks } from "./useReaderBookmarks";
 import { useReaderAutosave } from "./useReaderAutosave";
+import { usePlaybackProgress } from "./usePlaybackProgress";
+import { useRsvpEngine } from "./useRsvpEngine";
+import { useClusterEngine } from "./useClusterEngine";
 
 export interface UseReaderPlaybackProps {
   activeBook: Book | null;
@@ -128,34 +131,22 @@ export function useReaderPlayback({
   // Derived properties from active chapter index, computing sequences just-in-time for the active chapter only
   const currentChapter = React.useMemo(() => {
     if (chaptersData.length === 0) {
-      return { title: "No Book Loaded", content: "", words: [], rsvpSequence: [], clusterChunks: [], index: 0 };
+      return { title: "No Book Loaded", content: "", words: [], index: 0 };
     }
     const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
     const ch = chaptersData[safeIdx];
     
-    // Generate RSVP, Cluster sequences, and words JIT to guarantee instant page transitions
-    const wordsArr = ch.content.split(/\s+/).filter(w => w.trim() !== "");
-    const rsvpSeq = generateRSVPSequence(wordsArr);
-    const clusterSeq = generateDynamicClusters(wordsArr, 3);
+    // Generate words JIT to guarantee instant page transitions
+    const wordsArr = ch.content ? ch.content.split(/\s+/).filter(w => w.trim() !== "") : [];
     
     return {
       ...ch,
       words: wordsArr,
-      rsvpSequence: rsvpSeq,
-      clusterChunks: clusterSeq,
     };
   }, [chaptersData, activeChapterIndex]);
 
   const words = React.useMemo(() => {
     return currentChapter?.words || [];
-  }, [currentChapter]);
-
-  const rsvpSequence = React.useMemo(() => {
-    return currentChapter?.rsvpSequence || [];
-  }, [currentChapter]);
-
-  const clusterChunks = React.useMemo(() => {
-    return currentChapter?.clusterChunks || [];
   }, [currentChapter]);
 
   // Keep the latest wordIndex and activeChapterIndex in a ref so we can save it on unmount / beforeunload without re-subscribing the event listeners
@@ -164,69 +155,40 @@ export function useReaderPlayback({
     latestPositionRef.current = { wordIndex, activeChapterIndex };
   }, [wordIndex, activeChapterIndex]);
 
-  // Core callback to save book progress to database context
-  const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number, localPageIdx?: number) => {
-    if (chaptersData.length === 0) {
-      return;
-    }
-    
-    // Do NOT overwrite completed status due to unmount cleanup races if we are still near the end
-    if (activeBookRef.current?.id === bookId && activeBookRef.current?.status === "completed") {
-      const isLastChapter = chIdx === chaptersData.length - 1;
-      const targetChapter = chaptersData[chIdx];
-      if (targetChapter) {
-        const chWords = targetChapter.content ? targetChapter.content.split(/\s+/).filter(w => w.trim() !== "") : [];
-        const chWordsLength = chWords.length || 1;
-        const isAtLastWords = wIdx >= chWordsLength - 10;
-        if (isLastChapter && isAtLastWords) {
-          return;
-        }
-      }
-    }
-    
-    const targetChapter = chaptersData[chIdx];
-    if (!targetChapter) {
-      return;
-    }
-    
-    // Safely calculate words count from content as chaptersData is lightweight
-    const chWords = targetChapter.content ? targetChapter.content.split(/\s+/).filter(w => w.trim() !== "") : [];
-    const chWordsLength = chWords.length || 1;
-    
-    const progressInChapter = wIdx / chWordsLength;
-    let currentProgress = Math.min(
-      100,
-      Math.round(((chIdx + progressInChapter) / chaptersData.length) * 100)
-    );
+  const { saveProgressForBook } = usePlaybackProgress({
+    activeBookRef,
+    chaptersData,
+    mode,
+    allBookPages,
+    updateBook,
+  });
 
-    const isLastChapter = chIdx === chaptersData.length - 1;
-    const isAtLastWords = wIdx >= chWordsLength - 5;
-    
-    if (isLastChapter && isAtLastWords) {
-      currentProgress = 100;
-    }
+  const { rsvpSequence } = useRsvpEngine({
+    currentChapter,
+    isPlaying,
+    mode,
+    wpm,
+    currentWordIndexRef,
+    setWordIndex,
+    setCompletedChapter,
+    setIsPlaying,
+    playbackListeners,
+    latestPositionRef,
+  });
 
-    const finalLocalPageIdx = mode === "normal"
-      ? (localPageIdx !== undefined
-        ? localPageIdx
-        : (() => {
-            if (allBookPages.length > 0) {
-              const page = allBookPages.find(
-                (p) => p.chapterIndex === chIdx && wIdx >= p.startWordIndex && wIdx <= p.endWordIndex
-              );
-              return page ? page.pageIndex : undefined;
-            }
-            return undefined;
-          })())
-      : undefined;
-
-    updateBook(bookId, {
-      progress: currentProgress,
-      lastChapterIndex: chIdx,
-      lastWordIndex: wIdx,
-      lastLocalPageIndex: finalLocalPageIdx,
-    });
-  }, [chaptersData, updateBook, mode, allBookPages]);
+  const { clusterChunks, activeClusterIndex } = useClusterEngine({
+    currentChapter,
+    wordIndex,
+    isPlaying,
+    mode,
+    wpm,
+    currentWordIndexRef,
+    setWordIndex,
+    setCompletedChapter,
+    setIsPlaying,
+    playbackListeners,
+    latestPositionRef,
+  });
 
   // Consuming custom Autosave Hook
   useReaderAutosave({
@@ -358,85 +320,7 @@ export function useReaderPlayback({
     };
   }, [activeBook, chaptersData.length, updateBook]);
 
-  // Map individual word index to correct dynamic semantic foveal cluster chunk
-  const activeClusterIndex = React.useMemo(() => {
-    let currentWordOffset = 0;
-    for (let i = 0; i < clusterChunks.length; i++) {
-      const chunkWordsCount = clusterChunks[i].wordCount;
-      if (wordIndex >= currentWordOffset && wordIndex < currentWordOffset + chunkWordsCount) {
-        return i;
-      }
-      currentWordOffset += chunkWordsCount;
-    }
-    return Math.max(0, clusterChunks.length - 1);
-  }, [clusterChunks, wordIndex]);
 
-  // Master speed reading playback timer loop (chapter-scoped)
-  React.useEffect(() => {
-    if (!isPlaying || rsvpSequence.length === 0) return;
-
-    let timeoutId: NodeJS.Timeout | null = null;
-
-    const tick = () => {
-      const currentIdx = currentWordIndexRef.current;
-      const baseDelayMs = (60 * 1000) / wpm;
-      let finalDelay = baseDelayMs;
-      let wordsToAdvance = 1;
-
-      if (mode === "rsvp") {
-        const currentWordObj = rsvpSequence[currentIdx];
-        const delayMultiplier = currentWordObj ? currentWordObj.delayMultiplier : 1.0;
-        finalDelay = baseDelayMs * delayMultiplier;
-        wordsToAdvance = 1;
-      } else if (mode === "cluster") {
-        let activeClusterIdx = 0;
-        let currentWordOffset = 0;
-        for (let i = 0; i < clusterChunks.length; i++) {
-          const chunkWordsCount = clusterChunks[i].wordCount;
-          if (currentIdx >= currentWordOffset && currentIdx < currentWordOffset + chunkWordsCount) {
-            activeClusterIdx = i;
-            break;
-          }
-          currentWordOffset += chunkWordsCount;
-        }
-
-        const currentChunk = clusterChunks[activeClusterIdx];
-        if (currentChunk) {
-          const delayMultiplier = currentChunk.delayMultiplier || 1.0;
-          finalDelay = baseDelayMs * currentChunk.wordCount * delayMultiplier;
-          wordsToAdvance = currentChunk.wordCount;
-        }
-      } else {
-        setIsPlaying(false);
-        return;
-      }
-
-      timeoutId = setTimeout(() => {
-        const nextIndex = currentIdx + wordsToAdvance;
-
-        if (nextIndex >= rsvpSequence.length) {
-          setIsPlaying(false);
-          setCompletedChapter(currentChapter.title);
-          setWordIndex(Math.min(nextIndex, rsvpSequence.length - 1));
-        } else {
-          currentWordIndexRef.current = nextIndex;
-          latestPositionRef.current.wordIndex = nextIndex;
-          playbackListeners.forEach((cb) => cb(nextIndex));
-
-          if (nextIndex % 10 === 0) {
-            setWordIndex(nextIndex);
-          }
-          tick();
-        }
-      }, finalDelay);
-    };
-
-    tick();
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [isPlaying, wpm, rsvpSequence, mode, clusterChunks, currentChapter, playbackListeners]);
 
   const handlePageChange = React.useCallback((direction: "prev" | "next", forceComplete: boolean = false) => {
     if (allBookPages.length === 0 || !activePage || !activeBookRef.current) return;

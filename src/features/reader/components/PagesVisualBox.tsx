@@ -10,6 +10,8 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { prepareChapterHtml, ChapterHtmlData } from "@/features/reader/utils/chapterHtml";
 import { ReaderEpubStyles } from "./ReaderEpubStyles";
 import { PagesFooter } from "./PagesFooter";
+import { useDomPagination } from "../hooks/useDomPagination";
+import { usePageNavigation } from "../hooks/usePageNavigation";
 
 interface PagesVisualBoxProps {
   currentChapter: ChapterHtmlData;
@@ -65,15 +67,6 @@ export function PagesVisualBox({
   const columnsContainerRef = React.useRef<HTMLDivElement>(null);
   const hiddenPaginatorRef = React.useRef<HTMLDivElement>(null);
   const canvasWrapperRef = React.useRef<HTMLDivElement>(null);
-  
-  // Tracks whether the background DOM paginator has completed its first pass.
-  // While false, we show a spinner instead of the column content to prevent
-  // the page-0 flash that occurs before allBookPages is populated.
-  const [isPaginationReady, setIsPaginationReady] = React.useState(allBookPages.length > 0);
-  
-  // Tracks whether we have already completed at least one full pagination calculation
-  // for the current book. Helps differentiate between initial load and font/dimension reflows.
-  const hasComputedRef = React.useRef(false);
   
   // Track visible container dimensions for offscreen DOM pagination
   const [containerDimensions, setContainerDimensions] = React.useState<{ width: number; height: number } | null>(null);
@@ -137,284 +130,44 @@ export function PagesVisualBox({
     return prepareChapterHtml(currentChapter);
   }, [currentChapter]);
 
-  // Bi-directional word mapping conversions
-  const totalWords = React.useMemo(() => {
-    const wordsArr = currentChapter.content.split(/\s+/).filter((w) => w.trim() !== "");
-    return Math.max(1, wordsArr.length);
-  }, [currentChapter.content]);
+  // Consuming custom DOM pagination hook
+  const { isPaginationReady } = useDomPagination({
+    chaptersData,
+    containerDimensions,
+    onPagesComputed,
+    scaledFontSize,
+    readerFontClass,
+    wordsPerPage,
+    hiddenPaginatorRef,
+    columnGap,
+    latestRestoreTargetRef,
+    setCurrentPageIndex,
+    localWordIndexChangeRef,
+    pendingRestorePageRef,
+    initialReady: allBookPages.length > 0,
+  });
 
-  // Helper to map wordIndex to the exact page index using DOM coordinates!
-  const getPageIndexForWord = React.useCallback((wIdx: number): number => {
-    if (allBookPages.length > 0) {
-      const page = allBookPages.find(
-        (p) => p.chapterIndex === currentChapter.index && wIdx >= p.startWordIndex && wIdx <= p.endWordIndex
-      );
-      if (page) {
-        return page.pageIndex;
-      }
-    }
-
-    const el = columnsContainerRef.current;
-    if (!el || !containerDimensions) return 0;
-    const width = containerDimensions.width || 1;
-    
-    // Find the block containing this word
-    const blocks = el.querySelectorAll("[data-start-word-idx]");
-    let activeBlock: HTMLElement | null = null;
-    let lastBlock: HTMLElement | null = null;
-    
-    for (let i = 0; i < blocks.length; i++) {
-      const block = blocks[i] as HTMLElement;
-      const start = parseInt(block.getAttribute("data-start-word-idx") || "0", 10);
-      const end = parseInt(block.getAttribute("data-end-word-idx") || "0", 10);
-      
-      lastBlock = block;
-      
-      if (wIdx >= start && wIdx <= end) {
-        activeBlock = block;
-        break;
-      }
-    }
-    
-    if (activeBlock) {
-      // Use Math.round to handle minor column gaps, sub-pixel offsets, and margin differences safely!
-      return Math.round(activeBlock.offsetLeft / (width + columnGap));
-    }
-    
-    // Fallback: if wordIndex exceeds tagged block range (structural chapters like TOC/licenses),
-    // return the last page instead of 0 to prevent navigation jumping to the start
-    if (lastBlock) {
-      return Math.round(lastBlock.offsetLeft / (width + columnGap));
-    }
-    
-    return 0;
-  }, [containerDimensions, allBookPages, currentChapter.index]);
-
-  // Helper to map page index to its starting word index using DOM coordinates!
-  const getWordIndexForPage = React.useCallback((pIdx: number): number => {
-    if (allBookPages.length > 0) {
-      const page = allBookPages.find(
-        (p) => p.chapterIndex === currentChapter.index && p.pageIndex === pIdx
-      );
-      if (page) {
-        return page.startWordIndex;
-      }
-    }
-
-    const el = columnsContainerRef.current;
-    if (!el || !containerDimensions) return 0;
-    const width = containerDimensions.width || 1;
-    const targetOffset = pIdx * (width + columnGap);
-    
-    const blocks = el.querySelectorAll("[data-start-word-idx]");
-    let closestBlock: HTMLElement | null = null;
-    let minDiff = Infinity;
-    
-    for (let i = 0; i < blocks.length; i++) {
-      const block = blocks[i] as HTMLElement;
-      const blockLeft = block.offsetLeft;
-      
-      // Find the first block that starts inside this target column page area
-      // Tolerating 30px for margins/paddings and sub-pixel offsets
-      if (blockLeft >= targetOffset - 30) {
-        const diff = blockLeft - targetOffset;
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestBlock = block;
-        }
-      }
-    }
-    
-    if (closestBlock) {
-      return parseInt(closestBlock.getAttribute("data-start-word-idx") || "0", 10);
-    }
-    
-    return 0;
-  }, [containerDimensions, allBookPages, currentChapter.index]);
-
-  // Background dynamic DOM pagination to get pixel-perfect 1:1 pages count for all chapters.
-  // Performs measurements sequentially in requestAnimationFrame ticks to keep the thread fully responsive.
-  React.useEffect(() => {
-    if (!onPagesComputed || !containerDimensions || chaptersData.length === 0) {
-      return;
-    }
-
-    // Reset ready flag whenever we restart pagination (e.g. chapter/font change)
-    setIsPaginationReady(false);
-
-    let active = true;
-
-    const paginateAllChapters = async () => {
-      const { width, height } = containerDimensions;
-      if (width <= 0 || height <= 0) return;
-
-      const computedPages: BookVisualPage[] = [];
-      let absolutePageIndex = 0;
-
-      for (let chIdx = 0; chIdx < chaptersData.length; chIdx++) {
-        if (!active) return;
-
-        const chapter = chaptersData[chIdx];
-        const chapterHtml = prepareChapterHtml(chapter);
-        
-        const hiddenEl = hiddenPaginatorRef.current;
-        if (!hiddenEl) return;
-        
-        hiddenEl.innerHTML = chapterHtml;
-        
-        // Wait a frame for browser layout calculation
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-        
-        if (!active) return;
-        
-        const scrollWidth = hiddenEl.scrollWidth;
-        const totalPagesInChapter = Math.max(1, Math.ceil((scrollWidth + columnGap) / (width + columnGap)));
-        
-        const blocks = hiddenEl.querySelectorAll("[data-start-word-idx]");
-        const blockPositions = Array.from(blocks).map((block) => {
-          const el = block as HTMLElement;
-          return {
-            offsetLeft: el.offsetLeft,
-            startIdx: parseInt(el.getAttribute("data-start-word-idx") || "0", 10),
-            endIdx: parseInt(el.getAttribute("data-end-word-idx") || "0", 10),
-          };
-        });
-        
-        const wordsArr = chapter.content.split(/\s+/).filter((w) => w.trim() !== "");
-        const totalWords = Math.max(1, wordsArr.length);
-        
-        const findStartWordForPage = (pIdx: number): number => {
-          const targetOffset = pIdx * (width + columnGap);
-          let closestBlockStart = -1;
-          let minDiff = Infinity;
-          
-          for (const block of blockPositions) {
-            if (block.offsetLeft >= targetOffset - 30) {
-              const diff = block.offsetLeft - targetOffset;
-              if (diff < minDiff) {
-                minDiff = diff;
-                closestBlockStart = block.startIdx;
-              }
-            }
-          }
-          
-          if (closestBlockStart === -1) {
-            if (blockPositions.length > 0) {
-              return blockPositions[blockPositions.length - 1].startIdx;
-            }
-            return 0;
-          }
-          
-          return closestBlockStart;
-        };
-
-        const rawChapterPages: BookVisualPage[] = [];
-        for (let pIdx = 0; pIdx < totalPagesInChapter; pIdx++) {
-          const startWordIndex = findStartWordForPage(pIdx);
-          
-          rawChapterPages.push({
-            pageIndex: pIdx,
-            chapterIndex: chIdx,
-            absolutePageIndex: 0,
-            title: `Page ${pIdx + 1}`,
-            content: "",
-            leftColumn: "",
-            rightColumn: "",
-            startWordIndex,
-            endWordIndex: 0,
-          });
-        }
-        
-        // Interpolate duplicate startWordIndex values to ensure smooth traversal and avoid collapsing pages
-        let i = 0;
-        while (i < rawChapterPages.length) {
-          let j = i + 1;
-          while (j < rawChapterPages.length && rawChapterPages[j].startWordIndex === rawChapterPages[i].startWordIndex) {
-            j++;
-          }
-          
-          const runLength = j - i;
-          if (runLength > 1) {
-            const startVal = rawChapterPages[i].startWordIndex;
-            const endVal = j < rawChapterPages.length ? rawChapterPages[j].startWordIndex : totalWords;
-            const diff = endVal - startVal;
-            
-            for (let k = 1; k < runLength; k++) {
-              const step = Math.round((runLength > 0 ? (diff * k) / runLength : 0));
-              // Ensure strictly increasing indices where possible
-              rawChapterPages[i + k].startWordIndex = Math.min(
-                endVal - (runLength - k),
-                Math.max(startVal + k, startVal + step)
-              );
-            }
-          }
-          i = j;
-        }
-        
-        // Assign correct sequential page indices and word ranges without collapsing pages
-        for (let i = 0; i < rawChapterPages.length; i++) {
-          rawChapterPages[i].pageIndex = i;
-          rawChapterPages[i].absolutePageIndex = absolutePageIndex++;
-          rawChapterPages[i].title = `Page ${i + 1}`;
-          
-          if (i < rawChapterPages.length - 1) {
-            rawChapterPages[i].endWordIndex = rawChapterPages[i + 1].startWordIndex - 1;
-          } else {
-            rawChapterPages[i].endWordIndex = totalWords - 1;
-          }
-        }
-
-        computedPages.push(...rawChapterPages);
-      }
-
-      if (active) {
-        onPagesComputed(computedPages);
-
-        // --- Direct page restoration from saved local page index ---
-        // Read from latestRestoreTargetRef so we always use the values that are
-        // current at the moment this async function finishes, not the stale
-        // closure values captured when the effect was first scheduled.
-        // This is critical because the restore effect in useReaderPlayback fires
-        // AFTER the pagination effect starts, and containerDimensions does not
-        // change between renders, so the effect would otherwise never cancel/
-        // restart with the correct chapter/wordIndex/savedLocalPageIndex.
-        const { savedLocalPageIndex: currentSLPI, wordIndex: currentWI, chapterIndex: currentCI } = latestRestoreTargetRef.current;
-        
-        const isInitialLoad = !hasComputedRef.current;
-
-        if (isInitialLoad && currentSLPI !== undefined) {
-          const chapterPages = computedPages.filter(p => p.chapterIndex === currentCI);
-          const maxLocalPage = Math.max(0, chapterPages.length - 1);
-          const clampedPage = Math.min(currentSLPI, maxLocalPage);
-          if (chapterPages[clampedPage]) {
-            localWordIndexChangeRef.current = chapterPages[clampedPage].startWordIndex;
-          }
-          pendingRestorePageRef.current = clampedPage;
-          setCurrentPageIndex(clampedPage);
-        } else {
-          // No saved page index or not initial load (reflow) — derive from wordIndex using the freshly computed pages
-          const page = computedPages.find(
-            (p) => p.chapterIndex === currentCI && currentWI >= p.startWordIndex && currentWI <= p.endWordIndex
-          );
-          if (page) {
-            pendingRestorePageRef.current = page.pageIndex;
-            setCurrentPageIndex(page.pageIndex);
-          }
-        }
-
-        hasComputedRef.current = true;
-        // Mark pagination as ready so the spinner is replaced by the actual content
-        setIsPaginationReady(true);
-      }
-    };
-
-    paginateAllChapters();
-
-    return () => {
-      active = false;
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- closures for savedLocalPageIndex/wordIndex/currentChapter.index are intentionally read via latestRestoreTargetRef at async completion time
-  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage]);
+  // Consuming custom Page navigation hook
+  const {
+    getPageIndexForWord,
+    getWordIndexForPage,
+    handlePrev,
+    handleNext,
+  } = usePageNavigation({
+    allBookPages,
+    currentChapterIndex: currentChapter.index,
+    columnsContainerRef,
+    containerDimensions,
+    columnGap,
+    currentPageIndex,
+    setCurrentPageIndex,
+    totalPages,
+    localWordIndexChangeRef,
+    setWordIndex,
+    onSavePageProgress,
+    onPrevChapter,
+    onNextChapter,
+  });
 
   // Eagerly guard pendingRestorePageRef when we know there is a saved page to
   // restore. This runs synchronously (useLayoutEffect) BEFORE the async
@@ -546,38 +299,6 @@ export function PagesVisualBox({
   const showPrevChapter = currentPageIndex === 0;
   const showCompleteBook = currentPageIndex === totalPages - 1 && isLastChapter;
   const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter;
-
-  const handlePrev = () => {
-    if (currentPageIndex > 0) {
-      const prevPageIndex = currentPageIndex - 1;
-      setCurrentPageIndex(prevPageIndex);
-      
-      const targetWordIndex = getWordIndexForPage(prevPageIndex);
-      localWordIndexChangeRef.current = targetWordIndex;
-      setWordIndex(targetWordIndex);
-      // Persist the local page index on every page turn so restore is always exact
-      onSavePageProgress?.(prevPageIndex, targetWordIndex);
-    } else {
-      // Crossing chapter boundary to previous file
-      onPrevChapter();
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPageIndex < totalPages - 1) {
-      const nextPageIndex = currentPageIndex + 1;
-      setCurrentPageIndex(nextPageIndex);
-      
-      const targetWordIndex = getWordIndexForPage(nextPageIndex);
-      localWordIndexChangeRef.current = targetWordIndex;
-      setWordIndex(targetWordIndex);
-      // Persist the local page index on every page turn so restore is always exact
-      onSavePageProgress?.(nextPageIndex, targetWordIndex);
-    } else {
-      // Crossing chapter boundary to next file or completing book
-      onNextChapter();
-    }
-  };
 
   return (
     <div className="w-full bg-card/65 dark:bg-card/45 border border-border/20 rounded-2xl px-5 pb-4 pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl glass-panel relative overflow-hidden transition-opacity duration-300 flex flex-col h-[660px] min-h-[660px] max-h-[660px]">
