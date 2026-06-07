@@ -206,17 +206,27 @@ export function useReaderPlayback({
       currentProgress = 100;
     }
 
+    const finalLocalPageIdx = mode === "normal"
+      ? (localPageIdx !== undefined
+        ? localPageIdx
+        : (() => {
+            if (allBookPages.length > 0) {
+              const page = allBookPages.find(
+                (p) => p.chapterIndex === chIdx && wIdx >= p.startWordIndex && wIdx <= p.endWordIndex
+              );
+              return page ? page.pageIndex : undefined;
+            }
+            return undefined;
+          })())
+      : undefined;
+
     updateBook(bookId, {
       progress: currentProgress,
       lastChapterIndex: chIdx,
       lastWordIndex: wIdx,
-      // If we are in Normal mode and have a page index, save it.
-      // If we are in RSVP/Cluster speed reading modes, clear it to force recalculation on mode switch.
-      ...(mode === "normal"
-        ? (localPageIdx !== undefined ? { lastLocalPageIndex: localPageIdx } : {})
-        : { lastLocalPageIndex: undefined }),
+      lastLocalPageIndex: finalLocalPageIdx,
     });
-  }, [chaptersData, updateBook, mode]);
+  }, [chaptersData, updateBook, mode, allBookPages]);
 
   // Consuming custom Autosave Hook
   useReaderAutosave({

@@ -14,7 +14,17 @@ const ASSETS_TO_CACHE = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      // Use Promise.allSettled to prevent SW installation failure if an asset (like an icon) is missing (404)
+      return Promise.allSettled(
+        ASSETS_TO_CACHE.map((url) => 
+          fetch(url).then((response) => {
+            if (!response.ok) {
+              throw new Error(`Failed to fetch ${url}`);
+            }
+            return cache.put(url, response);
+          })
+        )
+      );
     })
   );
   self.skipWaiting();

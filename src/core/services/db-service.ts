@@ -78,17 +78,26 @@ class DbService {
     return this.enqueueWrite(async () => {
       const db = await this.getDb();
       return new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction(STORES.BOOKS, "readwrite");
-        const store = transaction.objectStore(STORES.BOOKS);
-        const request = store.put(book);
+        try {
+          const transaction = db.transaction(STORES.BOOKS, "readwrite");
+          const store = transaction.objectStore(STORES.BOOKS);
+          const request = store.put(book);
 
-        request.onsuccess = () => {
-          resolve();
-        };
+          request.onsuccess = () => {
+            resolve();
+          };
 
-        request.onerror = () => {
-          reject(request.error);
-        };
+          request.onerror = () => {
+            reject(request.error);
+          };
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "InvalidStateError") {
+            // DB is closing (e.g. tab closed), fail silently
+            resolve();
+          } else {
+            reject(error);
+          }
+        }
       });
     });
   }

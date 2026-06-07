@@ -1,25 +1,9 @@
 import { parseEpub } from "@/lib/parser/epub";
 import { parsePdf } from "@/lib/parser/pdf";
 import { parseTxt } from "@/lib/parser/txt";
-import { BookChapter } from "@/core/entities/book";
+import { BookChapter, ParsedBookData } from "@/core/entities/book";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
-export interface ParsedBookData {
-  title: string;
-  author: string;
-  format: "PDF" | "EPUB" | "TXT";
-  content?: string;
-  chapters?: BookChapter[];
-  metadata?: {
-    coverUrl?: string;
-    description?: string;
-    genres?: string[];
-    publisher?: string;
-    publishDate?: string;
-    language?: string;
-  };
-}
 
 /**
  * Parses a file name to extract the guessed title, author, and format format.

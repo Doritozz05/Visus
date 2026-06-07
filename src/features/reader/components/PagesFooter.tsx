@@ -55,6 +55,7 @@ export function PagesFooter({
             min="1"
             max={globalPageDetails.total}
             value={globalPageDetails.current}
+            disabled={!isPaginationReady}
             onChange={(e) => {
               const targetPageNum = Number(e.target.value);
               const targetPage = allBookPages.find(p => p.absolutePageIndex === targetPageNum - 1);
@@ -65,7 +66,7 @@ export function PagesFooter({
                 setWordIndex(targetPage.startWordIndex);
               }
             }}
-            className="w-32 accent-primary h-1 bg-border/40 hover:bg-border/60 rounded-lg appearance-none cursor-pointer transition-colors z-30"
+            className="w-32 accent-primary h-1 bg-border/40 hover:bg-border/60 rounded-lg appearance-none cursor-pointer transition-colors z-30 disabled:opacity-30 disabled:pointer-events-none"
             title={`Page ${globalPageDetails.current} of ${globalPageDetails.total}`}
           />
         )}
@@ -74,7 +75,8 @@ export function PagesFooter({
       <button
         data-testid="next-page-button"
         onClick={handleNext}
-        className={`flex items-center gap-1.5 transition-all z-20 hover:text-primary ${
+        disabled={!isPaginationReady}
+        className={`flex items-center gap-1.5 transition-all z-20 hover:text-primary disabled:opacity-30 disabled:pointer-events-none ${
           showCompleteBook
             ? "text-primary font-extrabold bg-primary/10 border border-primary/30 px-3 py-1 rounded hover:bg-primary hover:text-primary-foreground shadow-md shadow-primary/10"
             : ""

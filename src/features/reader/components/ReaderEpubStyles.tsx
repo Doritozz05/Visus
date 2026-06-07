@@ -15,6 +15,10 @@ export function ReaderEpubStyles() {
           padding-right: 6px;
           box-sizing: border-box;
         }
+        
+        .epub-content > *:last-child {
+          margin-bottom: 0 !important;
+        }
 
         .epub-content h1, .epub-content h2, .epub-content h3, .epub-content h4, .epub-content h5, .epub-content h6 {
           color: hsl(var(--primary));

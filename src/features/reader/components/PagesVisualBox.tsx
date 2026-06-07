@@ -71,6 +71,10 @@ export function PagesVisualBox({
   // the page-0 flash that occurs before allBookPages is populated.
   const [isPaginationReady, setIsPaginationReady] = React.useState(allBookPages.length > 0);
   
+  // Tracks whether we have already completed at least one full pagination calculation
+  // for the current book. Helps differentiate between initial load and font/dimension reflows.
+  const hasComputedRef = React.useRef(false);
+  
   // Track visible container dimensions for offscreen DOM pagination
   const [containerDimensions, setContainerDimensions] = React.useState<{ width: number; height: number } | null>(null);
   
@@ -281,7 +285,7 @@ export function PagesVisualBox({
         
         const findStartWordForPage = (pIdx: number): number => {
           const targetOffset = pIdx * (width + columnGap);
-          let closestBlockStart = 0;
+          let closestBlockStart = -1;
           let minDiff = Infinity;
           
           for (const block of blockPositions) {
@@ -293,6 +297,14 @@ export function PagesVisualBox({
               }
             }
           }
+          
+          if (closestBlockStart === -1) {
+            if (blockPositions.length > 0) {
+              return blockPositions[blockPositions.length - 1].startIdx;
+            }
+            return 0;
+          }
+          
           return closestBlockStart;
         };
 
@@ -367,7 +379,10 @@ export function PagesVisualBox({
         // change between renders, so the effect would otherwise never cancel/
         // restart with the correct chapter/wordIndex/savedLocalPageIndex.
         const { savedLocalPageIndex: currentSLPI, wordIndex: currentWI, chapterIndex: currentCI } = latestRestoreTargetRef.current;
-        if (currentSLPI !== undefined) {
+        
+        const isInitialLoad = !hasComputedRef.current;
+
+        if (isInitialLoad && currentSLPI !== undefined) {
           const chapterPages = computedPages.filter(p => p.chapterIndex === currentCI);
           const maxLocalPage = Math.max(0, chapterPages.length - 1);
           const clampedPage = Math.min(currentSLPI, maxLocalPage);
@@ -377,7 +392,7 @@ export function PagesVisualBox({
           pendingRestorePageRef.current = clampedPage;
           setCurrentPageIndex(clampedPage);
         } else {
-          // No saved page index — derive from wordIndex using the freshly computed pages
+          // No saved page index or not initial load (reflow) — derive from wordIndex using the freshly computed pages
           const page = computedPages.find(
             (p) => p.chapterIndex === currentCI && currentWI >= p.startWordIndex && currentWI <= p.endWordIndex
           );
@@ -387,6 +402,7 @@ export function PagesVisualBox({
           }
         }
 
+        hasComputedRef.current = true;
         // Mark pagination as ready so the spinner is replaced by the actual content
         setIsPaginationReady(true);
       }
@@ -406,7 +422,7 @@ export function PagesVisualBox({
   // below from calling getPageIndexForWord() and overwriting currentPageIndex
   // with 0 while allBookPages is still empty or stale.
   React.useLayoutEffect(() => {
-    if (savedLocalPageIndex !== undefined) {
+    if (savedLocalPageIndex !== undefined && allBookPages.length === 0) {
       // Signal that a restore is pending so the layout effect below skips its
       // word→page derivation. The exact page number isn't known yet (pending
       // async pagination), so store a sentinel (-1) to distinguish from the
@@ -415,7 +431,7 @@ export function PagesVisualBox({
         pendingRestorePageRef.current = -1;
       }
     }
-  }, [savedLocalPageIndex]);
+  }, [savedLocalPageIndex, allBookPages.length]);
 
   // Measure synchronously after layout is computed but before the browser paints!
   // This completely eliminates any blank flickering or jumping movements!
@@ -445,9 +461,11 @@ export function PagesVisualBox({
       if (wordIndex !== localWordIndexChangeRef.current) {
         const initialPage = getPageIndexForWord(wordIndex);
         setCurrentPageIndex(initialPage);
-      } else {
-        localWordIndexChangeRef.current = null;
       }
+      
+      // Always clear the ref after consuming it so it doesn't dangle
+      // and accidentally block a future valid navigation to that same word index.
+      localWordIndexChangeRef.current = null;
     }
   }, [formattedHtml, scaledFontSize, readerFontClass, containerDimensions, wordIndex, getPageIndexForWord]);
 

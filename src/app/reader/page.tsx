@@ -254,6 +254,7 @@ export default function ReaderPage() {
 
           {mode === "normal" ? (
             <PagesVisualBox
+              key={activeBook.id}
               currentChapter={currentChapter}
               chaptersData={chaptersData}
               activePage={activePage}

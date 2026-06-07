@@ -56,6 +56,24 @@ export interface Book {
   totalPages?: number;
 }
 
+export interface ParsedBookData {
+  title: string;
+  author: string;
+  format: "PDF" | "EPUB" | "TXT" | "PHYSICAL";
+  content?: string;
+  chapters?: BookChapter[];
+  metadata?: {
+    coverUrl?: string;
+    description?: string;
+    genres?: string[];
+    publisher?: string;
+    publishDate?: string;
+    language?: string;
+    currentPage?: number;
+    totalPages?: number;
+  };
+}
+
 /**
  * Seed data representing the initial books in the user's library.
  * Starts completely empty as requested by the user, providing a clean slate.
