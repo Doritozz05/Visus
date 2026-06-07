@@ -36,7 +36,7 @@ export function EmptyLibraryState({
           </div>
 
           <div className="relative z-10">
-            <h2 className="text-xl font-bold font-heading text-foreground mb-2">Reading Room</h2>
+            <h2 className="text-xl font-bold font-heading text-foreground mb-2">Reading room</h2>
             <p className="text-xs text-muted-foreground font-sans leading-relaxed max-w-xs mx-auto">
               Your speed reading center is ready, but your library is empty. Upload a PDF, EPUB, or TXT volume to begin calibrating foveal focus.
             </p>
@@ -48,14 +48,14 @@ export function EmptyLibraryState({
               className="flex-1 py-2.5 border border-border/30 rounded-lg text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent transition-all flex items-center justify-center gap-1.5"
             >
               <span className="material-symbols-outlined text-sm">library_books</span>
-              Go to Library
+              Go to library
             </button>
             <button
               onClick={triggerLocalFileBrowser}
               className="flex-1 py-2.5 bg-primary text-primary-foreground rounded-lg text-xs font-mono uppercase tracking-wider font-bold shadow-md hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
             >
               <span className="material-symbols-outlined text-sm">upload_file</span>
-              Browse Book
+              Browse book
             </button>
           </div>
         </div>

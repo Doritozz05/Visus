@@ -13,13 +13,13 @@ export function RsvpSettingsForm() {
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <span className="material-symbols-outlined text-primary">bolt</span>
-          <h3 className="text-sm font-bold font-heading text-foreground">RSVP Calibration Engine</h3>
+          <h3 className="text-sm font-bold font-heading text-foreground">RSVP calibration engine</h3>
         </div>
 
         {/* Size control */}
         <div className="mb-6">
           <div className="flex justify-between items-end mb-3">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Focus Text Optical Size</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Focus text optical size</label>
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{rsvp.fontSize}px</span>
           </div>
           <input 
@@ -38,7 +38,7 @@ export function RsvpSettingsForm() {
 
         {/* Typeface */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Reading Typeface</label>
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Reading typeface</label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { id: "inter", name: "Standard Sans", desc: "Inter Default" },
@@ -63,7 +63,7 @@ export function RsvpSettingsForm() {
 
         {/* Focus Point Colors */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Optimal Recognition Point (ORP) Color</label>
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Optimal recognition point (ORP) color</label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {[
               { id: "orange", name: "Classic Orange", css: "bg-orange-400" },
@@ -92,7 +92,7 @@ export function RsvpSettingsForm() {
         {/* Toggle glowing ORP */}
         <div className="flex items-center justify-between py-3 border-t border-border/10">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">ORP Spotlight Glow</label>
+            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">ORP spotlight glow</label>
             <p className="text-[9px] text-muted-foreground mt-0.5">Adds ambient luminous blur under the focus letter anchor point.</p>
           </div>
           <button 
@@ -106,7 +106,7 @@ export function RsvpSettingsForm() {
         {/* Toggle focus lines */}
         <div className="flex items-center justify-between py-3 border-t border-border/10">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Visual Guide Lines</label>
+            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Visual guide lines</label>
             <p className="text-[9px] text-muted-foreground mt-0.5">Show central horizontal and vertical lines as reading anchor points.</p>
           </div>
           <button 
@@ -120,7 +120,7 @@ export function RsvpSettingsForm() {
         {/* Unmarked Letter Opacity */}
         <div className="py-3 border-t border-border/10 transition-all duration-300">
           <div className="flex justify-between items-end mb-2">
-            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Unmarked Text Opacity</label>
+            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Unmarked text opacity</label>
             <span className="text-[10px] font-mono text-primary font-semibold">{Math.round(rsvp.unmarkedOpacity * 100)}%</span>
           </div>
           <input 
@@ -137,7 +137,7 @@ export function RsvpSettingsForm() {
 
         {/* Unmarked Letter Color */}
         <div className="py-3 border-t border-border/10 transition-all duration-300">
-          <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold mb-3">Unmarked Text Color</label>
+          <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold mb-3">Unmarked text color</label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { id: "foreground", name: "Standard", desc: "Solid contrast" },

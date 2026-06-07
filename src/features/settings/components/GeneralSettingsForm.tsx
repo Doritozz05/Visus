@@ -24,12 +24,12 @@ export function GeneralSettingsForm() {
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <span className="material-symbols-outlined text-primary">palette</span>
-          <h3 className="text-sm font-bold font-heading text-foreground">Aesthetic Schemes</h3>
+          <h3 className="text-sm font-bold font-heading text-foreground">Aesthetic schemes</h3>
         </div>
 
         {/* Predefined Themes Grid */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Color Scheme Theme</label>
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Color scheme theme</label>
           <div className="grid grid-cols-2 gap-2.5">
             {[
               { id: "dark-violet", name: "Dark Violet", desc: "Original Clinical Navy", preview: "bg-[#0b1326]" },
@@ -60,7 +60,7 @@ export function GeneralSettingsForm() {
 
         {/* Accent Highlight Color Selection */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Accent Tint Color</label>
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Accent tint color</label>
           <div className="flex flex-wrap gap-2">
             {[
               { id: "indigo", color: "bg-indigo-500" },
@@ -87,7 +87,7 @@ export function GeneralSettingsForm() {
 
         {/* UI Typography */}
         <div>
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">System UI Font Family</label>
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">System UI font family</label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { id: "inter", name: "Inter", desc: "Sans-Serif" },
@@ -115,7 +115,7 @@ export function GeneralSettingsForm() {
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <span className="material-symbols-outlined text-primary">psychology</span>
-          <h3 className="text-sm font-bold font-heading text-foreground">Advanced Engine Features</h3>
+          <h3 className="text-sm font-bold font-heading text-foreground">Advanced engine features</h3>
         </div>
 
         {/* Settings toggles */}
@@ -124,7 +124,7 @@ export function GeneralSettingsForm() {
           {/* Glassmorphism */}
           <div className="flex items-center justify-between py-1">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Frosted Glass Panels</label>
+              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Frosted glass panels</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Enables premium frosted glass styles. Disable on slow hardware.</p>
             </div>
             <button 
@@ -138,7 +138,7 @@ export function GeneralSettingsForm() {
           {/* Reduced Motion */}
           <div className="flex items-center justify-between py-1 border-t border-border/10 pt-3">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Reduce UI Motion</label>
+              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Reduce UI motion</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Disables transitions for speed loads and pagination changes.</p>
             </div>
             <button 
@@ -152,7 +152,7 @@ export function GeneralSettingsForm() {
           {/* Sound Effects */}
           <div className="flex items-center justify-between py-1 border-t border-border/10 pt-3">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Sound Feedbacks</label>
+              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Sound feedbacks</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Subtle clicks on pacing ticks and chimes on completing sessions.</p>
             </div>
             <button 
@@ -198,13 +198,13 @@ export function GeneralSettingsForm() {
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <span className="material-symbols-outlined text-primary">menu_book</span>
-          <h3 className="text-sm font-bold font-heading text-foreground">Traditional Pages Calibration</h3>
+          <h3 className="text-sm font-bold font-heading text-foreground">Traditional pages calibration</h3>
         </div>
 
         {/* Font size */}
         <div className="mb-6">
           <div className="flex justify-between items-end mb-3">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Reader Font Size</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Reader font size</label>
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{readerFontSize || 16}px</span>
           </div>
           <input 
@@ -225,7 +225,7 @@ export function GeneralSettingsForm() {
         {/* Words per page density */}
         <div className="mb-6">
           <div className="flex justify-between items-end mb-3">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Page Text Density (Words)</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Page text density (words)</label>
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{readerWordsPerPage || 300} words</span>
           </div>
           <input 
@@ -246,7 +246,7 @@ export function GeneralSettingsForm() {
 
         {/* Reading Typeface */}
         <div>
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Reader Typeface</label>
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Reader typeface</label>
           <div className="grid grid-cols-2 gap-2">
             {[
               { id: "inter", name: "Standard Sans", desc: "Inter UI" },

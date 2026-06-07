@@ -39,7 +39,7 @@ export function BookCard({
             onDelete(book.id);
           }}
           className="w-7 h-7 rounded-full hover:bg-rose-500/10 flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-all animate-fade-in"
-          title="Delete Book"
+          title="Delete book"
         >
           <span className="material-symbols-outlined text-base">delete</span>
         </button>
@@ -70,7 +70,7 @@ export function BookCard({
                 className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-b border-border/10"
               >
                 <span className="material-symbols-outlined text-sm text-muted-foreground">info</span>
-                View Details
+                View details
               </button>
               <button
                 onClick={() => {
@@ -82,7 +82,7 @@ export function BookCard({
                 <span className="material-symbols-outlined text-sm text-muted-foreground">
                   {book.status === "completed" ? "unpublished" : "task_alt"}
                 </span>
-                {book.status === "completed" ? "Mark as Active" : "Mark as Completed"}
+                {book.status === "completed" ? "Mark as active" : "Mark as completed"}
               </button>
               <button
                 onClick={() => {
@@ -92,7 +92,7 @@ export function BookCard({
                 className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors"
               >
                 <span className="material-symbols-outlined text-sm text-muted-foreground">edit</span>
-                Edit Details
+                Edit details
               </button>
               <button
                 onClick={() => {
@@ -104,7 +104,7 @@ export function BookCard({
                 <span className="material-symbols-outlined text-sm text-muted-foreground">
                   {book.status === "archived" ? "unarchive" : "archive"}
                 </span>
-                {book.status === "archived" ? "Unarchive Book" : "Archive Book"}
+                {book.status === "archived" ? "Unarchive book" : "Archive book"}
               </button>
             </div>
           )}
@@ -156,7 +156,7 @@ export function BookCard({
               className="flex items-center gap-1 px-3 py-1 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded transition-all shadow-sm"
             >
               <span className="material-symbols-outlined text-xs">chrome_reader_mode</span>
-              Read Book
+              Read book
             </button>
           )}
         </div>

@@ -88,7 +88,7 @@ export function ReaderHeader({
             }}
             disabled={activeChapterIndex === 0}
             className="w-5 h-5 rounded border border-border/30 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
-            title="Previous Chapter"
+            title="Previous chapter"
           >
             <span className="material-symbols-outlined text-[12px] font-bold">chevron_left</span>
           </button>
@@ -98,7 +98,7 @@ export function ReaderHeader({
             ref={chapterBtnRef}
             onClick={handleToggleToc}
             className="text-xs text-primary/80 hover:text-primary font-semibold bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/45 px-2.5 py-0.5 rounded flex items-center gap-1 transition-all truncate max-w-[120px] sm:max-w-[200px]"
-            title="Open Table of Contents / Chapter Index"
+            title="Open table of contents / chapter index"
           >
             <span className="truncate">{currentChapter.title}</span>
             <span className="material-symbols-outlined text-[14px] shrink-0 leading-none">
@@ -115,7 +115,7 @@ export function ReaderHeader({
             }}
             disabled={activeChapterIndex === chaptersData.length - 1}
             className="w-5 h-5 rounded border border-border/30 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
-            title="Next Chapter"
+            title="Next chapter"
           >
             <span className="material-symbols-outlined text-[12px] font-bold">chevron_right</span>
           </button>
@@ -127,7 +127,7 @@ export function ReaderHeader({
           />
         </div>
         <span className="text-[10px] font-mono text-muted-foreground/90 dark:text-muted-foreground font-semibold mt-1">
-          {progressPercentage}% Complete
+          {progressPercentage}% complete
         </span>
       </div>
 

@@ -47,7 +47,7 @@ export default function SettingsPage() {
             onClick={resetSettings}
             className="px-4 py-2 border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary rounded font-mono text-[10px] uppercase tracking-wider transition-all"
           >
-            Reset Defaults
+            Reset defaults
           </button>
         </header>
 
@@ -55,8 +55,8 @@ export default function SettingsPage() {
         <div className="flex border-b border-border/40 mb-8 overflow-x-auto scrollbar-none gap-2">
           {[
             { id: "general", name: "General & UI", icon: "settings" },
-            { id: "rsvp", name: "RSVP Engine", icon: "bolt" },
-            { id: "cluster", name: "Cluster Canvas", icon: "splitscreen" },
+            { id: "rsvp", name: "RSVP engine", icon: "bolt" },
+            { id: "cluster", name: "Cluster canvas", icon: "splitscreen" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -90,19 +90,19 @@ export default function SettingsPage() {
               <div className="absolute right-0 top-0 w-24 h-24 bg-primary/5 rounded-full -translate-y-8 translate-x-8 blur-xl pointer-events-none" />
               <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
                 <span className="material-symbols-outlined text-primary">account_circle</span>
-                <h3 className="text-lg font-bold font-heading text-foreground">Local Profile</h3>
+                <h3 className="text-lg font-bold font-heading text-foreground">Local profile</h3>
               </div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
                   <span className="material-symbols-outlined text-primary text-2xl">person</span>
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold">Guest Reader</h4>
+                  <h4 className="text-sm font-bold">Guest reader</h4>
                   <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">Unregistered account</span>
                 </div>
               </div>
               <button className="w-full py-2.5 bg-primary text-primary-foreground rounded font-mono text-xs uppercase tracking-wider hover:brightness-110 transition-all font-bold">
-                Login / Register
+                Login / register
               </button>
             </section>
 
@@ -110,14 +110,14 @@ export default function SettingsPage() {
             <section className="bg-card border border-border/20 rounded-xl p-6 shadow-md glass-panel">
               <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
                 <span className="material-symbols-outlined text-primary">cloud_sync</span>
-                <h3 className="text-lg font-bold font-heading text-foreground">Storage Sync</h3>
+                <h3 className="text-lg font-bold font-heading text-foreground">Storage sync</h3>
               </div>
               
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Cloud Sync Status</span>
+                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Cloud sync status</span>
                 <span className="text-xs font-mono text-emerald-500 dark:text-emerald-400 flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-                  Ready to Sync
+                  Ready to sync
                 </span>
               </div>
               <div className="text-[10px] text-muted-foreground mb-6 leading-relaxed">
@@ -130,7 +130,7 @@ export default function SettingsPage() {
                   disabled={isSyncing}
                   className="w-full py-2.5 border border-border/30 text-foreground rounded font-mono text-[10px] uppercase tracking-wider hover:bg-accent hover:border-primary transition-all disabled:opacity-50"
                 >
-                  {isSyncing ? "Syncing configs..." : "Force DB Synchronize"}
+                  {isSyncing ? "Syncing configs..." : "Force DB synchronize"}
                 </button>
               </div>
             </section>

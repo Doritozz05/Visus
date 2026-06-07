@@ -103,13 +103,13 @@ export function CompletionModal({
             onClick={onNavigateToLibrary}
             className="flex-1 py-3 bg-accent text-primary border border-primary/20 rounded-lg text-xs font-mono uppercase tracking-wider font-bold hover:brightness-95 transition-all"
           >
-            My Library
+            My library
           </button>
           <button
             onClick={onNavigateToDashboard}
             className="flex-1 py-3 bg-primary text-primary-foreground rounded-lg text-xs font-mono uppercase tracking-wider font-bold shadow-[0_0_15px_rgba(var(--primary),0.15)] hover:brightness-110 transition-all"
           >
-            View Analytics
+            View analytics
           </button>
         </div>
       </div>

@@ -21,7 +21,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
       <main className="flex-1 flex flex-col items-center justify-between p-6 pt-24 pb-8 md:pl-72 overflow-hidden">
         <div className="w-full max-w-4xl flex-1 flex flex-col justify-center gap-6 mt-4">
           <div className="text-center mb-4">
-            <h2 className="text-2xl font-bold font-heading text-foreground">Active Bookshelf</h2>
+            <h2 className="text-2xl font-bold font-heading text-foreground">Active bookshelf</h2>
             <p className="text-xs text-muted-foreground font-sans mt-1">Only active books are shown here. Archived and completed titles stay in the library.</p>
           </div>
 
@@ -76,7 +76,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
                     className="w-full px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-xs font-mono uppercase tracking-wider font-bold shadow-md hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
                   >
                     <span className="material-symbols-outlined text-sm">library_books</span>
-                    Open Library
+                    Open library
                   </button>
                 </div>
               </div>
@@ -89,7 +89,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
               className="px-5 py-2.5 border border-border/30 rounded-lg text-xs font-mono uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground transition-all flex items-center gap-1.5"
             >
               <span className="material-symbols-outlined text-sm">library_books</span>
-              Manage Library Books
+              Manage library books
             </button>
           </div>
         </div>

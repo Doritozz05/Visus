@@ -5,6 +5,10 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright-cache/
 
 # next.js
 /.next/
@@ -21,6 +25,11 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .env*.local
 
 # vercel

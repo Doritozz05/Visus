@@ -61,7 +61,7 @@ export function EditBookModal({
         <div className="flex items-center justify-between pb-4 border-b border-border/10 mb-4 relative z-10">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">edit</span>
-            <h3 className="font-heading font-bold text-lg">Edit Book Details</h3>
+            <h3 className="font-heading font-bold text-lg">Edit book details</h3>
           </div>
           <button 
             onClick={onClose}
@@ -186,7 +186,7 @@ export function EditBookModal({
               type="submit"
               className="flex-1 py-2.5 bg-primary text-primary-foreground font-bold rounded-lg text-xs font-mono uppercase tracking-wider shadow-md hover:brightness-110 transition-all"
             >
-              Save Changes
+              Save changes
             </button>
           </div>
         </form>

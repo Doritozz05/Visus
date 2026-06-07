@@ -52,7 +52,7 @@ export function BookDetailsModal({
           </div>
           
           <div className="mt-4 text-[10px] font-mono uppercase tracking-widest text-primary font-bold z-10 bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-            {book.format} Volume
+            {book.format} volume
           </div>
         </div>
 
@@ -140,7 +140,7 @@ export function BookDetailsModal({
               }}
               className="flex-1 py-2.5 bg-primary text-primary-foreground font-bold rounded-lg text-xs font-mono uppercase tracking-wider shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
             >
-              <span>Read Book</span>
+              <span>Read book</span>
               <span className="material-symbols-outlined text-sm">chrome_reader_mode</span>
             </button>
           </div>

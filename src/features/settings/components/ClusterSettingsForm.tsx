@@ -13,13 +13,13 @@ export function ClusterSettingsForm() {
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <span className="material-symbols-outlined text-primary">splitscreen</span>
-          <h3 className="text-sm font-bold font-heading text-foreground">Visual Cluster Engine</h3>
+          <h3 className="text-sm font-bold font-heading text-foreground">Visual cluster engine</h3>
         </div>
 
         {/* Size control */}
         <div className="mb-6">
           <div className="flex justify-between items-end mb-3">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Active Line Optical Font Size</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Active line optical font size</label>
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{cluster.fontSize}px</span>
           </div>
           <input 
@@ -38,7 +38,7 @@ export function ClusterSettingsForm() {
 
         {/* Typeface */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Cluster Canvas Font family</label>
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Cluster canvas font family</label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { id: "inter", name: "Standard Sans", desc: "Inter Default" },
@@ -63,7 +63,7 @@ export function ClusterSettingsForm() {
 
         {/* Highlight Styles */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Highlight Visual Style</label>
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Highlight visual style</label>
           <div className="grid grid-cols-2 gap-2">
             {[
               { id: "spotlight", label: "Spotlight" },
@@ -89,7 +89,7 @@ export function ClusterSettingsForm() {
 
         {/* Active Highlight Color Selection */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Active Cluster Color</label>
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Active cluster color</label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {[
               { id: "white", css: "bg-foreground" },
@@ -120,7 +120,7 @@ export function ClusterSettingsForm() {
         <div className="grid grid-cols-1 gap-6 py-4 border-t border-border/10">
           <div>
             <div className="flex justify-between items-end mb-2">
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Inactive Lines Opacity</label>
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Inactive lines opacity</label>
               <span className="text-[10px] font-mono text-primary font-semibold">{Math.round(cluster.inactiveOpacity * 100)}%</span>
             </div>
             <input 
@@ -135,7 +135,7 @@ export function ClusterSettingsForm() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Inactive Blur Amount</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Inactive blur amount</label>
             <div className="flex gap-1.5">
               {[
                 { val: "0px", label: "Sharp" },
@@ -162,7 +162,7 @@ export function ClusterSettingsForm() {
         {/* Dynamic glow effect */}
         <div className="flex items-center justify-between py-4 border-t border-border/10">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Spotlight Glow</label>
+            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Spotlight glow</label>
             <p className="text-[9px] text-muted-foreground mt-0.5">Adds subtle ambient glow under highlighted line.</p>
           </div>
           <div className="flex gap-1">

@@ -15,7 +15,7 @@ export default function Home() {
 
         <div className="space-y-3 relative">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-            v0.1.0 Scaffolding Successful
+            v0.1.0 Scaffolding successful
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight font-heading">
             <span className="text-gradient-primary">Visus</span>
@@ -28,35 +28,35 @@ export default function Home() {
         {/* Prototype Navigation Panels */}
         <div className="relative pt-6 border-t border-border/40 space-y-4">
           <h3 className="text-sm font-semibold tracking-wider uppercase text-primary text-left font-heading">
-            Interactive Prototype Screens (Visus Reader Pro)
+            Interactive prototype screens (Visus Reader Pro)
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <Link 
               href="/dashboard"
               className="flex flex-col p-4 rounded-xl border border-border/30 bg-card hover:bg-accent hover:border-primary/50 transition-all duration-300 text-left group"
             >
-              <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors font-heading">Performance Dashboard</span>
+              <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors font-heading">Performance dashboard</span>
               <span className="text-xs text-muted-foreground mt-1">Check visual analytics & progress charts</span>
             </Link>
             <Link 
               href="/reader"
               className="flex flex-col p-4 rounded-xl border border-border/30 bg-card hover:bg-accent hover:border-primary/50 transition-all duration-300 text-left group"
             >
-              <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors font-heading">Reading Room</span>
+              <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors font-heading">Reading room</span>
               <span className="text-xs text-muted-foreground mt-1">Calibrate speeds & read with active ORP</span>
             </Link>
             <Link 
               href="/library"
               className="flex flex-col p-4 rounded-xl border border-border/30 bg-card hover:bg-accent hover:border-primary/50 transition-all duration-300 text-left group"
             >
-              <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors font-heading font-bold">Library Management</span>
+              <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors font-heading">Library management</span>
               <span className="text-xs text-muted-foreground mt-1">Manage documents, ePUBs & raw texts</span>
             </Link>
             <Link 
               href="/settings"
               className="flex flex-col p-4 rounded-xl border border-border/30 bg-card hover:bg-accent hover:border-primary/50 transition-all duration-300 text-left group"
             >
-              <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors font-heading">Workspace Settings</span>
+              <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors font-heading">Workspace settings</span>
               <span className="text-xs text-muted-foreground mt-1">Customize themes, fonts & indicators</span>
             </Link>
           </div>

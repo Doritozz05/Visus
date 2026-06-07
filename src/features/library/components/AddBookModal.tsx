@@ -52,7 +52,7 @@ export function AddBookModal({
         <div className="flex items-center justify-between pb-4 border-b border-border/10 mb-4 relative z-10">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">library_add</span>
-            <h3 className="font-heading font-bold text-lg">Add Book Manually</h3>
+            <h3 className="font-heading font-bold text-lg">Add book manually</h3>
           </div>
           <button 
             onClick={onClose}
@@ -88,7 +88,7 @@ export function AddBookModal({
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Cover Image URL (Optional)</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Cover image URL (optional)</label>
             <input 
               type="text" 
               value={newCoverUrl}
@@ -99,7 +99,7 @@ export function AddBookModal({
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Tags (Comma separated)</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Tags (comma separated)</label>
             <input 
               type="text" 
               value={newTags}
@@ -146,7 +146,7 @@ export function AddBookModal({
               type="submit"
               className="flex-1 py-2.5 bg-primary text-primary-foreground font-bold rounded-lg text-xs font-mono uppercase tracking-wider shadow-md hover:brightness-110 transition-all"
             >
-              Add Volume
+              Add volume
             </button>
           </div>
         </form>

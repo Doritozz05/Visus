@@ -384,7 +384,7 @@ export default function LibraryPage() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
               <span className="material-symbols-outlined text-primary text-sm">local_fire_department</span>
-              <span>Streak: 12 Days</span>
+              <span>Streak: 12 days</span>
             </div>
             <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-bold text-primary">
               VP
@@ -418,7 +418,7 @@ export default function LibraryPage() {
                     {completedBooksCount}
                     <span className="text-sm text-muted-foreground/80 font-normal ml-1">/ {yearlyGoal}</span>
                   </span>
-                  <span className="text-[10px] font-mono text-primary font-bold">{goalProgressPercentage}% Yearly Goal</span>
+                  <span className="text-[10px] font-mono text-primary font-bold">{goalProgressPercentage}% Yearly goal</span>
                 </div>
                 <div className="w-full h-2 bg-background rounded-full overflow-hidden relative z-10 border border-border/10">
                   <div 
@@ -473,7 +473,7 @@ export default function LibraryPage() {
                   <button 
                     onClick={() => setIsAddModalOpen(true)}
                     className="w-9 h-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:brightness-110 transition-all shadow-md"
-                    title="Add Book Manually"
+                    title="Add book manually"
                   >
                     <span className="material-symbols-outlined text-xl">add</span>
                   </button>
@@ -483,19 +483,19 @@ export default function LibraryPage() {
               {/* Tags/Genres Filter */}
               {availableGenres.length > 0 && (
                 <div className="flex gap-2 px-2 items-center flex-wrap w-full">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground shrink-0">Filter by Tag:</span>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground shrink-0">Filter by tag:</span>
                   <div className="w-full sm:w-[20rem] md:w-[24rem] lg:w-[28rem] shrink-0">
                     <FancyDropdown
                       value={activeGenre || ""}
                       onChange={(nextValue) => setActiveGenre(nextValue || null)}
-                      placeholder="All Tags"
+                      placeholder="All tags"
                       ariaLabel="Filter books by tag"
                       align="start"
                       searchable
                       searchPlaceholder="Search tags..."
                       maxMenuHeightClassName="max-h-64"
                       options={[
-                        { value: "", label: "All Tags" },
+                        { value: "", label: "All tags" },
                         ...availableGenres.map((genre) => ({
                           value: genre,
                           label: genre,
