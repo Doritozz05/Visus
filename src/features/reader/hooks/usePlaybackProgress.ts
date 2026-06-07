@@ -74,12 +74,19 @@ export function usePlaybackProgress({
           })())
       : undefined;
 
-    updateBook(bookId, {
+    const updatePayload: Partial<Book> = {
       progress: currentProgress,
       lastChapterIndex: chIdx,
       lastWordIndex: wIdx,
-      lastLocalPageIndex: finalLocalPageIdx,
-    });
+    };
+
+    if (mode !== "normal") {
+      updatePayload.lastLocalPageIndex = undefined;
+    } else if (finalLocalPageIdx !== undefined) {
+      updatePayload.lastLocalPageIndex = finalLocalPageIdx;
+    }
+
+    updateBook(bookId, updatePayload);
   }, [chaptersData, updateBook, mode, allBookPages, activeBookRef]);
 
   return { saveProgressForBook };
