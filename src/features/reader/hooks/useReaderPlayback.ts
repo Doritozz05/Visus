@@ -24,7 +24,7 @@ export function useReaderPlayback({
   const [wordIndex, setWordIndex] = React.useState(0); // relative to active chapter
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [wpm, setWpm] = React.useState(600);
-  const [mode, setMode] = React.useState<"rsvp" | "cluster" | "normal">("normal");
+  const [mode, setModeState] = React.useState<"rsvp" | "cluster" | "normal">("normal");
   const [completedChapter, setCompletedChapter] = React.useState<string | null>(null);
   const [isCompletionModalOpen, setIsCompletionModalOpen] = React.useState(false);
   const [sessionStats, setSessionStats] = React.useState<{
@@ -166,7 +166,6 @@ export function useReaderPlayback({
   // Core callback to save book progress to database context
   const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number, localPageIdx?: number) => {
     if (chaptersData.length === 0) {
-      console.log(`[DEBUG SAVE] SKIPPED - chaptersData.length === 0 for bookId=${bookId}`);
       return;
     }
     
@@ -186,7 +185,6 @@ export function useReaderPlayback({
     
     const targetChapter = chaptersData[chIdx];
     if (!targetChapter) {
-      console.log(`[DEBUG SAVE] SKIPPED - no chapter at index ${chIdx} for bookId=${bookId}`);
       return;
     }
     
@@ -207,17 +205,17 @@ export function useReaderPlayback({
       currentProgress = 100;
     }
 
-    console.log(`[DEBUG SAVE] Calling updateBook: bookId=${bookId} chapter=${chIdx} wordIndex=${wIdx} localPage=${localPageIdx} progress=${currentProgress}`);
     updateBook(bookId, {
       progress: currentProgress,
       lastChapterIndex: chIdx,
       lastWordIndex: wIdx,
-      // Persist the exact within-chapter page index when available so that
-      // PagesVisualBox can restore directly without going through the
-      // wordIndex→page DOM mapping (which can shift slightly between sessions).
-      ...(localPageIdx !== undefined ? { lastLocalPageIndex: localPageIdx } : {}),
+      // If we are in Normal mode and have a page index, save it.
+      // If we are in RSVP/Cluster speed reading modes, clear it to force recalculation on mode switch.
+      ...(mode === "normal"
+        ? (localPageIdx !== undefined ? { lastLocalPageIndex: localPageIdx } : {})
+        : { lastLocalPageIndex: undefined }),
     });
-  }, [chaptersData, updateBook]);
+  }, [chaptersData, updateBook, mode]);
 
   // Event Callback ref pattern to avoid infinite loops when saveProgressForBook changes reference
   const saveProgressRef = React.useRef(saveProgressForBook);
@@ -245,15 +243,7 @@ export function useReaderPlayback({
         const bookId = initializedBookIdRef.current;
         const ch = latestPositionRef.current.activeChapterIndex;
         const wi = latestPositionRef.current.wordIndex;
-        console.log(`[DEBUG UNMOUNT] Saving on unmount: bookId=${bookId} chapter=${ch} wordIndex=${wi}`);
         saveProgressRef.current(bookId, ch, wi);
-        // Verify what localStorage has immediately after the save
-        try {
-          const cacheKey = `visus_book_progress_${bookId}`;
-          const cached = localStorage.getItem(cacheKey);
-          const parsed = cached ? JSON.parse(cached) : null;
-          console.log(`[DEBUG UNMOUNT] localStorage after save:`, JSON.stringify(parsed));
-        } catch (_) {}
       }
     };
   }, [activeBook?.id]);
@@ -322,8 +312,6 @@ export function useReaderPlayback({
       return;
     }
 
-    console.log(`[DEBUG RESTORE EFFECT] Fired. bookId=${activeBook.id} initRef=${initializedBookIdRef.current} chaptersData.length=${chaptersData.length} activeBook.lastChapterIndex=${activeBook.lastChapterIndex} activeBook.lastWordIndex=${activeBook.lastWordIndex} activeBook.lastLocalPageIndex=${activeBook.lastLocalPageIndex}`);
-
     // chaptersData is transiently empty while the memo re-runs for the new book.
     // Do NOT reset position here — wait for the next render when data is ready.
     if (chaptersData.length === 0) return;
@@ -347,7 +335,6 @@ export function useReaderPlayback({
       try {
         const cacheKey = `visus_book_progress_${activeBook.id}`;
         const cached = localStorage.getItem(cacheKey);
-        console.log(`[DEBUG RESTORE] localStorage raw for ${cacheKey}:`, cached);
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && typeof parsed === "object") {
@@ -362,7 +349,6 @@ export function useReaderPlayback({
             }
           }
         }
-        console.log(`[DEBUG RESTORE] Final values: savedChapterIdx=${savedChapterIdx} savedWordIdx=${savedWordIdx} savedLocalPageIdx=${savedLocalPageIdx}`);
       } catch (_) {
         // Fallback to activeBook values (already set above)
       }
@@ -386,7 +372,6 @@ export function useReaderPlayback({
       currentWordIndexRef.current = restoredWordIdx;
       latestPositionRef.current = { wordIndex: restoredWordIdx, activeChapterIndex: restoredChapterIdx };
 
-      console.log(`[DEBUG RESTORE] SETTING STATE: chapter=${restoredChapterIdx} wordIndex=${restoredWordIdx} localPage=${savedLocalPageIdx}`);
       setActiveChapterIndex(restoredChapterIdx);
       setWordIndex(restoredWordIdx);
       setIsPlaying(false);
@@ -664,6 +649,25 @@ export function useReaderPlayback({
       Math.round(((activeChapterIndex + progressInChapter) / chaptersData.length) * 100)
     );
   }, [chaptersData.length, activeChapterIndex, wordIndex, words.length]);
+
+  // Wrapped setMode state updater that captures when the mode transitions (especially to Normal),
+  // saving progress and clearing lastLocalPageIndex to allow accurate wordIndex recalculation.
+  const setMode = React.useCallback((newMode: "rsvp" | "cluster" | "normal") => {
+    if (mode !== newMode) {
+      setModeState(newMode);
+      
+      const activeBookVal = activeBookRef.current;
+      if (activeBookVal && initializedBookIdRef.current === activeBookVal.id) {
+        const clearPage = newMode === "normal";
+        updateBook(activeBookVal.id, {
+          lastChapterIndex: latestPositionRef.current.activeChapterIndex,
+          lastWordIndex: currentWordIndexRef.current,
+          progress: progressPercentage,
+          ...(clearPage ? { lastLocalPageIndex: undefined } : {}),
+        });
+      }
+    }
+  }, [mode, updateBook, progressPercentage]);
 
   return {
     activeChapterIndex,

@@ -71,56 +71,54 @@ export function ClusterVisualBox({
     });
   }, [subscribeToPlayback, getClusterIndexForWord]);
 
-  // High-performance foveal sliding window to avoid massive DOM trees and visual cognitive fatigue
-  const windowConfig = React.useMemo(() => {
-    const windowSize = 18; // optimal count for foveal visual tracking
-    const half = Math.floor(windowSize / 2);
-    
-    let start = Math.max(0, localActiveClusterIndex - half);
-    let end = Math.min(normalizedChunks.length, start + windowSize);
-    
-    // Adjust start offset if near the end of the chapter
-    if (end - start < windowSize) {
-      start = Math.max(0, end - windowSize);
-    }
-    
-    return {
-      start,
-      end,
-      hasPreceding: start > 0,
-      hasSucceeding: end < normalizedChunks.length,
-    };
-  }, [normalizedChunks.length, localActiveClusterIndex]);
+  // Scroll position tracking ref
+  const lastScrollTopRef = React.useRef<number>(-1);
 
-  // Auto-scroll inside container to keep active line centered if there is any minor overflow
+  // Reset scroll tracker when the chapter chunks change
+  React.useEffect(() => {
+    lastScrollTopRef.current = -1;
+  }, [clusterChunks]);
+
+  // Auto-scroll inside container to keep active line centered
   React.useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
     
-    const activeChild = container.querySelector(`[data-active="true"]`) as HTMLElement;
-    if (activeChild) {
-      const containerHeight = container.clientHeight;
-      const childOffsetTop = activeChild.offsetTop;
-      const childHeight = activeChild.clientHeight;
+    // Use requestAnimationFrame to ensure the DOM has updated and painted the new active child
+    const handleScroll = () => {
+      const activeChild = container.querySelector(`[data-active="true"]`) as HTMLElement;
+      if (activeChild) {
+        const containerHeight = container.clientHeight;
+        const childOffsetTop = activeChild.offsetTop;
+        const childHeight = activeChild.clientHeight;
 
-      const targetScrollTop = childOffsetTop - containerHeight / 2 + childHeight / 2;
+        const targetScrollTop = Math.max(0, childOffsetTop - containerHeight / 2 + childHeight / 2);
 
-      container.scrollTo({
-        top: Math.max(0, targetScrollTop),
-        behavior: "smooth",
-      });
-    }
+        // Only scroll if the target position has changed significantly (e.g. more than 2px)
+        // This prevents scroll stuttering and keeps it static during same-line reading
+        if (Math.abs(lastScrollTopRef.current - targetScrollTop) > 2) {
+          lastScrollTopRef.current = targetScrollTop;
+          container.scrollTo({
+            top: targetScrollTop,
+            behavior: "smooth",
+          });
+        }
+      }
+    };
+
+    const rafId = requestAnimationFrame(handleScroll);
+    return () => cancelAnimationFrame(rafId);
   }, [localActiveClusterIndex]);
 
   // Active color styling mapping
   const activeColors = {
-    indigo: "text-indigo-500 dark:text-indigo-400 font-bold",
-    violet: "text-violet-500 dark:text-violet-400 font-bold",
-    emerald: "text-emerald-600 dark:text-emerald-400 font-bold",
-    amber: "text-amber-600 dark:text-amber-400 font-bold",
-    rose: "text-rose-500 dark:text-rose-400 font-bold",
-    blue: "text-blue-500 dark:text-blue-400 font-bold",
-    white: "text-foreground font-bold",
+    indigo: "text-indigo-500 dark:text-indigo-400",
+    violet: "text-violet-500 dark:text-violet-400",
+    emerald: "text-emerald-600 dark:text-emerald-400",
+    amber: "text-amber-600 dark:text-amber-400",
+    rose: "text-rose-500 dark:text-rose-400",
+    blue: "text-blue-500 dark:text-blue-400",
+    white: "text-foreground",
   };
 
   const glows = {
@@ -137,52 +135,62 @@ export function ClusterVisualBox({
   };
 
   const sizeClass = `leading-relaxed md:leading-loose`;
-  const sizeStyle: React.CSSProperties = {
+  
+  // Calculate dynamic padding so the active line centers perfectly vertically
+  // regardless of font size, within the 280px high container.
+  const innerStyle: React.CSSProperties = {
     fontSize: `${settings.fontSize}px`,
+    paddingTop: `${140 - settings.fontSize / 2}px`,
+    paddingBottom: `${140 - settings.fontSize / 2}px`,
   };
 
   const activeColorClass = activeColors[settings.activeColor as keyof typeof activeColors] || activeColors.white;
   const fontFamilyClass = fontFamilies[settings.fontFamily as keyof typeof fontFamilies] || fontFamilies.inter;
 
-  // Sliced chunks within sliding window
+  // Map all chunks in the chapter (static layout) instead of slicing a sliding window
   const visibleChunks = React.useMemo(() => {
-    return normalizedChunks.slice(windowConfig.start, windowConfig.end).map((chunk, index) => {
-      const absoluteIndex = windowConfig.start + index;
+    return normalizedChunks.map((chunk, index) => {
       return {
         ...chunk,
-        absoluteIndex,
-        isActive: absoluteIndex === localActiveClusterIndex,
+        absoluteIndex: index,
+        isActive: index === localActiveClusterIndex,
       };
     });
-  }, [normalizedChunks, windowConfig, localActiveClusterIndex]);
+  }, [normalizedChunks, localActiveClusterIndex]);
+
+  // Premium lens focus fade gradient mask
+  const maskStyle: React.CSSProperties = {
+    maskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+    WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+  };
 
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-3xl h-[280px] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl p-8 bg-card/45 backdrop-blur-xl relative transition-all duration-300 flex items-center justify-center shadow-xl"
+      style={maskStyle}
+      className="w-full max-w-3xl h-[280px] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl px-8 py-0 bg-card/45 backdrop-blur-xl relative transition-all duration-300 shadow-xl"
     >
       <div 
-        style={sizeStyle}
+        style={innerStyle}
         className={`text-center whitespace-normal break-words w-full ${fontFamilyClass} ${sizeClass}`}
       >
-        {/* Preceding text fade indicator */}
-        {windowConfig.hasPreceding && (
-          <span className="text-muted-foreground/35 select-none font-mono text-[0.8em] mr-2">...</span>
-        )}
-
         {visibleChunks.map((chunk) => {
           const isActive = chunk.isActive;
 
           const inactiveStyle: React.CSSProperties = {
             opacity: settings.inactiveOpacity,
-            filter: settings.blurAmount ? `blur(${settings.blurAmount})` : undefined,
+            filter: settings.blurAmount && settings.blurAmount !== "0px" ? `blur(${settings.blurAmount})` : undefined,
+            transform: "scale(1.0)",
           };
 
           const activeStyle: React.CSSProperties = {
             opacity: 1,
             filter: "blur(0px)",
-            transform: "scale(1.05)",
-            display: "inline-block",
+            transform: "scale(1.03)",
+            // Simulate subtle bolding without changing the layout footprint to prevent any line wraps
+            textShadow: settings.highlightStyle !== "bold-only"
+              ? "0.2px 0 0 currentColor, -0.2px 0 0 currentColor"
+              : undefined,
           };
 
           let highlightClass = "";
@@ -203,6 +211,8 @@ export function ClusterVisualBox({
               highlightClass = "border border-transparent px-2 py-0.5 text-muted-foreground/60";
             } else if (settings.highlightStyle === "underline") {
               highlightClass = "border-b-2 border-transparent px-0.5 text-muted-foreground/60";
+            } else if (settings.highlightStyle === "bold-only") {
+              highlightClass = "text-muted-foreground/35 font-extrabold";
             } else {
               highlightClass = "text-muted-foreground/60";
             }
@@ -213,18 +223,14 @@ export function ClusterVisualBox({
               <span
                 data-active={isActive}
                 style={isActive ? activeStyle : inactiveStyle}
-                className={`inline-block transition-all duration-300 mx-1.5 ${highlightClass}`}
+                className={`inline-block whitespace-nowrap transition-all duration-150 ease-out mx-0.5 ${highlightClass}`}
               >
                 {chunk.text}
               </span>
+              {" "}
             </React.Fragment>
           );
         })}
-
-        {/* Succeeding text fade indicator */}
-        {windowConfig.hasSucceeding && (
-          <span className="text-muted-foreground/35 select-none font-mono text-[0.8em] ml-2">...</span>
-        )}
       </div>
     </div>
   );

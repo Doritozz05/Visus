@@ -447,12 +447,10 @@ export function PagesVisualBox({
         // change between renders, so the effect would otherwise never cancel/
         // restart with the correct chapter/wordIndex/savedLocalPageIndex.
         const { savedLocalPageIndex: currentSLPI, wordIndex: currentWI, chapterIndex: currentCI } = latestRestoreTargetRef.current;
-        console.log(`[DEBUG PagesVisualBox PAGINATE] done. currentSLPI=${currentSLPI} currentWI=${currentWI} currentCI=${currentCI}`);
         if (currentSLPI !== undefined) {
           const chapterPages = computedPages.filter(p => p.chapterIndex === currentCI);
           const maxLocalPage = Math.max(0, chapterPages.length - 1);
           const clampedPage = Math.min(currentSLPI, maxLocalPage);
-          console.log(`[DEBUG PagesVisualBox PAGINATE] Using savedLocalPageIndex=${currentSLPI} -> clampedPage=${clampedPage}`);
           if (chapterPages[clampedPage]) {
             localWordIndexChangeRef.current = chapterPages[clampedPage].startWordIndex;
           }
@@ -463,7 +461,6 @@ export function PagesVisualBox({
           const page = computedPages.find(
             (p) => p.chapterIndex === currentCI && currentWI >= p.startWordIndex && currentWI <= p.endWordIndex
           );
-          console.log(`[DEBUG PagesVisualBox PAGINATE] Using wordIndex=${currentWI} -> page.pageIndex=${page?.pageIndex}`);
           if (page) {
             pendingRestorePageRef.current = page.pageIndex;
             setCurrentPageIndex(page.pageIndex);

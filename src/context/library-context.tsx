@@ -65,7 +65,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
                     ...book,
                     lastChapterIndex: parsed.lastChapterIndex,
                     lastWordIndex: parsed.lastWordIndex,
-                    lastLocalPageIndex: parsed.lastLocalPageIndex ?? book.lastLocalPageIndex,
+                    lastLocalPageIndex: parsed.lastLocalPageIndex,
                     progress: parsed.progress,
                     estimatedReadingTime: parsed.estimatedReadingTime || book.estimatedReadingTime,
                     status: parsed.status || book.status
