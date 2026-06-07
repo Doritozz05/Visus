@@ -10,7 +10,7 @@ export default defineConfig({
   workers: 1, // Single worker to avoid database races in IndexedDB
   reporter: 'line',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3002',
     trace: 'on-first-retry',
     viewport: { width: 1280, height: 720 },
   },
@@ -21,9 +21,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'cmd /c npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true,
+    command: 'cmd /c npm run dev -- -p 3002',
+    url: 'http://localhost:3002',
+    reuseExistingServer: !process.env.CI,
     timeout: 60 * 1000,
   },
 });

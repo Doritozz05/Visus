@@ -9,7 +9,6 @@
 /playwright-report/
 /blob-report/
 /.playwright-cache/
-/test-results/
 
 # next.js
 /.next/
@@ -53,3 +52,7 @@ next-env.d.ts
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# generated files
+/public/pdf.worker.min.mjs
+

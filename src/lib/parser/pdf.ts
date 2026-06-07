@@ -1,9 +1,25 @@
 import { BookChapter } from "@/core/entities/book";
 
+interface PDFTextItem {
+  str: string;
+  transform: number[];
+  width?: number;
+}
+
+interface PDFInfo {
+  Title?: string;
+  Author?: string;
+  [key: string]: unknown;
+}
+
+interface ExtractedItem extends PDFTextItem {
+  x: number;
+}
+
 export async function parsePdf(arrayBuffer: ArrayBuffer): Promise<{ title: string; author: string; chapters: BookChapter[] }> {
   // Dynamic Next.js SSR-safe import of pdfjs-dist
   const pdfjs = await import("pdfjs-dist");
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+  pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.mjs`;
   
   const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) });
   const pdf = await loadingTask.promise;
@@ -16,7 +32,7 @@ export async function parsePdf(arrayBuffer: ArrayBuffer): Promise<{ title: strin
   try {
     const metadata = await pdf.getMetadata();
     if (metadata && metadata.info) {
-      const info = metadata.info as any;
+      const info = metadata.info as PDFInfo;
       if (info.Title) docTitle = info.Title;
       if (info.Author) docAuthor = info.Author;
     }
@@ -27,7 +43,12 @@ export async function parsePdf(arrayBuffer: ArrayBuffer): Promise<{ title: strin
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
     const page = await pdf.getPage(pageNum);
     const textContent = await page.getTextContent();
-    const items = textContent.items as any[];
+    const rawItems = textContent.items as unknown[];
+    
+    // Filter and map only items containing text structure
+    const items = rawItems.filter((item): item is PDFTextItem => 
+      typeof item === "object" && item !== null && "str" in item
+    );
     
     if (items.length === 0) {
       chapters.push({
@@ -40,7 +61,7 @@ export async function parsePdf(arrayBuffer: ArrayBuffer): Promise<{ title: strin
     // Group text items by vertical height (Y coordinate)
     // transform matrix: [scaleX, skewX, skewY, scaleY, x, y] -> y is transform[5]
     const yThreshold = 3.5; // pixels threshold to match lines
-    const linesMap: { y: number; items: any[] }[] = [];
+    const linesMap: { y: number; items: ExtractedItem[] }[] = [];
     
     items.forEach((item) => {
       if (!item.str || item.str.trim() === "") return;

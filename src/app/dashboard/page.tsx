@@ -5,12 +5,13 @@ import { Sidebar } from "@/components/Sidebar";
 import { useLibrary } from "@/context/library-context";
 import { StatsService } from "@/core/services/stats-service";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { ReadingSessionLog, LibraryStatsSummary } from "@/core/entities/stats";
 
 export default function DashboardPage() {
   const { books } = useLibrary();
   const [isHydrated, setIsHydrated] = React.useState(false);
-  const [logs, setLogs] = React.useState<any[]>([]);
-  const [summary, setSummary] = React.useState<any>({
+  const [logs, setLogs] = React.useState<ReadingSessionLog[]>([]);
+  const [summary, setSummary] = React.useState<LibraryStatsSummary>({
     totalBooksRead: 0,
     averageWpm: 550,
     currentStreakDays: 12,

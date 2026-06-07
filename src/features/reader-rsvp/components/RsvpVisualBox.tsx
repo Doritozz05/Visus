@@ -1,8 +1,9 @@
 import * as React from "react";
 import { RsvpSettings } from "@/core/entities/settings";
+import { RSVPWord } from "@/core/entities/text";
 
 interface RsvpVisualBoxProps {
-  rsvpSequence: any[];
+  rsvpSequence: RSVPWord[];
   initialWordIndex: number;
   subscribeToPlayback: (callback: (idx: number) => void) => () => void;
   settings: RsvpSettings;
