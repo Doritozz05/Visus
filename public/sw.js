@@ -1,6 +1,6 @@
 /**
- * Service Worker para Visus - Lectura Rápida Avanzada.
- * Proporciona soporte offline para archivos estáticos y gestión de caché de lectura.
+ * Service Worker for Visus - Advanced speed reading.
+ * Provides offline support for static assets and reading cache management.
  */
 
 const CACHE_NAME = "visus-cache-v1";
@@ -46,7 +46,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // Solo interceptar peticiones de nuestro origen y de tipo 'get'
+  // Only intercept GET requests from our origin
   if (event.request.method !== "GET") return;
 
   event.respondWith(
@@ -59,7 +59,7 @@ self.addEventListener("fetch", (event) => {
           return networkResponse;
         }
         
-        // Cachear dinámicamente recursos del mismo origen
+        // Dynamically cache same-origin resources
         const responseToCache = networkResponse.clone();
         caches.open(CACHE_NAME).then((cache) => {
           if (event.request.url.startsWith(self.location.origin)) {
@@ -69,7 +69,7 @@ self.addEventListener("fetch", (event) => {
         
         return networkResponse;
       }).catch(() => {
-        // Fallback offline en caso de fallo de red
+        // Offline fallback in case of network failure
         return caches.match("/");
       });
     })
