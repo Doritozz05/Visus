@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { useSettings } from "@/context/settings-context";
+import { useSettings } from "@/features/settings/context/settings-context";
 import { GeneralSettingsForm } from "@/features/settings/components/GeneralSettingsForm";
 import { RsvpSettingsForm } from "@/features/settings/components/RsvpSettingsForm";
 import { ClusterSettingsForm } from "@/features/settings/components/ClusterSettingsForm";

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
-import { useLibrary } from "@/context/library-context";
+import { useLibrary } from "@/features/library/context/library-context";
 import { Book } from "@/core/entities/book";
 import { useRouter } from "next/navigation";
 import { Eraser } from "lucide-react";

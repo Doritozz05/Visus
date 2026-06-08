@@ -211,7 +211,7 @@ export function useDomPagination({
       active = false;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage]);
+  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, onPagesComputed, wordsPerPage, columnGap]);
 
   return {
     isPaginationReady,

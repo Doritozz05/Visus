@@ -15,6 +15,7 @@ export interface ReadingState {
   completedChapter: string | null;
   progressPercentage: number;
   chapters: ChapterItem[];
+  chapterWordCounts: number[];
 
   // Actions
   setWordIndex: (wordIndex: number) => void;
@@ -36,14 +37,13 @@ export interface ReadingState {
 
 function calculateProgressPercentage(
   chapters: ChapterItem[],
+  chapterWordCounts: number[],
   activeChapterIndex: number,
   wordIndex: number
 ): number {
   if (!chapters || chapters.length === 0) return 0;
   const safeIdx = Math.min(Math.max(0, activeChapterIndex), chapters.length - 1);
-  const ch = chapters[safeIdx];
-  const words = ch?.content ? ch.content.split(/\s+/).filter((w) => w.trim() !== "") : [];
-  const currentChapterWordsCount = words.length || 1;
+  const currentChapterWordsCount = chapterWordCounts && chapterWordCounts.length > 0 ? chapterWordCounts[safeIdx] : 1;
 
   const progressInChapter = wordIndex / currentChapterWordsCount;
   let currentProgress = Math.min(
@@ -71,11 +71,13 @@ export const useReadingStore = create<ReadingState>((set) => ({
   completedChapter: null,
   progressPercentage: 0,
   chapters: [],
+  chapterWordCounts: [],
 
   setWordIndex: (wordIndex) =>
     set((state) => {
       const progressPercentage = calculateProgressPercentage(
         state.chapters,
+        state.chapterWordCounts,
         state.activeChapterIndex,
         wordIndex
       );
@@ -86,6 +88,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
     set((state) => {
       const progressPercentage = calculateProgressPercentage(
         state.chapters,
+        state.chapterWordCounts,
         activeChapterIndex,
         state.wordIndex
       );
@@ -100,8 +103,12 @@ export const useReadingStore = create<ReadingState>((set) => ({
 
   initBook: (bookId, chapterIndex, wordIndex, wpm, mode, chapters) =>
     set(() => {
+      const chapterWordCounts = chapters.map((ch) =>
+        ch?.content ? ch.content.split(/\s+/).filter((w) => w.trim() !== "").length || 1 : 1
+      );
       const progressPercentage = calculateProgressPercentage(
         chapters,
+        chapterWordCounts,
         chapterIndex,
         wordIndex
       );
@@ -115,6 +122,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
         completedChapter: null,
         progressPercentage,
         chapters,
+        chapterWordCounts,
       };
     }),
 }));

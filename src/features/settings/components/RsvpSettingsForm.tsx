@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useSettings } from "@/context/settings-context";
+import { useSettings } from "@/features/settings/context/settings-context";
 
 export function RsvpSettingsForm() {
   const { settings, updateRsvpSettings } = useSettings();

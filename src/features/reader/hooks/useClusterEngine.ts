@@ -49,7 +49,8 @@ export function useClusterEngine({
       const wordsToAdvance = currentChunk.wordCount;
 
       timeoutId = setTimeout(() => {
-        const nextIndex = currentIdx + wordsToAdvance;
+        const latestIdx = useReadingStore.getState().wordIndex;
+        const nextIndex = latestIdx + wordsToAdvance;
 
         if (nextIndex >= currentChapter.words.length) {
           useReadingStore.getState().setIsPlaying(false);

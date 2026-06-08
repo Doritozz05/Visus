@@ -49,7 +49,7 @@ const DISTRACTOR_PROPER_NOUNS = [
 ];
 
 /**
- * Shuffles an array deterministically or pseudo-randomly.
+ * Shuffles an array using the pseudo-random Fisher-Yates algorithm.
  */
 function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array];

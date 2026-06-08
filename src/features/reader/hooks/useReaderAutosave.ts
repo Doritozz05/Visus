@@ -18,6 +18,24 @@ export function useReaderAutosave({
     saveProgressRef.current = saveProgressForBook;
   }, [saveProgressForBook]);
 
+  // Interval save to ensure progress is periodically updated in library-context
+  React.useEffect(() => {
+    if (!activeBook?.id) return;
+    
+    const interval = setInterval(() => {
+      const state = useReadingStore.getState();
+      if (state.activeBookId && state.activeBookId === activeBook.id) {
+        saveProgressRef.current(
+          state.activeBookId,
+          state.activeChapterIndex,
+          state.wordIndex
+        );
+      }
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [activeBook?.id]);
+
   // Unmount cleanup and tab close safety hook
   React.useEffect(() => {
     const handleBeforeUnload = () => {

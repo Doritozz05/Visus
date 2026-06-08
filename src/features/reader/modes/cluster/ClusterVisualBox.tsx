@@ -108,11 +108,16 @@ export function ClusterVisualBox({
   const fontFamilyClass = SPEED_READER_FONT_CLASSES[settings.fontFamily as keyof typeof SPEED_READER_FONT_CLASSES] || SPEED_READER_FONT_CLASSES.inter;
 
   const visibleChunks = React.useMemo(() => {
-    return normalizedChunks.map((chunk, index) => {
+    const WINDOW_SIZE = 15;
+    const start = Math.max(0, activeClusterIndex - WINDOW_SIZE);
+    const end = Math.min(normalizedChunks.length - 1, activeClusterIndex + WINDOW_SIZE);
+
+    return normalizedChunks.slice(start, end + 1).map((chunk, idx) => {
+      const absoluteIndex = start + idx;
       return {
         ...chunk,
-        absoluteIndex: index,
-        isActive: index === activeClusterIndex,
+        absoluteIndex,
+        isActive: absoluteIndex === activeClusterIndex,
       };
     });
   }, [normalizedChunks, activeClusterIndex]);

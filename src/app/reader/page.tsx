@@ -5,8 +5,8 @@ import { Sidebar } from "@/components/Sidebar";
 import { RsvpVisualBox } from "@/features/reader/modes/rsvp/RsvpVisualBox";
 import { ClusterVisualBox } from "@/features/reader/modes/cluster/ClusterVisualBox";
 import { ReaderPlayer } from "@/features/reader/components/ReaderPlayer";
-import { useSettings } from "@/context/settings-context";
-import { useLibrary } from "@/context/library-context";
+import { useSettings } from "@/features/settings/context/settings-context";
+import { useLibrary } from "@/features/library/context/library-context";
 import { useRouter } from "next/navigation";
 
 // Imported modular subcomponents
@@ -17,7 +17,7 @@ import { PagesVisualBox } from "@/features/reader/components/PagesVisualBox";
 import { SettingsDrawer } from "@/features/reader/components/SettingsDrawer";
 import { CompletionModal } from "@/features/reader/components/CompletionModal";
 import { ComprehensionQuiz } from "@/features/reader/components/ComprehensionQuiz";
-import { generateQuizForChapter } from "@/core/algorithms/quiz-generator";
+import { generateQuizForChapter, Quiz } from "@/core/algorithms/quiz-generator";
 
 // Modular hooks
 import { useBookIngestion } from "@/features/reader/hooks/useBookIngestion";
@@ -41,7 +41,7 @@ export default function ReaderPage() {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster">("rsvp");
   const [isTocOpen, setIsTocOpen] = React.useState(false);
-  const [activeQuiz, setActiveQuiz] = React.useState<any | null>(null);
+  const [activeQuiz, setActiveQuiz] = React.useState<Quiz | null>(null);
 
   const completedChapter = useReadingStore((state) => state.completedChapter);
 
@@ -293,7 +293,7 @@ export default function ReaderPage() {
               onPagesComputed={setAllBookPages}
               savedLocalPageIndex={activeBook.lastChapterIndex === activeChapterIndex ? activeBook.lastLocalPageIndex : undefined}
               onSavePageProgress={(localPageIdx, wIdx) => {
-                saveProgressForBook(activeBook.id, activeChapterIndex, wIdx, localPageIdx, true);
+                saveProgressForBook(activeBook.id, activeChapterIndex, wIdx, localPageIdx);
               }}
               readerFontClass={readerFontClass}
               fontSize={settings.general.readerFontSize || 16}

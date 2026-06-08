@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useLibrary } from "@/context/library-context";
+import { useLibrary } from "@/features/library/context/library-context";
 import { parseUploadedFile } from "@/lib/services/book-ingestion-service";
 
 export function useBookIngestion() {

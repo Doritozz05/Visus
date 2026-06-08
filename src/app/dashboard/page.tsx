@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { useLibrary } from "@/context/library-context";
+import { useLibrary } from "@/features/library/context/library-context";
 import { StatsService } from "@/core/services/stats-service";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ReadingSessionLog, LibraryStatsSummary } from "@/core/entities/stats";

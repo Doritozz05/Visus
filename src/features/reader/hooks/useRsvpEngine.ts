@@ -36,7 +36,8 @@ export function useRsvpEngine({
       const wordsToAdvance = 1;
 
       timeoutId = setTimeout(() => {
-        const nextIndex = currentIdx + wordsToAdvance;
+        const latestIdx = useReadingStore.getState().wordIndex;
+        const nextIndex = latestIdx + wordsToAdvance;
 
         if (nextIndex >= rsvpSequence.length) {
           useReadingStore.getState().setIsPlaying(false);

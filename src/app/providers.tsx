@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { SettingsProvider, useSettings } from "@/context/settings-context";
-import { LibraryProvider } from "@/context/library-context";
+import { SettingsProvider, useSettings } from "@/features/settings/context/settings-context";
+import { LibraryProvider } from "@/features/library/context/library-context";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
