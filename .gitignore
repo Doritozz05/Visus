@@ -52,6 +52,7 @@ audit_log.md
 *.sln
 *.sw?
 prompts.txt
+plan.md
 
 # OS metadata
 .DS_Store
