@@ -175,7 +175,7 @@ export default function ReaderPage() {
       </nav>
 
       {/* Main Content Workspace */}
-      <main className="flex-1 flex flex-col items-center justify-between relative md:pl-64 h-[calc(100vh-80px)] md:h-screen p-6 pt-32 pb-8 overflow-hidden overscroll-none">
+      <main className="flex-1 flex flex-col items-center justify-between relative md:pl-64 h-[calc(100vh-80px)] md:h-screen p-6 pt-4 pb-8 overflow-hidden overscroll-none">
 
         <ReaderHeader
           activeBook={activeBook}

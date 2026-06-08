@@ -62,9 +62,9 @@ export function ReaderHeader({
   };
 
   return (
-    <div className="absolute top-8 left-0 md:left-64 right-0 flex items-center justify-between px-6 md:px-8 z-30 border-b border-border/10 pb-4 gap-4 bg-background/95 backdrop-blur-sm">
+    <div className="w-full grid grid-cols-3 items-center px-6 md:px-8 z-30 border-b border-border/10 pb-4 gap-4 bg-background/95 backdrop-blur-sm">
       {/* Left: Back to Bookshelf */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center justify-start gap-2 min-w-0">
         <button
           onClick={() => setActiveBookId(null)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
@@ -75,11 +75,12 @@ export function ReaderHeader({
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center pointer-events-auto min-w-0 relative">
-        <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground dark:text-foreground/75 font-bold truncate max-w-[200px] sm:max-w-xs">
+      {/* Center: Title & Progress */}
+      <div className="flex flex-col items-center justify-center min-w-0">
+        <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground dark:text-foreground/75 font-bold truncate max-w-[140px] sm:max-w-xs">
           {activeBook.title}
         </h2>
-        <div className="flex items-center gap-1.5 mt-1.5 shrink-0 pointer-events-auto">
+        <div className="flex items-center gap-1.5 mt-1.5 shrink-0">
           <button
             onClick={() => {
               if (activeChapterIndex > 0) {
@@ -97,7 +98,7 @@ export function ReaderHeader({
           <button
             ref={chapterBtnRef}
             onClick={handleToggleToc}
-            className="text-xs text-primary/80 hover:text-primary font-semibold bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/45 px-2.5 py-0.5 rounded flex items-center gap-1 transition-all truncate max-w-[120px] sm:max-w-[200px]"
+            className="text-xs text-primary/80 hover:text-primary font-semibold bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/45 px-2.5 py-0.5 rounded flex items-center gap-1 transition-all truncate max-w-[110px] sm:max-w-[180px]"
             title="Open table of contents / chapter index"
           >
             <span className="truncate">{currentChapter.title}</span>
@@ -119,7 +120,7 @@ export function ReaderHeader({
             <span className="material-symbols-outlined text-[12px] font-bold">chevron_right</span>
           </button>
         </div>
-        <div className="w-48 h-1.5 bg-muted dark:bg-card/90 mt-2.5 rounded-full overflow-hidden border border-border/40 dark:border-border/20 shadow-inner">
+        <div className="w-36 sm:w-48 h-1.5 bg-muted dark:bg-card/90 mt-2.5 rounded-full overflow-hidden border border-border/40 dark:border-border/20 shadow-inner">
           <div
             className="h-full bg-primary transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
@@ -130,9 +131,10 @@ export function ReaderHeader({
         </span>
       </div>
 
-      <div className="hidden md:flex items-center gap-3 shrink-0">
+      {/* Right: Mode selector & Settings */}
+      <div className="flex items-center justify-end gap-3 min-w-0">
         {/* Triple Mode Switcher */}
-        <div className="bg-card border border-border/30 p-1 rounded-lg flex items-center shadow-sm">
+        <div className="hidden md:flex bg-card border border-border/30 p-1 rounded-lg flex items-center shadow-sm">
           <button
             onClick={() => {
               setIsPlaying(false);
@@ -178,7 +180,7 @@ export function ReaderHeader({
         <button
           data-testid="desktop-settings-button"
           onClick={openQuickSettings}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
         >
           <span className="material-symbols-outlined text-base animate-spin-slow">settings</span>
           Settings
