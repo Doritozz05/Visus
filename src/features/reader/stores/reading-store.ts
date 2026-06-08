@@ -15,7 +15,7 @@ export interface ReadingState {
   mode: "rsvp" | "cluster" | "normal";
   completedChapter: string | null;
   progressPercentage: number;
-  chapters: ChapterItem[];
+  totalChapters: number;
   chapterWordCounts: number[];
   allBookPages: BookVisualPage[];
   isCompletionModalOpen: boolean;
@@ -48,22 +48,22 @@ export interface ReadingState {
 }
 
 function calculateProgressPercentage(
-  chapters: ChapterItem[],
+  totalChapters: number,
   chapterWordCounts: number[],
   activeChapterIndex: number,
   wordIndex: number
 ): number {
-  if (!chapters || chapters.length === 0) return 0;
-  const safeIdx = Math.min(Math.max(0, activeChapterIndex), chapters.length - 1);
+  if (totalChapters === 0) return 0;
+  const safeIdx = Math.min(Math.max(0, activeChapterIndex), totalChapters - 1);
   const currentChapterWordsCount = chapterWordCounts && chapterWordCounts.length > 0 ? chapterWordCounts[safeIdx] : 1;
 
   const progressInChapter = wordIndex / currentChapterWordsCount;
   let currentProgress = Math.min(
     100,
-    Math.round(((activeChapterIndex + progressInChapter) / chapters.length) * 100)
+    Math.round(((activeChapterIndex + progressInChapter) / totalChapters) * 100)
   );
 
-  const isLastChapter = activeChapterIndex === chapters.length - 1;
+  const isLastChapter = activeChapterIndex === totalChapters - 1;
   const isAtLastWords = wordIndex >= currentChapterWordsCount - 5;
 
   if (isLastChapter && isAtLastWords) {
@@ -82,7 +82,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   mode: "normal",
   completedChapter: null,
   progressPercentage: 0,
-  chapters: [],
+  totalChapters: 0,
   chapterWordCounts: [],
   allBookPages: [],
   isCompletionModalOpen: false,
@@ -91,7 +91,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   setWordIndex: (wordIndex) =>
     set((state) => {
       const progressPercentage = calculateProgressPercentage(
-        state.chapters,
+        state.totalChapters,
         state.chapterWordCounts,
         state.activeChapterIndex,
         wordIndex
@@ -102,7 +102,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   setActiveChapterIndex: (activeChapterIndex) =>
     set((state) => {
       const progressPercentage = calculateProgressPercentage(
-        state.chapters,
+        state.totalChapters,
         state.chapterWordCounts,
         activeChapterIndex,
         state.wordIndex
@@ -124,8 +124,9 @@ export const useReadingStore = create<ReadingState>((set) => ({
       const chapterWordCounts = chapters.map((ch) =>
         ch?.content ? ch.content.split(/\s+/).filter((w) => w.trim() !== "").length || 1 : 1
       );
+      const totalChapters = chapters.length;
       const progressPercentage = calculateProgressPercentage(
-        chapters,
+        totalChapters,
         chapterWordCounts,
         chapterIndex,
         wordIndex
@@ -139,7 +140,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
         isPlaying: false,
         completedChapter: null,
         progressPercentage,
-        chapters,
+        totalChapters,
         chapterWordCounts,
         allBookPages: [],
         isCompletionModalOpen: false,

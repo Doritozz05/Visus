@@ -119,9 +119,10 @@ export function BookCard({
 
       {/* Card Info Cover Row */}
       <div className="flex gap-4 items-start pr-16 mb-4">
-        <div 
-          className="w-12 h-16 bg-gradient-to-br from-primary/10 to-primary/5 border border-border/30 rounded-lg flex items-center justify-center shrink-0 relative shadow-inner overflow-hidden cursor-pointer" 
+        <button 
+          className="w-12 h-16 bg-gradient-to-br from-primary/10 to-primary/5 border border-border/30 rounded-lg flex items-center justify-center shrink-0 relative shadow-inner overflow-hidden cursor-pointer p-0" 
           onClick={() => onDetails(book)}
+          aria-label={`View details for ${book.title}`}
         >
           {book.coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -135,7 +136,7 @@ export function BookCard({
             </div>
           )}
           <div className="absolute bottom-0.5 right-0.5 bg-accent/90 border border-border/10 px-1.5 py-0.5 rounded text-[7px] font-mono text-primary font-bold shadow-sm">{book.format}</div>
-        </div>
+        </button>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">{book.title}</h3>
           <p className="text-[11px] text-muted-foreground font-mono truncate mt-0.5 mb-2">{book.author}</p>

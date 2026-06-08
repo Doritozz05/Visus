@@ -164,13 +164,13 @@ export function useReaderNavigation({
   }, [chaptersData, activeBookRef, saveProgressForBook]);
 
   const handleSkip = React.useCallback(() => {
-    const { wordIndex, chapters, activeChapterIndex, setWordIndex } = useReadingStore.getState();
-    const safeIdx = Math.min(Math.max(0, activeChapterIndex), chapters.length - 1);
-    const ch = chapters[safeIdx];
+    const { wordIndex, activeChapterIndex, setWordIndex } = useReadingStore.getState();
+    const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
+    const ch = chaptersData[safeIdx];
     const words = ch?.content ? ch.content.split(/\s+/).filter((w: string) => w.trim() !== "") : [];
     const nextIdx = Math.min(Math.max(0, words.length - 1), wordIndex + 10);
     setWordIndex(nextIdx);
-  }, []);
+  }, [chaptersData]);
 
   const handleChapterChange = React.useCallback((chapterIndex: number) => {
     useReadingStore.getState().setIsPlaying(false);

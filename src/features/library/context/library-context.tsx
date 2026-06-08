@@ -121,21 +121,25 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       // Recalculate progress/status based on updates
       const updatedBook = libraryService.calculateProgress(currentBook, updates);
 
-      // Perform shallow checks for primitives, fallback to JSON stringify only for objects
-      // to decide if the change justifies a re-render
+      // Implement a targeted shallow comparison to avoid deep serialization bottlenecks.
+      // We explicitly skip massive static objects like 'content' and 'chapters'
+      // which do not mutate during reading sessions.
       let bookChanged = false;
-      for (const key in updatedBook) {
-        const val1 = currentBook[key as keyof Book];
-        const val2 = updatedBook[key as keyof Book];
-        if (typeof val1 === "object" && val1 !== null && typeof val2 === "object" && val2 !== null) {
-          if (JSON.stringify(val1) !== JSON.stringify(val2)) {
-            bookChanged = true;
-            break;
-          }
-        } else if (val1 !== val2) {
+      for (const key in updates) {
+        const k = key as keyof Book;
+        if (currentBook[k] !== updatedBook[k]) {
           bookChanged = true;
           break;
         }
+      }
+      
+      // Also check if our calculated fields (status, progress, estimatedReadingTime) changed
+      if (
+        currentBook.status !== updatedBook.status ||
+        currentBook.progress !== updatedBook.progress ||
+        currentBook.estimatedReadingTime !== updatedBook.estimatedReadingTime
+      ) {
+        bookChanged = true;
       }
 
       if (!bookChanged) return prevBooks;

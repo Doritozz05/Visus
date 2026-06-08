@@ -149,7 +149,7 @@ export function PagesVisualBox({
     columnGap,
     latestRestoreTargetRef,
     initialReady: allBookPages.length > 0,
-  } as any);
+  });
 
   // Consuming custom Page navigation hook
   const {
@@ -169,7 +169,7 @@ export function PagesVisualBox({
     onSavePageProgress,
     onPrevChapter,
     onNextChapter,
-  } as any);
+  });
 
   React.useLayoutEffect(() => {
     const el = columnsContainerRef.current;

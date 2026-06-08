@@ -15,7 +15,6 @@ export function useRsvpEngine({
   wpm,
 }: UseRsvpEngineProps) {
   const isPlaying = useReadingStore((state) => state.isPlaying);
-  const wordIndex = useReadingStore((state) => state.wordIndex);
 
   const rsvpSequence = React.useMemo(() => {
     return generateRSVPSequence(currentChapter.words);
@@ -56,7 +55,7 @@ export function useRsvpEngine({
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isPlaying, wpm, rsvpSequence, mode, currentChapter, wordIndex]);
+  }, [isPlaying, wpm, rsvpSequence, mode, currentChapter]);
 
   return {
     rsvpSequence,

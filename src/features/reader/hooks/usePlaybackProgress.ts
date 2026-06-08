@@ -2,6 +2,7 @@ import * as React from "react";
 import { Book } from "@/core/entities/book";
 import { BookVisualPage } from "@/lib/parser/paginator";
 import { ChapterHtmlData } from "@/features/reader/utils/chapterHtml";
+import { useReadingStore } from "@/features/reader/stores/reading-store";
 
 interface UsePlaybackProgressProps {
   activeBookRef: React.MutableRefObject<Book | null>;
@@ -24,13 +25,15 @@ export function usePlaybackProgress({
       return;
     }
     
+    // Safely get words count from the pre-calculated store array to prevent heavy string processing
+    const chapterWordCounts = useReadingStore.getState().chapterWordCounts;
+    const chWordsLength = (chapterWordCounts && chapterWordCounts[chIdx]) || 1;
+
     // Do NOT overwrite completed status due to unmount cleanup races if we are still near the end
     if (activeBookRef.current?.id === bookId && activeBookRef.current?.status === "completed") {
       const isLastChapter = chIdx === chaptersData.length - 1;
       const targetChapter = chaptersData[chIdx];
       if (targetChapter) {
-        const chWords = targetChapter.content ? targetChapter.content.split(/\s+/).filter(w => w.trim() !== "") : [];
-        const chWordsLength = chWords.length || 1;
         const isAtLastWords = wIdx >= chWordsLength - 10;
         if (isLastChapter && isAtLastWords) {
           return;
@@ -42,10 +45,6 @@ export function usePlaybackProgress({
     if (!targetChapter) {
       return;
     }
-    
-    // Safely calculate words count from content as chaptersData is lightweight
-    const chWords = targetChapter.content ? targetChapter.content.split(/\s+/).filter(w => w.trim() !== "") : [];
-    const chWordsLength = chWords.length || 1;
     
     const progressInChapter = wIdx / chWordsLength;
     let currentProgress = Math.min(

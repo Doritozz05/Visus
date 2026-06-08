@@ -76,6 +76,7 @@ export function Sidebar({ activePath }: SidebarProps) {
             <Link
               key={item.path}
               href={item.path}
+              aria-label={item.name}
               className={`flex flex-col items-center justify-center w-1/4 h-full transition-all ${
                 isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
