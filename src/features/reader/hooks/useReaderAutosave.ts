@@ -26,9 +26,6 @@ export function useReaderAutosave({
     saveProgressRef.current = saveProgressForBook;
   }, [saveProgressForBook]);
 
-  // Keep track of the active book ID to save progress before switching books
-  const prevBookIdRef = React.useRef<string | null>(null);
-
   // Unmount cleanup and tab close safety hook
   React.useEffect(() => {
     const handleBeforeUnload = () => {
@@ -55,22 +52,6 @@ export function useReaderAutosave({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- latestPositionRef.current must be read dynamically at cleanup time
   }, [activeBook?.id, initializedBookIdRef]);
-
-  // Save previous book progress when activeBook changes
-  React.useEffect(() => {
-    if (activeBook) {
-      if (prevBookIdRef.current && prevBookIdRef.current !== activeBook.id) {
-        if (initializedBookIdRef.current === prevBookIdRef.current) {
-          saveProgressRef.current(
-            prevBookIdRef.current,
-            latestPositionRef.current.activeChapterIndex,
-            latestPositionRef.current.wordIndex
-          );
-        }
-      }
-      prevBookIdRef.current = activeBook.id;
-    }
-  }, [activeBook, initializedBookIdRef, latestPositionRef]);
 
   const wasPlayingRef = React.useRef(false);
 
