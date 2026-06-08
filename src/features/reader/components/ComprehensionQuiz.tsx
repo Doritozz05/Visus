@@ -18,57 +18,51 @@ export function ComprehensionQuiz({
 }: ComprehensionQuizProps) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
-  const [isAnswerChecked, setIsAnswerChecked] = React.useState(false);
-  const [correctCount, setCorrectCount] = React.useState(0);
+  const [selectedWeights, setSelectedWeights] = React.useState<number[]>([]);
   const [showResults, setShowResults] = React.useState(false);
   const [focusLevel, setFocusLevel] = React.useState<string>("");
 
   const currentQuestion: QuizQuestion = quiz.questions[currentIndex];
   const totalQuestions = quiz.questions.length;
-  const objectiveQuestionsCount = quiz.questions.filter(q => !q.isSubjective).length;
 
   const handleOptionSelect = (option: string) => {
-    if (isAnswerChecked) return;
     setSelectedOption(option);
   };
 
   const handleCheckOrNext = () => {
     if (!selectedOption) return;
 
-    if (!isAnswerChecked && !currentQuestion.isSubjective) {
-      // Check the answer
-      const isCorrect = selectedOption === currentQuestion.correctAnswer;
-      if (isCorrect) {
-        setCorrectCount(prev => prev + 1);
-      }
-      setIsAnswerChecked(true);
-    } else {
-      // Save focus level if subjective
-      if (currentQuestion.isSubjective) {
-        setFocusLevel(selectedOption);
-      }
+    const optIdx = currentQuestion.options.indexOf(selectedOption);
+    const weight = currentQuestion.weights[optIdx] ?? 100;
 
-      // Advance or show results
-      if (currentIndex < totalQuestions - 1) {
-        setCurrentIndex(prev => prev + 1);
-        setSelectedOption(null);
-        setIsAnswerChecked(false);
-      } else {
-        // Compute final score
-        const scorePercentage = objectiveQuestionsCount > 0 
-          ? Math.round((correctCount / objectiveQuestionsCount) * 100)
-          : 100;
-        
-        onComplete(scorePercentage, focusLevel || selectedOption);
-        setShowResults(true);
-      }
+    const newWeights = [...selectedWeights, weight];
+    setSelectedWeights(newWeights);
+
+    if (currentQuestion.type === "attention") {
+      setFocusLevel(selectedOption);
+    }
+
+    if (currentIndex < totalQuestions - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setSelectedOption(null);
+    } else {
+      // Calculate average score of performance-related questions (gist, detail, focus, pace)
+      const performanceWeights = newWeights.slice(0, 4);
+      const sum = performanceWeights.reduce((a, b) => a + b, 0);
+      const scorePercentage = Math.round(sum / 4);
+
+      const finalFocus = selectedOption;
+      setFocusLevel(finalFocus);
+
+      onComplete(scorePercentage, finalFocus);
+      setShowResults(true);
     }
   };
 
   if (showResults) {
-    const scorePercentage = objectiveQuestionsCount > 0 
-      ? Math.round((correctCount / objectiveQuestionsCount) * 100)
-      : 100;
+    const performanceWeights = selectedWeights.slice(0, 4);
+    const sum = performanceWeights.reduce((a, b) => a + b, 0);
+    const scorePercentage = Math.round(sum / 4);
 
     return (
       <div className="w-full max-w-md bg-card border border-border/30 rounded-xl p-5 md:p-6 text-center shadow-2xl glass-panel relative overflow-hidden flex flex-col items-center justify-center gap-4 transition-all duration-300">
@@ -81,12 +75,12 @@ export function ComprehensionQuiz({
         </div>
 
         <div className="relative z-10 w-full">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-primary mb-1 block font-bold">Quiz completed</span>
-          <h2 className="text-lg font-bold font-heading text-foreground mb-3">Comprehension results</h2>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-primary mb-1 block font-bold">Evaluation completed</span>
+          <h2 className="text-lg font-bold font-heading text-foreground mb-3">Your Reading Metrics</h2>
           
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="bg-background/40 border border-border/20 p-3 rounded-lg text-left">
-              <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Accuracy score</span>
+              <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Accuracy rating</span>
               <p className={`text-xl font-extrabold font-heading mt-0.5 ${
                 scorePercentage >= 80 ? "text-emerald-500" : scorePercentage >= 50 ? "text-amber-500" : "text-destructive"
               }`}>
@@ -95,7 +89,7 @@ export function ComprehensionQuiz({
             </div>
             
             <div className="bg-background/40 border border-border/20 p-3 rounded-lg text-left">
-              <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Focus rating</span>
+              <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Focus level</span>
               <p className="text-xs font-bold text-foreground mt-0.5 truncate">
                 {focusLevel ? focusLevel.split(": ")[0] : "Not rated"}
               </p>
@@ -103,11 +97,11 @@ export function ComprehensionQuiz({
           </div>
 
           <p className="text-xs text-muted-foreground font-sans max-w-xs leading-relaxed mx-auto mb-1">
-            {scorePercentage === 100 
-              ? "Perfect retention! Your speed-reading comprehension is outstanding at this pace."
+            {scorePercentage >= 80 
+              ? "Excellent comprehension! You have found a highly efficient pace for this text."
               : scorePercentage >= 50 
-                ? "Good comprehension. Try maintaining a steady rhythm to improve retention."
-                : "Low retention. Consider adjusting your WPM lower to process details more effectively."
+                ? "Moderate comprehension. You might benefit from slightly slowing down to absorb details."
+                : "Low retention. Try decreasing your target WPM to process the text more comfortably."
             }
           </p>
         </div>
@@ -167,37 +161,19 @@ export function ComprehensionQuiz({
       <div className="relative z-10 flex flex-col gap-2">
         {currentQuestion.options.map((option, idx) => {
           const isSelected = selectedOption === option;
-          const isCorrect = option === currentQuestion.correctAnswer;
           
           let optionStyle = "border-border/30 hover:border-primary/50 hover:bg-accent/40";
           if (isSelected) {
             optionStyle = "border-primary bg-primary/10 text-primary";
-          }
-          
-          if (isAnswerChecked) {
-            if (isCorrect) {
-              optionStyle = "border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium";
-            } else if (isSelected) {
-              optionStyle = "border-destructive bg-destructive/10 text-destructive font-medium";
-            } else {
-              optionStyle = "border-border/10 opacity-60";
-            }
           }
 
           return (
             <button
               key={idx}
               onClick={() => handleOptionSelect(option)}
-              disabled={isAnswerChecked}
               className={`w-full text-left py-2 px-3.5 rounded-lg border transition-all text-xs md:text-sm font-sans flex items-center justify-between group ${optionStyle}`}
             >
               <span className="flex-1">{option}</span>
-              {isAnswerChecked && isCorrect && (
-                <span className="material-symbols-outlined text-emerald-500 text-sm ml-2">check_circle</span>
-              )}
-              {isAnswerChecked && isSelected && !isCorrect && (
-                <span className="material-symbols-outlined text-destructive text-sm ml-2">cancel</span>
-              )}
             </button>
           );
         })}
@@ -217,15 +193,10 @@ export function ComprehensionQuiz({
           className="px-4 py-1.5 bg-primary disabled:opacity-50 disabled:hover:brightness-100 text-primary-foreground rounded text-xs font-mono uppercase tracking-wider font-bold shadow-[0_0_15px_rgba(var(--primary),0.15)] hover:brightness-110 transition-all flex items-center gap-1.5"
         >
           <span>
-            {currentQuestion.isSubjective
-              ? (currentIndex === totalQuestions - 1 ? "Finish quiz" : "Next question")
-              : (isAnswerChecked
-                  ? (currentIndex === totalQuestions - 1 ? "View results" : "Next question")
-                  : "Check answer")
-            }
+            {currentIndex === totalQuestions - 1 ? "Finish evaluation" : "Next question"}
           </span>
           <span className="material-symbols-outlined text-sm">
-            {currentIndex === totalQuestions - 1 && (isAnswerChecked || currentQuestion.isSubjective) ? "done_all" : "arrow_forward"}
+            {currentIndex === totalQuestions - 1 ? "done_all" : "arrow_forward"}
           </span>
         </button>
       </div>
