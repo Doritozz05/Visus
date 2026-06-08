@@ -139,7 +139,7 @@ export function PagesVisualBox({
   }, [currentChapter]);
 
   // Consuming custom DOM pagination hook
-  const { isPaginationReady, isFullPaginationReady } = useDomPagination({
+  const { isPaginationReady, isFullPaginationReady, pageIndexMapRef } = useDomPagination({
     chaptersData,
     containerDimensions,
     scaledFontSize,
@@ -228,19 +228,13 @@ export function PagesVisualBox({
       return { current: currentPageIndex + 1, total: totalPages };
     }
     
-    const chapterFirstPage = allBookPages.find(p => p.chapterIndex === currentChapter.index);
-    if (!chapterFirstPage) {
-      return { current: currentPageIndex + 1, total: allBookPages.length };
-    }
-    
-    const chapterPageCount = allBookPages.filter(p => p.chapterIndex === currentChapter.index).length;
-    const clampedPageIndex = Math.min(currentPageIndex, Math.max(0, chapterPageCount - 1));
+    const absolutePageIndex = pageIndexMapRef.current.get(`${currentChapter.index}_${currentPageIndex}`);
     
     return {
-      current: chapterFirstPage.absolutePageIndex + clampedPageIndex + 1,
+      current: absolutePageIndex !== undefined ? absolutePageIndex + 1 : currentPageIndex + 1,
       total: allBookPages.length,
     };
-  }, [allBookPages, currentChapter.index, currentPageIndex, totalPages]);
+  }, [allBookPages, currentChapter.index, currentPageIndex, totalPages, pageIndexMapRef]);
 
   const defaultBookmarkName = React.useMemo(() => {
     return `Page ${globalPageDetails.current} of ${globalPageDetails.total}`;

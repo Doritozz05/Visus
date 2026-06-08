@@ -68,29 +68,32 @@ export function Sidebar({ activePath }: SidebarProps) {
       </aside>
 
       {/* Mobile BottomNav */}
-      <nav className="md:hidden fixed bottom-0 w-full bg-card border-t border-border/50 z-50 flex justify-around items-center h-16 pb-safe transition-all duration-300">
-        {navItems.map((item) => {
-          const isActive = currentPath === item.path;
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.path}
-              href={item.path}
-              aria-label={item.name}
-              className={`flex flex-col items-center justify-center w-1/4 h-full transition-all ${
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <div className={`${isActive ? "bg-accent px-4 py-1.5 rounded-full" : ""}`}>
-                <Icon
-                  className={`w-6 h-6 transition-colors ${
-                    isActive ? "text-primary" : "text-muted-foreground"
+      <nav className="md:hidden fixed bottom-0 w-full bg-card border-t border-border/50 z-50 h-16 pb-safe transition-all duration-300">
+        <ul className="flex justify-around items-center h-full w-full m-0 p-0">
+          {navItems.map((item) => {
+            const isActive = currentPath === item.path;
+            const Icon = item.icon;
+            return (
+              <li key={item.path} className="w-1/4 h-full">
+                <Link
+                  href={item.path}
+                  aria-label={item.name}
+                  className={`flex flex-col items-center justify-center w-full h-full transition-all ${
+                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                   }`}
-                />
-              </div>
-            </Link>
-          );
-        })}
+                >
+                  <div className={`${isActive ? "bg-accent px-4 py-1.5 rounded-full" : ""}`}>
+                    <Icon
+                      className={`w-6 h-6 transition-colors ${
+                        isActive ? "text-primary" : "text-muted-foreground"
+                      }`}
+                    />
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
     </>
   );

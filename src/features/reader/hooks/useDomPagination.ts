@@ -34,6 +34,7 @@ export function useDomPagination({
   const [isPaginationReady, setIsPaginationReady] = React.useState(initialReady);
   const [isFullPaginationReady, setIsFullPaginationReady] = React.useState(initialReady);
   const hasComputedRef = React.useRef(false);
+  const pageIndexMapRef = React.useRef(new Map<string, number>());
   const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
 
   const lastLayoutRef = React.useRef("");
@@ -73,15 +74,19 @@ export function useDomPagination({
       const updateStore = () => {
         let absoluteIndexCounter = 0;
         const incrementalPages: BookVisualPage[] = [];
+        const map = new Map<string, number>();
         for (let i = 0; i < totalChapters; i++) {
           const chapterPages = pagesByChapter[i];
           for (const page of chapterPages) {
             incrementalPages.push({
               ...page,
-              absolutePageIndex: absoluteIndexCounter++
+              absolutePageIndex: absoluteIndexCounter
             });
+            map.set(`${page.chapterIndex}_${page.pageIndex}`, absoluteIndexCounter);
+            absoluteIndexCounter++;
           }
         }
+        pageIndexMapRef.current = map;
         setAllBookPages(incrementalPages);
       };
       
@@ -160,5 +165,6 @@ export function useDomPagination({
     isPaginationReady,
     isFullPaginationReady,
     hasComputedRef,
+    pageIndexMapRef,
   };
 }

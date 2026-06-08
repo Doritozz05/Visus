@@ -28,6 +28,32 @@ export function BookCard({
   onRead,
   onDetails,
 }: BookCardProps) {
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (activeDropdownId !== book.id) return;
+    
+    if (e.key === "Escape") {
+      setActiveDropdownId(null);
+      return;
+    }
+    
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const items = Array.from(menuRef.current?.querySelectorAll('[role="menuitem"]') || []) as HTMLElement[];
+      const activeElement = document.activeElement as HTMLElement;
+      const currentIndex = items.indexOf(activeElement);
+      
+      let nextIndex = 0;
+      if (e.key === "ArrowDown") {
+        nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+      } else {
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+      }
+      items[nextIndex]?.focus();
+    }
+  };
+
   return (
     <div
       className="bg-card border border-border/20 rounded-xl p-5 flex flex-col justify-between relative hover:border-primary/50 transition-all shadow-md glass-panel min-h-[160px]"
@@ -47,8 +73,10 @@ export function BookCard({
         </button>
 
         {/* Options Dropdown Trigger */}
-        <div className="relative">
+        <div className="relative" onKeyDown={handleKeyDown}>
           <button
+            aria-haspopup="true"
+            aria-expanded={activeDropdownId === book.id}
             onClick={(e) => {
               e.stopPropagation();
               setActiveDropdownId(activeDropdownId === book.id ? null : book.id);
@@ -61,25 +89,29 @@ export function BookCard({
           {/* Dropdown Menu (floats dynamically outside card, NEVER clipped, completely opaque) */}
           {activeDropdownId === book.id && (
             <div
+              ref={menuRef}
+              role="menu"
               onClick={(e) => e.stopPropagation()}
               className="absolute right-0 top-8 z-30 w-52 overflow-hidden rounded-2xl border border-border/40 bg-card/95 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl animate-fade-in opacity-100"
             >
               <button
+                role="menuitem"
                 onClick={() => {
                   onDetails(book);
                   setActiveDropdownId(null);
                 }}
-                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-b border-border/10"
+                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-b border-border/10 focus:outline-none focus:bg-accent/80"
               >
                 <Info className="w-3.5 h-3.5 text-muted-foreground" />
                 View details
               </button>
               <button
+                role="menuitem"
                 onClick={() => {
                   onToggleCompleted(book.id);
                   setActiveDropdownId(null);
                 }}
-                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors"
+                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors focus:outline-none focus:bg-accent/80"
               >
                 {book.status === "completed" ? (
                   <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
@@ -89,21 +121,23 @@ export function BookCard({
                 {book.status === "completed" ? "Mark as active" : "Mark as completed"}
               </button>
               <button
+                role="menuitem"
                 onClick={() => {
                   onEdit(book);
                   setActiveDropdownId(null);
                 }}
-                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors"
+                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors focus:outline-none focus:bg-accent/80"
               >
                 <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
                 Edit details
               </button>
               <button
+                role="menuitem"
                 onClick={() => {
                   onUpdateBook(book.id, { status: book.status === "archived" ? "active" : "archived" });
                   setActiveDropdownId(null);
                 }}
-                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-t border-border/10"
+                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-t border-border/10 focus:outline-none focus:bg-accent/80"
               >
                 {book.status === "archived" ? (
                   <FolderPlus className="w-3.5 h-3.5 text-muted-foreground" />

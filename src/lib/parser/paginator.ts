@@ -14,49 +14,54 @@ export interface BookVisualPage extends VisualPage {
 }
 
 /**
- * Paginate a chapter's content into a list of visual pages.
+ * Generator that yields tokens (non-whitespace matches) with character offsets
+ * one at a time, avoiding creation of intermediate arrays.
  */
-export function paginateChapter(chapterContent: string, targetWordsPerPage: number = 300): VisualPage[] {
-  const cleanContent = chapterContent.replace(/\r\n/g, "\n");
-  
-  // Regex mapping all non-whitespace tokens (words) with start/end character offsets
-  const wordRegex = /\S+/g;
-  interface Token {
-    text: string;
-    start: number;
-    end: number;
-  }
-  const tokens: Token[] = [];
+function* yieldToken(text: string): Generator<{ text: string; start: number; end: number }, void, void> {
+  const regex = /\S+/g;
   let match;
-  while ((match = wordRegex.exec(cleanContent)) !== null) {
-    tokens.push({
+  while ((match = regex.exec(text)) !== null) {
+    yield {
       text: match[0],
       start: match.index,
       end: match.index + match[0].length
-    });
+    };
   }
-  
-  if (tokens.length === 0) return [];
-  
+}
+
+/**
+ * Paginate a chapter's content into a list of visual pages.
+ * Uses a lazy generator to stream tokens instead of building a full token array.
+ */
+export function paginateChapter(chapterContent: string, targetWordsPerPage: number = 300): VisualPage[] {
+  const cleanContent = chapterContent.replace(/\r\n/g, "\n");
+  const tokenGen = yieldToken(cleanContent);
+
   const pages: VisualPage[] = [];
   let currentWordOffset = 0;
-  
-  while (currentWordOffset < tokens.length) {
-    const endOffset = Math.min(currentWordOffset + targetWordsPerPage, tokens.length);
-    const pageTokens = tokens.slice(currentWordOffset, endOffset);
-    
+  let genDone = false;
+
+  while (!genDone) {
+    const pageTokens: Array<{ text: string; start: number; end: number }> = [];
+    for (let i = 0; i < targetWordsPerPage; i++) {
+      const next = tokenGen.next();
+      if (next.done) {
+        genDone = true;
+        break;
+      }
+      pageTokens.push(next.value);
+    }
+
     if (pageTokens.length === 0) break;
-    
-    // Extract exact substring from start of first word to end of last word
+
     const pageStartChar = pageTokens[0].start;
     const pageEndChar = pageTokens[pageTokens.length - 1].end;
     const pageText = cleanContent.substring(pageStartChar, pageEndChar);
-    
-    // Find absolute split index for columns, aligning at the nearest sentence boundary
+
     const splitIndex = findSmartSplitPoint(pageText);
     const leftColumn = pageText.substring(0, splitIndex).trim();
     const rightColumn = pageText.substring(splitIndex).trim();
-    
+
     pages.push({
       pageIndex: pages.length,
       title: `Page ${pages.length + 1}`,
@@ -64,12 +69,12 @@ export function paginateChapter(chapterContent: string, targetWordsPerPage: numb
       leftColumn,
       rightColumn,
       startWordIndex: currentWordOffset,
-      endWordIndex: endOffset
+      endWordIndex: currentWordOffset + pageTokens.length
     });
-    
-    currentWordOffset = endOffset;
+
+    currentWordOffset += pageTokens.length;
   }
-  
+
   return pages;
 }
 
