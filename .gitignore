@@ -42,6 +42,9 @@ next-env.d.ts
 # IDE / Editor configurations
 .idea/
 .vscode/
+.agents/
+AGENTS.md
+audit_log.md
 .cursorrules
 *.suo
 *.ntvs*
@@ -55,4 +58,8 @@ Thumbs.db
 
 # generated files
 /public/pdf.worker.min.mjs
+
+# Serena MCP
+.serena/
+serena.db
 
