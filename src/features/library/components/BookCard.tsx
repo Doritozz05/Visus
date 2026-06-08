@@ -118,7 +118,7 @@ export function BookCard({
           onClick={() => onDetails(book)}
         >
           {book.coverUrl ? (
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
           ) : (
             <div className="flex flex-col items-center justify-center h-full w-full bg-accent/30">
