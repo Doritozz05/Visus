@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 
 interface EmptyLibraryStateProps {
-  localFileInputRef: React.RefObject<HTMLInputElement>;
+  localFileInputRef: React.RefObject<HTMLInputElement | null>;
   handleLocalFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   triggerLocalFileBrowser: () => void;
 }
