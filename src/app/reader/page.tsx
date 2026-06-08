@@ -209,7 +209,8 @@ export default function ReaderPage() {
                   if (!activeBook) return;
                   const chapterWords = currentChapter.words.length || 1;
                   const speedWpm = useReadingStore.getState().wpm || 600;
-                  const durationSeconds = Math.round(chapterWords / (speedWpm / 60)) || 10;
+                  const FALLBACK_DURATION_SECONDS = 10;
+                  const durationSeconds = Math.round(chapterWords / (speedWpm / 60)) || FALLBACK_DURATION_SECONDS;
                   
                   import("@/core/services/stats-service").then(({ StatsService }) => {
                     StatsService.recordSession({
