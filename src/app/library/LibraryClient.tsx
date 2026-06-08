@@ -8,7 +8,6 @@ import { Book } from "@/core/entities/book";
 import { useRouter } from "next/navigation";
 import { Eraser, Flame, Search, Plus, Library } from "lucide-react";
 
-import { parseUploadedFile } from "@/lib/services/book-ingestion-service";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 // Extracted Sub-Components
@@ -18,57 +17,74 @@ import { EditBookModal } from "@/features/library/components/EditBookModal";
 import { BookDetailsModal } from "@/features/library/components/BookDetailsModal";
 import { BookCard } from "@/features/library/components/BookCard";
 
+// Extracted Hooks
+import { useBookIngestion } from "@/features/library/hooks/useBookIngestion";
+import { useAddBookForm } from "@/features/library/hooks/useAddBookForm";
+import { useEditBookForm } from "@/features/library/hooks/useEditBookForm";
+
 export default function LibraryClient() {
   const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, setActiveBookId, isHydrated } = useLibrary();
   const router = useRouter();
 
-  // State controls
+  // State controls for UI
   const [searchQuery, setSearchQuery] = React.useState("");
   const [activeTab, setActiveTab] = React.useState<"active" | "completed" | "archived">("active");
-  const [isDragOver, setIsDragOver] = React.useState(false);
   const [activeGenre, setActiveGenre] = React.useState<string | null>(null);
   const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null);
-  const [isIngesting, setIsIngesting] = React.useState(false);
   const [detailsBook, setDetailsBook] = React.useState<Book | null>(null);
 
-  // Modal forms state
-  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
-  
-  // Add Form State
-  const [newTitle, setNewTitle] = React.useState("");
-  const [newAuthor, setNewAuthor] = React.useState("");
-  const [newFormat] = React.useState<"PDF" | "EPUB" | "TXT" | "PHYSICAL">("PHYSICAL");
-  const [newCoverUrl, setNewCoverUrl] = React.useState("");
-  const [newCurrentPage, setNewCurrentPage] = React.useState<number | "">("");
-  const [newTotalPages, setNewTotalPages] = React.useState<number | "">("");
-  const [newTags, setNewTags] = React.useState("");
+  // Use custom hooks
+  const {
+    isDragOver,
+    isIngesting,
+    fileInputRef,
+    handleFileChange,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    triggerFileBrowser
+  } = useBookIngestion(addBook);
 
-  // Edit Form State
-  const [editingBookId, setEditingBookId] = React.useState<string | null>(null);
-  const [editTitle, setEditTitle] = React.useState("");
-  const [editAuthor, setEditAuthor] = React.useState("");
-  const [editFormat, setEditFormat] = React.useState<"PDF" | "EPUB" | "TXT" | "PHYSICAL">("EPUB");
-  const [editProgress, setEditProgress] = React.useState(0);
-  const [editStatus, setEditStatus] = React.useState<"active" | "completed" | "archived">("active");
-  const [editCurrentPage, setEditCurrentPage] = React.useState<number | "">("");
-  const [editTotalPages, setEditTotalPages] = React.useState<number | "">("");
+  const {
+    isAddModalOpen,
+    setIsAddModalOpen,
+    newTitle,
+    setNewTitle,
+    newAuthor,
+    setNewAuthor,
+    newCoverUrl,
+    setNewCoverUrl,
+    newTags,
+    setNewTags,
+    newCurrentPage,
+    setNewCurrentPage,
+    newTotalPages,
+    setNewTotalPages,
+    handleAddSubmit
+  } = useAddBookForm(addBook);
 
-  const formatOptions = [
-    { value: "EPUB", label: "EPUB" },
-    { value: "PDF", label: "PDF" },
-    { value: "TXT", label: "TXT" },
-    { value: "PHYSICAL", label: "PHYSICAL" },
-  ];
-
-  const statusOptions = [
-    { value: "active", label: "Active" },
-    { value: "completed", label: "Completed" },
-    { value: "archived", label: "Archived" },
-  ];
-
-  // File input ref for browsing files
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const {
+    isEditModalOpen,
+    setIsEditModalOpen,
+    editTitle,
+    setEditTitle,
+    editAuthor,
+    setEditAuthor,
+    editFormat,
+    setEditFormat,
+    editStatus,
+    setEditStatus,
+    editCurrentPage,
+    setEditCurrentPage,
+    editTotalPages,
+    setEditTotalPages,
+    editProgress,
+    setEditProgress,
+    formatOptions,
+    statusOptions,
+    handleEditSubmit,
+    openEditModal
+  } = useEditBookForm(updateBook);
 
   // Close dropdowns on click outside
   React.useEffect(() => {
@@ -76,137 +92,6 @@ export default function LibraryClient() {
     window.addEventListener("click", handleOutsideClick);
     return () => window.removeEventListener("click", handleOutsideClick);
   }, []);
-
-  const processAndAddFile = async (file: File) => {
-    const parsed = await parseUploadedFile(file);
-    addBook(
-      parsed.title,
-      parsed.author,
-      parsed.format,
-      parsed.content,
-      parsed.chapters,
-      parsed.metadata
-    );
-  };
-
-  const processFilesBatch = async (fileList: FileList) => {
-    setIsIngesting(true);
-    const files = Array.from(fileList);
-    
-    try {
-      const results = await Promise.allSettled(
-        files.map(file => processAndAddFile(file))
-      );
-      
-      const failures = results.filter(
-        (r): r is PromiseRejectedResult => r.status === "rejected"
-      );
-      
-      if (failures.length > 0) {
-        const errorMessages = failures.map(f => f.reason?.message || "Unknown file read error").join("\n");
-        alert(`Some files could not be imported:\n${errorMessages}`);
-      }
-    } catch (err) {
-      console.error("Batch file ingestion failed:", err);
-    } finally {
-      setIsIngesting(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  // Ingestion: File selection handler with FileReader and PDF/EPUB parsing
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    await processFilesBatch(files);
-  };
-
-  // Ingestion: Drag and drop handlers with PDF/TXT/EPUB extraction
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-
-    const files = e.dataTransfer.files;
-    if (!files || files.length === 0) return;
-    await processFilesBatch(files);
-  };
-
-  const triggerFileBrowser = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  // Modal Submit Handlers
-  const handleAddSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTitle.trim()) return;
-
-    addBook(newTitle, newAuthor, newFormat, undefined, undefined, {
-      coverUrl: newCoverUrl || undefined,
-      genres: newTags ? newTags.split(",").map(t => t.trim()).filter(Boolean) : undefined,
-      currentPage: newFormat === "PHYSICAL" && newCurrentPage !== "" ? Number(newCurrentPage) : undefined,
-      totalPages: newFormat === "PHYSICAL" && newTotalPages !== "" ? Number(newTotalPages) : undefined,
-    });
-    
-    setNewTitle("");
-    setNewAuthor("");
-    setNewCoverUrl("");
-    setNewCurrentPage("");
-    setNewTotalPages("");
-    setNewTags("");
-    setIsAddModalOpen(false);
-  };
-
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingBookId || !editTitle.trim()) return;
-
-    const updates: Partial<Book> = {
-      title: editTitle.trim(),
-      author: editAuthor.trim() || "Unknown Author",
-      format: editFormat,
-      status: editStatus,
-    };
-    
-    if (editFormat === "PHYSICAL") {
-      updates.currentPage = editCurrentPage !== "" ? Number(editCurrentPage) : undefined;
-      updates.totalPages = editTotalPages !== "" ? Number(editTotalPages) : undefined;
-    } else {
-      updates.progress = editProgress;
-      updates.estimatedReadingTime = editProgress === 100 
-        ? "Completed" 
-        : editProgress > 0 
-          ? `${Math.ceil((100 - editProgress) * 0.15)}h remaining at 450 WPM`
-          : "Not started";
-    }
-
-    updateBook(editingBookId, updates);
-
-    setIsEditModalOpen(false);
-    setEditingBookId(null);
-  };
-
-  const openEditModal = (book: Book) => {
-    setEditingBookId(book.id);
-    setEditTitle(book.title);
-    setEditAuthor(book.author);
-    setEditFormat(book.format);
-    setEditProgress(book.progress);
-    setEditStatus(book.status);
-    setEditCurrentPage(book.currentPage ?? "");
-    setEditTotalPages(book.totalPages ?? "");
-    setIsEditModalOpen(true);
-  };
 
   const handleReadBook = (bookId: string) => {
     setActiveBookId(bookId);
