@@ -193,50 +193,44 @@ export default function ReaderPage() {
               : "max-w-2xl"
         } px-6 md:px-0 flex-1 flex flex-col items-center justify-center relative z-10 transition-opacity duration-300`}>
 
-          {completedChapter && (
-            <div className="absolute inset-0 bg-background/85 dark:bg-background/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-30 rounded-2xl border border-border/20 transition-all duration-300">
-              <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl glass-panel relative overflow-hidden flex flex-col items-center justify-center gap-6">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
-                <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-bounce relative z-10">
-                  <span className="material-symbols-outlined text-3xl">auto_stories</span>
-                </div>
-                
-                <div className="relative z-10">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-primary mb-2 block font-bold">Section Completed</span>
-                  <h2 className="text-xl font-bold font-heading text-foreground mb-3">{completedChapter}</h2>
-                  <p className="text-xs text-muted-foreground font-sans max-w-xs leading-relaxed mx-auto">
-                    Excellent comprehension pace! Your mind has successfully processed this chapter. Take a second to breathe and consolidate the information.
-                  </p>
-                </div>
+          {completedChapter && mode !== "normal" ? (
+            <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl glass-panel relative overflow-hidden flex flex-col items-center justify-center gap-6 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+              <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-bounce relative z-10">
+                <span className="material-symbols-outlined text-3xl">auto_stories</span>
+              </div>
+              
+              <div className="relative z-10">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-primary mb-2 block font-bold">Section Completed</span>
+                <h2 className="text-xl font-bold font-heading text-foreground mb-3">{completedChapter}</h2>
+                <p className="text-xs text-muted-foreground font-sans max-w-xs leading-relaxed mx-auto">
+                  Excellent comprehension pace! Your mind has successfully processed this chapter. Take a second to breathe and consolidate the information.
+                </p>
+              </div>
 
-                <div className="flex gap-3 w-full mt-2 relative z-10">
-                  <button
-                    onClick={() => {
-                      setCompletedChapter(null);
-                      setMode("normal");
-                    }}
-                    className="flex-1 px-4 py-2.5 border border-border/30 rounded text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
-                  >
-                    Back to Pages
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCompletedChapter(null);
-                      handleNextChapter();
-                      // Wait a tiny bit for the chapter transition before resuming playback
-                      setTimeout(() => setIsPlaying(true), 10);
-                    }}
-                    className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded text-xs font-mono uppercase tracking-wider font-bold shadow-[0_0_15px_rgba(var(--primary),0.15)] hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    <span>Next Chapter</span>
-                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                  </button>
-                </div>
+              <div className="flex gap-3 w-full mt-2 relative z-10">
+                <button
+                  onClick={() => {
+                    setCompletedChapter(null);
+                    setMode("normal");
+                  }}
+                  className="flex-1 px-4 py-2.5 border border-border/30 rounded text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                >
+                  Back to Pages
+                </button>
+                <button
+                  onClick={() => {
+                    setCompletedChapter(null);
+                    handleNextChapter();
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded text-xs font-mono uppercase tracking-wider font-bold shadow-[0_0_15px_rgba(var(--primary),0.15)] hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>Next Chapter</span>
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
               </div>
             </div>
-          )}
-
-          {mode === "normal" ? (
+          ) : mode === "normal" ? (
             <PagesVisualBox
               key={activeBook.id}
               currentChapter={currentChapter}

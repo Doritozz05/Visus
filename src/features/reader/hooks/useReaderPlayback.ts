@@ -406,9 +406,29 @@ export function useReaderPlayback({
     handlePrevChapter,
     handleNextChapter,
     handleRewind: () => {
-      const { wordIndex } = useReadingStore.getState();
-      const nextIdx = Math.max(0, wordIndex - 10);
-      useReadingStore.getState().setWordIndex(nextIdx);
+      const { wordIndex, activeChapterIndex } = useReadingStore.getState();
+      useReadingStore.getState().setCompletedChapter(null);
+      
+      if (wordIndex === 0) {
+        if (activeChapterIndex > 0) {
+          const prevChapterIdx = activeChapterIndex - 1;
+          const prevCh = chaptersData[prevChapterIdx];
+          const prevWords = prevCh ? prevCh.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+          const lastWordIdx = Math.max(0, prevWords.length - 1);
+          
+          useReadingStore.getState().setIsPlaying(false);
+          useReadingStore.getState().setActiveChapterIndex(prevChapterIdx);
+          useReadingStore.getState().setWordIndex(lastWordIdx);
+          
+          const activeBookVal = activeBookRef.current;
+          if (activeBookVal) {
+            saveProgressForBook(activeBookVal.id, prevChapterIdx, lastWordIdx);
+          }
+        }
+      } else {
+        const nextIdx = Math.max(0, wordIndex - 10);
+        useReadingStore.getState().setWordIndex(nextIdx);
+      }
     },
     handleSkip: () => {
       const { wordIndex, chapters, activeChapterIndex } = useReadingStore.getState();
