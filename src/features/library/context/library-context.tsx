@@ -36,10 +36,6 @@ const LibraryContext = React.createContext<LibraryContextType | undefined>(undef
 
 export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const [books, setBooks] = React.useState<Book[]>([]);
-  const booksRef = React.useRef(books);
-  React.useEffect(() => {
-    booksRef.current = books;
-  }, [books]);
   const [activeBookId, setActiveBookIdState] = React.useState<string | null>(null);
   const [isHydrated, setIsHydrated] = React.useState(false);
 
@@ -118,40 +114,38 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateBook = React.useCallback((id: string, updates: Partial<Book>) => {
-    const currentBook = booksRef.current.find((book) => book.id === id);
-    if (!currentBook) return;
+    setBooks((prevBooks) => {
+      const currentBook = prevBooks.find((book) => book.id === id);
+      if (!currentBook) return prevBooks;
 
-    // Recalculate progress/status based on updates
-    const updatedBook = libraryService.calculateProgress(currentBook, updates);
+      // Recalculate progress/status based on updates
+      const updatedBook = libraryService.calculateProgress(currentBook, updates);
 
-    // Perform shallow checks for primitives, fallback to JSON stringify only for objects
-    // to decide if the change justifies a re-render
-    let bookChanged = false;
-    for (const key in updatedBook) {
-      const val1 = currentBook[key as keyof Book];
-      const val2 = updatedBook[key as keyof Book];
-      if (typeof val1 === "object" && val1 !== null && typeof val2 === "object" && val2 !== null) {
-        if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+      // Perform shallow checks for primitives, fallback to JSON stringify only for objects
+      // to decide if the change justifies a re-render
+      let bookChanged = false;
+      for (const key in updatedBook) {
+        const val1 = currentBook[key as keyof Book];
+        const val2 = updatedBook[key as keyof Book];
+        if (typeof val1 === "object" && val1 !== null && typeof val2 === "object" && val2 !== null) {
+          if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+            bookChanged = true;
+            break;
+          }
+        } else if (val1 !== val2) {
           bookChanged = true;
           break;
         }
-      } else if (val1 !== val2) {
-        bookChanged = true;
-        break;
       }
-    }
 
-    if (!bookChanged) return;
+      if (!bookChanged) return prevBooks;
 
-    // Update the ref immediately so subsequent reads or saves see the latest state
-    booksRef.current = booksRef.current.map((book) => (book.id === id ? updatedBook : book));
+      // Save updated book asynchronously (non-blocking, O(1))
+      libraryService.saveBook(updatedBook).catch((err) => {
+        console.warn("Could not save updated book:", err);
+      });
 
-    // Update state purely
-    setBooks(booksRef.current);
-
-    // Save updated book asynchronously (non-blocking, O(1))
-    libraryService.saveBook(updatedBook).catch((err) => {
-      console.warn("Could not save updated book:", err);
+      return prevBooks.map((book) => (book.id === id ? updatedBook : book));
     });
   }, []);
 
@@ -175,24 +169,25 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleCompleted = React.useCallback((id: string) => {
-    const currentBook = booksRef.current.find((book) => book.id === id);
-    if (!currentBook) return;
+    setBooks((prevBooks) => {
+      const currentBook = prevBooks.find((book) => book.id === id);
+      if (!currentBook) return prevBooks;
 
-    const isCurrentlyCompleted = currentBook.status === "completed";
-    const newStatus: "active" | "completed" = isCurrentlyCompleted ? "active" : "completed";
-    const newProgress = isCurrentlyCompleted ? 0 : 100;
+      const isCurrentlyCompleted = currentBook.status === "completed";
+      const newStatus: "active" | "completed" = isCurrentlyCompleted ? "active" : "completed";
+      const newProgress = isCurrentlyCompleted ? 0 : 100;
 
-    const updatedBook = libraryService.calculateProgress(currentBook, {
-      status: newStatus,
-      progress: newProgress,
-    });
+      const updatedBook = libraryService.calculateProgress(currentBook, {
+        status: newStatus,
+        progress: newProgress,
+      });
 
-    // Update state purely
-    setBooks((prev) => prev.map((book) => (book.id === id ? updatedBook : book)));
+      // Save to database asynchronously (non-blocking)
+      libraryService.saveBook(updatedBook).catch((err) => {
+        console.warn("Could not save toggled book:", err);
+      });
 
-    // Save to database asynchronously (non-blocking)
-    libraryService.saveBook(updatedBook).catch((err) => {
-      console.warn("Could not save toggled book:", err);
+      return prevBooks.map((book) => (book.id === id ? updatedBook : book));
     });
   }, []);
 

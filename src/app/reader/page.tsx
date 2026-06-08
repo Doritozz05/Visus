@@ -44,6 +44,11 @@ export default function ReaderPage() {
   const [activeQuiz, setActiveQuiz] = React.useState<Quiz | null>(null);
 
   const completedChapter = useReadingStore((state) => state.completedChapter);
+  const setCompletedChapter = useReadingStore((state) => state.setCompletedChapter);
+  const setIsPlaying = useReadingStore((state) => state.setIsPlaying);
+  const isCompletionModalOpen = useReadingStore((state) => state.isCompletionModalOpen);
+  const setIsCompletionModalOpen = useReadingStore((state) => state.setIsCompletionModalOpen);
+  const sessionStats = useReadingStore((state) => state.sessionStats);
 
   React.useEffect(() => {
     setActiveQuiz(null);
@@ -70,13 +75,8 @@ export default function ReaderPage() {
 
   // Consuming the core speed reading engine playback hook
   const {
-    isCompletionModalOpen,
-    sessionStats,
     saveProgressForBook,
-    setIsPlaying,
     setMode,
-    setCompletedChapter,
-    setIsCompletionModalOpen,
     chaptersData,
     allBookPages,
     setAllBookPages,
@@ -290,8 +290,6 @@ export default function ReaderPage() {
               key={activeBook.id}
               currentChapter={currentChapter}
               chaptersData={chaptersData}
-              allBookPages={allBookPages}
-              onPagesComputed={setAllBookPages}
               savedLocalPageIndex={activeBook.lastChapterIndex === activeChapterIndex ? activeBook.lastLocalPageIndex : undefined}
               onSavePageProgress={(localPageIdx, wIdx) => {
                 saveProgressForBook(activeBook.id, activeChapterIndex, wIdx, localPageIdx);

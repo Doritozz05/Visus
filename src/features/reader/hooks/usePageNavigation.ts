@@ -8,9 +8,7 @@ interface UsePageNavigationProps {
   containerDimensions: { width: number; height: number } | null;
   columnGap: number;
   currentPageIndex: number;
-  setCurrentPageIndex: (idx: number) => void;
   totalPages: number;
-  localWordIndexChangeRef: React.MutableRefObject<number | null>;
   setWordIndex: (w: number) => void;
   onSavePageProgress?: (localPageIndex: number, wordIndex: number) => void;
   onPrevChapter: () => void;
@@ -24,9 +22,7 @@ export function usePageNavigation({
   containerDimensions,
   columnGap,
   currentPageIndex,
-  setCurrentPageIndex,
   totalPages,
-  localWordIndexChangeRef,
   setWordIndex,
   onSavePageProgress,
   onPrevChapter,
@@ -125,10 +121,7 @@ export function usePageNavigation({
   const handlePrev = () => {
     if (currentPageIndex > 0) {
       const prevPageIndex = currentPageIndex - 1;
-      setCurrentPageIndex(prevPageIndex);
-      
       const targetWordIndex = getWordIndexForPage(prevPageIndex);
-      localWordIndexChangeRef.current = targetWordIndex;
       setWordIndex(targetWordIndex);
       // Persist the local page index on every page turn so restore is always exact
       if (onSavePageProgress) {
@@ -143,10 +136,7 @@ export function usePageNavigation({
   const handleNext = () => {
     if (currentPageIndex < totalPages - 1) {
       const nextPageIndex = currentPageIndex + 1;
-      setCurrentPageIndex(nextPageIndex);
-      
       const targetWordIndex = getWordIndexForPage(nextPageIndex);
-      localWordIndexChangeRef.current = targetWordIndex;
       setWordIndex(targetWordIndex);
       // Persist the local page index on every page turn so restore is always exact
       if (onSavePageProgress) {

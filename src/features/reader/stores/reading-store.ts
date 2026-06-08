@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { BookVisualPage } from "@/lib/parser/paginator";
 
 interface ChapterItem {
   title: string;
@@ -16,6 +17,14 @@ export interface ReadingState {
   progressPercentage: number;
   chapters: ChapterItem[];
   chapterWordCounts: number[];
+  allBookPages: BookVisualPage[];
+  isCompletionModalOpen: boolean;
+  sessionStats: {
+    speedWpm: number;
+    durationSeconds: number;
+    accuracy: number;
+    wordsCount: number;
+  } | null;
 
   // Actions
   setWordIndex: (wordIndex: number) => void;
@@ -25,6 +34,9 @@ export interface ReadingState {
   setWpm: (wpm: number) => void;
   setMode: (mode: "rsvp" | "cluster" | "normal") => void;
   setCompletedChapter: (completedChapter: string | null) => void;
+  setAllBookPages: (pages: BookVisualPage[]) => void;
+  setIsCompletionModalOpen: (isOpen: boolean) => void;
+  setSessionStats: (stats: { speedWpm: number; durationSeconds: number; accuracy: number; wordsCount: number; } | null) => void;
   initBook: (
     bookId: string,
     chapterIndex: number,
@@ -72,6 +84,9 @@ export const useReadingStore = create<ReadingState>((set) => ({
   progressPercentage: 0,
   chapters: [],
   chapterWordCounts: [],
+  allBookPages: [],
+  isCompletionModalOpen: false,
+  sessionStats: null,
 
   setWordIndex: (wordIndex) =>
     set((state) => {
@@ -100,6 +115,9 @@ export const useReadingStore = create<ReadingState>((set) => ({
   setWpm: (wpm) => set({ wpm }),
   setMode: (mode) => set({ mode }),
   setCompletedChapter: (completedChapter) => set({ completedChapter }),
+  setAllBookPages: (allBookPages) => set({ allBookPages }),
+  setIsCompletionModalOpen: (isCompletionModalOpen) => set({ isCompletionModalOpen }),
+  setSessionStats: (sessionStats) => set({ sessionStats }),
 
   initBook: (bookId, chapterIndex, wordIndex, wpm, mode, chapters) =>
     set(() => {
@@ -123,6 +141,9 @@ export const useReadingStore = create<ReadingState>((set) => ({
         progressPercentage,
         chapters,
         chapterWordCounts,
+        allBookPages: [],
+        isCompletionModalOpen: false,
+        sessionStats: null,
       };
     }),
 }));

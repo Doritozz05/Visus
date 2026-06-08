@@ -17,8 +17,7 @@ import { useReadingStore } from "../stores/reading-store";
 interface PagesVisualBoxProps {
   currentChapter: ChapterHtmlData;
   chaptersData: ChapterHtmlData[];
-  allBookPages: BookVisualPage[];
-  onPagesComputed?: (computedPages: BookVisualPage[]) => void;
+
   /** The local page index (within the current chapter) saved from the previous session. */
   savedLocalPageIndex?: number;
   /** Called after every page turn (handleNext/handlePrev) with the new local page index */
@@ -38,8 +37,7 @@ interface PagesVisualBoxProps {
 export function PagesVisualBox({
   currentChapter,
   chaptersData,
-  allBookPages,
-  onPagesComputed,
+
   savedLocalPageIndex,
   onSavePageProgress,
   readerFontClass,
@@ -55,7 +53,6 @@ export function PagesVisualBox({
 }: PagesVisualBoxProps) {
   const columnGap = 40;
   const [totalPages, setTotalPages] = React.useState(1);
-  const [currentPageIndex, setCurrentPageIndex] = React.useState(0);
   const columnsContainerRef = React.useRef<HTMLDivElement>(null);
   const hiddenPaginatorRef = React.useRef<HTMLDivElement>(null);
   const canvasWrapperRef = React.useRef<HTMLDivElement>(null);
@@ -63,10 +60,29 @@ export function PagesVisualBox({
   // Subscribe atomically to Zustand store properties
   const wordIndex = useReadingStore((state) => state.wordIndex);
   const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
+  const allBookPages = useReadingStore((state) => state.allBookPages);
 
   const setWordIndex = React.useCallback((w: number) => {
     useReadingStore.getState().setWordIndex(w);
   }, []);
+
+  // Compute currentPageIndex synchronously
+  const currentPageIndex = React.useMemo(() => {
+    if (!allBookPages || allBookPages.length === 0) return 0;
+    
+    const chapterPages = allBookPages.filter(p => p.chapterIndex === currentChapter.index);
+    if (chapterPages.length === 0) return 0;
+
+    const foundIndex = chapterPages.findIndex(
+      (p) => wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
+    );
+    
+    if (foundIndex !== -1) return foundIndex;
+    
+    // Fallback if out of bounds: 0 if before, last if after
+    if (chapterPages[0] && wordIndex < chapterPages[0].startWordIndex) return 0;
+    return chapterPages.length - 1;
+  }, [allBookPages, currentChapter.index, wordIndex]);
 
   // Derived active visual page object
   const activePage = React.useMemo(() => {
@@ -79,12 +95,6 @@ export function PagesVisualBox({
   
   // Track visible container dimensions for offscreen DOM pagination
   const [containerDimensions, setContainerDimensions] = React.useState<{ width: number; height: number } | null>(null);
-  
-  // Track local word index updates to avoid synchronization render loops
-  const localWordIndexChangeRef = React.useRef<number | null>(null);
-  
-  // Guards against the useLayoutEffect overriding a pending page restoration.
-  const pendingRestorePageRef = React.useRef<number | null>(null);
 
   // Always-current ref for the values that the async paginateAllChapters needs
   const latestRestoreTargetRef = React.useRef<{
@@ -132,18 +142,14 @@ export function PagesVisualBox({
   const { isPaginationReady } = useDomPagination({
     chaptersData,
     containerDimensions,
-    onPagesComputed,
     scaledFontSize,
     readerFontClass,
     wordsPerPage,
     hiddenPaginatorRef,
     columnGap,
     latestRestoreTargetRef,
-    setCurrentPageIndex,
-    localWordIndexChangeRef,
-    pendingRestorePageRef,
     initialReady: allBookPages.length > 0,
-  });
+  } as any);
 
   // Consuming custom Page navigation hook
   const {
@@ -158,22 +164,12 @@ export function PagesVisualBox({
     containerDimensions,
     columnGap,
     currentPageIndex,
-    setCurrentPageIndex,
     totalPages,
-    localWordIndexChangeRef,
     setWordIndex,
     onSavePageProgress,
     onPrevChapter,
     onNextChapter,
-  });
-
-  React.useLayoutEffect(() => {
-    if (savedLocalPageIndex !== undefined && allBookPages.length === 0) {
-      if (pendingRestorePageRef.current === null) {
-        pendingRestorePageRef.current = -1;
-      }
-    }
-  }, [savedLocalPageIndex, allBookPages.length]);
+  } as any);
 
   React.useLayoutEffect(() => {
     const el = columnsContainerRef.current;
@@ -182,23 +178,8 @@ export function PagesVisualBox({
       const scrollWidth = el.scrollWidth;
       const pages = Math.max(1, Math.ceil((scrollWidth + columnGap) / (width + columnGap)));
       setTotalPages(pages);
-      
-      if (pendingRestorePageRef.current !== null) {
-        if (pendingRestorePageRef.current >= 0) {
-          pendingRestorePageRef.current = null;
-          localWordIndexChangeRef.current = null;
-        }
-        return;
-      }
-      
-      if (wordIndex !== localWordIndexChangeRef.current) {
-        const initialPage = getPageIndexForWord(wordIndex);
-        setCurrentPageIndex(initialPage);
-      }
-      
-      localWordIndexChangeRef.current = null;
     }
-  }, [formattedHtml, scaledFontSize, readerFontClass, containerDimensions, wordIndex, getPageIndexForWord]);
+  }, [formattedHtml, scaledFontSize, readerFontClass, containerDimensions]);
 
   React.useEffect(() => {
     const wrapper = canvasWrapperRef.current;

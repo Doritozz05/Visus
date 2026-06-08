@@ -87,16 +87,9 @@ describe("useReaderPlayback hook", () => {
     });
 
     // Check initialized properties exist
-    expect(result).toHaveProperty("wordIndex");
-    expect(result).toHaveProperty("activeChapterIndex");
-    expect(result).toHaveProperty("isPlaying");
-    expect(result).toHaveProperty("mode");
     expect(result).toHaveProperty("rsvpSequence");
     expect(result).toHaveProperty("clusterChunks");
-    expect(result).toHaveProperty("progressPercentage");
-    
-    // Check initial values
-    expect(result.isPlaying).toBe(false);
-    expect(result.mode).toBe("normal");
+    expect(result).toHaveProperty("setMode");
+    expect(result).toHaveProperty("saveProgressForBook");
   });
 });
