@@ -108,7 +108,7 @@ export default function ReaderClient() {
   const currentChapter = React.useMemo(() => {
     const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
     const ch = chaptersData[safeIdx] || { title: "No Book Loaded", content: "" };
-    const wordsArr = ch.content ? ch.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+    const wordsArr = ch.content ? ch.content.split(/\s+/).filter((w: string) => w.trim() !== "") : [];
     return { ...ch, words: wordsArr, index: safeIdx };
   }, [chaptersData, activeChapterIndex]);
 
