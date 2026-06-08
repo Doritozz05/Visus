@@ -1,0 +1,9 @@
+{
+  "ignoredFiles": [
+    "public/icons/*.png",
+    "node_modules/*",
+    ".next/*"
+  ],
+  "aggressive": false,
+  "schedule": "daily"
+}
