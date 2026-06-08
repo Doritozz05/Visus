@@ -31,6 +31,7 @@ export function useDomPagination({
   initialReady,
 }: UseDomPaginationProps) {
   const [isPaginationReady, setIsPaginationReady] = React.useState(initialReady);
+  const [isFullPaginationReady, setIsFullPaginationReady] = React.useState(initialReady);
   const hasComputedRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -40,6 +41,7 @@ export function useDomPagination({
 
     // Reset ready flag whenever we restart pagination (e.g. chapter/font change)
     setIsPaginationReady(false);
+    setIsFullPaginationReady(false);
 
     let active = true;
 
@@ -216,6 +218,11 @@ export function useDomPagination({
         // Yield to allow UI updates and not block the main thread
         await new Promise((resolve) => setTimeout(resolve, 0));
       }
+
+      // Mark full pagination completed once the loop concludes
+      if (active) {
+        setIsFullPaginationReady(true);
+      }
     };
 
     paginateAllChapters();
@@ -228,6 +235,7 @@ export function useDomPagination({
 
   return {
     isPaginationReady,
+    isFullPaginationReady,
     hasComputedRef,
   };
 }

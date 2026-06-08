@@ -6,6 +6,7 @@ import { BookVisualPage } from "@/lib/parser/paginator";
 
 interface PagesFooterProps {
   isPaginationReady: boolean;
+  isFullPaginationReady: boolean;
   currentPageIndex: number;
   currentChapterIndex: number;
   globalPageDetails: { current: number; total: number };
@@ -21,6 +22,7 @@ interface PagesFooterProps {
 
 export function PagesFooter({
   isPaginationReady,
+  isFullPaginationReady,
   currentPageIndex,
   currentChapterIndex,
   globalPageDetails,
@@ -46,30 +48,38 @@ export function PagesFooter({
       </button>
 
       {/* Page indicator & Slider */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5">
-        <div className="text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60 pointer-events-none leading-none">
-          Page {globalPageDetails.current} of {globalPageDetails.total}
-        </div>
-        {allBookPages.length > 0 && (
-          <input
-            type="range"
-            min="1"
-            max={globalPageDetails.total}
-            value={globalPageDetails.current}
-            disabled={!isPaginationReady}
-            onChange={(e) => {
-              const targetPageNum = Number(e.target.value);
-              const targetPage = allBookPages.find(p => p.absolutePageIndex === targetPageNum - 1);
-              if (targetPage) {
-                if (targetPage.chapterIndex !== currentChapterIndex) {
-                  setActiveChapterIndex(targetPage.chapterIndex);
-                }
-                setWordIndex(targetPage.startWordIndex);
-              }
-            }}
-            className="w-32 accent-primary h-1 bg-border/40 hover:bg-border/60 rounded-lg appearance-none cursor-pointer transition-colors z-30 disabled:opacity-30 disabled:pointer-events-none"
-            title={`Page ${globalPageDetails.current} of ${globalPageDetails.total}`}
-          />
+      <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 min-w-[120px]">
+        {!isFullPaginationReady ? (
+          <div className="text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/50 animate-pulse pointer-events-none leading-none py-2">
+            Calculating pages...
+          </div>
+        ) : (
+          <>
+            <div className="text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60 pointer-events-none leading-none">
+              Page {globalPageDetails.current} of {globalPageDetails.total}
+            </div>
+            {allBookPages.length > 0 && (
+              <input
+                type="range"
+                min="1"
+                max={globalPageDetails.total}
+                value={globalPageDetails.current}
+                disabled={!isPaginationReady}
+                onChange={(e) => {
+                  const targetPageNum = Number(e.target.value);
+                  const targetPage = allBookPages.find(p => p.absolutePageIndex === targetPageNum - 1);
+                  if (targetPage) {
+                    if (targetPage.chapterIndex !== currentChapterIndex) {
+                      setActiveChapterIndex(targetPage.chapterIndex);
+                    }
+                    setWordIndex(targetPage.startWordIndex);
+                  }
+                }}
+                className="w-32 accent-primary h-1 bg-border/40 hover:bg-border/60 rounded-lg appearance-none cursor-pointer transition-colors z-30 disabled:opacity-30 disabled:pointer-events-none"
+                title={`Page ${globalPageDetails.current} of ${globalPageDetails.total}`}
+              />
+            )}
+          </>
         )}
       </div>
 

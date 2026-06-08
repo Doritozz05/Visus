@@ -139,7 +139,7 @@ export function PagesVisualBox({
   }, [currentChapter]);
 
   // Consuming custom DOM pagination hook
-  const { isPaginationReady } = useDomPagination({
+  const { isPaginationReady, isFullPaginationReady } = useDomPagination({
     chaptersData,
     containerDimensions,
     scaledFontSize,
@@ -314,6 +314,7 @@ export function PagesVisualBox({
 
       <PagesFooter
         isPaginationReady={isPaginationReady}
+        isFullPaginationReady={isFullPaginationReady}
         currentPageIndex={currentPageIndex}
         currentChapterIndex={currentChapter.index}
         globalPageDetails={globalPageDetails}

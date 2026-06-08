@@ -75,6 +75,7 @@ export default function ReaderPage() {
   const {
     saveProgressForBook,
     setMode,
+    initializedBookIdRef,
     chaptersData,
     allBookPages,
     setAllBookPages,
@@ -102,7 +103,7 @@ export default function ReaderPage() {
   const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
   const storeActiveBookId = useReadingStore((state) => state.activeBookId);
 
-  const isStoreInitialized = activeBook && storeActiveBookId === activeBook.id;
+  const isStoreInitialized = activeBook && storeActiveBookId === activeBook.id && initializedBookIdRef.current === activeBook.id;
 
   const currentChapter = React.useMemo(() => {
     const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
