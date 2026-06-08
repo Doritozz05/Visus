@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
 
 export interface DropdownOption {
   value: string;
@@ -166,7 +166,7 @@ export function FancyDropdown({
                 {searchable && (
                   <div className="border-b border-border/10 p-2">
                     <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-background/70 px-3 h-10 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
-                      <span className="material-symbols-outlined text-sm text-muted-foreground">search</span>
+                      <Search className="w-4 h-4 text-muted-foreground" />
                       <input
                         ref={searchInputRef}
                         value={searchQuery}

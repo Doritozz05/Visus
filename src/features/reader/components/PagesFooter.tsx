@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
 import { BookVisualPage } from "@/lib/parser/paginator";
 
 interface PagesFooterProps {
@@ -40,7 +41,7 @@ export function PagesFooter({
         disabled={!isPaginationReady || (currentPageIndex === 0 && currentChapterIndex === 0)}
         className="flex items-center gap-1.5 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none z-20"
       >
-        <span className="material-symbols-outlined text-sm">arrow_back_ios</span>
+        <ChevronLeft className="h-3.5 w-3.5" />
         {showPrevChapter ? "Previous Chapter" : "Previous Page"}
       </button>
 
@@ -85,12 +86,12 @@ export function PagesFooter({
         {showCompleteBook ? (
           <>
             Complete Book
-            <span className="material-symbols-outlined text-base">task_alt</span>
+            <CheckCircle className="h-4 w-4" />
           </>
         ) : (
           <>
             {showNextChapter ? "Next Chapter" : "Next Page"}
-            <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
+            <ChevronRight className="h-3.5 w-3.5" />
           </>
         )}
       </button>

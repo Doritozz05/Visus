@@ -51,11 +51,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} ${hanken.variable} dark`}>
-      <head>
-        {/* Load Material Symbols Outlined for prototype screen icons */}
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-      </head>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
         <Providers>{children}</Providers>
       </body>

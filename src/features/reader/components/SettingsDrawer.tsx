@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Settings, Sliders, X, Zap, Columns } from "lucide-react";
 import { GeneralSettingsForm } from "@/features/settings/components/GeneralSettingsForm";
 import { RsvpSettingsForm } from "@/features/settings/components/RsvpSettingsForm";
 import { ClusterSettingsForm } from "@/features/settings/components/ClusterSettingsForm";
@@ -37,7 +38,7 @@ export function SettingsDrawer({
         
         <div className="flex items-center justify-between pb-4 border-b border-border/30 mb-6">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">settings_applications</span>
+            <Sliders className="text-primary h-5 w-5" />
             <h3 className="font-heading font-bold text-base">Quick Calibration</h3>
           </div>
           <button 
@@ -45,29 +46,32 @@ export function SettingsDrawer({
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground border border-border/20 transition-all"
           >
-            <span className="material-symbols-outlined text-lg">close</span>
+            <X className="h-[18px] w-[18px]" />
           </button>
         </div>
 
         <div className="flex gap-1 border-b border-border/10 pb-3 mb-6 overflow-x-auto scrollbar-none">
           {[
-            { id: "general", label: "General", icon: "settings" },
-            { id: "rsvp", label: "RSVP", icon: "bolt" },
-            { id: "cluster", label: "Cluster", icon: "splitscreen" },
-          ].map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setDrawerTab(t.id as any)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg border font-mono text-[10px] uppercase tracking-wider transition-all shrink-0 ${
-                drawerTab === t.id
-                  ? "border-primary bg-primary/10 text-primary font-bold shadow-sm"
-                  : "border-border/30 bg-card hover:bg-accent/65 text-muted-foreground hover:text-foreground shadow-sm"
-              }`}
-            >
-              <span className="material-symbols-outlined text-sm">{t.icon}</span>
-              {t.label}
-            </button>
-          ))}
+            { id: "general", label: "General", icon: Settings },
+            { id: "rsvp", label: "RSVP", icon: Zap },
+            { id: "cluster", label: "Cluster", icon: Columns },
+          ].map((t) => {
+            const Icon = t.icon;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setDrawerTab(t.id as any)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg border font-mono text-[10px] uppercase tracking-wider transition-all shrink-0 ${
+                  drawerTab === t.id
+                    ? "border-primary bg-primary/10 text-primary font-bold shadow-sm"
+                    : "border-border/30 bg-card hover:bg-accent/65 text-muted-foreground hover:text-foreground shadow-sm"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {t.label}
+              </button>
+            );
+          })}
         </div>
 
         <div 

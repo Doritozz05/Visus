@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { BookOpen, X } from "lucide-react";
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -51,14 +52,14 @@ export function AddBookModal({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-border/10 mb-4 relative z-10">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">library_add</span>
+            <BookOpen className="text-primary w-5 h-5" />
             <h3 className="font-heading font-bold text-lg">Add book manually</h3>
           </div>
           <button 
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
           >
-            <span className="material-symbols-outlined text-lg">close</span>
+            <X className="w-5 h-5" />
           </button>
         </div>
 

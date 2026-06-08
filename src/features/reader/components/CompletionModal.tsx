@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Trophy } from "lucide-react";
 
 interface SessionStats {
   speedWpm: number;
@@ -41,7 +42,7 @@ export function CompletionModal({
         <div className="relative mb-6">
           <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary via-purple-500 to-pink-500 blur opacity-70 animate-pulse"></div>
           <div className="relative w-20 h-20 rounded-full bg-background border border-primary/30 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-4xl animate-bounce">emoji_events</span>
+            <Trophy className="h-9 w-9 animate-bounce text-primary" />
           </div>
         </div>
 

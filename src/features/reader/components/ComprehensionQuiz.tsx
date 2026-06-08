@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Quiz, QuizQuestion } from "@/core/algorithms/quiz-generator";
+import { CheckCircle, ArrowRight, CheckCheck } from "lucide-react";
 
 interface ComprehensionQuizProps {
   quiz: Quiz;
@@ -70,7 +71,7 @@ export function ComprehensionQuiz({
         
         <div className="relative mb-1">
           <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-2xl">task_alt</span>
+            <CheckCircle className="h-6 w-6 text-primary" />
           </div>
         </div>
 
@@ -119,7 +120,7 @@ export function ComprehensionQuiz({
               className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded text-xs font-mono uppercase tracking-wider font-bold shadow-[0_0_15px_rgba(var(--primary),0.15)] hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
             >
               <span>Next chapter</span>
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -195,9 +196,11 @@ export function ComprehensionQuiz({
           <span>
             {currentIndex === totalQuestions - 1 ? "Finish evaluation" : "Next question"}
           </span>
-          <span className="material-symbols-outlined text-sm">
-            {currentIndex === totalQuestions - 1 ? "done_all" : "arrow_forward"}
-          </span>
+          {currentIndex === totalQuestions - 1 ? (
+            <CheckCheck className="h-3.5 w-3.5" />
+          ) : (
+            <ArrowRight className="h-3.5 w-3.5" />
+          )}
         </button>
       </div>
     </div>

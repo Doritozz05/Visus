@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Book } from "@/core/entities/book";
+import { Book as BookIcon, X, BookOpen } from "lucide-react";
 
 interface BookDetailsModalProps {
   book: Book;
@@ -46,7 +47,7 @@ export function BookDetailsModal({
                 <span className="text-xl font-extrabold text-primary/70 font-mono tracking-tighter uppercase mb-1">
                   {book.title.slice(0, 2)}
                 </span>
-                <span className="material-symbols-outlined text-muted-foreground/30 text-2xl">menu_book</span>
+                <BookIcon className="text-muted-foreground/30 h-6 w-6" />
               </div>
             )}
             <div className="absolute bottom-1 right-1 bg-accent/90 border border-border/10 px-1.5 py-0.5 rounded text-[8px] font-mono text-primary font-bold shadow-md">{book.format}</div>
@@ -65,7 +66,7 @@ export function BookDetailsModal({
             onClick={onClose}
             className="absolute right-4 top-4 w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground border border-border/20 transition-all z-20"
           >
-            <span className="material-symbols-outlined text-lg">close</span>
+            <X className="h-[18px] w-[18px]" />
           </button>
 
           <div className="space-y-4">
@@ -142,7 +143,7 @@ export function BookDetailsModal({
               className="flex-1 py-2.5 bg-primary text-primary-foreground font-bold rounded-lg text-xs font-mono uppercase tracking-wider shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
             >
               <span>Read book</span>
-              <span className="material-symbols-outlined text-sm">chrome_reader_mode</span>
+              <BookOpen className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>

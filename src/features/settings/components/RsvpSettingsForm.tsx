@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Zap } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
 
 export function RsvpSettingsForm() {
@@ -12,7 +13,7 @@ export function RsvpSettingsForm() {
       {/* RSVP Layout Controls */}
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
-          <span className="material-symbols-outlined text-primary">bolt</span>
+          <Zap className="text-primary h-5 w-5 animate-pulse" />
           <h3 className="text-sm font-bold font-heading text-foreground">RSVP calibration engine</h3>
         </div>
 

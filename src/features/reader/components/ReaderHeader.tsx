@@ -4,6 +4,7 @@ import * as React from "react";
 import { Book, Bookmark } from "@/core/entities/book";
 import { TableOfContents } from "./TableOfContents";
 import { useReadingStore } from "../stores/reading-store";
+import { ArrowLeft, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Settings } from "lucide-react";
 
 interface ChapterItem {
   title: string;
@@ -70,7 +71,7 @@ export function ReaderHeader({
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
           title="Change book or back to selection list"
         >
-          <span className="material-symbols-outlined text-base">arrow_back</span>
+          <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Bookshelf</span>
         </button>
       </div>
@@ -91,7 +92,7 @@ export function ReaderHeader({
             className="w-5 h-5 rounded border border-border/30 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
             title="Previous chapter"
           >
-            <span className="material-symbols-outlined text-[12px] font-bold">chevron_left</span>
+            <ChevronLeft className="w-3.5 h-3.5" />
           </button>
 
           {/* Clickable Chapter Badge */}
@@ -102,9 +103,7 @@ export function ReaderHeader({
             title="Open table of contents / chapter index"
           >
             <span className="truncate">{currentChapter.title}</span>
-            <span className="material-symbols-outlined text-[14px] shrink-0 leading-none">
-              {isTocOpen ? "expand_less" : "expand_more"}
-            </span>
+            {isTocOpen ? <ChevronUp className="w-3.5 h-3.5 shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 shrink-0" />}
           </button>
 
           <button
@@ -117,7 +116,7 @@ export function ReaderHeader({
             className="w-5 h-5 rounded border border-border/30 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
             title="Next chapter"
           >
-            <span className="material-symbols-outlined text-[12px] font-bold">chevron_right</span>
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
         <div className="w-36 sm:w-48 h-1.5 bg-muted dark:bg-card/90 mt-2.5 rounded-full overflow-hidden border border-border/40 dark:border-border/20 shadow-inner">
@@ -182,7 +181,7 @@ export function ReaderHeader({
           onClick={openQuickSettings}
           className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
         >
-          <span className="material-symbols-outlined text-base animate-spin-slow">settings</span>
+          <Settings className="w-4 h-4 animate-spin-slow" />
           Settings
         </button>
       </div>

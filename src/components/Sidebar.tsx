@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Library, Gauge, TrendingUp, Settings, Eye } from "lucide-react";
 
 interface SidebarProps {
   activePath?: string;
@@ -12,10 +13,10 @@ export function Sidebar({ activePath }: SidebarProps) {
   const currentPath = activePath || pathname;
 
   const navItems = [
-    { name: "Library", path: "/library", icon: "library_books" },
-    { name: "Reading room", path: "/reader", icon: "speed" },
-    { name: "Performance", path: "/dashboard", icon: "insights" },
-    { name: "Settings", path: "/settings", icon: "settings" },
+    { name: "Library", path: "/library", icon: Library },
+    { name: "Reading room", path: "/reader", icon: Gauge },
+    { name: "Performance", path: "/dashboard", icon: TrendingUp },
+    { name: "Settings", path: "/settings", icon: Settings },
   ];
 
   return (
@@ -25,7 +26,7 @@ export function Sidebar({ activePath }: SidebarProps) {
         <div className="p-6 border-b border-border/50">
           <Link href="/">
             <h1 className="text-2xl font-extrabold tracking-tight text-primary font-heading flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-3xl">visibility</span>
+              <Eye className="w-8 h-8 text-primary" />
               Visus
             </h1>
           </Link>
@@ -36,6 +37,7 @@ export function Sidebar({ activePath }: SidebarProps) {
         <nav className="flex-1 py-6 flex flex-col gap-2">
           {navItems.map((item) => {
             const isActive = currentPath === item.path;
+            const Icon = item.icon;
             return (
               <Link
                 key={item.path}
@@ -46,14 +48,11 @@ export function Sidebar({ activePath }: SidebarProps) {
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                 }`}
               >
-                <span
-                  className={`material-symbols-outlined text-lg transition-colors ${
+                <Icon
+                  className={`w-5 h-5 transition-colors ${
                     isActive ? "text-primary" : "group-hover:text-primary"
                   }`}
-                  style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
-                >
-                  {item.icon}
-                </span>
+                />
                 {item.name}
               </Link>
             );
@@ -72,6 +71,7 @@ export function Sidebar({ activePath }: SidebarProps) {
       <nav className="md:hidden fixed bottom-0 w-full bg-card border-t border-border/50 z-50 flex justify-around items-center h-16 pb-safe transition-all duration-300">
         {navItems.map((item) => {
           const isActive = currentPath === item.path;
+          const Icon = item.icon;
           return (
             <Link
               key={item.path}
@@ -80,13 +80,12 @@ export function Sidebar({ activePath }: SidebarProps) {
                 isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <div className={`${isActive ? "bg-accent px-4 py-1 rounded-full" : ""}`}>
-                <span
-                  className="material-symbols-outlined text-2xl"
-                  style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
-                >
-                  {item.icon}
-                </span>
+              <div className={`${isActive ? "bg-accent px-4 py-1.5 rounded-full" : ""}`}>
+                <Icon
+                  className={`w-6 h-6 transition-colors ${
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  }`}
+                />
               </div>
             </Link>
           );

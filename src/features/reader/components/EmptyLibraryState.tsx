@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { BookOpen, Library, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 
@@ -32,7 +33,7 @@ export function EmptyLibraryState({
         <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl glass-panel relative overflow-hidden flex flex-col items-center justify-center gap-6">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
           <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-pulse relative z-10">
-            <span className="material-symbols-outlined text-4xl">auto_stories</span>
+            <BookOpen className="h-8 w-8" />
           </div>
 
           <div className="relative z-10">
@@ -47,14 +48,14 @@ export function EmptyLibraryState({
               onClick={() => router.push("/library")}
               className="flex-1 py-2.5 border border-border/30 rounded-lg text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent transition-all flex items-center justify-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-sm">library_books</span>
+              <Library className="h-3.5 w-3.5" />
               Go to library
             </button>
             <button
               onClick={triggerLocalFileBrowser}
               className="flex-1 py-2.5 bg-primary text-primary-foreground rounded-lg text-xs font-mono uppercase tracking-wider font-bold shadow-md hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-sm">upload_file</span>
+              <Upload className="h-3.5 w-3.5" />
               Browse book
             </button>
           </div>

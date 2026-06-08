@@ -24,6 +24,7 @@ import { useBookIngestion } from "@/features/reader/hooks/useBookIngestion";
 import { useReaderPlayback } from "@/features/reader/hooks/useReaderPlayback";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { Settings, BookOpen, HelpCircle, ArrowRight } from "lucide-react";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
 import { READER_FONT_CLASSES } from "@/features/reader/utils/reader-fonts";
 
@@ -164,7 +165,7 @@ export default function ReaderPage() {
             onClick={openQuickSettings}
             className="w-9 h-9 rounded-full bg-accent flex items-center justify-center border border-border/30 hover:text-primary transition-all text-muted-foreground"
           >
-            <span className="material-symbols-outlined text-lg">settings</span>
+            <Settings className="w-5 h-5" />
           </button>
           <div className="w-8 h-8 rounded-full bg-accent border border-border/30 overflow-hidden">
             <div className="w-full h-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
@@ -239,7 +240,7 @@ export default function ReaderPage() {
               <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl glass-panel relative overflow-hidden flex flex-col items-center justify-center gap-6 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
                 <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-bounce relative z-10">
-                  <span className="material-symbols-outlined text-3xl">auto_stories</span>
+                  <BookOpen className="w-8 h-8" />
                 </div>
                 
                 <div className="relative z-10">
@@ -259,7 +260,7 @@ export default function ReaderPage() {
                     className="w-full py-3 bg-primary text-primary-foreground rounded-lg text-xs font-mono uppercase tracking-wider font-bold shadow-[0_0_15px_rgba(var(--primary),0.15)] hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
                   >
                     <span>Take comprehension quiz</span>
-                    <span className="material-symbols-outlined text-sm">quiz</span>
+                    <HelpCircle className="w-4 h-4" />
                   </button>
                   
                   <div className="flex gap-3 w-full">
@@ -280,7 +281,7 @@ export default function ReaderPage() {
                       className="flex-1 px-4 py-2.5 bg-accent text-primary border border-primary/20 rounded text-xs font-mono uppercase tracking-wider font-bold hover:bg-accent/85 transition-all flex items-center justify-center gap-1.5"
                     >
                       <span>Skip quiz</span>
-                      <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Eye } from "lucide-react";
 
 interface LoadingSpinnerProps {
   message?: string;
@@ -25,9 +26,7 @@ export function LoadingSpinner({
         {/* Spinning tracker track */}
         <div className="w-14 h-14 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
         {/* Inner foveal core guide symbol */}
-        <span className="material-symbols-outlined absolute text-primary/70 text-lg animate-pulse">
-          visibility
-        </span>
+        <Eye className="absolute text-primary/70 w-5 h-5 animate-pulse" />
       </div>
       {message && (
         <p className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold animate-pulse">

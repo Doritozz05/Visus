@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Palette, CheckCircle, Check, Brain, BookOpen } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
 
 export function GeneralSettingsForm() {
@@ -23,7 +24,7 @@ export function GeneralSettingsForm() {
       {/* Visual Themes Module */}
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
-          <span className="material-symbols-outlined text-primary">palette</span>
+          <Palette className="text-primary h-5 w-5" />
           <h3 className="text-sm font-bold font-heading text-foreground">Aesthetic schemes</h3>
         </div>
 
@@ -47,7 +48,7 @@ export function GeneralSettingsForm() {
               >
                 <div className="flex items-center justify-between mb-2 w-full">
                   <span className="text-[11px] font-bold">{t.name}</span>
-                  {theme === t.id && <span className="material-symbols-outlined text-primary text-xs">check_circle</span>}
+                  {theme === t.id && <CheckCircle className="text-primary h-3.5 w-3.5" />}
                 </div>
                 <div className="flex gap-1.5 items-center">
                   <div className={`w-4 h-4 rounded-full ${t.preview} border border-border/40 shrink-0`}></div>
@@ -78,7 +79,7 @@ export function GeneralSettingsForm() {
                 }`}
               >
                 {accentColor === c.id && (
-                  <span className="material-symbols-outlined text-white text-xs font-bold">check</span>
+                  <Check className="text-white h-3.5 w-3.5 stroke-[3]" />
                 )}
               </button>
             ))}
@@ -114,7 +115,7 @@ export function GeneralSettingsForm() {
       {/* Behavioral & Advanced Configuration */}
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
-          <span className="material-symbols-outlined text-primary">psychology</span>
+          <Brain className="text-primary h-5 w-5" />
           <h3 className="text-sm font-bold font-heading text-foreground">Advanced engine features</h3>
         </div>
 
@@ -197,7 +198,7 @@ export function GeneralSettingsForm() {
       {/* Pages Reader Calibration */}
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
-          <span className="material-symbols-outlined text-primary">menu_book</span>
+          <BookOpen className="text-primary h-5 w-5" />
           <h3 className="text-sm font-bold font-heading text-foreground">Traditional pages calibration</h3>
         </div>
 

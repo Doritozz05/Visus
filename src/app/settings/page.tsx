@@ -6,6 +6,7 @@ import { useSettings } from "@/features/settings/context/settings-context";
 import { GeneralSettingsForm } from "@/features/settings/components/GeneralSettingsForm";
 import { RsvpSettingsForm } from "@/features/settings/components/RsvpSettingsForm";
 import { ClusterSettingsForm } from "@/features/settings/components/ClusterSettingsForm";
+import { Settings, Zap, Columns, Flame, UserCircle, User, RefreshCw } from "lucide-react";
 
 export default function SettingsPage() {
   const { resetSettings } = useSettings();
@@ -25,7 +26,7 @@ export default function SettingsPage() {
       <nav className="md:hidden bg-card border-b border-border/50 flex justify-between items-center w-full px-6 py-4 z-50 sticky top-0 transition-colors">
         <div className="text-xl font-bold tracking-tight text-foreground">Visus</div>
         <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-primary">local_fire_department</span>
+          <Flame className="text-primary h-5 w-5 fill-primary/20" />
           <div className="w-8 h-8 rounded-full bg-accent border border-border/30 overflow-hidden">
             <div className="w-full h-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
               VP
@@ -54,23 +55,26 @@ export default function SettingsPage() {
         {/* Dynamic Inner Configuration Tabs */}
         <div className="flex border-b border-border/40 mb-8 overflow-x-auto scrollbar-none gap-2">
           {[
-            { id: "general", name: "General & UI", icon: "settings" },
-            { id: "rsvp", name: "RSVP engine", icon: "bolt" },
-            { id: "cluster", name: "Cluster canvas", icon: "splitscreen" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-3 border-b-2 font-mono text-xs uppercase tracking-wider transition-all shrink-0 ${
-                activeTab === tab.id
-                  ? "border-primary text-primary font-bold bg-accent/40"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/10"
-              }`}
-            >
-              <span className="material-symbols-outlined text-lg">{tab.icon}</span>
-              {tab.name}
-            </button>
-          ))}
+            { id: "general", name: "General & UI", icon: Settings },
+            { id: "rsvp", name: "RSVP engine", icon: Zap },
+            { id: "cluster", name: "Cluster canvas", icon: Columns },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 px-6 py-3 border-b-2 font-mono text-xs uppercase tracking-wider transition-all shrink-0 ${
+                  activeTab === tab.id
+                    ? "border-primary text-primary font-bold bg-accent/40"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                }`}
+              >
+                <Icon className="h-4.5 w-4.5" />
+                {tab.name}
+              </button>
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -89,12 +93,12 @@ export default function SettingsPage() {
             <section className="bg-card border border-border/20 rounded-xl p-6 shadow-md glass-panel relative overflow-hidden">
               <div className="absolute right-0 top-0 w-24 h-24 bg-primary/5 rounded-full -translate-y-8 translate-x-8 blur-xl pointer-events-none" />
               <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
-                <span className="material-symbols-outlined text-primary">account_circle</span>
+                <UserCircle className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-bold font-heading text-foreground">Local profile</h3>
               </div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                  <span className="material-symbols-outlined text-primary text-2xl">person</span>
+                  <User className="text-primary h-6 w-6" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold">Guest reader</h4>
@@ -109,7 +113,7 @@ export default function SettingsPage() {
             {/* Cloud and Local Backup Integration */}
             <section className="bg-card border border-border/20 rounded-xl p-6 shadow-md glass-panel">
               <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
-                <span className="material-symbols-outlined text-primary">cloud_sync</span>
+                <RefreshCw className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-bold font-heading text-foreground">Storage sync</h3>
               </div>
               

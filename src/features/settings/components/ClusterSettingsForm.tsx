@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useSettings } from "@/features/settings/context/settings-context";
+import { Columns } from "lucide-react";
 
 export function ClusterSettingsForm() {
   const { settings, updateClusterSettings } = useSettings();
@@ -12,7 +13,7 @@ export function ClusterSettingsForm() {
       {/* Cluster Layout Controls */}
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
-          <span className="material-symbols-outlined text-primary">splitscreen</span>
+          <Columns className="text-primary h-5 w-5" />
           <h3 className="text-sm font-bold font-heading text-foreground">Visual cluster engine</h3>
         </div>
 

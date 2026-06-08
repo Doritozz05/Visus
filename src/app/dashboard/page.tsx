@@ -6,6 +6,7 @@ import { useLibrary } from "@/features/library/context/library-context";
 import { StatsService } from "@/core/services/stats-service";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ReadingSessionLog, LibraryStatsSummary } from "@/core/entities/stats";
+import { Flame, Gauge, TrendingUp, Brain, CheckCircle, BarChart } from "lucide-react";
 
 export default function DashboardPage() {
   const { books } = useLibrary();
@@ -48,7 +49,7 @@ export default function DashboardPage() {
       <nav className="md:hidden bg-card border-b border-border/30 flex justify-between items-center w-full px-6 py-4 z-50 sticky top-0 transition-all duration-300">
         <div className="text-xl font-bold tracking-tight text-foreground">Visus</div>
         <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-primary">local_fire_department</span>
+          <Flame className="text-primary w-6 h-6" />
           <div className="w-8 h-8 rounded-full bg-accent border border-border/30 overflow-hidden">
             <div className="w-full h-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
               VP
@@ -86,7 +87,7 @@ export default function DashboardPage() {
           {/* Card 1: Average WPM */}
           <div className="bg-card border border-border/20 p-6 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <span className="material-symbols-outlined text-8xl">speed</span>
+              <Gauge className="w-24 h-24 text-foreground" />
             </div>
             <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Average WPM</h3>
             <div className="flex items-baseline gap-2">
@@ -96,7 +97,7 @@ export default function DashboardPage() {
               <span className="text-xs font-mono text-primary uppercase">WPM</span>
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs font-mono text-emerald-500 dark:text-emerald-400">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
+              <TrendingUp className="w-4 h-4" />
               <span>{isHydrated ? `Total time: ${summary.totalReadingTimeMinutes} mins` : "+12% vs last week"}</span>
             </div>
           </div>
@@ -104,7 +105,7 @@ export default function DashboardPage() {
           {/* Card 2: Streak */}
           <div className="bg-card border border-border/20 p-6 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <span className="material-symbols-outlined text-8xl">local_fire_department</span>
+              <Flame className="w-24 h-24 text-foreground" />
             </div>
             <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Current streak</h3>
             <div className="flex items-baseline gap-2">
@@ -124,7 +125,7 @@ export default function DashboardPage() {
           {/* Card 3: Comprehension */}
           <div className="bg-card border border-border/20 p-6 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <span className="material-symbols-outlined text-8xl">psychology</span>
+              <Brain className="w-24 h-24 text-foreground" />
             </div>
             <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Comprehension</h3>
             <div className="flex items-baseline gap-2">
@@ -134,7 +135,7 @@ export default function DashboardPage() {
               <span className="text-xs font-mono text-muted-foreground">%</span>
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs font-mono text-muted-foreground">
-              <span className="material-symbols-outlined text-sm">check_circle</span>
+              <CheckCircle className="w-4 h-4" />
               <span>Based on reading telemetry logs</span>
             </div>
           </div>
@@ -143,7 +144,7 @@ export default function DashboardPage() {
         {/* Detailed Session Logs */}
         <section className="bg-card border border-border/20 rounded-xl p-6 shadow-md glass-panel">
           <div className="flex items-center gap-2 mb-6 border-b border-border/20 pb-4">
-            <span className="material-symbols-outlined text-primary">bar_chart</span>
+            <BarChart className="text-primary w-5 h-5" />
             <h3 className="text-lg font-bold font-heading text-foreground">Recent reading activity</h3>
           </div>
           <div className="overflow-x-auto">

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { AlertOctagon } from "lucide-react";
 
 interface Props {
   children: React.ReactNode;
@@ -34,7 +35,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
       return (
         <div className="max-w-md w-full bg-card border border-destructive/30 rounded-2xl p-8 text-center shadow-2xl glass-panel flex flex-col items-center justify-center gap-6">
           <div className="w-16 h-16 rounded-full bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive">
-            <span className="material-symbols-outlined text-3xl">error</span>
+            <AlertOctagon className="w-8 h-8" />
           </div>
           <div>
             <h2 className="text-xl font-bold font-heading text-foreground mb-3">Render Error</h2>

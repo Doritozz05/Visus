@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Upload } from "lucide-react";
 
 interface IngestionDropzoneProps {
   isDragOver: boolean;
@@ -45,7 +46,7 @@ export function IngestionDropzone({
           />
         ) : (
           <>
-            <span className="material-symbols-outlined text-4xl text-muted-foreground mb-3 group-hover:text-primary transition-colors animate-pulse">upload_file</span>
+            <Upload className="h-9 w-9 text-muted-foreground mb-3 group-hover:text-primary transition-colors animate-pulse" />
             <p className="text-sm font-semibold text-foreground mb-1">Drag & drop files here</p>
             <p className="text-[10px] font-mono text-muted-foreground/80">PDF, EPUB, TXT formats supported</p>
             <button 

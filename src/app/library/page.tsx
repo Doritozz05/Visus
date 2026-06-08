@@ -6,7 +6,7 @@ import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { useLibrary } from "@/features/library/context/library-context";
 import { Book } from "@/core/entities/book";
 import { useRouter } from "next/navigation";
-import { Eraser } from "lucide-react";
+import { Eraser, Flame, Search, Plus, Library } from "lucide-react";
 
 import { parseUploadedFile } from "@/lib/services/book-ingestion-service";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -271,11 +271,10 @@ export default function LibraryPage() {
         className="hidden" 
       />
 
-      {/* Mobile TopNav */}
-      <nav className="md:hidden bg-card border-b border-border/30 flex justify-between items-center w-full px-6 py-4 z-50 sticky top-0 transition-all duration-300">
+      <nav className="md:hidden bg-card border-b border-border/50 flex justify-between items-center w-full px-6 py-4 z-50 sticky top-0 transition-all duration-300">
         <div className="text-xl font-bold tracking-tight text-foreground">Visus</div>
         <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-primary">local_fire_department</span>
+          <Flame className="text-primary w-6 h-6" />
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary border border-border/30">
             VP
           </div>
@@ -290,7 +289,7 @@ export default function LibraryPage() {
           <h1 className="text-3xl font-extrabold font-heading text-foreground">Library</h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-              <span className="material-symbols-outlined text-primary text-sm">local_fire_department</span>
+              <Flame className="text-primary w-4 h-4" />
               <span>Streak: 12 days</span>
             </div>
             <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-bold text-primary">
@@ -348,7 +347,7 @@ export default function LibraryPage() {
               {/* Search, Filter Tabs & Add Button */}
               <div className="flex flex-col sm:flex-row gap-4 items-center bg-card rounded-xl border border-border/20 p-2 shadow-xl glass-panel">
                 <div className="flex-1 flex items-center px-4 gap-2 w-full">
-                  <span className="material-symbols-outlined text-muted-foreground">search</span>
+                  <Search className="text-muted-foreground w-4 h-4" />
                   <input 
                     className="w-full bg-transparent border-none text-sm text-foreground focus:outline-none focus:ring-0 placeholder-muted-foreground/60 h-10" 
                     placeholder="Search by title or author..." 
@@ -382,7 +381,7 @@ export default function LibraryPage() {
                     className="w-9 h-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:brightness-110 transition-all shadow-md"
                     title="Add book manually"
                   >
-                    <span className="material-symbols-outlined text-xl">add</span>
+                    <Plus className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -427,7 +426,7 @@ export default function LibraryPage() {
                 <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pr-1 pb-10">
                   {filteredBooks.length === 0 ? (
                     <div className="border border-dashed border-border/40 rounded-xl flex flex-col items-center justify-center p-12 text-center bg-card/10 h-full min-h-[300px]">
-                      <span className="material-symbols-outlined text-4xl text-muted-foreground/60 mb-3">library_books</span>
+                      <Library className="w-10 h-10 text-muted-foreground/60 mb-3" />
                       <p className="text-sm font-semibold text-muted-foreground">No books found</p>
                       <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs leading-relaxed">
                         Try adjusting your search criteria, switching tabs, or uploading a new file in the ingestion area.

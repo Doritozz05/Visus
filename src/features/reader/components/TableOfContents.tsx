@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Trash2 } from "lucide-react";
 import { Bookmark } from "@/core/entities/book";
 
 interface ChapterItem {
@@ -156,7 +157,7 @@ export function TableOfContents({
                       className="p-1 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded transition-all mr-1 shrink-0"
                       title="Delete bookmark"
                     >
-                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   )}
                 </div>

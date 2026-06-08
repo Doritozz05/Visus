@@ -1,18 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { Book } from "@/core/entities/book";
+import { Book, Trash2, MoreVertical, Info, BookOpen, CheckCircle, Pencil, Archive, FolderPlus } from "lucide-react";
+import { Book as BookEntity } from "@/core/entities/book";
 
 interface BookCardProps {
-  book: Book;
+  book: BookEntity;
   activeDropdownId: string | null;
   setActiveDropdownId: (id: string | null) => void;
   onDelete: (id: string) => void;
   onToggleCompleted: (id: string) => void;
-  onEdit: (book: Book) => void;
-  onUpdateBook: (id: string, updates: Partial<Book>) => void;
+  onEdit: (book: BookEntity) => void;
+  onUpdateBook: (id: string, updates: Partial<BookEntity>) => void;
   onRead: (id: string) => void;
-  onDetails: (book: Book) => void;
+  onDetails: (book: BookEntity) => void;
 }
 
 export function BookCard({
@@ -41,7 +42,7 @@ export function BookCard({
           className="w-7 h-7 rounded-full hover:bg-rose-500/10 flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-all animate-fade-in"
           title="Delete book"
         >
-          <span className="material-symbols-outlined text-base">delete</span>
+          <Trash2 className="w-4 h-4" />
         </button>
 
         {/* Options Dropdown Trigger */}
@@ -53,7 +54,7 @@ export function BookCard({
             }}
             className="w-7 h-7 rounded-full hover:bg-accent/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
           >
-            <span className="material-symbols-outlined text-base">more_vert</span>
+            <MoreVertical className="w-4 h-4" />
           </button>
 
           {/* Dropdown Menu (floats dynamically outside card, NEVER clipped, completely opaque) */}
@@ -69,7 +70,7 @@ export function BookCard({
                 }}
                 className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-b border-border/10"
               >
-                <span className="material-symbols-outlined text-sm text-muted-foreground">info</span>
+                <Info className="w-3.5 h-3.5 text-muted-foreground" />
                 View details
               </button>
               <button
@@ -79,9 +80,11 @@ export function BookCard({
                 }}
                 className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors"
               >
-                <span className="material-symbols-outlined text-sm text-muted-foreground">
-                  {book.status === "completed" ? "unpublished" : "task_alt"}
-                </span>
+                {book.status === "completed" ? (
+                  <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
+                ) : (
+                  <CheckCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                )}
                 {book.status === "completed" ? "Mark as active" : "Mark as completed"}
               </button>
               <button
@@ -91,7 +94,7 @@ export function BookCard({
                 }}
                 className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors"
               >
-                <span className="material-symbols-outlined text-sm text-muted-foreground">edit</span>
+                <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
                 Edit details
               </button>
               <button
@@ -101,9 +104,11 @@ export function BookCard({
                 }}
                 className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-t border-border/10"
               >
-                <span className="material-symbols-outlined text-sm text-muted-foreground">
-                  {book.status === "archived" ? "unarchive" : "archive"}
-                </span>
+                {book.status === "archived" ? (
+                  <FolderPlus className="w-3.5 h-3.5 text-muted-foreground" />
+                ) : (
+                  <Archive className="w-3.5 h-3.5 text-muted-foreground" />
+                )}
                 {book.status === "archived" ? "Unarchive book" : "Archive book"}
               </button>
             </div>
@@ -125,7 +130,7 @@ export function BookCard({
               <span className="text-[10px] font-extrabold text-primary/70 font-mono tracking-tighter uppercase leading-none mb-1">
                 {book.title.slice(0, 2)}
               </span>
-              <span className="material-symbols-outlined text-muted-foreground/40 text-xs">menu_book</span>
+              <Book className="w-4 h-4 text-muted-foreground/40" />
             </div>
           )}
           <div className="absolute bottom-0.5 right-0.5 bg-accent/90 border border-border/10 px-1.5 py-0.5 rounded text-[7px] font-mono text-primary font-bold shadow-sm">{book.format}</div>
@@ -156,7 +161,7 @@ export function BookCard({
               onClick={() => onRead(book.id)}
               className="flex items-center gap-1 px-3 py-1 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded transition-all shadow-sm"
             >
-              <span className="material-symbols-outlined text-xs">chrome_reader_mode</span>
+              <BookOpen className="w-3 h-3" />
               Read book
             </button>
           )}

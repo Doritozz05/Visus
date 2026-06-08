@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
+import { Pencil, X } from "lucide-react";
 
 interface EditBookModalProps {
   isOpen: boolean;
@@ -60,14 +61,14 @@ export function EditBookModal({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-border/10 mb-4 relative z-10">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">edit</span>
+            <Pencil className="text-primary h-5 w-5" />
             <h3 className="font-heading font-bold text-lg">Edit book details</h3>
           </div>
           <button 
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
           >
-            <span className="material-symbols-outlined text-lg">close</span>
+            <X className="h-[18px] w-[18px]" />
           </button>
         </div>
 

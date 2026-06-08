@@ -1,6 +1,7 @@
 import * as React from "react";
 import { BookVisualPage } from "@/lib/parser/paginator";
 import { useReadingStore } from "../stores/reading-store";
+import { ChevronLeft, ChevronRight, RotateCcw, RotateCw, Play, Pause, Zap } from "lucide-react";
 
 interface ReaderPlayerProps {
   onRewind: () => void;
@@ -62,7 +63,7 @@ export function ReaderPlayer({
             className="w-10 h-10 rounded-full border border-border/30 flex items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-30 disabled:pointer-events-none transition-colors"
             title="Previous Chapter/Page"
           >
-            <span className="material-symbols-outlined text-lg">arrow_back_ios_new</span>
+            <ChevronLeft className="w-5 h-5" />
           </button>
         ) : (
           <button
@@ -70,7 +71,7 @@ export function ReaderPlayer({
             className="w-10 h-10 rounded-full border border-border/30 flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors"
             title="Rewind 10 words"
           >
-            <span className="material-symbols-outlined text-lg">replay_10</span>
+            <RotateCcw className="w-5 h-5" />
           </button>
         )}
 
@@ -83,9 +84,13 @@ export function ReaderPlayer({
           }`}
           title={isNormalMode ? "Start Speed Reading (RSVP)" : (isPlaying ? "Pause" : "Play")}
         >
-          <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-            {isNormalMode ? "bolt" : (isPlaying ? "pause" : "play_arrow")}
-          </span>
+          {isNormalMode ? (
+            <Zap className="w-6 h-6 fill-current" />
+          ) : isPlaying ? (
+            <Pause className="w-6 h-6 fill-current" />
+          ) : (
+            <Play className="w-6 h-6 fill-current ml-0.5" />
+          )}
         </button>
 
         {isNormalMode ? (
@@ -95,7 +100,7 @@ export function ReaderPlayer({
             className="w-10 h-10 rounded-full border border-border/30 flex items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-30 disabled:pointer-events-none transition-colors"
             title="Next Chapter/Page"
           >
-            <span className="material-symbols-outlined text-lg">arrow_forward_ios</span>
+            <ChevronRight className="w-5 h-5" />
           </button>
         ) : (
           <button
@@ -103,7 +108,7 @@ export function ReaderPlayer({
             className="w-10 h-10 rounded-full border border-border/30 flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors"
             title="Skip 10 words"
           >
-            <span className="material-symbols-outlined text-lg">forward_10</span>
+            <RotateCw className="w-5 h-5" />
           </button>
         )}
       </div>
