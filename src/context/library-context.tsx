@@ -26,7 +26,7 @@ interface LibraryContextType {
       totalPages?: number;
     }
   ) => string;
-  updateBook: (id: string, updates: Partial<Book>) => void;
+  updateBook: (id: string, updates: Partial<Book>, silent?: boolean) => void;
   deleteBook: (id: string) => void;
   toggleCompleted: (id: string) => void;
   resetLibrary: () => void;
@@ -117,7 +117,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     return newBook.id;
   }, []);
 
-  const updateBook = React.useCallback((id: string, updates: Partial<Book>) => {
+  const updateBook = React.useCallback((id: string, updates: Partial<Book>, silent = false) => {
     const currentBook = booksRef.current.find((book) => book.id === id);
     if (!currentBook) return;
 
@@ -143,13 +143,23 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
     if (!bookChanged) return;
 
-    // Update state purely
-    setBooks((prev) => prev.map((book) => (book.id === id ? updatedBook : book)));
+    // Update the ref immediately so subsequent reads or saves see the latest state
+    booksRef.current = booksRef.current.map((book) => (book.id === id ? updatedBook : book));
 
-    // Save updated book asynchronously (non-blocking, O(1))
-    libraryService.saveBook(updatedBook).catch((err) => {
-      console.warn("Could not save updated book:", err);
-    });
+    if (silent) {
+      // Save updated book asynchronously (non-blocking, O(1))
+      libraryService.saveBook(updatedBook).catch((err) => {
+        console.warn("Could not save updated book silently:", err);
+      });
+    } else {
+      // Update state purely
+      setBooks(booksRef.current);
+
+      // Save updated book asynchronously (non-blocking, O(1))
+      libraryService.saveBook(updatedBook).catch((err) => {
+        console.warn("Could not save updated book:", err);
+      });
+    }
   }, []);
 
   const deleteBook = React.useCallback((id: string) => {

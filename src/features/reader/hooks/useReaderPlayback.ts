@@ -1,10 +1,9 @@
 import * as React from "react";
 import { Book } from "@/core/entities/book";
 import { SettingsState } from "@/core/entities/settings";
-import { generateRSVPSequence } from "@/core/algorithms/rsvp";
-import { generateDynamicClusters } from "@/core/algorithms/clusters";
 import { StatsService } from "@/core/services/stats-service";
 import { BookVisualPage } from "@/lib/parser/paginator";
+import { useReadingStore } from "../stores/reading-store";
 
 // Extracted Sub-Hooks
 import { useReaderBookmarks } from "./useReaderBookmarks";
@@ -15,7 +14,7 @@ import { useClusterEngine } from "./useClusterEngine";
 
 export interface UseReaderPlaybackProps {
   activeBook: Book | null;
-  updateBook: (id: string, updates: Partial<Book>) => void;
+  updateBook: (id: string, updates: Partial<Book>, silent?: boolean) => void;
   settings: SettingsState;
   wordsPerPage: number;
 }
@@ -26,13 +25,7 @@ export function useReaderPlayback({
   settings,
   wordsPerPage,
 }: UseReaderPlaybackProps) {
-  // Player session states
-  const [activeChapterIndex, setActiveChapterIndex] = React.useState(0);
-  const [wordIndex, setWordIndex] = React.useState(0); // relative to active chapter
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const [wpm, setWpm] = React.useState(600);
-  const [mode, setModeState] = React.useState<"rsvp" | "cluster" | "normal">("normal");
-  const [completedChapter, setCompletedChapter] = React.useState<string | null>(null);
+  // Modal & Stats session states (low-frequency)
   const [isCompletionModalOpen, setIsCompletionModalOpen] = React.useState(false);
   const [sessionStats, setSessionStats] = React.useState<{
     speedWpm: number;
@@ -41,25 +34,6 @@ export function useReaderPlayback({
     wordsCount: number;
   } | null>(null);
 
-  // High-frequency word index ref and subscription listeners to avoid global React re-renders
-  const currentWordIndexRef = React.useRef(wordIndex);
-  const playbackListeners = React.useMemo(() => new Set<(idx: number) => void>(), []);
-
-  const subscribeToPlayback = React.useCallback((callback: (idx: number) => void) => {
-    playbackListeners.add(callback);
-    return () => {
-      playbackListeners.delete(callback);
-    };
-  }, [playbackListeners]);
-
-  // Synchronize internal ref and subscribers when wordIndex is updated from outside
-  React.useEffect(() => {
-    if (currentWordIndexRef.current !== wordIndex) {
-      currentWordIndexRef.current = wordIndex;
-      playbackListeners.forEach((cb) => cb(wordIndex));
-    }
-  }, [wordIndex, playbackListeners]);
-
   // Active book reference to prevent state loops
   const activeBookRef = React.useRef(activeBook);
   React.useEffect(() => {
@@ -67,19 +41,15 @@ export function useReaderPlayback({
   }, [activeBook]);
 
   const initializedBookIdRef = React.useRef<string | null>(null);
-
   const activeBookId = activeBook?.id || null;
 
   // Dynamic parser turning any plain text content or structural parsed chapters into visual chapters/pages.
-  // Memoized strictly by static content keys to avoid recalculation on page progress/bookmark updates.
   const chaptersData = React.useMemo(() => {
-    if (!activeBookId || !activeBook) return [];
+    if (!activeBook) return [];
     
-    // Use pre-parsed chapters if available on the book object, otherwise segment content as fallback
     let rawChapters = activeBook.chapters || [];
     
     if (rawChapters.length === 0 && activeBook.content) {
-      // Split content by double newlines or paragraph breaks as fallback
       const paragraphs = activeBook.content.split(/\n\s*\n+/).filter(p => p.trim() !== "");
       const legacyChapters = [];
       for (let i = 0; i < paragraphs.length; i += 6) {
@@ -97,63 +67,25 @@ export function useReaderPlayback({
       }];
     }
 
-    // Keep it extremely lightweight to avoid overhead and memory bloat on full-book loads
     return rawChapters.map((ch, idx) => ({
       ...ch,
       index: idx,
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeBookId]);
+  }, [activeBook?.id, activeBook?.chapters, activeBook?.content]);
 
   // allBookPages is populated exclusively by PagesVisualBox's background DOM paginator.
-  // Do NOT pre-populate with static estimates (paginateChapter) - those produce different
-  // page boundaries than the real DOM layout, causing the page offset bug on restore.
   const [allBookPages, setAllBookPages] = React.useState<BookVisualPage[]>([]);
 
-  // Reset allBookPages when there is no book or chapters loaded (e.g. on book switch)
-  // so stale page data from a previous book cannot bleed into the new book's pagination.
+  // Reset allBookPages when there is no book or chapters loaded
   React.useEffect(() => {
     if (chaptersData.length === 0) {
       setAllBookPages([]);
     }
   }, [chaptersData.length]);
 
-
-  // Derive active visual page object
-  const activePage = React.useMemo(() => {
-    if (allBookPages.length === 0) return null;
-    const found = allBookPages.find(
-      (p) => p.chapterIndex === activeChapterIndex && wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
-    );
-    return found || allBookPages.find(p => p.chapterIndex === activeChapterIndex) || allBookPages[0];
-  }, [allBookPages, activeChapterIndex, wordIndex]);
-
-  // Derived properties from active chapter index, computing sequences just-in-time for the active chapter only
-  const currentChapter = React.useMemo(() => {
-    if (chaptersData.length === 0) {
-      return { title: "No Book Loaded", content: "", words: [], index: 0 };
-    }
-    const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
-    const ch = chaptersData[safeIdx];
-    
-    // Generate words JIT to guarantee instant page transitions
-    const wordsArr = ch.content ? ch.content.split(/\s+/).filter(w => w.trim() !== "") : [];
-    
-    return {
-      ...ch,
-      words: wordsArr,
-    };
-  }, [chaptersData, activeChapterIndex]);
-
-  const words = React.useMemo(() => {
-    return currentChapter?.words || [];
-  }, [currentChapter]);
-
-  // Keep the latest wordIndex and activeChapterIndex in a ref so we can save it on unmount / beforeunload without re-subscribing the event listeners
-  const latestPositionRef = React.useRef({ wordIndex, activeChapterIndex });
-  React.useEffect(() => {
-    latestPositionRef.current = { wordIndex, activeChapterIndex };
-  }, [wordIndex, activeChapterIndex]);
+  const mode = useReadingStore((state) => state.mode);
+  const wpm = useReadingStore((state) => state.wpm);
+  const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
 
   const { saveProgressForBook } = usePlaybackProgress({
     activeBookRef,
@@ -164,58 +96,42 @@ export function useReaderPlayback({
   });
 
   const { rsvpSequence } = useRsvpEngine({
-    currentChapter,
-    isPlaying,
+    currentChapter: React.useMemo(() => {
+      const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
+      const ch = chaptersData[safeIdx] || { title: "No Book", content: "" };
+      const wordsArr = ch.content ? ch.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+      return { ...ch, words: wordsArr, index: safeIdx };
+    }, [chaptersData, activeChapterIndex]),
     mode,
     wpm,
-    currentWordIndexRef,
-    setWordIndex,
-    setCompletedChapter,
-    setIsPlaying,
-    playbackListeners,
-    latestPositionRef,
   });
 
-  const { clusterChunks, activeClusterIndex } = useClusterEngine({
-    currentChapter,
-    wordIndex,
-    isPlaying,
+  const { clusterChunks } = useClusterEngine({
+    currentChapter: React.useMemo(() => {
+      const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
+      const ch = chaptersData[safeIdx] || { title: "No Book", content: "" };
+      const wordsArr = ch.content ? ch.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+      return { ...ch, words: wordsArr, index: safeIdx };
+    }, [chaptersData, activeChapterIndex]),
     mode,
     wpm,
-    currentWordIndexRef,
-    setWordIndex,
-    setCompletedChapter,
-    setIsPlaying,
-    playbackListeners,
-    latestPositionRef,
   });
 
   // Consuming custom Autosave Hook
   useReaderAutosave({
     activeBook,
-    isPlaying,
-    currentWordIndexRef,
-    latestPositionRef,
-    initializedBookIdRef,
     saveProgressForBook,
-    setWordIndex,
   });
 
   // Intercept and wrap chapter selection to trigger immediate saves
   const handleChapterChange = React.useCallback((chapterIndex: number) => {
-    setIsPlaying(false);
+    useReadingStore.getState().setIsPlaying(false);
+    useReadingStore.getState().setCompletedChapter(null);
     
     const activeBookVal = activeBookRef.current;
-    if (activeBookVal && initializedBookIdRef.current === activeBookVal.id) {
-      saveProgressForBook(
-        activeBookVal.id,
-        latestPositionRef.current.activeChapterIndex,
-        currentWordIndexRef.current
-      );
-    }
     
-    setActiveChapterIndex(chapterIndex);
-    setWordIndex(0);
+    useReadingStore.getState().setActiveChapterIndex(chapterIndex);
+    useReadingStore.getState().setWordIndex(0);
     
     if (activeBookVal) {
       saveProgressForBook(activeBookVal.id, chapterIndex, 0);
@@ -224,38 +140,24 @@ export function useReaderPlayback({
 
   // Reset player indexes when active book changes, resuming from exact saved position
   React.useEffect(() => {
-    // Hard reset only when there is genuinely no active book
-    if (!activeBook) {
-      setWordIndex(0);
-      setActiveChapterIndex(0);
-      setIsPlaying(false);
-      setCompletedChapter(null);
+    const book = activeBookRef.current;
+    if (!book || !activeBookId) {
+      useReadingStore.getState().initBook("", 0, 0, 600, "normal", []);
       initializedBookIdRef.current = null;
       return;
     }
 
-    // chaptersData is transiently empty while the memo re-runs for the new book.
-    // Do NOT reset position here — wait for the next render when data is ready.
     if (chaptersData.length === 0) return;
     
-    if (initializedBookIdRef.current !== activeBook.id) {
-      // Mark as initialized BEFORE setting state so the pause-save effect
-      // (which checks initializedBookIdRef === activeBook.id) does not fire
-      // with a stale currentWordIndexRef.current value of 0.
-      initializedBookIdRef.current = activeBook.id;
+    if (initializedBookIdRef.current !== activeBookId) {
+      initializedBookIdRef.current = activeBookId;
 
-      // Read the most recent progress from the synchronous localStorage cache.
-      // When navigating away via sidebar links, the unmount cleanup calls updateBook
-      // which writes to localStorage synchronously but enqueues the React setBooks
-      // state update asynchronously. On remount, activeBook may still have stale
-      // lastChapterIndex/lastWordIndex because React hasn't committed the batched
-      // update yet. The localStorage cache always has the freshest values.
-      let savedChapterIdx = activeBook.lastChapterIndex ?? null;
-      let savedWordIdx = activeBook.lastWordIndex ?? null;
-      let savedLocalPageIdx = activeBook.lastLocalPageIndex;
+      let savedChapterIdx = book.lastChapterIndex ?? null;
+      let savedWordIdx = book.lastWordIndex ?? null;
+      let savedLocalPageIdx = book.lastLocalPageIndex;
 
       try {
-        const cacheKey = `visus_book_progress_${activeBook.id}`;
+        const cacheKey = `visus_book_progress_${book.id}`;
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const parsed = JSON.parse(cached);
@@ -271,9 +173,7 @@ export function useReaderPlayback({
             }
           }
         }
-      } catch (_) {
-        // Fallback to activeBook values (already set above)
-      }
+      } catch (_) {}
 
       let restoredChapterIdx = 0;
       let restoredWordIdx = 0;
@@ -282,32 +182,28 @@ export function useReaderPlayback({
         restoredChapterIdx = savedChapterIdx;
         restoredWordIdx = savedWordIdx ?? 0;
       } else {
-        // Fallback for books saved before this update (only progress% available)
         restoredChapterIdx = Math.min(
           chaptersData.length - 1,
-          Math.max(0, Math.floor((activeBook.progress / 100) * chaptersData.length))
+          Math.max(0, Math.floor((book.progress / 100) * chaptersData.length))
         );
         restoredWordIdx = 0;
       }
 
-      // Sync the ref immediately so the pause-save effect reads the correct value
-      currentWordIndexRef.current = restoredWordIdx;
-      latestPositionRef.current = { wordIndex: restoredWordIdx, activeChapterIndex: restoredChapterIdx };
+      useReadingStore.getState().initBook(
+        book.id,
+        restoredChapterIdx,
+        restoredWordIdx,
+        600,
+        "normal",
+        chaptersData
+      );
 
-      setActiveChapterIndex(restoredChapterIdx);
-      setWordIndex(restoredWordIdx);
-      setIsPlaying(false);
-      setCompletedChapter(null);
-
-      // Reconcile the React state (activeBook) with the localStorage values when
-      // they differ. This ensures derived props like savedLocalPageIndex in
-      // PagesVisualBox also read the freshest values instead of the stale state.
       if (
-        restoredChapterIdx !== (activeBook.lastChapterIndex ?? 0) ||
-        restoredWordIdx !== (activeBook.lastWordIndex ?? 0) ||
-        (savedLocalPageIdx !== undefined && savedLocalPageIdx !== activeBook.lastLocalPageIndex)
+        restoredChapterIdx !== (book.lastChapterIndex ?? 0) ||
+        restoredWordIdx !== (book.lastWordIndex ?? 0) ||
+        (savedLocalPageIdx !== undefined && savedLocalPageIdx !== book.lastLocalPageIndex)
       ) {
-        updateBook(activeBook.id, {
+        updateBook(book.id, {
           lastChapterIndex: restoredChapterIdx,
           lastWordIndex: restoredWordIdx,
           ...(savedLocalPageIdx !== undefined ? { lastLocalPageIndex: savedLocalPageIdx } : {}),
@@ -317,30 +213,36 @@ export function useReaderPlayback({
 
     return () => {
       initializedBookIdRef.current = null;
+      useReadingStore.getState().setIsPlaying(false);
     };
-  }, [activeBook, chaptersData.length, updateBook]);
-
-
+  }, [activeBookId, chaptersData, updateBook]);
 
   const handlePageChange = React.useCallback((direction: "prev" | "next", forceComplete: boolean = false) => {
-    if (allBookPages.length === 0 || !activePage || !activeBookRef.current) return;
+    if (allBookPages.length === 0 || !activeBookRef.current) return;
     
     const activeBookVal = activeBookRef.current;
+    const { wordIndex, activeChapterIndex, wpm, mode } = useReadingStore.getState();
+    const activePage = allBookPages.find(
+      (p) => p.chapterIndex === activeChapterIndex && wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
+    ) || allBookPages.find(
+      (p) => p.chapterIndex === activeChapterIndex && wordIndex < p.startWordIndex
+    ) || allBookPages.filter(p => p.chapterIndex === activeChapterIndex).pop() || allBookPages[0];
+
+    if (!activePage) return;
     
     if (direction === "prev") {
       if (activePage.absolutePageIndex > 0) {
         const prevPageObj = allBookPages[activePage.absolutePageIndex - 1];
-        setActiveChapterIndex(prevPageObj.chapterIndex);
-        setWordIndex(prevPageObj.startWordIndex);
+        useReadingStore.getState().setActiveChapterIndex(prevPageObj.chapterIndex);
+        useReadingStore.getState().setWordIndex(prevPageObj.startWordIndex);
         saveProgressForBook(activeBookVal.id, prevPageObj.chapterIndex, prevPageObj.startWordIndex);
       }
     } else {
       if (forceComplete || activePage.absolutePageIndex >= allBookPages.length - 1) {
-        // Last page "Next" button clicked -> COMPLETE BOOK!
         const totalWords = activeBookVal.chapters?.reduce((acc, c) => acc + c.content.split(/\s+/).filter(Boolean).length, 0) || activeBookVal.content?.split(/\s+/).filter(Boolean).length || 4500;
         const currentSpeed = mode === "normal" ? 280 : wpm;
         const calculatedSeconds = Math.round(totalWords / (currentSpeed / 60));
-        const accuracyRating = Math.floor(Math.random() * 8) + 92; // 92% - 99%
+        const accuracyRating = Math.floor(Math.random() * 8) + 92;
         
         const stats = {
           speedWpm: currentSpeed,
@@ -351,7 +253,6 @@ export function useReaderPlayback({
         
         setSessionStats(stats);
         
-        // Save session telemetry log in local database
         StatsService.recordSession({
           bookId: activeBookVal.id,
           bookTitle: activeBookVal.title,
@@ -361,7 +262,6 @@ export function useReaderPlayback({
           accuracy: accuracyRating
         });
         
-        // Force book state to completed
         updateBook(activeBookVal.id, {
           progress: 100,
           status: "completed",
@@ -371,59 +271,53 @@ export function useReaderPlayback({
         setIsCompletionModalOpen(true);
       } else {
         const nextPageObj = allBookPages[activePage.absolutePageIndex + 1];
-        setActiveChapterIndex(nextPageObj.chapterIndex);
-        setWordIndex(nextPageObj.startWordIndex);
+        useReadingStore.getState().setActiveChapterIndex(nextPageObj.chapterIndex);
+        useReadingStore.getState().setWordIndex(nextPageObj.startWordIndex);
         saveProgressForBook(activeBookVal.id, nextPageObj.chapterIndex, nextPageObj.startWordIndex);
       }
     }
-  }, [allBookPages, activePage, mode, wpm, saveProgressForBook, updateBook]);
+  }, [allBookPages, saveProgressForBook, updateBook]);
 
   const handlePrevChapter = React.useCallback(() => {
+    const { activeChapterIndex } = useReadingStore.getState();
     if (activeChapterIndex > 0) {
       const prevChapterIdx = activeChapterIndex - 1;
       
-      // Use DOM-measured page data from allBookPages when available to get the correct
-      // last page word index. This prevents landing on a mismatched wordIndex for structural
-      // chapters (TOC, licenses) where content.split() word count differs from tagged HTML word count.
       const prevChapterPages = allBookPages.filter(p => p.chapterIndex === prevChapterIdx);
       const lastPage = prevChapterPages.length > 0 ? prevChapterPages[prevChapterPages.length - 1] : null;
       
       const lastWordIdx = lastPage
         ? lastPage.startWordIndex
         : (() => {
-            // Fallback: use content.split() when allBookPages is not yet available
             const prevCh = chaptersData[prevChapterIdx];
             const prevWords = prevCh ? prevCh.content.split(/\s+/).filter(w => w.trim() !== "") : [];
             return Math.max(0, prevWords.length - 1);
           })();
       
-      setIsPlaying(false);
+      useReadingStore.getState().setIsPlaying(false);
+      useReadingStore.getState().setCompletedChapter(null);
       const activeBookVal = activeBookRef.current;
-      if (activeBookVal && initializedBookIdRef.current === activeBookVal.id) {
-        saveProgressForBook(activeBookVal.id, activeChapterIndex, wordIndex);
-      }
       
-      setActiveChapterIndex(prevChapterIdx);
-      setWordIndex(lastWordIdx);
+      useReadingStore.getState().setActiveChapterIndex(prevChapterIdx);
+      useReadingStore.getState().setWordIndex(lastWordIdx);
       
       if (activeBookVal) {
         saveProgressForBook(activeBookVal.id, prevChapterIdx, lastWordIdx);
       }
     }
-  }, [activeChapterIndex, chaptersData, saveProgressForBook, wordIndex, allBookPages]);
+  }, [chaptersData, saveProgressForBook, allBookPages]);
 
   const handleNextChapter = React.useCallback(() => {
+    const { activeChapterIndex } = useReadingStore.getState();
     if (activeChapterIndex < chaptersData.length - 1) {
       const nextChapterIdx = activeChapterIndex + 1;
       
-      setIsPlaying(false);
+      useReadingStore.getState().setIsPlaying(false);
+      useReadingStore.getState().setCompletedChapter(null);
       const activeBookVal = activeBookRef.current;
-      if (activeBookVal && initializedBookIdRef.current === activeBookVal.id) {
-        saveProgressForBook(activeBookVal.id, activeChapterIndex, wordIndex);
-      }
       
-      setActiveChapterIndex(nextChapterIdx);
-      setWordIndex(0);
+      useReadingStore.getState().setActiveChapterIndex(nextChapterIdx);
+      useReadingStore.getState().setWordIndex(0);
       
       if (activeBookVal) {
         saveProgressForBook(activeBookVal.id, nextChapterIdx, 0);
@@ -431,7 +325,7 @@ export function useReaderPlayback({
     } else {
       handlePageChange("next", true);
     }
-  }, [activeChapterIndex, chaptersData.length, saveProgressForBook, wordIndex, handlePageChange]);
+  }, [chaptersData.length, saveProgressForBook, handlePageChange]);
 
   // Consuming custom Bookmarks Hook
   const {
@@ -443,75 +337,102 @@ export function useReaderPlayback({
     activeBook,
     updateBook,
     chaptersData,
-    setIsPlaying,
-    setActiveChapterIndex,
-    setWordIndex,
+    setIsPlaying: (p) => useReadingStore.getState().setIsPlaying(p),
+    setActiveChapterIndex: (ch) => useReadingStore.getState().setActiveChapterIndex(ch),
+    setWordIndex: (w) => useReadingStore.getState().setWordIndex(w),
     saveProgressForBook,
   });
 
-  const progressPercentage = React.useMemo(() => {
-    if (chaptersData.length === 0) return 0;
-    const currentChapterWordsCount = words.length || 1;
-    const progressInChapter = wordIndex / currentChapterWordsCount;
-    return Math.min(
-      100,
-      Math.round(((activeChapterIndex + progressInChapter) / chaptersData.length) * 100)
-    );
-  }, [chaptersData.length, activeChapterIndex, wordIndex, words.length]);
-
-  // Wrapped setMode state updater that captures when the mode transitions (especially to Normal),
-  // saving progress and clearing lastLocalPageIndex to allow accurate wordIndex recalculation.
   const setMode = React.useCallback((newMode: "rsvp" | "cluster" | "normal") => {
-    if (mode !== newMode) {
-      setModeState(newMode);
+    const currentMode = useReadingStore.getState().mode;
+    if (currentMode !== newMode) {
+      useReadingStore.getState().setMode(newMode);
       
       const activeBookVal = activeBookRef.current;
       if (activeBookVal && initializedBookIdRef.current === activeBookVal.id) {
         const clearPage = newMode === "normal";
+        const { activeChapterIndex, wordIndex, progressPercentage } = useReadingStore.getState();
         updateBook(activeBookVal.id, {
-          lastChapterIndex: latestPositionRef.current.activeChapterIndex,
-          lastWordIndex: currentWordIndexRef.current,
+          lastChapterIndex: activeChapterIndex,
+          lastWordIndex: wordIndex,
           progress: progressPercentage,
           ...(clearPage ? { lastLocalPageIndex: undefined } : {}),
         });
       }
     }
-  }, [mode, updateBook, progressPercentage]);
+  }, [updateBook]);
+
+  // Synchronous snapshot getter for static properties
+  const getSnapshot = () => {
+    const state = useReadingStore.getState();
+    const activeChapterIdx = state.activeChapterIndex;
+    const safeIdx = Math.min(Math.max(0, activeChapterIdx), chaptersData.length - 1);
+    const ch = chaptersData[safeIdx] || { title: "No Book Loaded", content: "" };
+    const wordsArr = ch.content ? ch.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+    
+    return {
+      wordIndex: state.wordIndex,
+      activeChapterIndex: state.activeChapterIndex,
+      isPlaying: state.isPlaying,
+      wpm: state.wpm,
+      mode: state.mode,
+      completedChapter: state.completedChapter,
+      progressPercentage: state.progressPercentage,
+      currentChapter: { ...ch, words: wordsArr, index: safeIdx },
+      words: wordsArr,
+    };
+  };
+
+  const snapshot = getSnapshot();
 
   return {
-    activeChapterIndex,
-    wordIndex,
-    isPlaying,
-    wpm,
-    mode,
-    completedChapter,
+    ...snapshot,
     isCompletionModalOpen,
     sessionStats,
-    setWordIndex,
-    setActiveChapterIndex,
-    setIsPlaying,
-    setWpm,
+    saveProgressForBook,
+    setWordIndex: (w: number) => useReadingStore.getState().setWordIndex(w),
+    setActiveChapterIndex: (ch: number) => useReadingStore.getState().setActiveChapterIndex(ch),
+    setIsPlaying: (p: boolean) => useReadingStore.getState().setIsPlaying(p),
+    setWpm: (w: number) => useReadingStore.getState().setWpm(w),
     setMode,
-    setCompletedChapter,
+    setCompletedChapter: (c: string | null) => useReadingStore.getState().setCompletedChapter(c),
     setIsCompletionModalOpen,
     chaptersData,
     allBookPages,
     setAllBookPages,
-    activePage,
-    currentChapter,
-    words,
-    rsvpSequence,
-    clusterChunks,
-    activeClusterIndex,
-    progressPercentage,
+    progressPercentage: snapshot.progressPercentage,
     handleChapterChange,
     handlePageChange,
     handlePrevChapter,
     handleNextChapter,
+    handleRewind: () => {
+      const { wordIndex } = useReadingStore.getState();
+      const nextIdx = Math.max(0, wordIndex - 10);
+      useReadingStore.getState().setWordIndex(nextIdx);
+    },
+    handleSkip: () => {
+      const { wordIndex, chapters, activeChapterIndex } = useReadingStore.getState();
+      const safeIdx = Math.min(Math.max(0, activeChapterIndex), chapters.length - 1);
+      const ch = chapters[safeIdx];
+      const words = ch?.content ? ch.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+      const nextIdx = Math.min(Math.max(0, words.length - 1), wordIndex + 10);
+      useReadingStore.getState().setWordIndex(nextIdx);
+    },
     handleAddBookmark,
     handleRemoveBookmark,
     handleUpdateBookmarkName,
     handleGoToBookmark,
-    subscribeToPlayback,
+    rsvpSequence,
+    clusterChunks,
+    activeClusterIndex: 0,
+    subscribeToPlayback: (callback: (idx: number) => void) => {
+      let lastWordIndex = useReadingStore.getState().wordIndex;
+      return useReadingStore.subscribe((state) => {
+        if (state.wordIndex !== lastWordIndex) {
+          lastWordIndex = state.wordIndex;
+          callback(state.wordIndex);
+        }
+      });
+    },
   };
 }

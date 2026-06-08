@@ -1,27 +1,19 @@
 import * as React from "react";
 import { Book } from "@/core/entities/book";
+import { useReadingStore } from "@/features/reader/stores/reading-store";
 
 interface UseReaderAutosaveProps {
   activeBook: Book | null;
-  isPlaying: boolean;
-  currentWordIndexRef: React.MutableRefObject<number>;
-  latestPositionRef: React.MutableRefObject<{ wordIndex: number; activeChapterIndex: number }>;
-  initializedBookIdRef: React.MutableRefObject<string | null>;
   saveProgressForBook: (bookId: string, chIdx: number, wIdx: number) => void;
-  setWordIndex: (w: number) => void;
 }
 
 export function useReaderAutosave({
   activeBook,
-  isPlaying,
-  currentWordIndexRef,
-  latestPositionRef,
-  initializedBookIdRef,
   saveProgressForBook,
-  setWordIndex,
 }: UseReaderAutosaveProps) {
-  // Keep the latest saveProgress callback in a ref to prevent re-subscribing the unload handlers
+  const isPlaying = useReadingStore((state) => state.isPlaying);
   const saveProgressRef = React.useRef(saveProgressForBook);
+  
   React.useEffect(() => {
     saveProgressRef.current = saveProgressForBook;
   }, [saveProgressForBook]);
@@ -29,42 +21,67 @@ export function useReaderAutosave({
   // Unmount cleanup and tab close safety hook
   React.useEffect(() => {
     const handleBeforeUnload = () => {
-      if (initializedBookIdRef.current === activeBook?.id) {
+      const state = useReadingStore.getState();
+      if (state.activeBookId && state.activeBookId === activeBook?.id) {
         saveProgressRef.current(
-          initializedBookIdRef.current,
-          latestPositionRef.current.activeChapterIndex,
-          latestPositionRef.current.wordIndex
+          state.activeBookId,
+          state.activeChapterIndex,
+          state.wordIndex
         );
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      
-      const currentBookId = initializedBookIdRef.current;
-      if (currentBookId) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        const position = latestPositionRef.current;
-        saveProgressRef.current(currentBookId, position.activeChapterIndex, position.wordIndex);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        const state = useReadingStore.getState();
+        if (state.activeBookId && state.activeBookId === activeBook?.id) {
+          saveProgressRef.current(
+            state.activeBookId,
+            state.activeChapterIndex,
+            state.wordIndex
+          );
+        }
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- latestPositionRef.current must be read dynamically at cleanup time
-  }, [activeBook?.id, initializedBookIdRef]);
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+    
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+      }
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
+      
+      const state = useReadingStore.getState();
+      if (state.activeBookId && state.activeBookId === activeBook?.id) {
+        saveProgressRef.current(
+          state.activeBookId,
+          state.activeChapterIndex,
+          state.wordIndex
+        );
+      }
+    };
+  }, [activeBook?.id]);
 
   const wasPlayingRef = React.useRef(false);
 
   // Save position when the player pauses
   React.useEffect(() => {
-    if (!isPlaying && wasPlayingRef.current && initializedBookIdRef.current === activeBook?.id) {
-      setWordIndex(currentWordIndexRef.current);
+    const state = useReadingStore.getState();
+    if (!isPlaying && wasPlayingRef.current && state.activeBookId && state.activeBookId === activeBook?.id) {
       saveProgressRef.current(
-        initializedBookIdRef.current,
-        latestPositionRef.current.activeChapterIndex,
-        currentWordIndexRef.current
+        state.activeBookId,
+        state.activeChapterIndex,
+        state.wordIndex
       );
     }
     wasPlayingRef.current = isPlaying;
-  }, [isPlaying, activeBook?.id, initializedBookIdRef, latestPositionRef, currentWordIndexRef, setWordIndex]);
+  }, [isPlaying, activeBook?.id]);
 }

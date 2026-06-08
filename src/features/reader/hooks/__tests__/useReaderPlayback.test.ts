@@ -1,6 +1,38 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as React from "react";
-import { useReaderPlayback } from "../useReaderPlayback";
+
+// Mock Zustand reading-store BEFORE importing the hook
+vi.mock("@/features/reader/stores/reading-store", () => {
+  const mockState = {
+    wordIndex: 0,
+    activeChapterIndex: 0,
+    activeBookId: "book-abc",
+    isPlaying: false,
+    wpm: 600,
+    mode: "normal",
+    completedChapter: null,
+    progressPercentage: 0,
+    chapters: [],
+    setWordIndex: vi.fn(),
+    setActiveChapterIndex: vi.fn(),
+    setActiveBookId: vi.fn(),
+    setIsPlaying: vi.fn(),
+    setWpm: vi.fn(),
+    setMode: vi.fn(),
+    setCompletedChapter: vi.fn(),
+    initBook: vi.fn(),
+  };
+
+  return {
+    useReadingStore: Object.assign(
+      vi.fn((selector) => selector(mockState)),
+      {
+        getState: vi.fn(() => mockState),
+        subscribe: vi.fn(() => vi.fn()),
+      }
+    ),
+  };
+});
 
 // Mock React hooks to run hook logic in pure Node environment
 vi.mock("react", () => {
@@ -12,6 +44,8 @@ vi.mock("react", () => {
     useEffect: vi.fn(),
   };
 });
+
+import { useReaderPlayback } from "../useReaderPlayback";
 
 describe("useReaderPlayback hook", () => {
   let mockUpdateBook: any;

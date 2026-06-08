@@ -1,32 +1,21 @@
 import * as React from "react";
 import { generateRSVPSequence } from "@/core/algorithms/rsvp";
 import { ChapterHtmlData } from "@/features/reader/utils/chapterHtml";
+import { useReadingStore } from "@/features/reader/stores/reading-store";
 
 interface UseRsvpEngineProps {
   currentChapter: ChapterHtmlData & { words: string[] };
-  isPlaying: boolean;
   mode: "rsvp" | "cluster" | "normal";
   wpm: number;
-  currentWordIndexRef: React.MutableRefObject<number>;
-  setWordIndex: (idx: number) => void;
-  setCompletedChapter: (title: string | null) => void;
-  setIsPlaying: (playing: boolean) => void;
-  playbackListeners: Set<(idx: number) => void>;
-  latestPositionRef: React.MutableRefObject<{ wordIndex: number; activeChapterIndex: number }>;
 }
 
 export function useRsvpEngine({
   currentChapter,
-  isPlaying,
   mode,
   wpm,
-  currentWordIndexRef,
-  setWordIndex,
-  setCompletedChapter,
-  setIsPlaying,
-  playbackListeners,
-  latestPositionRef,
 }: UseRsvpEngineProps) {
+  const isPlaying = useReadingStore((state) => state.isPlaying);
+
   const rsvpSequence = React.useMemo(() => {
     return generateRSVPSequence(currentChapter.words);
   }, [currentChapter.words]);
@@ -38,7 +27,7 @@ export function useRsvpEngine({
     let timeoutId: NodeJS.Timeout | null = null;
 
     const tick = () => {
-      const currentIdx = currentWordIndexRef.current;
+      const currentIdx = useReadingStore.getState().wordIndex;
       const baseDelayMs = (60 * 1000) / wpm;
 
       const currentWordObj = rsvpSequence[currentIdx];
@@ -50,17 +39,11 @@ export function useRsvpEngine({
         const nextIndex = currentIdx + wordsToAdvance;
 
         if (nextIndex >= rsvpSequence.length) {
-          setIsPlaying(false);
-          setCompletedChapter(currentChapter.title);
-          setWordIndex(Math.min(nextIndex, rsvpSequence.length - 1));
+          useReadingStore.getState().setIsPlaying(false);
+          useReadingStore.getState().setCompletedChapter(currentChapter.title);
+          useReadingStore.getState().setWordIndex(Math.min(nextIndex, rsvpSequence.length - 1));
         } else {
-          currentWordIndexRef.current = nextIndex;
-          latestPositionRef.current.wordIndex = nextIndex;
-          playbackListeners.forEach((cb) => cb(nextIndex));
-
-          if (nextIndex % 10 === 0) {
-            setWordIndex(nextIndex);
-          }
+          useReadingStore.getState().setWordIndex(nextIndex);
           tick();
         }
       }, finalDelay);
@@ -71,7 +54,7 @@ export function useRsvpEngine({
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isPlaying, wpm, rsvpSequence, mode, currentChapter, playbackListeners, currentWordIndexRef, latestPositionRef, setCompletedChapter, setIsPlaying, setWordIndex]);
+  }, [isPlaying, wpm, rsvpSequence, mode, currentChapter]);
 
   return {
     rsvpSequence,

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Book, Bookmark } from "@/core/entities/book";
 import { TableOfContents } from "./TableOfContents";
+import { useReadingStore } from "../stores/reading-store";
 
 interface ChapterItem {
   title: string;
@@ -10,13 +11,8 @@ interface ChapterItem {
 
 interface ReaderHeaderProps {
   activeBook: Book;
-  currentChapter: ChapterItem;
-  activeChapterIndex: number;
   setActiveChapterIndex: (index: number) => void;
   chaptersData: ChapterItem[];
-  setWordIndex: (index: number) => void;
-  progressPercentage: number;
-  mode: "rsvp" | "cluster" | "normal";
   setMode: (mode: "rsvp" | "cluster" | "normal") => void;
   setIsPlaying: (playing: boolean) => void;
   setCompletedChapter: (chapter: string | null) => void;
@@ -31,13 +27,8 @@ interface ReaderHeaderProps {
 
 export function ReaderHeader({
   activeBook,
-  currentChapter,
-  activeChapterIndex,
   setActiveChapterIndex,
   chaptersData,
-  setWordIndex,
-  progressPercentage,
-  mode,
   setMode,
   setIsPlaying,
   setCompletedChapter,
@@ -51,6 +42,16 @@ export function ReaderHeader({
 }: ReaderHeaderProps) {
   const chapterBtnRef = React.useRef<HTMLButtonElement>(null);
   const [anchorPos, setAnchorPos] = React.useState<{ x: number; y: number } | null>(null);
+
+  // Subscribe atomically to Zustand store properties
+  const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
+  const progressPercentage = useReadingStore((state) => state.progressPercentage);
+  const mode = useReadingStore((state) => state.mode);
+
+  const currentChapter = React.useMemo(() => {
+    const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
+    return chaptersData[safeIdx] || { title: "No Book Loaded" };
+  }, [chaptersData, activeChapterIndex]);
 
   const handleToggleToc = () => {
     if (!isTocOpen && chapterBtnRef.current) {
@@ -83,7 +84,6 @@ export function ReaderHeader({
             onClick={() => {
               if (activeChapterIndex > 0) {
                 setActiveChapterIndex(activeChapterIndex - 1);
-                setWordIndex(0);
               }
             }}
             disabled={activeChapterIndex === 0}
@@ -110,7 +110,6 @@ export function ReaderHeader({
             onClick={() => {
               if (activeChapterIndex < chaptersData.length - 1) {
                 setActiveChapterIndex(activeChapterIndex + 1);
-                setWordIndex(0);
               }
             }}
             disabled={activeChapterIndex === chaptersData.length - 1}
@@ -193,7 +192,7 @@ export function ReaderHeader({
         chaptersData={chaptersData}
         activeChapterIndex={activeChapterIndex}
         setActiveChapterIndex={setActiveChapterIndex}
-        setWordIndex={setWordIndex}
+        setWordIndex={(w) => useReadingStore.getState().setWordIndex(w)}
         bookmarks={bookmarks}
         onGoToBookmark={onGoToBookmark}
         onDeleteBookmark={onDeleteBookmark}
@@ -203,4 +202,3 @@ export function ReaderHeader({
     </div>
   );
 }
-

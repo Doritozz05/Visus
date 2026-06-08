@@ -8,7 +8,7 @@ interface UsePlaybackProgressProps {
   chaptersData: ChapterHtmlData[];
   mode: "rsvp" | "cluster" | "normal";
   allBookPages: BookVisualPage[];
-  updateBook: (id: string, updates: Partial<Book>) => void;
+  updateBook: (id: string, updates: Partial<Book>, silent?: boolean) => void;
 }
 
 export function usePlaybackProgress({
@@ -19,7 +19,7 @@ export function usePlaybackProgress({
   updateBook,
 }: UsePlaybackProgressProps) {
   // Core callback to save book progress to database context
-  const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number, localPageIdx?: number) => {
+  const saveProgressForBook = React.useCallback((bookId: string, chIdx: number, wIdx: number, localPageIdx?: number, silent?: boolean) => {
     if (chaptersData.length === 0) {
       return;
     }
@@ -86,7 +86,7 @@ export function usePlaybackProgress({
       updatePayload.lastLocalPageIndex = finalLocalPageIdx;
     }
 
-    updateBook(bookId, updatePayload);
+    updateBook(bookId, updatePayload, silent);
   }, [chaptersData, updateBook, mode, allBookPages, activeBookRef]);
 
   return { saveProgressForBook };

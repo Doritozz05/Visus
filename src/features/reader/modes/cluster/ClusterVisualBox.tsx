@@ -1,21 +1,20 @@
 import * as React from "react";
 import { DynamicCluster } from "@/core/algorithms/clusters";
 import { ClusterSettings } from "@/core/entities/settings";
+import { useReadingStore } from "../../stores/reading-store";
+import { SPEED_READER_FONT_CLASSES } from "../../utils/reader-fonts";
 
 interface ClusterVisualBoxProps {
   clusterChunks: string[] | DynamicCluster[];
-  initialWordIndex: number;
-  subscribeToPlayback: (callback: (idx: number) => void) => () => void;
   settings: ClusterSettings;
 }
 
 export function ClusterVisualBox({
   clusterChunks,
-  initialWordIndex,
-  subscribeToPlayback,
   settings,
 }: ClusterVisualBoxProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const wordIndex = useReadingStore((state) => state.wordIndex);
 
   // Normalize inputs (accepts both string arrays and DynamicCluster arrays)
   const normalizedChunks = React.useMemo(() => {
@@ -40,36 +39,9 @@ export function ClusterVisualBox({
     return Math.max(0, normalizedChunks.length - 1);
   }, [normalizedChunks]);
 
-  const [localActiveClusterIndex, setLocalActiveClusterIndex] = React.useState(() => {
-    let currentWordOffset = 0;
-    const initialChunks = clusterChunks.map((chunk) => {
-      if (typeof chunk === "string") {
-        return { text: chunk, wordCount: 1 };
-      }
-      return chunk;
-    });
-    for (let i = 0; i < initialChunks.length; i++) {
-      const chunk = initialChunks[i];
-      const count = chunk.wordCount || 1;
-      if (initialWordIndex >= currentWordOffset && initialWordIndex < currentWordOffset + count) {
-        return i;
-      }
-      currentWordOffset += count;
-    }
-    return Math.max(0, initialChunks.length - 1);
-  });
-
-  // Sync state if initialWordIndex changes (such as manually moving bookmarks or skip/rewind)
-  React.useEffect(() => {
-    setLocalActiveClusterIndex(getClusterIndexForWord(initialWordIndex));
-  }, [initialWordIndex, getClusterIndexForWord]);
-
-  // Subscribe to high-frequency timer ticks
-  React.useEffect(() => {
-    return subscribeToPlayback((newWordIdx) => {
-      setLocalActiveClusterIndex(getClusterIndexForWord(newWordIdx));
-    });
-  }, [subscribeToPlayback, getClusterIndexForWord]);
+  const activeClusterIndex = React.useMemo(() => {
+    return getClusterIndexForWord(wordIndex);
+  }, [wordIndex, getClusterIndexForWord]);
 
   // Scroll position tracking ref
   const lastScrollTopRef = React.useRef<number>(-1);
@@ -84,7 +56,6 @@ export function ClusterVisualBox({
     if (!containerRef.current) return;
     const container = containerRef.current;
     
-    // Use requestAnimationFrame to ensure the DOM has updated and painted the new active child
     const handleScroll = () => {
       const activeChild = container.querySelector(`[data-active="true"]`) as HTMLElement;
       if (activeChild) {
@@ -94,8 +65,6 @@ export function ClusterVisualBox({
 
         const targetScrollTop = Math.max(0, childOffsetTop - containerHeight / 2 + childHeight / 2);
 
-        // Only scroll if the target position has changed significantly (e.g. more than 2px)
-        // This prevents scroll stuttering and keeps it static during same-line reading
         if (Math.abs(lastScrollTopRef.current - targetScrollTop) > 2) {
           lastScrollTopRef.current = targetScrollTop;
           container.scrollTo({
@@ -108,9 +77,8 @@ export function ClusterVisualBox({
 
     const rafId = requestAnimationFrame(handleScroll);
     return () => cancelAnimationFrame(rafId);
-  }, [localActiveClusterIndex]);
+  }, [activeClusterIndex]);
 
-  // Active color styling mapping
   const activeColors = {
     indigo: "text-indigo-500 dark:text-indigo-400",
     violet: "text-violet-500 dark:text-violet-400",
@@ -128,16 +96,8 @@ export function ClusterVisualBox({
     none: "",
   };
 
-  const fontFamilies = {
-    inter: "font-sans",
-    atkinson: "font-sans font-medium tracking-wide",
-    dyslexic: "font-sans font-normal tracking-wide",
-  };
-
   const sizeClass = `leading-relaxed md:leading-loose`;
   
-  // Calculate dynamic padding so the active line centers perfectly vertically
-  // regardless of font size, within the 280px high container.
   const innerStyle: React.CSSProperties = {
     fontSize: `${settings.fontSize}px`,
     paddingTop: `${140 - settings.fontSize / 2}px`,
@@ -145,20 +105,18 @@ export function ClusterVisualBox({
   };
 
   const activeColorClass = activeColors[settings.activeColor as keyof typeof activeColors] || activeColors.white;
-  const fontFamilyClass = fontFamilies[settings.fontFamily as keyof typeof fontFamilies] || fontFamilies.inter;
+  const fontFamilyClass = SPEED_READER_FONT_CLASSES[settings.fontFamily as keyof typeof SPEED_READER_FONT_CLASSES] || SPEED_READER_FONT_CLASSES.inter;
 
-  // Map all chunks in the chapter (static layout) instead of slicing a sliding window
   const visibleChunks = React.useMemo(() => {
     return normalizedChunks.map((chunk, index) => {
       return {
         ...chunk,
         absoluteIndex: index,
-        isActive: index === localActiveClusterIndex,
+        isActive: index === activeClusterIndex,
       };
     });
-  }, [normalizedChunks, localActiveClusterIndex]);
+  }, [normalizedChunks, activeClusterIndex]);
 
-  // Premium lens focus fade gradient mask
   const maskStyle: React.CSSProperties = {
     maskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
     WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
@@ -187,7 +145,6 @@ export function ClusterVisualBox({
             opacity: 1,
             filter: "blur(0px)",
             transform: "scale(1.03)",
-            // Simulate subtle bolding without changing the layout footprint to prevent any line wraps
             textShadow: settings.highlightStyle !== "bold-only"
               ? "0.2px 0 0 currentColor, -0.2px 0 0 currentColor"
               : undefined,

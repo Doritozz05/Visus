@@ -147,11 +147,10 @@ export function useDomPagination({
             
             for (let k = 1; k < runLength; k++) {
               const step = Math.round((runLength > 0 ? (diff * k) / runLength : 0));
-              // Ensure strictly increasing indices where possible
-              rawChapterPages[i + k].startWordIndex = Math.min(
-                endVal - (runLength - k),
-                Math.max(startVal + k, startVal + step)
-              );
+              rawChapterPages[i + k].startWordIndex = Math.min(endVal, startVal + step);
+              if (rawChapterPages[i + k].startWordIndex < rawChapterPages[i + k - 1].startWordIndex) {
+                rawChapterPages[i + k].startWordIndex = rawChapterPages[i + k - 1].startWordIndex;
+              }
             }
           }
           i = j;

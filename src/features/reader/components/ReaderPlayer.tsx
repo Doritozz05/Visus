@@ -1,32 +1,54 @@
 import * as React from "react";
+import { BookVisualPage } from "@/lib/parser/paginator";
+import { useReadingStore } from "../stores/reading-store";
 
 interface ReaderPlayerProps {
-  isPlaying: boolean;
-  onPlayPauseToggle: () => void;
-  wpm: number;
-  onWpmChange: (wpm: number) => void;
   onRewind: () => void;
   onSkip: () => void;
-  mode?: "rsvp" | "cluster" | "normal";
   onPrevPage?: () => void;
   onNextPage?: () => void;
-  hasPrevPage?: boolean;
-  hasNextPage?: boolean;
+  allBookPages: BookVisualPage[];
 }
 
 export function ReaderPlayer({
-  isPlaying,
-  onPlayPauseToggle,
-  wpm,
-  onWpmChange,
   onRewind,
   onSkip,
-  mode = "rsvp",
   onPrevPage,
   onNextPage,
-  hasPrevPage = false,
-  hasNextPage = false,
+  allBookPages,
 }: ReaderPlayerProps) {
+  // Subscribe atomically to Zustand store properties
+  const isPlaying = useReadingStore((state) => state.isPlaying);
+  const wpm = useReadingStore((state) => state.wpm);
+  const mode = useReadingStore((state) => state.mode);
+
+  // Derive activePage ONLY in normal mode to prevent high-frequency re-renders during RSVP/Cluster playback
+  const activePage = useReadingStore((state) => {
+    if (state.mode !== "normal" || allBookPages.length === 0) return null;
+    const found = allBookPages.find(
+      (p) =>
+        p.chapterIndex === state.activeChapterIndex &&
+        state.wordIndex >= p.startWordIndex &&
+        state.wordIndex <= p.endWordIndex
+    );
+    return (
+      found ||
+      allBookPages.find((p) => p.chapterIndex === state.activeChapterIndex) ||
+      allBookPages[0]
+    );
+  });
+
+  const hasPrevPage = activePage ? activePage.absolutePageIndex > 0 : false;
+  const hasNextPage = activePage ? activePage.absolutePageIndex < allBookPages.length - 1 : false;
+
+  const onPlayPauseToggle = React.useCallback(() => {
+    useReadingStore.getState().setIsPlaying(!isPlaying);
+  }, [isPlaying]);
+
+  const onWpmChange = React.useCallback((newWpm: number) => {
+    useReadingStore.getState().setWpm(newWpm);
+  }, []);
+
   const isNormalMode = mode === "normal";
 
   return (

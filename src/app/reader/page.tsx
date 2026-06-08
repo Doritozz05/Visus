@@ -21,6 +21,8 @@ import { CompletionModal } from "@/features/reader/components/CompletionModal";
 import { useBookIngestion } from "@/features/reader/hooks/useBookIngestion";
 import { useReaderPlayback } from "@/features/reader/hooks/useReaderPlayback";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { useReadingStore } from "@/features/reader/stores/reading-store";
+import { READER_FONT_CLASSES } from "@/features/reader/utils/reader-fonts";
 
 export default function ReaderPage() {
   const router = useRouter();
@@ -38,8 +40,6 @@ export default function ReaderPage() {
   const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster">("rsvp");
   const [isTocOpen, setIsTocOpen] = React.useState(false);
 
-
-
   // Consuming modular custom hooks
   const {
     localFileInputRef,
@@ -50,7 +50,6 @@ export default function ReaderPage() {
   // Font-adaptive visual words-per-page scaler to prevent any visual overflows/cuts
   const getSafeWordsPerPage = React.useCallback((fontSize: number, baseWords: number): number => {
     const scale = 16 / fontSize;
-    // Apply a safety scaling factor (0.82) to guarantee text fits comfortably inside the 660px container under any font size
     return Math.max(100, Math.round(baseWords * scale * 0.82));
   }, []);
 
@@ -62,45 +61,49 @@ export default function ReaderPage() {
 
   // Consuming the core speed reading engine playback hook
   const {
-    activeChapterIndex,
-    wordIndex,
-    isPlaying,
-    wpm,
-    mode,
-    completedChapter,
     isCompletionModalOpen,
     sessionStats,
-    setWordIndex,
+    saveProgressForBook,
     setIsPlaying,
-    setWpm,
     setMode,
     setCompletedChapter,
     setIsCompletionModalOpen,
     chaptersData,
     allBookPages,
     setAllBookPages,
-    activePage,
-    currentChapter,
-    words,
     rsvpSequence,
     clusterChunks,
-    activeClusterIndex,
-    progressPercentage,
     handleChapterChange,
     handlePageChange,
     handlePrevChapter,
     handleNextChapter,
+    handleRewind,
+    handleSkip,
     handleAddBookmark,
     handleRemoveBookmark,
     handleUpdateBookmarkName,
     handleGoToBookmark,
-    subscribeToPlayback,
   } = useReaderPlayback({
     activeBook,
     updateBook,
     settings,
     wordsPerPage,
   });
+
+  // Low-frequency subscriptions to Zustand store properties
+  const mode = useReadingStore((state) => state.mode);
+  const completedChapter = useReadingStore((state) => state.completedChapter);
+  const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
+  const storeActiveBookId = useReadingStore((state) => state.activeBookId);
+
+  const isStoreInitialized = activeBook && storeActiveBookId === activeBook.id;
+
+  const currentChapter = React.useMemo(() => {
+    const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
+    const ch = chaptersData[safeIdx] || { title: "No Book Loaded", content: "" };
+    const wordsArr = ch.content ? ch.content.split(/\s+/).filter(w => w.trim() !== "") : [];
+    return { ...ch, words: wordsArr, index: safeIdx };
+  }, [chaptersData, activeChapterIndex]);
 
   const openQuickSettings = () => {
     setIsPlaying(false);
@@ -114,25 +117,13 @@ export default function ReaderPage() {
 
   const readerFontClass = React.useMemo(() => {
     const ff = settings.general.readerFontFamily || "serif";
-    switch (ff) {
-      case "inter":
-        return "font-sans antialiased text-justify";
-      case "atkinson":
-        return "font-sans antialiased text-justify tracking-wide font-medium";
-      case "dyslexic":
-        return "font-sans antialiased text-justify tracking-wide font-normal";
-      case "serif":
-      default:
-        return "font-serif antialiased text-justify tracking-normal text-foreground/90";
-    }
+    return READER_FONT_CLASSES[ff as keyof typeof READER_FONT_CLASSES] || READER_FONT_CLASSES.serif;
   }, [settings.general.readerFontFamily]);
 
-  // Return full screen loading spinner during hydration phase to prevent layout flashes
-  if (!isHydrated) {
-    return <LoadingSpinner fullScreen />;
+  if (!isHydrated || (activeBook && !isStoreInitialized)) {
+    return <LoadingSpinner message="Loading reader session..." fullScreen />;
   }
 
-  // --- RENDERING STATE 1: COMPLETELY EMPTY LIBRARY ---
   if (books.length === 0) {
     return (
       <EmptyLibraryState
@@ -143,7 +134,6 @@ export default function ReaderPage() {
     );
   }
 
-  // --- RENDERING STATE 2: BOOKSHELF CHOOSE LIST ---
   if (!activeBook) {
     return (
       <BookshelfSelector
@@ -153,7 +143,6 @@ export default function ReaderPage() {
     );
   }
 
-  // --- RENDERING STATE 3: SPEED READING ENGINE WORKSPACE ---
   return (
     <div className="bg-background text-foreground font-sans h-screen overflow-hidden overscroll-none flex flex-col md:flex-row antialiased transition-all duration-300 relative">
       <Sidebar activePath="/reader" />
@@ -179,16 +168,10 @@ export default function ReaderPage() {
       {/* Main Content Workspace */}
       <main className="flex-1 flex flex-col items-center justify-between relative md:pl-64 h-[calc(100vh-80px)] md:h-screen p-6 pt-32 pb-8 overflow-hidden overscroll-none">
 
-        {/* Modular Header Component */}
         <ReaderHeader
           activeBook={activeBook}
-          currentChapter={currentChapter}
-          activeChapterIndex={activeChapterIndex}
           setActiveChapterIndex={handleChapterChange}
           chaptersData={chaptersData}
-          setWordIndex={setWordIndex}
-          progressPercentage={progressPercentage}
-          mode={mode}
           setMode={setMode}
           setIsPlaying={setIsPlaying}
           setCompletedChapter={setCompletedChapter}
@@ -210,7 +193,6 @@ export default function ReaderPage() {
               : "max-w-2xl"
         } px-6 md:px-0 flex-1 flex flex-col items-center justify-center relative z-10 transition-opacity duration-300`}>
 
-          {/* Auto-pause Chapter completed overlay */}
           {completedChapter && (
             <div className="absolute inset-0 bg-background/85 dark:bg-background/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-30 rounded-2xl border border-border/20 transition-all duration-300">
               <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl glass-panel relative overflow-hidden flex flex-col items-center justify-center gap-6">
@@ -240,7 +222,9 @@ export default function ReaderPage() {
                   <button
                     onClick={() => {
                       setCompletedChapter(null);
-                      setIsPlaying(true);
+                      handleNextChapter();
+                      // Wait a tiny bit for the chapter transition before resuming playback
+                      setTimeout(() => setIsPlaying(true), 10);
                     }}
                     className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded text-xs font-mono uppercase tracking-wider font-bold shadow-[0_0_15px_rgba(var(--primary),0.15)] hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
                   >
@@ -257,22 +241,11 @@ export default function ReaderPage() {
               key={activeBook.id}
               currentChapter={currentChapter}
               chaptersData={chaptersData}
-              activePage={activePage}
               allBookPages={allBookPages}
               onPagesComputed={setAllBookPages}
-              wordIndex={wordIndex}
-              setWordIndex={setWordIndex}
               savedLocalPageIndex={activeBook.lastChapterIndex === activeChapterIndex ? activeBook.lastLocalPageIndex : undefined}
               onSavePageProgress={(localPageIdx, wIdx) => {
-                // Persist the exact page position on every page turn.
-                // updateBook is called directly with the local page index so the next
-                // session can restore the exact page without relying on the DOM
-                // word→page mapping (which can drift between sessions).
-                updateBook(activeBook.id, {
-                  lastChapterIndex: activeChapterIndex,
-                  lastWordIndex: wIdx,
-                  lastLocalPageIndex: localPageIdx,
-                });
+                saveProgressForBook(activeBook.id, activeChapterIndex, wIdx, localPageIdx, true);
               }}
               readerFontClass={readerFontClass}
               fontSize={settings.general.readerFontSize || 16}
@@ -288,15 +261,11 @@ export default function ReaderPage() {
           ) : mode === "rsvp" ? (
             <RsvpVisualBox
               rsvpSequence={rsvpSequence}
-              initialWordIndex={wordIndex}
-              subscribeToPlayback={subscribeToPlayback}
               settings={settings.rsvp}
             />
           ) : (
             <ClusterVisualBox
               clusterChunks={clusterChunks}
-              initialWordIndex={wordIndex}
-              subscribeToPlayback={subscribeToPlayback}
               settings={settings.cluster}
             />
           )}
@@ -305,17 +274,11 @@ export default function ReaderPage() {
         {/* Player Bar (Hidden in standard page mode) */}
         {mode !== "normal" && (
           <ReaderPlayer
-            isPlaying={isPlaying}
-            onPlayPauseToggle={() => setIsPlaying(!isPlaying)}
-            wpm={wpm}
-            onWpmChange={setWpm}
-            onRewind={() => setWordIndex((prev) => Math.max(0, prev - 10))}
-            onSkip={() => setWordIndex((prev) => Math.min(words.length - 1, prev + 10))}
-            mode={mode}
+            onRewind={handleRewind}
+            onSkip={handleSkip}
             onPrevPage={() => handlePageChange("prev")}
             onNextPage={() => handlePageChange("next")}
-            hasPrevPage={activeChapterIndex > 0}
-            hasNextPage={activeChapterIndex < chaptersData.length - 1}
+            allBookPages={allBookPages}
           />
         )}
       </main>
