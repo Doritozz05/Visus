@@ -153,7 +153,12 @@ export function useReaderPlayback({
       (p) => p.chapterIndex === activeChapterIndex && wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
     ) || allBookPages.find(
       (p) => p.chapterIndex === activeChapterIndex && wordIndex < p.startWordIndex
-    ) || allBookPages.filter(p => p.chapterIndex === activeChapterIndex).pop() || allBookPages[0];
+    ) || (() => {
+      for (let i = allBookPages.length - 1; i >= 0; i--) {
+        if (allBookPages[i].chapterIndex === activeChapterIndex) return allBookPages[i];
+      }
+      return null;
+    })() || allBookPages[0];
 
     if (!activePage) return;
     

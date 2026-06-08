@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Sidebar } from "@/components/Sidebar";
 import { Book } from "@/core/entities/book";
 import { Book as BookIcon, BookOpen, Library } from "lucide-react";
@@ -40,7 +41,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
                       <div className="w-12 h-16 rounded-lg border border-border/30 overflow-hidden shrink-0 relative shadow-inner bg-background">
                         {book.coverUrl ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                          <Image src={book.coverUrl} fill alt={book.title} className="object-cover transition-transform duration-300 group-hover:scale-105" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-accent/25">
                             <BookIcon className="text-muted-foreground/80 h-5 w-5" />

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { Book, Trash2, MoreVertical, Info, BookOpen, CheckCircle, Pencil, Archive, FolderPlus } from "lucide-react";
 import { Book as BookEntity } from "@/core/entities/book";
 
@@ -124,7 +125,7 @@ export function BookCard({
         >
           {book.coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+            <Image src={book.coverUrl} fill alt={book.title} className="object-cover transition-transform duration-300 hover:scale-105" />
           ) : (
             <div className="flex flex-col items-center justify-center h-full w-full bg-accent/30">
               <span className="text-[10px] font-extrabold text-primary/70 font-mono tracking-tighter uppercase leading-none mb-1">

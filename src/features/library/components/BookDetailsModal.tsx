@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { Book } from "@/core/entities/book";
 import { Book as BookIcon, X, BookOpen } from "lucide-react";
 
@@ -41,7 +42,7 @@ export function BookDetailsModal({
           <div className="w-28 h-40 bg-gradient-to-br from-primary/10 to-primary/5 border border-border/20 rounded-xl flex items-center justify-center relative shadow-2xl overflow-hidden z-10 shrink-0 transform hover:scale-102 transition-transform duration-300">
             {book.coverUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
+              <Image src={book.coverUrl} fill alt={book.title} className="object-cover" />
             ) : (
               <div className="flex flex-col items-center justify-center h-full w-full bg-accent/30">
                 <span className="text-xl font-extrabold text-primary/70 font-mono tracking-tighter uppercase mb-1">
