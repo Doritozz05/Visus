@@ -20,6 +20,16 @@ export function useClusterEngine({
     return generateDynamicClusters(currentChapter.words, 3);
   }, [currentChapter.words]);
 
+  const clusterOffsets = React.useMemo(() => {
+    let offset = 0;
+    return clusterChunks.map((chunk) => {
+      const start = offset;
+      const end = offset + chunk.wordCount;
+      offset = end;
+      return { start, end };
+    });
+  }, [clusterChunks]);
+
   // Master speed reading playback timer loop for Cluster mode
   React.useEffect(() => {
     if (!isPlaying || mode !== "cluster" || clusterChunks.length === 0) return;
@@ -30,16 +40,23 @@ export function useClusterEngine({
       const currentIdx = useReadingStore.getState().wordIndex;
       const baseDelayMs = (60 * 1000) / wpm;
 
-      let activeClusterIdx = 0;
-      let currentWordOffset = 0;
-      for (let i = 0; i < clusterChunks.length; i++) {
-        const chunkWordsCount = clusterChunks[i].wordCount;
-        if (currentIdx >= currentWordOffset && currentIdx < currentWordOffset + chunkWordsCount) {
-          activeClusterIdx = i;
+      let activeClusterIdx = -1;
+      let low = 0;
+      let high = clusterOffsets.length - 1;
+      while (low <= high) {
+        const mid = (low + high) >> 1;
+        const range = clusterOffsets[mid];
+        if (currentIdx >= range.start && currentIdx < range.end) {
+          activeClusterIdx = mid;
           break;
+        } else if (currentIdx < range.start) {
+          high = mid - 1;
+        } else {
+          low = mid + 1;
         }
-        currentWordOffset += chunkWordsCount;
       }
+
+      if (activeClusterIdx === -1) activeClusterIdx = 0;
 
       const currentChunk = clusterChunks[activeClusterIdx];
       if (!currentChunk) return;
@@ -68,7 +85,7 @@ export function useClusterEngine({
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isPlaying, wpm, clusterChunks, mode, currentChapter]);
+  }, [isPlaying, wpm, clusterChunks, clusterOffsets, mode, currentChapter]);
 
   return {
     clusterChunks,

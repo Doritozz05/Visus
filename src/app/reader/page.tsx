@@ -23,6 +23,7 @@ import { generateQuizForChapter, Quiz } from "@/core/algorithms/quiz-generator";
 import { useBookIngestion } from "@/features/reader/hooks/useBookIngestion";
 import { useReaderPlayback } from "@/features/reader/hooks/useReaderPlayback";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
 import { READER_FONT_CLASSES } from "@/features/reader/utils/reader-fonts";
 
@@ -286,25 +287,27 @@ export default function ReaderPage() {
               </div>
             )
           ) : mode === "normal" ? (
-            <PagesVisualBox
-              key={activeBook.id}
-              currentChapter={currentChapter}
-              chaptersData={chaptersData}
-              savedLocalPageIndex={activeBook.lastChapterIndex === activeChapterIndex ? activeBook.lastLocalPageIndex : undefined}
-              onSavePageProgress={(localPageIdx, wIdx) => {
-                saveProgressForBook(activeBook.id, activeChapterIndex, wIdx, localPageIdx);
-              }}
-              readerFontClass={readerFontClass}
-              fontSize={settings.general.readerFontSize || 16}
-              wordsPerPage={wordsPerPage}
-              onPrevChapter={handlePrevChapter}
-              onNextChapter={handleNextChapter}
-              setActiveChapterIndex={handleChapterChange}
-              bookmarks={activeBook.bookmarks || []}
-              onAddBookmark={handleAddBookmark}
-              onRemoveBookmark={handleRemoveBookmark}
-              onUpdateBookmarkName={handleUpdateBookmarkName}
-            />
+            <ErrorBoundary>
+              <PagesVisualBox
+                key={activeBook.id}
+                currentChapter={currentChapter}
+                chaptersData={chaptersData}
+                savedLocalPageIndex={activeBook.lastChapterIndex === activeChapterIndex ? activeBook.lastLocalPageIndex : undefined}
+                onSavePageProgress={(localPageIdx, wIdx) => {
+                  saveProgressForBook(activeBook.id, activeChapterIndex, wIdx, localPageIdx);
+                }}
+                readerFontClass={readerFontClass}
+                fontSize={settings.general.readerFontSize || 16}
+                wordsPerPage={wordsPerPage}
+                onPrevChapter={handlePrevChapter}
+                onNextChapter={handleNextChapter}
+                setActiveChapterIndex={handleChapterChange}
+                bookmarks={activeBook.bookmarks || []}
+                onAddBookmark={handleAddBookmark}
+                onRemoveBookmark={handleRemoveBookmark}
+                onUpdateBookmarkName={handleUpdateBookmarkName}
+              />
+            </ErrorBoundary>
           ) : mode === "rsvp" ? (
             <RsvpVisualBox
               rsvpSequence={rsvpSequence}

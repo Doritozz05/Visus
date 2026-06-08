@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Outfit, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -13,7 +13,7 @@ const outfit = Outfit({
   variable: "--font-heading",
 });
 
-const hanken = Inter({ // fallback as hanken grotesk may require explicit import
+const hanken = Hanken_Grotesk({
   subsets: ["latin"],
   variable: "--font-hanken",
 });
@@ -50,14 +50,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable} dark`}>
+    <html lang="en" className={`${inter.variable} ${outfit.variable} ${hanken.variable} dark`}>
       <head>
         {/* Load Material Symbols Outlined for prototype screen icons */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-        {/* Load Hanken Grotesk for Visus Pro aesthetic matches */}
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
         <Providers>{children}</Providers>
