@@ -69,3 +69,18 @@ serena.db
 .audit_history/
 
 
+
+# Sentry Config Files
+.env.sentry-build-plugin
+.sentryclirc
+sentry.properties
+
+# Databases
+*.db
+*.sqlite
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
