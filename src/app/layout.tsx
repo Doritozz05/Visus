@@ -13,6 +13,11 @@ const outfit = Outfit({
   variable: "--font-heading",
 });
 
+const hanken = Inter({ // fallback as hanken grotesk may require explicit import
+  subsets: ["latin"],
+  variable: "--font-hanken",
+});
+
 export const viewport: Viewport = {
   themeColor: "#6366f1",
   width: "device-width",
@@ -48,8 +53,10 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${outfit.variable} dark`}>
       <head>
         {/* Load Material Symbols Outlined for prototype screen icons */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
         {/* Load Hanken Grotesk for Visus Pro aesthetic matches */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">

@@ -271,7 +271,7 @@ export function useReaderPlayback({
         saveProgressForBook(activeBookVal.id, nextPageObj.chapterIndex, nextPageObj.startWordIndex);
       }
     }
-  }, [allBookPages, saveProgressForBook, updateBook]);
+  }, [allBookPages, saveProgressForBook, updateBook, setIsCompletionModalOpen, setSessionStats]);
 
   const handlePrevChapter = React.useCallback(() => {
     const { activeChapterIndex } = useReadingStore.getState();

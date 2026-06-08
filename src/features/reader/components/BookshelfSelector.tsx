@@ -38,6 +38,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
                     <div className="flex gap-3.5 items-start">
                       <div className="w-12 h-16 rounded-lg border border-border/30 overflow-hidden shrink-0 relative shadow-inner bg-background">
                         {book.coverUrl ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
                           <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-accent/25">
