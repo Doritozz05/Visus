@@ -51,6 +51,7 @@ audit_log.md
 *.njsproj
 *.sln
 *.sw?
+prompts.txt
 
 # OS metadata
 .DS_Store
