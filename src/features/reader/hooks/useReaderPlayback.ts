@@ -38,14 +38,17 @@ export function useReaderPlayback({
   const initializedBookIdRef = React.useRef<string | null>(null);
   const activeBookId = activeBook?.id || null;
 
+  const activeBookChapters = activeBook?.chapters;
+  const activeBookContent = activeBook?.content;
+
   // Dynamic parser turning any plain text content or structural parsed chapters into visual chapters/pages.
   const chaptersData = React.useMemo(() => {
-    if (!activeBook) return [];
+    if (!activeBookId) return [];
     
-    let rawChapters = activeBook.chapters || [];
+    let rawChapters = activeBookChapters || [];
     
-    if (rawChapters.length === 0 && activeBook.content) {
-      const paragraphs = activeBook.content.split(/\n\s*\n+/).filter(p => p.trim() !== "");
+    if (rawChapters.length === 0 && activeBookContent) {
+      const paragraphs = activeBookContent.split(/\n\s*\n+/).filter(p => p.trim() !== "");
       const legacyChapters = [];
       for (let i = 0; i < paragraphs.length; i += 6) {
         const title = `Section ${Math.floor(i / 6) + 1}`;
@@ -58,7 +61,7 @@ export function useReaderPlayback({
     if (rawChapters.length === 0) {
       rawChapters = [{
         title: "Section 1",
-        content: activeBook.content || "Empty book content."
+        content: activeBookContent || "Empty book content."
       }];
     }
 
@@ -66,7 +69,7 @@ export function useReaderPlayback({
       ...ch,
       index: idx,
     }));
-  }, [activeBook?.id, activeBook?.chapters, activeBook?.content]);
+  }, [activeBookId, activeBookChapters, activeBookContent]);
 
   const allBookPages = useReadingStore((state) => state.allBookPages);
   const setAllBookPages = useReadingStore((state) => state.setAllBookPages);

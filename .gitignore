@@ -63,3 +63,7 @@ Thumbs.db
 .serena/
 serena.db
 
+# Audit history
+.audit_history/
+
+
