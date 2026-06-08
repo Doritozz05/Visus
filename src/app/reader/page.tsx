@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { RsvpVisualBox } from "@/features/reader-rsvp/components/RsvpVisualBox";
-import { ClusterVisualBox } from "@/features/reader-clusters/components/ClusterVisualBox";
-import { ReaderPlayer } from "@/features/reader-controls/components/ReaderPlayer";
+import { RsvpVisualBox } from "@/features/reader/modes/rsvp/RsvpVisualBox";
+import { ClusterVisualBox } from "@/features/reader/modes/cluster/ClusterVisualBox";
+import { ReaderPlayer } from "@/features/reader/components/ReaderPlayer";
 import { useSettings } from "@/context/settings-context";
 import { useLibrary } from "@/context/library-context";
 import { useRouter } from "next/navigation";
