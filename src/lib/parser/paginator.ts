@@ -125,6 +125,68 @@ function findSmartSplitPoint(text: string): number {
  * with their absolute start and end word indices in the chapter.
  * Works strictly in the browser context (client-side).
  */
+function normalizeMixedContent(container: HTMLElement) {
+  const BLOCK_TAGS = new Set([
+    "DIV", "SECTION", "ARTICLE", "HEADER", "FOOTER", "MAIN", "ASIDE", 
+    "BLOCKQUOTE", "BODY", "LI", "TD", "P", "H1", "H2", "H3", "H4", "H5", "H6", "PRE"
+  ]);
+
+  const isBlockNode = (node: Node): boolean => {
+    return node.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((node as Element).tagName);
+  };
+
+  const walk = (element: HTMLElement) => {
+    if (!element) return;
+    
+    const elementChildren = element.children ? Array.from(element.children) : [];
+    elementChildren.forEach((child) => {
+      walk(child as HTMLElement);
+    });
+
+    const children = element.childNodes ? Array.from(element.childNodes) : [];
+    const hasBlockChild = children.some(isBlockNode);
+
+    if (!hasBlockChild) return;
+
+    let currentGroup: Node[] = [];
+
+    const flushGroup = () => {
+      if (currentGroup.length === 0) return;
+
+      const hasContent = currentGroup.some(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return (node.textContent || "").trim().length > 0;
+        }
+        return true;
+      });
+
+      if (hasContent) {
+        const doc = element.ownerDocument || document;
+        const p = doc.createElement("p");
+        element.insertBefore(p, currentGroup[0]);
+        currentGroup.forEach(node => p.appendChild(node));
+      } else {
+        currentGroup.forEach(node => {
+          if (node.parentNode) node.parentNode.removeChild(node);
+        });
+      }
+      currentGroup = [];
+    };
+
+    children.forEach((child) => {
+      if (isBlockNode(child)) {
+        flushGroup();
+      } else {
+        currentGroup.push(child);
+      }
+    });
+
+    flushGroup();
+  };
+
+  walk(container);
+}
+
 export function tagHtmlBlocksWithWordIndices(htmlContent: string): { html: string; totalWords: number } {
   if (typeof window === "undefined" || !htmlContent) {
     return { html: htmlContent, totalWords: 0 };
@@ -136,6 +198,8 @@ export function tagHtmlBlocksWithWordIndices(htmlContent: string): { html: strin
     const doc = parser.parseFromString(`<div>${htmlContent}</div>`, "text/html");
     const container = doc.body.firstElementChild as HTMLElement;
     if (!container) return { html: htmlContent, totalWords: 0 };
+
+    normalizeMixedContent(container);
 
     // Primary block-level elements that always contain readable text
     const PRIMARY_BLOCK_SELECTOR = "p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, td";

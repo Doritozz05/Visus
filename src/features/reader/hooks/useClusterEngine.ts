@@ -15,6 +15,7 @@ export function useClusterEngine({
   wpm,
 }: UseClusterEngineProps) {
   const isPlaying = useReadingStore((state) => state.isPlaying);
+  const wordIndex = useReadingStore((state) => state.wordIndex);
 
   const clusterChunks = React.useMemo(() => {
     return generateDynamicClusters(currentChapter.words, 3);
@@ -85,7 +86,7 @@ export function useClusterEngine({
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isPlaying, wpm, clusterChunks, clusterOffsets, mode, currentChapter]);
+  }, [isPlaying, wpm, clusterChunks, clusterOffsets, mode, currentChapter, wordIndex]);
 
   return {
     clusterChunks,

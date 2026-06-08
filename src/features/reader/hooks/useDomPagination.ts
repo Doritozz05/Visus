@@ -34,13 +34,28 @@ export function useDomPagination({
   const [isPaginationReady, setIsPaginationReady] = React.useState(initialReady);
   const [isFullPaginationReady, setIsFullPaginationReady] = React.useState(initialReady);
   const hasComputedRef = React.useRef(false);
+  const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
+
+  const lastLayoutRef = React.useRef("");
 
   React.useEffect(() => {
     if (!containerDimensions || chaptersData.length === 0) {
       return;
     }
 
-    // Reset ready flag whenever we restart pagination (e.g. chapter/font change)
+    const currentLayoutKey = `${chaptersData.length}-${scaledFontSize}-${readerFontClass}-${containerDimensions?.width || 0}x${containerDimensions?.height || 0}-${wordsPerPage}-${columnGap}`;
+    const isLayoutChange = currentLayoutKey !== lastLayoutRef.current;
+    
+    // Check if we already have pages computed for the active chapter
+    const hasPagesForActive = useReadingStore.getState().allBookPages.some(p => p.chapterIndex === activeChapterIndex);
+    
+    if (!isLayoutChange && hasPagesForActive) {
+      setIsPaginationReady(true);
+      return;
+    }
+
+    // Reset ready flag whenever we restart pagination (e.g. layout change or uncomputed chapter)
+    lastLayoutRef.current = currentLayoutKey;
     setIsPaginationReady(false);
     setIsFullPaginationReady(false);
 
@@ -50,7 +65,7 @@ export function useDomPagination({
       const { width, height } = containerDimensions;
       if (width <= 0 || height <= 0) return;
 
-      const { activeChapterIndex, setAllBookPages } = useReadingStore.getState();
+      const { setAllBookPages } = useReadingStore.getState();
       const totalChapters = chaptersData.length;
       
       const pagesByChapter: BookVisualPage[][] = new Array(totalChapters).fill([]);
@@ -139,7 +154,7 @@ export function useDomPagination({
       active = false;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, wordsPerPage, columnGap]);
+  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, wordsPerPage, columnGap, activeChapterIndex]);
 
   return {
     isPaginationReady,
