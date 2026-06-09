@@ -324,7 +324,7 @@ export default function LibraryDashboard() {
 
               {/* Book List Scrollable Grid Panel */}
               <div className="relative flex-1 max-h-[58vh]">
-                <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pr-1 pb-10">
+                <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pr-1 pb-48">
                   {filteredBooks.length === 0 ? (
                     <div className="border border-dashed border-border/40 rounded-xl flex flex-col items-center justify-center p-12 text-center bg-card/10 h-full min-h-[300px]">
                       <Library className="w-10 h-10 text-muted-foreground/60 mb-3" />

@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -9,6 +11,15 @@ interface AuthLayoutProps {
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-8 bg-background relative overflow-hidden">
+      {/* Back Button */}
+      <Link 
+        href="/" 
+        className="absolute top-8 left-8 z-20 flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+      >
+        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+        <span>Back to Home</span>
+      </Link>
+
       {/* Background ambient light effects */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/20 blur-[120px] rounded-full opacity-50 pointer-events-none animate-pulse" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-accent/20 blur-[120px] rounded-full opacity-50 pointer-events-none animate-pulse" style={{ animationDelay: "2s" }} />
