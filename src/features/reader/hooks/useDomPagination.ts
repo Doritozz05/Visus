@@ -47,17 +47,27 @@ export function useDomPagination({
     const currentLayoutKey = `${chaptersData.length}-${scaledFontSize}-${readerFontClass}-${containerDimensions?.width || 0}x${containerDimensions?.height || 0}-${wordsPerPage}-${columnGap}`;
     const isLayoutChange = currentLayoutKey !== lastLayoutRef.current;
     
-    // Check if we already have pages computed for the active chapter
-    const hasPagesForActive = useReadingStore.getState().allBookPages.some(p => p.chapterIndex === activeChapterIndex);
+    // Check existing pages state
+    const existingPages = useReadingStore.getState().allBookPages;
+    const computedChapters = new Set<number>();
+    existingPages.forEach(p => computedChapters.add(p.chapterIndex));
+    const isFullyComputed = computedChapters.size === chaptersData.length;
+    const hasPagesForActive = computedChapters.has(activeChapterIndex);
     
+    if (!isLayoutChange && isFullyComputed) {
+      setIsPaginationReady(true);
+      setIsFullPaginationReady(true);
+      return;
+    }
+
     if (!isLayoutChange && hasPagesForActive) {
       setIsPaginationReady(true);
-      return;
+    } else {
+      setIsPaginationReady(false);
     }
 
     // Reset ready flag whenever we restart pagination (e.g. layout change or uncomputed chapter)
     lastLayoutRef.current = currentLayoutKey;
-    setIsPaginationReady(false);
     setIsFullPaginationReady(false);
 
     let active = true;
@@ -71,12 +81,26 @@ export function useDomPagination({
       
       const pagesByChapter: BookVisualPage[][] = new Array(totalChapters).fill([]);
 
+      if (!isLayoutChange) {
+        // Pre-fill with already computed pages
+        for (const page of existingPages) {
+          if (!pagesByChapter[page.chapterIndex]) {
+            pagesByChapter[page.chapterIndex] = [];
+          }
+          pagesByChapter[page.chapterIndex].push(page);
+        }
+      } else {
+        // Clear pages if layout changed
+        setAllBookPages([]);
+      }
+
       const updateStore = () => {
         let absoluteIndexCounter = 0;
         const incrementalPages: BookVisualPage[] = [];
         const map = new Map<string, number>();
         for (let i = 0; i < totalChapters; i++) {
           const chapterPages = pagesByChapter[i];
+          if (!chapterPages) continue;
           for (const page of chapterPages) {
             incrementalPages.push({
               ...page,
@@ -92,31 +116,33 @@ export function useDomPagination({
       
       const checkActive = () => active;
 
-      // 1. Paginate active chapter first
+      // 1. Paginate active chapter first if not already computed
       if (activeChapterIndex >= 0 && activeChapterIndex < totalChapters) {
-        pagesByChapter[activeChapterIndex] = await paginateChapter({
-          chIdx: activeChapterIndex,
-          chapter: chaptersData[activeChapterIndex],
-          width,
-          columnGap,
-          hiddenEl: hiddenPaginatorRef.current!,
-          checkActive
-        });
-        
-        if (!active) return;
-        
-        updateStore();
+        if (!pagesByChapter[activeChapterIndex] || pagesByChapter[activeChapterIndex].length === 0) {
+          pagesByChapter[activeChapterIndex] = await paginateChapter({
+            chIdx: activeChapterIndex,
+            chapter: chaptersData[activeChapterIndex],
+            width,
+            columnGap,
+            hiddenEl: hiddenPaginatorRef.current!,
+            checkActive
+          });
+          
+          if (!active) return;
+          
+          updateStore();
 
-        const { savedLocalPageIndex: currentSLPI, chapterIndex: currentCI } = latestRestoreTargetRef.current;
-        const isInitialLoad = !hasComputedRef.current;
+          const { savedLocalPageIndex: currentSLPI, chapterIndex: currentCI } = latestRestoreTargetRef.current;
+          const isInitialLoad = !hasComputedRef.current;
 
-        // Apply restore logic only for the active chapter
-        if (currentCI === activeChapterIndex) {
-          if (isInitialLoad && currentSLPI !== undefined) {
-            const maxLocalPage = Math.max(0, pagesByChapter[activeChapterIndex].length - 1);
-            const clampedPage = Math.min(currentSLPI, maxLocalPage);
-            if (pagesByChapter[activeChapterIndex][clampedPage]) {
-              useReadingStore.getState().setWordIndex(pagesByChapter[activeChapterIndex][clampedPage].startWordIndex);
+          // Apply restore logic only for the active chapter
+          if (currentCI === activeChapterIndex) {
+            if (isInitialLoad && currentSLPI !== undefined) {
+              const maxLocalPage = Math.max(0, pagesByChapter[activeChapterIndex].length - 1);
+              const clampedPage = Math.min(currentSLPI, maxLocalPage);
+              if (pagesByChapter[activeChapterIndex][clampedPage]) {
+                useReadingStore.getState().setWordIndex(pagesByChapter[activeChapterIndex][clampedPage].startWordIndex);
+              }
             }
           }
         }
@@ -128,7 +154,8 @@ export function useDomPagination({
       // 2. Paginate the rest asynchronously
       for (let chIdx = 0; chIdx < totalChapters; chIdx++) {
         if (!active) return;
-        if (chIdx === activeChapterIndex) continue; // Already done
+        if (chIdx === activeChapterIndex) continue; // Already handled
+        if (pagesByChapter[chIdx] && pagesByChapter[chIdx].length > 0) continue; // Skip already computed
         
         pagesByChapter[chIdx] = await paginateChapter({
           chIdx,

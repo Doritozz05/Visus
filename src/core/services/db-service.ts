@@ -57,7 +57,18 @@ class DbService {
       };
 
       request.onsuccess = () => {
-        resolve(request.result);
+        const db = request.result;
+
+        // Evict cached promise if connection is dropped or closed
+        db.onclose = () => {
+          this.dbPromise = null;
+        };
+        db.onversionchange = () => {
+          db.close();
+          this.dbPromise = null;
+        };
+
+        resolve(db);
       };
 
       request.onerror = () => {
@@ -69,125 +80,115 @@ class DbService {
     return this.dbPromise;
   }
 
+  private async withDb<T>(operation: (db: IDBDatabase) => Promise<T>, retries = 1): Promise<T> {
+    try {
+      const db = await this.getDb();
+      return await operation(db);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "InvalidStateError" && retries > 0) {
+        console.warn("[DbService] IndexedDB connection closed or invalid, forcing reconnect and retrying...");
+        this.dbPromise = null; // Force reconnection
+        return this.withDb(operation, retries - 1);
+      }
+      throw error;
+    }
+  }
+
   // --- BOOKS METADATA STORE ACTIONS ---
 
   async getAllBooks(): Promise<Book[]> {
-    const db = await this.getDb();
-    return new Promise((resolve, reject) => {
+    return this.withDb((db) => new Promise((resolve, reject) => {
       const transaction = db.transaction(STORES.BOOKS_METADATA, "readonly");
       const store = transaction.objectStore(STORES.BOOKS_METADATA);
       const request = store.getAll();
 
       request.onsuccess = () => resolve(request.result || []);
       request.onerror = () => reject(request.error);
-    });
+    }));
   }
 
   async saveBook(book: Book): Promise<void> {
-    return this.enqueueWrite(async () => {
-      const db = await this.getDb();
-      return new Promise<void>((resolve, reject) => {
-        try {
-          const transaction = db.transaction(STORES.BOOKS_METADATA, "readwrite");
-          const store = transaction.objectStore(STORES.BOOKS_METADATA);
-          const request = store.put(book);
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.BOOKS_METADATA, "readwrite");
+        const store = transaction.objectStore(STORES.BOOKS_METADATA);
+        const request = store.put(book);
 
-          request.onsuccess = () => resolve();
-          request.onerror = () => reject(request.error);
-        } catch (error) {
-          if (error instanceof DOMException && error.name === "InvalidStateError") {
-            resolve();
-          } else {
-            reject(error);
-          }
-        }
-      });
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      }));
     });
   }
 
   async deleteBook(id: string): Promise<void> {
-    return this.enqueueWrite(async () => {
-      const db = await this.getDb();
-      return new Promise<void>((resolve, reject) => {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(STORES.BOOKS_METADATA, "readwrite");
         const store = transaction.objectStore(STORES.BOOKS_METADATA);
         const request = store.delete(id);
 
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
-      });
+      }));
     });
   }
 
   async clearAllBooks(): Promise<void> {
-    return this.enqueueWrite(async () => {
-      const db = await this.getDb();
-      return new Promise<void>((resolve, reject) => {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(STORES.BOOKS_METADATA, "readwrite");
         const store = transaction.objectStore(STORES.BOOKS_METADATA);
         const request = store.clear();
 
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
-      });
+      }));
     });
   }
 
   // --- BOOKS BINARY STORE ACTIONS ---
 
   async getBookBinary(bookId: string): Promise<BookBinary | null> {
-    const db = await this.getDb();
-    return new Promise((resolve, reject) => {
+    return this.withDb((db) => new Promise((resolve, reject) => {
       const transaction = db.transaction(STORES.BOOKS_BINARY, "readonly");
       const store = transaction.objectStore(STORES.BOOKS_BINARY);
       const request = store.get(bookId);
 
       request.onsuccess = () => resolve(request.result || null);
       request.onerror = () => reject(request.error);
-    });
+    }));
   }
 
   async saveBookBinary(binary: BookBinary): Promise<void> {
-    return this.enqueueWrite(async () => {
-      const db = await this.getDb();
-      return new Promise<void>((resolve, reject) => {
-        try {
-          const transaction = db.transaction(STORES.BOOKS_BINARY, "readwrite");
-          const store = transaction.objectStore(STORES.BOOKS_BINARY);
-          const request = store.put(binary);
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.BOOKS_BINARY, "readwrite");
+        const store = transaction.objectStore(STORES.BOOKS_BINARY);
+        const request = store.put(binary);
 
-          request.onsuccess = () => resolve();
-          request.onerror = () => reject(request.error);
-        } catch (error) {
-          if (error instanceof DOMException && error.name === "InvalidStateError") {
-            resolve();
-          } else {
-            reject(error);
-          }
-        }
-      });
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      }));
     });
   }
 
   async deleteBookBinary(bookId: string): Promise<void> {
-    return this.enqueueWrite(async () => {
-      const db = await this.getDb();
-      return new Promise<void>((resolve, reject) => {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(STORES.BOOKS_BINARY, "readwrite");
         const store = transaction.objectStore(STORES.BOOKS_BINARY);
         const request = store.delete(bookId);
 
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
-      });
+      }));
     });
   }
 
   // --- STATS STORE ACTIONS ---
 
   async getAllLogs(): Promise<ReadingSessionLog[]> {
-    const db = await this.getDb();
-    return new Promise((resolve, reject) => {
+    return this.withDb((db) => new Promise((resolve, reject) => {
       const transaction = db.transaction(STORES.STATS, "readonly");
       const store = transaction.objectStore(STORES.STATS);
       const request = store.getAll();
@@ -199,13 +200,12 @@ class DbService {
       request.onerror = () => {
         reject(request.error);
       };
-    });
+    }));
   }
 
   async saveLog(log: ReadingSessionLog): Promise<void> {
-    return this.enqueueWrite(async () => {
-      const db = await this.getDb();
-      return new Promise<void>((resolve, reject) => {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(STORES.STATS, "readwrite");
         const store = transaction.objectStore(STORES.STATS);
         const request = store.put(log);
@@ -217,14 +217,13 @@ class DbService {
         request.onerror = () => {
           reject(request.error);
         };
-      });
+      }));
     });
   }
 
   async clearAllLogs(): Promise<void> {
-    return this.enqueueWrite(async () => {
-      const db = await this.getDb();
-      return new Promise<void>((resolve, reject) => {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(STORES.STATS, "readwrite");
         const store = transaction.objectStore(STORES.STATS);
         const request = store.clear();
@@ -236,7 +235,7 @@ class DbService {
         request.onerror = () => {
           reject(request.error);
         };
-      });
+      }));
     });
   }
 }

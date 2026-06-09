@@ -189,10 +189,16 @@ export function PagesVisualBox({
       const availableWidth = wrapper.clientWidth;
       const targetW = Math.round(800 * densityRatio);
       const widthVal = Math.floor(Math.min(availableWidth, targetW));
+      const heightVal = wrapper.clientHeight;
       
-      setContainerDimensions({
-        width: widthVal,
-        height: wrapper.clientHeight,
+      setContainerDimensions((prev) => {
+        if (prev && prev.width === widthVal && prev.height === heightVal) {
+          return prev;
+        }
+        return {
+          width: widthVal,
+          height: heightVal,
+        };
       });
     };
     
