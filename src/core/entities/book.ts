@@ -43,10 +43,6 @@ export interface Book {
    *  Stored alongside lastWordIndex to allow direct currentPageIndex restoration without
    *  relying on the potentially unstable wordIndex→page DOM mapping. */
   lastLocalPageIndex?: number;
-  /** Optional saved bookmark position (legacy) */
-  bookmarkChapterIndex?: number;
-  /** Optional saved bookmark word index within the bookmarked chapter (legacy) */
-  bookmarkWordIndex?: number;
   /** Collection of multiple saved bookmarked positions */
   bookmarks?: Bookmark[];
   /** Premium Metadata & Cover Image */

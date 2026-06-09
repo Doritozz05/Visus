@@ -6,49 +6,6 @@
 import { ReadingSessionLog, LibraryStatsSummary, ReadingMode } from "../entities/stats";
 import { dbService } from "./db-service";
 
-const DEFAULT_SEEDED_LOGS: ReadingSessionLog[] = [
-  {
-    id: "log-seed-1",
-    bookId: "book-default-1",
-    bookTitle: "Neuromancer Excerpt",
-    mode: "rsvp",
-    speedWpm: 650,
-    durationSeconds: 862,
-    accuracy: 95,
-    completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(), // 1 day ago
-  },
-  {
-    id: "log-seed-2",
-    bookId: "book-default-2",
-    bookTitle: "Clean Architecture Chapter 1",
-    mode: "cluster",
-    speedWpm: 480,
-    durationSeconds: 1510,
-    accuracy: 90,
-    completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 days ago
-  },
-  {
-    id: "log-seed-3",
-    bookId: "book-default-3",
-    bookTitle: "React Performance Tuning Guide",
-    mode: "rsvp",
-    speedWpm: 700,
-    durationSeconds: 525,
-    accuracy: 92,
-    completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(), // 5 days ago
-  },
-  {
-    id: "log-seed-4",
-    bookId: "book-default-4",
-    bookTitle: "Clean Code Handbook",
-    mode: "cluster",
-    speedWpm: 500,
-    durationSeconds: 1110,
-    accuracy: 94,
-    completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(), // 6 days ago
-  },
-];
-
 export class StatsService {
   /**
    * Fetch all recorded reading session logs from local database (IndexedDB)
@@ -57,17 +14,10 @@ export class StatsService {
     if (typeof window === "undefined") return [];
     try {
       const logs = await dbService.getAllLogs();
-      if (logs && logs.length > 0) {
-        return logs;
-      }
-      // Seed default logs if nothing has been recorded yet
-      for (const log of DEFAULT_SEEDED_LOGS) {
-        await dbService.saveLog(log);
-      }
-      return DEFAULT_SEEDED_LOGS;
+      return logs || [];
     } catch (err) {
       console.warn("Could not retrieve reading logs from IndexedDB:", err);
-      return DEFAULT_SEEDED_LOGS;
+      return [];
     }
   }
 
@@ -98,27 +48,25 @@ export class StatsService {
     const logs = await this.getSessionLogs();
     
     const totalWpm = logs.reduce((sum, log) => sum + log.speedWpm, 0);
-    const averageWpm = logs.length > 0 ? Math.round(totalWpm / logs.length) : 550;
+    const averageWpm = logs.length > 0 ? Math.round(totalWpm / logs.length) : 0;
     
     const totalReadingTimeSeconds = logs.reduce((sum, log) => sum + log.durationSeconds, 0);
     const totalReadingTimeMinutes = Math.round(totalReadingTimeSeconds / 60);
 
     // Simple streak calculation (based on consecutive active days in logs)
-    let currentStreakDays = 12; // Base fallback streak from design
+    let currentStreakDays = 0;
     try {
       const uniqueDays = new Set(
         logs.map((log) => new Date(log.completedAt).toDateString())
       );
-      if (uniqueDays.size > 0) {
-        currentStreakDays = Math.max(currentStreakDays, uniqueDays.size);
-      }
+      currentStreakDays = uniqueDays.size;
     } catch (_) {}
 
     return {
       totalBooksRead: booksReadCount,
       averageWpm,
       currentStreakDays,
-      completionRatePercent: logs.length > 0 ? Math.round((booksReadCount / (booksReadCount + 3)) * 100) : 75,
+      completionRatePercent: booksReadCount > 0 ? 100 : 0, // Simplified for now, or use actual logic if needed
       totalReadingTimeMinutes,
     };
   }

@@ -332,14 +332,6 @@ export default function LibraryDashboard() {
                       <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs leading-relaxed">
                         Try adjusting your search criteria, switching tabs, or uploading a new file in the ingestion area.
                       </p>
-                      {books.length === 0 && (
-                        <button
-                          onClick={resetLibrary}
-                          className="mt-4 px-3 py-1.5 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary bg-primary/5 hover:bg-primary/10 rounded transition-all"
-                        >
-                          Reload seed data
-                        </button>
-                      )}
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
