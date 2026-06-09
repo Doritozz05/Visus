@@ -55,6 +55,7 @@ export async function parseUploadedFile(file: File): Promise<ParsedBookData> {
             format,
             content: textContent,
             chapters: parsedChapters,
+            fileBlob: file,
           });
         } catch (err) {
           reject(err);
@@ -81,11 +82,12 @@ export async function parseUploadedFile(file: File): Promise<ParsedBookData> {
             format,
             content: fullContent,
             chapters: parsed.chapters,
+            fileBlob: file,
           });
         } catch (pdfErr) {
           console.error("PDF Parsing failed:", pdfErr);
           // Fallback to shell book to allow ingestion even if deep parsing fails
-          resolve({ title, author, format });
+          resolve({ title, author, format, fileBlob: file });
         }
       };
       reader.onerror = () => reject(new Error(`Failed to read "${file.name}"`));
@@ -109,6 +111,7 @@ export async function parseUploadedFile(file: File): Promise<ParsedBookData> {
             format,
             content: fullContent,
             chapters: parsed.chapters,
+            fileBlob: file,
             metadata: {
               coverUrl: parsed.coverUrl,
               description: parsed.description,
@@ -121,7 +124,7 @@ export async function parseUploadedFile(file: File): Promise<ParsedBookData> {
         } catch (epubErr) {
           console.error("EPUB Parsing failed:", epubErr);
           // Fallback to shell book to allow ingestion even if deep parsing fails
-          resolve({ title, author, format });
+          resolve({ title, author, format, fileBlob: file });
         }
       };
       reader.onerror = () => reject(new Error(`Failed to read "${file.name}"`));
@@ -130,5 +133,5 @@ export async function parseUploadedFile(file: File): Promise<ParsedBookData> {
   }
 
   // Fallback for unexpected formats
-  return { title, author, format };
+  return { title, author, format, fileBlob: file };
 }

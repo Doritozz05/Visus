@@ -20,10 +20,43 @@ import { BookCard } from "@/features/library/components/BookCard";
 import { useBookIngestion } from "@/features/library/hooks/useBookIngestion";
 import { useAddBookForm } from "@/features/library/hooks/useAddBookForm";
 import { useEditBookForm } from "@/features/library/hooks/useEditBookForm";
+import { useCloudSync } from "@/features/library/hooks/useCloudSync";
 
 export default function LibraryDashboard() {
   const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, setActiveBookId, isHydrated } = useLibrary();
   const router = useRouter();
+
+  // State controls for UI
+  const [activeSyncingId, setActiveSyncingId] = React.useState<string | null>(null);
+
+  const {
+    syncToCloud,
+    removeFromCloud,
+    isSyncing,
+    error: syncError,
+    cloudSlotsUsed,
+    maxSlots
+  } = useCloudSync(books, updateBook);
+
+  const handleToggleCloudSync = async (id: string) => {
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+
+    setActiveSyncingId(id);
+    if (book.isInCloud) {
+      await removeFromCloud(id);
+    } else {
+      await syncToCloud(id);
+    }
+    setActiveSyncingId(null);
+  };
+
+  // Show sync error alert if any
+  React.useEffect(() => {
+    if (syncError) {
+      alert(syncError);
+    }
+  }, [syncError]);
 
   // State controls for UI
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -170,28 +203,41 @@ export default function LibraryDashboard() {
                 triggerFileBrowser={triggerFileBrowser}
               />
 
-              {/* Dynamic Reading Stats */}
-              <div className="bg-card rounded-xl border border-border/20 p-6 shadow-xl glass-panel relative overflow-hidden group shrink-0">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
-                <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 relative z-10">Books read</h2>
-                <div className="flex justify-between items-end mb-2 relative z-10">
-                  <span className="text-3xl font-extrabold font-heading text-foreground">
-                    {completedBooksCount}
-                    <span className="text-sm text-muted-foreground/80 font-normal ml-1">/ {yearlyGoal}</span>
-                  </span>
-                  <span className="text-[10px] font-mono text-primary font-bold">{goalProgressPercentage}% Yearly goal</span>
+              {/* Combined Info Panel (Compact) */}
+              <div className="flex flex-col gap-4">
+                {/* Cloud Storage Slots */}
+                <div className="bg-card rounded-xl border border-border/20 p-4 shadow-lg glass-panel relative overflow-hidden group shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+                  <div className="flex justify-between items-center mb-2 relative z-10">
+                    <h2 className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Cloud Storage</h2>
+                    <span className="text-[10px] font-mono text-primary font-bold">{cloudSlotsUsed} / {maxSlots}</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-background rounded-full overflow-hidden relative z-10 border border-border/10">
+                    <div 
+                      className="h-full bg-gradient-to-r from-primary to-blue-500 rounded-full transition-all duration-500" 
+                      style={{ width: `${(cloudSlotsUsed / maxSlots) * 100}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-background rounded-full overflow-hidden relative z-10 border border-border/10">
-                  <div 
-                    className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-500 group-hover:brightness-110" 
-                    style={{ width: `${goalProgressPercentage}%` }}
-                  ></div>
+
+                {/* Dynamic Reading Stats (Compact) */}
+                <div className="bg-card rounded-xl border border-border/20 p-4 shadow-lg glass-panel relative overflow-hidden group shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+                  <div className="flex justify-between items-center mb-2 relative z-10">
+                    <h2 className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Books Read</h2>
+                    <span className="text-[10px] font-mono text-primary font-bold">{goalProgressPercentage}% Goal</span>
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-2 relative z-10">
+                    <span className="text-2xl font-extrabold font-heading text-foreground">{completedBooksCount}</span>
+                    <span className="text-xs text-muted-foreground/80 font-normal">/ {yearlyGoal}</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-background rounded-full overflow-hidden relative z-10 border border-border/10">
+                    <div 
+                      className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-500 group-hover:brightness-110" 
+                      style={{ width: `${goalProgressPercentage}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-3 relative z-10 leading-relaxed font-sans">
-                  {completedBooksCount >= yearlyGoal 
-                    ? "Congratulations! You reached your yearly goal! Keep setting new milestones."
-                    : `Doing great! Next milestone is just ${Math.max(1, yearlyGoal - completedBooksCount)} book${yearlyGoal - completedBooksCount > 1 ? "s" : ""} away.`}
-                </p>
               </div>
 
             </div>
@@ -309,6 +355,8 @@ export default function LibraryDashboard() {
                           onUpdateBook={updateBook}
                           onRead={handleReadBook}
                           onDetails={setDetailsBook}
+                          onToggleCloudSync={handleToggleCloudSync}
+                          isSyncing={activeSyncingId === book.id}
                         />
                       ))}
                     </div>

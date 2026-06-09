@@ -8,6 +8,8 @@ import { useLibrary } from "@/features/library/context/library-context";
 import { useRouter } from "next/navigation";
 
 // Imported modular subcomponents
+import { dbService } from "@/core/services/db-service";
+import { BookBinary } from "@/core/entities/book";
 import { EmptyLibraryState } from "@/features/reader/components/EmptyLibraryState";
 import { BookshelfSelector } from "@/features/reader/components/BookshelfSelector";
 import { ReaderHeader } from "@/features/reader/components/ReaderHeader";
@@ -34,6 +36,32 @@ export default function ReaderClient() {
     if (!activeBookId) return null;
     return books.find((book) => book.id === activeBookId) || null;
   }, [books, activeBookId]);
+
+  const [bookBinary, setBookBinary] = React.useState<BookBinary | null>(null);
+  const [isLoadingContent, setIsLoadingContent] = React.useState(false);
+
+  React.useEffect(() => {
+    async function loadBinary() {
+      if (!activeBookId) {
+        setBookBinary(null);
+        return;
+      }
+      setIsLoadingContent(true);
+      try {
+        const binary = await dbService.getBookBinary(activeBookId);
+        if (binary) {
+          setBookBinary(binary);
+        } else {
+          setBookBinary(null);
+        }
+      } catch (err) {
+        console.error("Failed to load book binary:", err);
+      } finally {
+        setIsLoadingContent(false);
+      }
+    }
+    loadBinary();
+  }, [activeBookId, activeBook?.isInCloud]);
 
   // Drawer / UI toggles
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
@@ -93,6 +121,7 @@ export default function ReaderClient() {
     handleGoToBookmark,
   } = useReaderPlayback({
     activeBook,
+    bookBinary,
     updateBook,
     settings,
     wordsPerPage,
@@ -127,8 +156,8 @@ export default function ReaderClient() {
     return READER_FONT_CLASSES[ff as keyof typeof READER_FONT_CLASSES] || READER_FONT_CLASSES.serif;
   }, [settings.general.readerFontFamily]);
 
-  if (!isHydrated || (activeBook && !isStoreInitialized)) {
-    return <LoadingSpinner message="Loading reader session..." fullScreen />;
+  if (!isHydrated || isLoadingContent || (activeBook && !isStoreInitialized)) {
+    return <LoadingSpinner message={activeBook?.isInCloud && !bookBinary ? "Downloading from cloud..." : "Loading reader session..."} fullScreen />;
   }
 
   if (books.length === 0) {

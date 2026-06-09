@@ -48,6 +48,9 @@ export const metadata: Metadata = {
     icon: "/icons/icon-192x192.png",
     apple: "/icons/icon-192x192.png",
   },
+  verification: {
+    google: 'kQS_aofbtHE0ifRmQCFFVqQrcntk7oF-A2l6RVbk_eA',
+  },
 };
 
 export default function RootLayout({
@@ -59,9 +62,8 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${outfit.variable} ${hanken.variable} dark`}>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
         <Providers>{children}</Providers>
-        <Script src="https://scripts.simpleanalyticscdn.com/latest.js" strategy="afterInteractive" />
-        <Analytics />
-        <SpeedInsights />
+        {/* <Analytics />
+        <SpeedInsights /> */}
       </body>
     </html>
   );

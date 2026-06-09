@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Book, Trash2, MoreVertical, Info, BookOpen, CheckCircle, Pencil, Archive, FolderPlus } from "lucide-react";
+import { Book, Trash2, MoreVertical, Info, BookOpen, CheckCircle, Pencil, Archive, FolderPlus, Cloud, CloudOff, RefreshCw } from "lucide-react";
 import { Book as BookEntity } from "@/core/entities/book";
 
 interface BookCardProps {
@@ -15,6 +15,8 @@ interface BookCardProps {
   onUpdateBook: (id: string, updates: Partial<BookEntity>) => void;
   onRead: (id: string) => void;
   onDetails: (book: BookEntity) => void;
+  onToggleCloudSync?: (id: string) => void;
+  isSyncing?: boolean;
 }
 
 export function BookCard({
@@ -27,6 +29,8 @@ export function BookCard({
   onUpdateBook,
   onRead,
   onDetails,
+  onToggleCloudSync,
+  isSyncing = false,
 }: BookCardProps) {
   const menuRef = React.useRef<HTMLDivElement>(null);
   
@@ -59,7 +63,7 @@ export function BookCard({
       className="bg-card border border-border/20 rounded-xl p-5 flex flex-col justify-between relative hover:border-primary/50 transition-all shadow-md glass-panel min-h-[160px]"
     >
       {/* Option Actions Row */}
-      <div className="absolute top-4 right-4 flex items-center gap-1 z-20">
+      <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-20">
         {/* Direct Trash Icon Delete Button */}
         <button
           onClick={(e) => {
@@ -86,7 +90,7 @@ export function BookCard({
             <MoreVertical className="w-4 h-4" />
           </button>
 
-          {/* Dropdown Menu (floats dynamically outside card, NEVER clipped, completely opaque) */}
+          {/* Dropdown Menu */}
           {activeDropdownId === book.id && (
             <div
               ref={menuRef}
@@ -149,10 +153,35 @@ export function BookCard({
             </div>
           )}
         </div>
+
+        {/* Cloud Sync Toggle (Repositioned below Dots) */}
+        {book.format !== "PHYSICAL" && onToggleCloudSync && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleCloudSync(book.id);
+            }}
+            disabled={isSyncing}
+            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+              book.isInCloud 
+                ? "text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20" 
+                : "text-muted-foreground/30 hover:bg-accent hover:text-foreground border border-transparent"
+            }`}
+            title={book.isInCloud ? "Remove from Cloud" : "Sync to Cloud (3 slots max)"}
+          >
+            {isSyncing ? (
+              <RefreshCw className="w-3 h-3 animate-spin" />
+            ) : book.isInCloud ? (
+              <Cloud className="w-3.5 h-3.5" />
+            ) : (
+              <CloudOff className="w-3.5 h-3.5" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Card Info Cover Row */}
-      <div className="flex gap-4 items-start pr-16 mb-4">
+      <div className="flex gap-4 items-start pr-12 mb-4">
         <button 
           className="w-12 h-16 bg-gradient-to-br from-primary/10 to-primary/5 border border-border/30 rounded-lg flex items-center justify-center shrink-0 relative shadow-inner overflow-hidden cursor-pointer p-0" 
           onClick={() => onDetails(book)}

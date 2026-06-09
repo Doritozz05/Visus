@@ -81,6 +81,7 @@ describe("useReaderPlayback hook", () => {
   it("should initialize default state correctly and return structured engine components", () => {
     const result = useReaderPlayback({
       activeBook: mockActiveBook,
+      bookBinary: null,
       updateBook: mockUpdateBook,
       settings: mockSettings,
       wordsPerPage: 300,

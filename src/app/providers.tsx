@@ -3,6 +3,7 @@
 import * as React from "react";
 import { SettingsProvider, useSettings } from "@/features/settings/context/settings-context";
 import { LibraryProvider } from "@/features/library/context/library-context";
+import { AuthProvider } from "@/features/auth/context/auth-context";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
@@ -61,6 +62,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Base configuration for PWA - Registering Service Worker on client load
   React.useEffect(() => {
     if (
+      process.env.NODE_ENV === "production" &&
       typeof window !== "undefined" &&
       "serviceWorker" in navigator &&
       (window as any).workbox === undefined
@@ -77,10 +79,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SettingsProvider>
-      <LibraryProvider>
-        <ThemeProviderHelper>{children}</ThemeProviderHelper>
-      </LibraryProvider>
-    </SettingsProvider>
+    <AuthProvider>
+      <SettingsProvider>
+        <LibraryProvider>
+          <ThemeProviderHelper>{children}</ThemeProviderHelper>
+        </LibraryProvider>
+      </SettingsProvider>
+    </AuthProvider>
   );
 }

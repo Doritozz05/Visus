@@ -1,11 +1,13 @@
-import { Book } from "../entities/book";
+import { Book, BookBinary } from "../entities/book";
 import { ReadingSessionLog } from "../entities/stats";
 
 const DB_NAME = "visus_database";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORES = {
-  BOOKS: "books",
-  STATS: "stats"
+  BOOKS_METADATA: "books_metadata",
+  BOOKS_BINARY: "books_binary",
+  STATS: "stats_logs",
+  SYNC_QUEUE: "sync_queue"
 };
 
 class DbService {
@@ -32,13 +34,25 @@ class DbService {
     this.dbPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-      request.onupgradeneeded = () => {
+      request.onupgradeneeded = (event: any) => {
         const db = request.result;
-        if (!db.objectStoreNames.contains(STORES.BOOKS)) {
-          db.createObjectStore(STORES.BOOKS, { keyPath: "id" });
-        }
-        if (!db.objectStoreNames.contains(STORES.STATS)) {
-          db.createObjectStore(STORES.STATS, { keyPath: "id" });
+        const oldVersion = event.oldVersion;
+
+        if (oldVersion < 2) {
+          // If we come from v1, we could migrate, but for simplicity
+          // and to align with the new offline-first architecture:
+          if (!db.objectStoreNames.contains(STORES.BOOKS_METADATA)) {
+            db.createObjectStore(STORES.BOOKS_METADATA, { keyPath: "id" });
+          }
+          if (!db.objectStoreNames.contains(STORES.BOOKS_BINARY)) {
+            db.createObjectStore(STORES.BOOKS_BINARY, { keyPath: "bookId" });
+          }
+          if (!db.objectStoreNames.contains(STORES.STATS)) {
+            db.createObjectStore(STORES.STATS, { keyPath: "id" });
+          }
+          if (!db.objectStoreNames.contains(STORES.SYNC_QUEUE)) {
+            db.createObjectStore(STORES.SYNC_QUEUE, { keyPath: "id", autoIncrement: true });
+          }
         }
       };
 
@@ -55,22 +69,17 @@ class DbService {
     return this.dbPromise;
   }
 
-  // --- BOOKS STORE ACTIONS ---
+  // --- BOOKS METADATA STORE ACTIONS ---
 
   async getAllBooks(): Promise<Book[]> {
     const db = await this.getDb();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.BOOKS, "readonly");
-      const store = transaction.objectStore(STORES.BOOKS);
+      const transaction = db.transaction(STORES.BOOKS_METADATA, "readonly");
+      const store = transaction.objectStore(STORES.BOOKS_METADATA);
       const request = store.getAll();
 
-      request.onsuccess = () => {
-        resolve(request.result || []);
-      };
-
-      request.onerror = () => {
-        reject(request.error);
-      };
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
     });
   }
 
@@ -79,20 +88,14 @@ class DbService {
       const db = await this.getDb();
       return new Promise<void>((resolve, reject) => {
         try {
-          const transaction = db.transaction(STORES.BOOKS, "readwrite");
-          const store = transaction.objectStore(STORES.BOOKS);
+          const transaction = db.transaction(STORES.BOOKS_METADATA, "readwrite");
+          const store = transaction.objectStore(STORES.BOOKS_METADATA);
           const request = store.put(book);
 
-          request.onsuccess = () => {
-            resolve();
-          };
-
-          request.onerror = () => {
-            reject(request.error);
-          };
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
         } catch (error) {
           if (error instanceof DOMException && error.name === "InvalidStateError") {
-            // DB is closing (e.g. tab closed), fail silently
             resolve();
           } else {
             reject(error);
@@ -106,17 +109,12 @@ class DbService {
     return this.enqueueWrite(async () => {
       const db = await this.getDb();
       return new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction(STORES.BOOKS, "readwrite");
-        const store = transaction.objectStore(STORES.BOOKS);
+        const transaction = db.transaction(STORES.BOOKS_METADATA, "readwrite");
+        const store = transaction.objectStore(STORES.BOOKS_METADATA);
         const request = store.delete(id);
 
-        request.onsuccess = () => {
-          resolve();
-        };
-
-        request.onerror = () => {
-          reject(request.error);
-        };
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
       });
     });
   }
@@ -125,17 +123,62 @@ class DbService {
     return this.enqueueWrite(async () => {
       const db = await this.getDb();
       return new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction(STORES.BOOKS, "readwrite");
-        const store = transaction.objectStore(STORES.BOOKS);
+        const transaction = db.transaction(STORES.BOOKS_METADATA, "readwrite");
+        const store = transaction.objectStore(STORES.BOOKS_METADATA);
         const request = store.clear();
 
-        request.onsuccess = () => {
-          resolve();
-        };
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    });
+  }
 
-        request.onerror = () => {
-          reject(request.error);
-        };
+  // --- BOOKS BINARY STORE ACTIONS ---
+
+  async getBookBinary(bookId: string): Promise<BookBinary | null> {
+    const db = await this.getDb();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORES.BOOKS_BINARY, "readonly");
+      const store = transaction.objectStore(STORES.BOOKS_BINARY);
+      const request = store.get(bookId);
+
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async saveBookBinary(binary: BookBinary): Promise<void> {
+    return this.enqueueWrite(async () => {
+      const db = await this.getDb();
+      return new Promise<void>((resolve, reject) => {
+        try {
+          const transaction = db.transaction(STORES.BOOKS_BINARY, "readwrite");
+          const store = transaction.objectStore(STORES.BOOKS_BINARY);
+          const request = store.put(binary);
+
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "InvalidStateError") {
+            resolve();
+          } else {
+            reject(error);
+          }
+        }
+      });
+    });
+  }
+
+  async deleteBookBinary(bookId: string): Promise<void> {
+    return this.enqueueWrite(async () => {
+      const db = await this.getDb();
+      return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.BOOKS_BINARY, "readwrite");
+        const store = transaction.objectStore(STORES.BOOKS_BINARY);
+        const request = store.delete(bookId);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
       });
     });
   }

@@ -8,7 +8,8 @@ export function useAddBookForm(
     format: "PDF" | "EPUB" | "TXT" | "PHYSICAL",
     content?: string,
     chapters?: { title: string; content: string }[],
-    metadata?: Partial<Book>
+    metadata?: any,
+    fileBlob?: Blob
   ) => void
 ) {
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);

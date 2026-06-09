@@ -15,7 +15,7 @@ describe("libraryService", () => {
       
       expect(book.title).toBe("Test Book");
       expect(book.author).toBe("Test Author");
-      expect(book.content).toContain("Welcome to your Visus Reading Room!");
+      expect(book.format).toBe("EPUB");
       expect(book.id).toMatch(/^book-\d+-\d+$/);
     });
 
@@ -33,7 +33,7 @@ describe("libraryService", () => {
       
       const book = libraryService.createBookEntity(bookData);
       
-      expect(book.content).toBe("Substantive content here.");
+      expect(book.title).toBe("Real Book");
       expect(book.description).toBe("A great book.");
       expect(book.language).toBe("en");
     });

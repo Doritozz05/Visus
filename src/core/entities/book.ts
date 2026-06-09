@@ -19,6 +19,13 @@ export interface Bookmark {
   chapterTitle: string;
 }
 
+export interface BookBinary {
+  bookId: string;
+  content?: string; // Stored text content of the book
+  chapters?: BookChapter[]; // Parsed chapters for EPUB/PDF/TXT
+  fileBlob?: Blob; // The actual file if needed locally
+}
+
 export interface Book {
   id: string;
   title: string;
@@ -27,8 +34,6 @@ export interface Book {
   progress: number; // Percentage complete (0 to 100)
   estimatedReadingTime: string; // Dynamic text, e.g., "2h 15m remaining"
   status: "active" | "completed" | "archived";
-  content?: string; // Stored text content of the book
-  chapters?: BookChapter[]; // Parsed chapters for EPUB/PDF/TXT
   createdAt: string;
   /** Exact chapter index the user was on when they last left the reader */
   lastChapterIndex?: number;
@@ -54,6 +59,11 @@ export interface Book {
   /** Physical book tracking properties */
   currentPage?: number;
   totalPages?: number;
+  /** Sync status */
+  syncStatus?: "synced" | "pending" | "local_only";
+  /** Whether the actual binary file (.epub, .pdf) is stored in the cloud storage (limit 3 for free users) */
+  isInCloud?: boolean;
+  updatedAt?: string;
 }
 
 export interface ParsedBookData {
@@ -62,6 +72,7 @@ export interface ParsedBookData {
   format: "PDF" | "EPUB" | "TXT" | "PHYSICAL";
   content?: string;
   chapters?: BookChapter[];
+  fileBlob?: Blob;
   metadata?: {
     coverUrl?: string;
     description?: string;

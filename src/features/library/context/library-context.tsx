@@ -24,7 +24,8 @@ interface LibraryContextType {
       language?: string;
       currentPage?: number;
       totalPages?: number;
-    }
+    },
+    fileBlob?: Blob
   ) => string;
   updateBook: (id: string, updates: Partial<Book>) => void;
   deleteBook: (id: string) => void;
@@ -43,7 +44,59 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const hydrate = async () => {
       try {
-        const loadedBooks = await libraryService.loadLibrary();
+        let loadedBooks = await libraryService.loadLibrary();
+
+        // Background automatic sync check on load
+        import("@/core/config/services").then(async ({ authService, remoteSyncService, remoteStorageService }) => {
+          const user = await authService.getUser();
+          if (user) {
+            try {
+              const lastSync = localStorage.getItem("visus_last_sync_timestamp") || new Date(0).toISOString();
+              const remoteChanges = await remoteSyncService.pullChanges(user.id, lastSync);
+              
+              if (remoteChanges.books.length > 0 || remoteChanges.deletedBookIds.length > 0) {
+                // Apply deletions
+                loadedBooks = loadedBooks.filter(b => !remoteChanges.deletedBookIds.includes(b.id));
+                
+                // Apply additions/updates
+                for (const remoteBook of remoteChanges.books) {
+                  const existingIndex = loadedBooks.findIndex(b => b.id === remoteBook.id);
+                  let finalBook = remoteBook;
+
+                  if (existingIndex >= 0) {
+                     loadedBooks[existingIndex] = remoteBook;
+                  } else {
+                     loadedBooks.push(remoteBook);
+                     // If it's a completely new book from the cloud, try to download its binary
+                     if (remoteBook.format !== "PHYSICAL" && remoteBook.isInCloud) {
+                        try {
+                          const fileBlob = await remoteStorageService.downloadBookFile(user.id, remoteBook.id);
+                          import("@/core/services/db-service").then(({ dbService }) => {
+                            dbService.saveBookBinary({
+                              bookId: remoteBook.id,
+                              fileBlob: fileBlob,
+                              content: `Auto-downloaded book content.` // Basic fallback
+                            });
+                          });
+                        } catch (downloadErr) {
+                          console.warn("Auto-download binary failed for", remoteBook.id, downloadErr);
+                        }
+                     }
+                  }
+                  // Save to local DB so next reload is fast
+                  import("@/core/services/db-service").then(({ dbService }) => dbService.saveBook(remoteBook));
+                }
+                
+                // Update React State with merged cloud data
+                setBooks([...loadedBooks]);
+                localStorage.setItem("visus_last_sync_timestamp", new Date().toISOString());
+              }
+            } catch (syncErr) {
+              console.warn("Background auto-sync failed:", syncErr);
+            }
+          }
+        });
+
         setBooks(loadedBooks);
 
         const activeId = localStorage.getItem(ACTIVE_BOOK_KEY);
@@ -92,7 +145,8 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       language?: string;
       currentPage?: number;
       totalPages?: number;
-    }
+    },
+    fileBlob?: Blob
   ) => {
     const newBook = libraryService.createBookEntity({
       title,
@@ -105,8 +159,17 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
     setBooks((prev) => [newBook, ...prev]);
 
+    // Create binary data if we have content or a file
+    const binary = libraryService.createBookBinary(newBook.id, {
+      title,
+      author,
+      format,
+      content,
+      chapters,
+    }, fileBlob);
+
     // Save to database asynchronously (non-blocking, O(1))
-    libraryService.saveBook(newBook).catch((err) => {
+    libraryService.saveBook(newBook, binary).catch((err) => {
       console.warn("Could not save new book:", err);
     });
 
@@ -154,11 +217,39 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const deleteBook = React.useCallback((id: string) => {
-    setBooks((prev) => prev.filter((book) => book.id !== id));
+    // 1. Remove from local state immediately for fast UI
+    setBooks((prev) => {
+      const bookToDelete = prev.find(b => b.id === id);
+      
+      // If it was in the cloud, we should try to delete the file from the bucket
+      if (bookToDelete?.isInCloud) {
+        import("@/core/config/services").then(({ authService, remoteStorageService }) => {
+          authService.getUser().then(user => {
+            if (user) {
+              remoteStorageService.deleteBookFile(user.id, id).catch(console.warn);
+            }
+          });
+        });
+      }
+      return prev.filter((book) => book.id !== id);
+    });
 
-    // Delete asynchronously (non-blocking)
+    // 2. Delete from local DB asynchronously
     libraryService.deleteBook(id).catch((err) => {
-      console.warn("Could not delete book:", err);
+      console.warn("Could not delete book from local DB:", err);
+    });
+    
+    // 3. Log deletion for cloud sync
+    import("@/core/config/services").then(({ authService, remoteSyncService }) => {
+      authService.getUser().then(user => {
+        if (user) {
+           remoteSyncService.pushChanges(user.id, {
+             books: [],
+             stats: [],
+             deletedBookIds: [id]
+           }).catch(console.warn);
+        }
+      });
     });
 
     setActiveBookIdState((prevActiveId) => {

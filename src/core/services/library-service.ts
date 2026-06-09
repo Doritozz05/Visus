@@ -1,4 +1,4 @@
-import { Book, DEFAULT_BOOKS, ParsedBookData } from "../entities/book";
+import { Book, BookBinary, DEFAULT_BOOKS, ParsedBookData } from "../entities/book";
 import { dbService } from "./db-service";
 
 export const ACTIVE_BOOK_KEY = "visus_active_book_id";
@@ -12,11 +12,39 @@ export function generateBookId(): string {
   return `book-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 }
 
-export function createBookEntity(data: ParsedBookData): Book {
+export function createBookEntity(data: ParsedBookData, customId?: string): Book {
   const title = data.title.trim();
   const author = data.author.trim() || "Unknown Author";
 
-  // Default placeholder content if none is provided (e.g. for PDF/EPUB uploads)
+  return {
+    id: customId || generateBookId(),
+    title,
+    author,
+    format: data.format,
+    progress: data.metadata?.totalPages && data.metadata?.currentPage !== undefined 
+      ? Math.min(100, Math.round((data.metadata.currentPage / data.metadata.totalPages) * 100)) 
+      : 0,
+    estimatedReadingTime: "Not started",
+    status: "active",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    syncStatus: "pending",
+    coverUrl: data.metadata?.coverUrl,
+    description: data.metadata?.description,
+    genres: data.metadata?.genres,
+    publisher: data.metadata?.publisher,
+    publishDate: data.metadata?.publishDate,
+    language: data.metadata?.language,
+    currentPage: data.metadata?.currentPage,
+    totalPages: data.metadata?.totalPages,
+  };
+}
+
+export function createBookBinary(bookId: string, data: ParsedBookData, fileBlob?: Blob): BookBinary {
+  const title = data.title.trim();
+  const author = data.author.trim() || "Unknown Author";
+
+  // Default placeholder content if none is provided (e.g. for PDF/EPUB uploads without deep parse)
   const placeholderContent = `Welcome to your Visus Reading Room!
  
 You are currently reading "${title}" by ${author}. This high-performance speed reader locks your foveal focus onto the Optimal Recognition Point (ORP) of every word, eliminating traditional ocular scanning patterns.
@@ -26,26 +54,10 @@ By stabilizing your eye alignment and moving foveal targets rapidly, RSVP enable
 Keep calibrating your target words per minute (WPM), relax your foveal field, and let foveal visual processing take over as your eyes settle on the foveal alignment guides. Visus is designed to minimize cognitive visual friction, letting you enter a seamless, deep flow state.`;
 
   return {
-    id: generateBookId(),
-    title,
-    author,
-    format: data.format,
-    progress: data.metadata?.totalPages && data.metadata?.currentPage !== undefined 
-      ? Math.min(100, Math.round((data.metadata.currentPage / data.metadata.totalPages) * 100)) 
-      : 0,
-    estimatedReadingTime: "Not started",
-    status: "active",
+    bookId,
     content: data.content ? data.content.trim() : placeholderContent,
     chapters: data.chapters,
-    createdAt: new Date().toISOString(),
-    coverUrl: data.metadata?.coverUrl,
-    description: data.metadata?.description,
-    genres: data.metadata?.genres,
-    publisher: data.metadata?.publisher,
-    publishDate: data.metadata?.publishDate,
-    language: data.metadata?.language,
-    currentPage: data.metadata?.currentPage,
-    totalPages: data.metadata?.totalPages,
+    fileBlob
   };
 }
 
@@ -80,7 +92,7 @@ export function calculateProgress(book: Book, updates: Partial<Book>): Book {
   return mergedBook;
 }
 
-export async function saveBook(book: Book): Promise<void> {
+export async function saveBook(book: Book, binary?: BookBinary): Promise<void> {
   // Cache progress synchronously in localStorage FIRST to guarantee persistence on tab close / reload
   if (typeof window !== "undefined" && book.format !== "PHYSICAL") {
     try {
@@ -98,7 +110,11 @@ export async function saveBook(book: Book): Promise<void> {
   }
 
   // Save to IndexedDB asynchronously
-  await dbService.saveBook(book);
+  await dbService.saveBook({ ...book, updatedAt: new Date().toISOString() });
+  
+  if (binary) {
+    await dbService.saveBookBinary(binary);
+  }
 }
 
 export async function loadLibrary(): Promise<Book[]> {
@@ -145,6 +161,7 @@ export async function loadLibrary(): Promise<Book[]> {
 export async function deleteBook(id: string): Promise<void> {
   // Delete from IndexedDB
   await dbService.deleteBook(id);
+  await dbService.deleteBookBinary(id);
 
   // Clean up temporary synchronous progress cache
   if (typeof window !== "undefined") {
@@ -162,6 +179,7 @@ export async function resetLibrary(): Promise<void> {
 export const libraryService = {
   generateBookId,
   createBookEntity,
+  createBookBinary,
   calculateProgress,
   saveBook,
   loadLibrary,

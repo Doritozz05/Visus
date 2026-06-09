@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Book } from "@/core/entities/book";
+import { Book, BookBinary } from "@/core/entities/book";
 import { SettingsState } from "@/core/entities/settings";
 import { useReadingStore } from "../stores/reading-store";
 import { buildChaptersData } from "@/lib/parser/chapter-fallback";
@@ -15,6 +15,7 @@ import { useReaderNavigation } from "./useReaderNavigation";
 
 export interface UseReaderPlaybackProps {
   activeBook: Book | null;
+  bookBinary: BookBinary | null;
   updateBook: (id: string, updates: Partial<Book>, silent?: boolean) => void;
   settings: SettingsState;
   wordsPerPage: number;
@@ -22,6 +23,7 @@ export interface UseReaderPlaybackProps {
 
 export function useReaderPlayback({
   activeBook,
+  bookBinary,
   updateBook,
   settings,
   wordsPerPage,
@@ -33,8 +35,8 @@ export function useReaderPlayback({
   }, [activeBook]);
 
   const activeBookId = activeBook?.id || null;
-  const activeBookChapters = activeBook?.chapters;
-  const activeBookContent = activeBook?.content;
+  const activeBookChapters = bookBinary?.chapters;
+  const activeBookContent = bookBinary?.content;
 
   // Extracted logic to pure function
   const chaptersData = React.useMemo(() => {

@@ -9,7 +9,8 @@ export function useBookIngestion(
     format: "PDF" | "EPUB" | "TXT" | "PHYSICAL",
     content?: string,
     chapters?: { title: string; content: string }[],
-    metadata?: Partial<Book>
+    metadata?: any,
+    fileBlob?: Blob
   ) => void
 ) {
   const [isDragOver, setIsDragOver] = React.useState(false);
@@ -24,7 +25,8 @@ export function useBookIngestion(
       parsed.format,
       parsed.content,
       parsed.chapters,
-      parsed.metadata
+      parsed.metadata,
+      parsed.fileBlob
     );
   };
 

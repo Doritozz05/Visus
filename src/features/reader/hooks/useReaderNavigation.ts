@@ -49,7 +49,7 @@ export function useReaderNavigation({
       }
     } else {
       if (forceComplete || activePage.absolutePageIndex >= allBookPages.length - 1) {
-        const totalWords = activeBookVal.chapters?.reduce((acc, c) => acc + c.content.split(/\s+/).filter(Boolean).length, 0) || activeBookVal.content?.split(/\s+/).filter(Boolean).length || 4500;
+        const totalWords = chaptersData.reduce((acc: number, c: any) => acc + c.content.split(/\s+/).filter(Boolean).length, 0) || 4500;
         const currentSpeed = mode === "normal" ? 280 : wpm;
         const calculatedSeconds = Math.round(totalWords / (currentSpeed / 60));
         const accuracyRating = Math.floor(Math.random() * 8) + 92;
@@ -86,7 +86,7 @@ export function useReaderNavigation({
         saveProgressForBook(activeBookVal.id, nextPageObj.chapterIndex, nextPageObj.startWordIndex);
       }
     }
-  }, [allBookPages, saveProgressForBook, updateBook, setIsCompletionModalOpen, setSessionStats, activeBookRef]);
+  }, [allBookPages, chaptersData, saveProgressForBook, updateBook, setIsCompletionModalOpen, setSessionStats, activeBookRef]);
 
   const handlePrevChapter = React.useCallback(() => {
     const { activeChapterIndex } = useReadingStore.getState();
