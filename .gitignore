@@ -68,7 +68,7 @@ serena.db
 # Audit history
 .audit_history/
 
-
+skills-lock.json
 
 # Sentry Config Files
 .env.sentry-build-plugin
