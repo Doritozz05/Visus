@@ -28,7 +28,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-bold font-heading text-foreground border-b border-border/40 pb-2">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground mt-2">
-              By accessing or using Visus ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
+              By accessing or using Visus (&quot;the Service&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
             </p>
           </section>
 
@@ -55,7 +55,7 @@ export default function TermsOfService() {
               <li>Attempting to gain unauthorized access to our systems.</li>
               <li>Uploading content that violates intellectual property rights.</li>
               <li>Using automated systems (bots) to scrape data from the Service.</li>
-              <li>Violating Google's own Terms of Service while using our Google integration.</li>
+              <li>Violating Google&apos;s own Terms of Service while using our Google integration.</li>
             </ul>
           </section>
 
@@ -69,7 +69,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-bold font-heading text-foreground border-b border-border/40 pb-2">6. Limitation of Liability</h2>
             <p className="text-muted-foreground mt-2">
-              THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND. VISUS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF YOUR USE OF THE SERVICE.
+              THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND. VISUS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF YOUR USE OF THE SERVICE.
             </p>
           </section>
 

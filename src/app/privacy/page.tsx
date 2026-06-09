@@ -28,7 +28,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-xl font-bold font-heading text-foreground border-b border-border/40 pb-2">1. Introduction</h2>
             <p className="text-muted-foreground mt-2">
-              Visus ("we", "our", or "us") is an advanced speed reading platform. We are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This Privacy Policy outlines how we collect, use, and safeguard your data when you use our web application and Progressive Web App (PWA).
+              Visus (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is an advanced speed reading platform. We are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This Privacy Policy outlines how we collect, use, and safeguard your data when you use our web application and Progressive Web App (PWA).
             </p>
           </section>
 

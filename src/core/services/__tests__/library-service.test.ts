@@ -50,6 +50,7 @@ describe("libraryService", () => {
         status: "active",
         estimatedReadingTime: "Not started",
         createdAt: "",
+        ownerId: "local",
       };
 
       const updated = libraryService.calculateProgress(book, { progress: 50 });
@@ -74,6 +75,7 @@ describe("libraryService", () => {
         estimatedReadingTime: "Not started",
         createdAt: "",
         totalPages: 200,
+        ownerId: "local",
       };
 
       const updated = libraryService.calculateProgress(book, { currentPage: 100 });
