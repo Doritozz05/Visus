@@ -1,6 +1,7 @@
 import * as React from "react";
 import { parseUploadedFile } from "@/lib/services/book-ingestion-service";
 import { Book } from "@/core/entities/book";
+import { calculateFileHash } from "@/lib/utils";
 
 export function useBookIngestion(
   addBook: (
@@ -10,8 +11,9 @@ export function useBookIngestion(
     content?: string,
     chapters?: { title: string; content: string }[],
     metadata?: any,
-    fileBlob?: Blob
-  ) => void
+    fileBlob?: Blob,
+    fileHash?: string
+  ) => string | null
 ) {
   const [isDragOver, setIsDragOver] = React.useState(false);
   const [isIngesting, setIsIngesting] = React.useState(false);
@@ -19,15 +21,29 @@ export function useBookIngestion(
 
   const processAndAddFile = async (file: File) => {
     const parsed = await parseUploadedFile(file);
-    addBook(
+    let fileHash: string | undefined = undefined;
+    if (parsed.fileBlob) {
+      try {
+        fileHash = await calculateFileHash(parsed.fileBlob);
+      } catch (err) {
+        console.warn("Could not calculate file hash:", err);
+      }
+    }
+    
+    const resultId = addBook(
       parsed.title,
       parsed.author,
       parsed.format,
       parsed.content,
       parsed.chapters,
       parsed.metadata,
-      parsed.fileBlob
+      parsed.fileBlob,
+      fileHash
     );
+
+    if (!resultId) {
+      throw new Error(`The file "${parsed.title}" is already in your library.`);
+    }
   };
 
   const processFilesBatch = async (fileList: FileList) => {

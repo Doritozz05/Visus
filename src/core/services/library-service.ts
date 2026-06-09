@@ -37,6 +37,7 @@ export function createBookEntity(data: ParsedBookData, customId?: string): Book 
     language: data.metadata?.language,
     currentPage: data.metadata?.currentPage,
     totalPages: data.metadata?.totalPages,
+    ownerId: data.ownerId || 'local',
   };
 }
 
@@ -117,8 +118,8 @@ export async function saveBook(book: Book, binary?: BookBinary): Promise<void> {
   }
 }
 
-export async function loadLibrary(): Promise<Book[]> {
-  const dbBooks = await dbService.getAllBooks();
+export async function loadLibrary(ownerId: string = 'local'): Promise<Book[]> {
+  const dbBooks = await dbService.getAllBooks(ownerId);
   let loadedBooks = dbBooks && dbBooks.length > 0 ? dbBooks : DEFAULT_BOOKS;
 
   if (typeof window !== "undefined") {

@@ -2,7 +2,7 @@ import { Book, BookBinary } from "../entities/book";
 import { ReadingSessionLog } from "../entities/stats";
 
 const DB_NAME = "visus_database";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORES = {
   BOOKS_METADATA: "books_metadata",
   BOOKS_BINARY: "books_binary",
@@ -39,10 +39,9 @@ class DbService {
         const oldVersion = event.oldVersion;
 
         if (oldVersion < 2) {
-          // If we come from v1, we could migrate, but for simplicity
-          // and to align with the new offline-first architecture:
           if (!db.objectStoreNames.contains(STORES.BOOKS_METADATA)) {
-            db.createObjectStore(STORES.BOOKS_METADATA, { keyPath: "id" });
+            const store = db.createObjectStore(STORES.BOOKS_METADATA, { keyPath: "id" });
+            store.createIndex("ownerId", "ownerId", { unique: false });
           }
           if (!db.objectStoreNames.contains(STORES.BOOKS_BINARY)) {
             db.createObjectStore(STORES.BOOKS_BINARY, { keyPath: "bookId" });
@@ -52,6 +51,17 @@ class DbService {
           }
           if (!db.objectStoreNames.contains(STORES.SYNC_QUEUE)) {
             db.createObjectStore(STORES.SYNC_QUEUE, { keyPath: "id", autoIncrement: true });
+          }
+        }
+        
+        if (oldVersion < 3) {
+          // Add ownerId index to existing books_metadata store if upgrading from v2
+          if (db.objectStoreNames.contains(STORES.BOOKS_METADATA)) {
+            const transaction = event.currentTarget.transaction;
+            const store = transaction.objectStore(STORES.BOOKS_METADATA);
+            if (!store.indexNames.contains("ownerId")) {
+              store.createIndex("ownerId", "ownerId", { unique: false });
+            }
           }
         }
       };
@@ -96,11 +106,18 @@ class DbService {
 
   // --- BOOKS METADATA STORE ACTIONS ---
 
-  async getAllBooks(): Promise<Book[]> {
+  async getAllBooks(ownerId?: string): Promise<Book[]> {
     return this.withDb((db) => new Promise((resolve, reject) => {
       const transaction = db.transaction(STORES.BOOKS_METADATA, "readonly");
       const store = transaction.objectStore(STORES.BOOKS_METADATA);
-      const request = store.getAll();
+      
+      let request;
+      if (ownerId) {
+        const index = store.index("ownerId");
+        request = index.getAll(ownerId);
+      } else {
+        request = store.getAll();
+      }
 
       request.onsuccess = () => resolve(request.result || []);
       request.onerror = () => reject(request.error);
@@ -112,6 +129,10 @@ class DbService {
       return this.withDb((db) => new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(STORES.BOOKS_METADATA, "readwrite");
         const store = transaction.objectStore(STORES.BOOKS_METADATA);
+        // Ensure ownerId is set (fallback to 'local' if missing for backward compatibility)
+        if (!book.ownerId) {
+          book.ownerId = 'local';
+        }
         const request = store.put(book);
 
         request.onsuccess = () => resolve();
@@ -128,6 +149,31 @@ class DbService {
         const request = store.delete(id);
 
         request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      }));
+    });
+  }
+
+  async clearBooksByOwnerId(ownerId: string): Promise<void> {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction([STORES.BOOKS_METADATA, STORES.BOOKS_BINARY], "readwrite");
+        const metadataStore = transaction.objectStore(STORES.BOOKS_METADATA);
+        const index = metadataStore.index("ownerId");
+        
+        const request = index.getAllKeys(ownerId);
+        
+        request.onsuccess = () => {
+          const keys = request.result;
+          const binaryStore = transaction.objectStore(STORES.BOOKS_BINARY);
+          
+          keys.forEach(key => {
+            metadataStore.delete(key);
+            binaryStore.delete(key);
+          });
+          resolve();
+        };
+        
         request.onerror = () => reject(request.error);
       }));
     });

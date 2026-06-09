@@ -64,12 +64,15 @@ export interface Book {
   /** Whether the actual binary file (.epub, .pdf) is stored in the cloud storage (limit 3 for free users) */
   isInCloud?: boolean;
   updatedAt?: string;
+  fileHash?: string;
+  ownerId: string;
 }
 
 export interface ParsedBookData {
   title: string;
   author: string;
   format: "PDF" | "EPUB" | "TXT" | "PHYSICAL";
+  ownerId?: string;
   content?: string;
   chapters?: BookChapter[];
   fileBlob?: Blob;

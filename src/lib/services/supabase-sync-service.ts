@@ -53,7 +53,9 @@ export class SupabaseSyncService implements IRemoteSyncService {
         language: b.language,
         currentPage: b.current_page,
         totalPages: b.total_pages,
-        isInCloud: b.is_in_cloud
+        isInCloud: b.is_in_cloud,
+        fileHash: b.file_hash,
+        ownerId: b.user_id
       })),
       stats: (stats || []).map(s => ({
         id: s.id,
@@ -102,7 +104,8 @@ export class SupabaseSyncService implements IRemoteSyncService {
           language: b.language,
           current_page: b.currentPage,
           total_pages: b.totalPages,
-          is_in_cloud: true // By definition, since we filtered them
+          is_in_cloud: true, // By definition, since we filtered them
+          file_hash: b.fileHash
         })));
       if (error) throw new Error(`Push books failed: ${error.message}`);
     }
