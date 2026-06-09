@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Outfit, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import Script from "next/script";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -56,6 +57,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${outfit.variable} ${hanken.variable} dark`}>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
         <Providers>{children}</Providers>
+        <Script src="https://scripts.simpleanalyticscdn.com/latest.js" strategy="afterInteractive" />
       </body>
     </html>
   );
