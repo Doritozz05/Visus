@@ -99,11 +99,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
                    if (!binary || !binary.fileBlob) {
                       try {
                         const fileBlob = await remoteStorageService.downloadBookFile(user.id, remoteBook.id);
-                        await dbService.saveBookBinary({
-                          bookId: remoteBook.id,
-                          fileBlob: fileBlob,
-                          content: `Auto-downloaded book content.` 
-                        });
+                        await libraryService.ingestRemoteBinary(remoteBook, fileBlob);
                       } catch (downloadErr) {
                         console.warn("Auto-download binary failed for", remoteBook.id, downloadErr);
                       }

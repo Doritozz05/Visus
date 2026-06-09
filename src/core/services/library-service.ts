@@ -1,5 +1,6 @@
 import { Book, BookBinary, DEFAULT_BOOKS, ParsedBookData } from "../entities/book";
 import { dbService } from "./db-service";
+import { parseUploadedFile } from "@/lib/services/book-ingestion-service";
 
 export const ACTIVE_BOOK_KEY = "visus_active_book_id";
 export const BOOK_PROGRESS_PREFIX = "visus_book_progress_";
@@ -177,6 +178,24 @@ export async function resetLibrary(): Promise<void> {
   await dbService.clearAllBooks();
 }
 
+/**
+ * Ingests a remote book binary by parsing it and saving the results to local database.
+ */
+export async function ingestRemoteBinary(book: Book, blob: Blob): Promise<void> {
+  // Convert Blob to File to satisfy parser requirements
+  const file = new File([blob], `${book.title}.${book.format.toLowerCase()}`, { type: blob.type });
+  const parsed = await parseUploadedFile(file);
+  
+  const binary: BookBinary = {
+    bookId: book.id,
+    content: parsed.content || `Content for ${book.title}`,
+    chapters: parsed.chapters,
+    fileBlob: blob
+  };
+
+  await dbService.saveBookBinary(binary);
+}
+
 export const libraryService = {
   generateBookId,
   createBookEntity,
@@ -186,4 +205,5 @@ export const libraryService = {
   loadLibrary,
   deleteBook,
   resetLibrary,
+  ingestRemoteBinary,
 };
