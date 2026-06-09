@@ -5,7 +5,7 @@ import { useAuth } from "@/features/auth/context/auth-context";
 import { MfaSetup } from "@/features/auth/components/MfaSetup";
 import { UpdateEmailForm } from "@/features/auth/components/UpdateEmailForm";
 import { UpdatePasswordForm } from "@/features/auth/components/UpdatePasswordForm";
-import { User, ShieldCheck, Mail, Lock, LogOut, RefreshCw, UserCircle, CheckCircle, AlertTriangle } from "lucide-react";
+import { User, ShieldCheck, Mail, Lock, LogOut, RefreshCw, UserCircle, CheckCircle, AlertTriangle, CloudUpload, CloudDownload } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { remoteSyncService } from "@/core/config/services";
@@ -14,22 +14,23 @@ import { StatsService } from "@/core/services/stats-service";
 
 export function AccountSettingsForm() {
   const { user, logout } = useAuth();
-  const [isSyncing, setIsSyncing] = React.useState(false);
+  const [isPushing, setIsPushing] = React.useState(false);
+  const [isPulling, setIsPulling] = React.useState(false);
   const [syncStatus, setSyncStatus] = React.useState<"idle" | "success" | "error">("idle");
   const [syncError, setSyncError] = React.useState<string | null>(null);
 
   const isGoogleUser = user?.avatarUrl !== undefined;
 
-  const handleSync = async () => {
+  const handlePush = async () => {
     if (!user) return;
     
-    setIsSyncing(true);
+    setIsPushing(true);
     setSyncStatus("idle");
     setSyncError(null);
 
     try {
       // 1. Gather all local data
-      const books = await dbService.getAllBooks();
+      const books = await dbService.getAllBooks(user.id);
       const logs = await StatsService.getSessionLogs();
       
       // 2. Push local changes to Supabase
@@ -39,26 +40,47 @@ export function AccountSettingsForm() {
         deletedBookIds: [] 
       });
 
-      // 3. Pull remote changes from Supabase
-      // We use a very old timestamp or track the last sync time to get everything
-      const lastSync = localStorage.getItem("visus_last_sync_timestamp") || new Date(0).toISOString();
-      const remoteChanges = await remoteSyncService.pullChanges(user.id, lastSync);
+      setSyncStatus("success");
+    } catch (err: any) {
+      setSyncStatus("error");
+      setSyncError(err.message || "Unknown push error.");
+    } finally {
+      setIsPushing(false);
+    }
+  };
 
-      // 4. Update local DB with remote changes
+  const handlePull = async () => {
+    if (!user) return;
+    
+    setIsPulling(true);
+    setSyncStatus("idle");
+    setSyncError(null);
+
+    try {
+      // Pull remote changes from Supabase (using 0 to fetch all, which deduplicates on page reload)
+      const remoteChanges = await remoteSyncService.pullChanges(user.id, new Date(0).toISOString());
+
+      // Update local DB with remote changes
       for (const remoteBook of remoteChanges.books) {
+        remoteBook.ownerId = user.id;
         await dbService.saveBook(remoteBook);
       }
       for (const remoteLog of remoteChanges.stats) {
         await dbService.saveLog(remoteLog);
       }
 
-      localStorage.setItem("visus_last_sync_timestamp", new Date().toISOString());
+      localStorage.setItem(`visus_last_sync_${user.id}`, new Date().toISOString());
       setSyncStatus("success");
+      
+      // Reload page to trigger LibraryContext hydration & deduplication
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (err: any) {
       setSyncStatus("error");
-      setSyncError(err.message || "Unknown synchronization error.");
+      setSyncError(err.message || "Unknown pull error.");
     } finally {
-      setIsSyncing(false);
+      setIsPulling(false);
     }
   };
 
@@ -163,18 +185,24 @@ export function AccountSettingsForm() {
             </div>
           )}
 
-          <button 
-            onClick={handleSync}
-            disabled={isSyncing || !user}
-            className={`w-full py-2.5 mt-auto border rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
-              syncStatus === "success" 
-                ? "bg-emerald-500/10 border-emerald-500 text-emerald-500"
-                : "border-border/30 text-foreground hover:bg-accent hover:border-primary"
-            }`}
-          >
-            <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-            {isSyncing ? "Syncing..." : syncStatus === "success" ? "Synced!" : "Force DB Synchronize"}
-          </button>
+          <div className="grid grid-cols-2 gap-2 mt-auto">
+            <button 
+              onClick={handlePush}
+              disabled={isPushing || isPulling || !user}
+              className="w-full py-2.5 border border-border/30 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-foreground hover:bg-accent hover:border-primary"
+            >
+              <CloudUpload className={`h-4 w-4 ${isPushing ? "animate-bounce" : ""}`} />
+              {isPushing ? "Pushing..." : "Push Local"}
+            </button>
+            <button 
+              onClick={handlePull}
+              disabled={isPushing || isPulling || !user}
+              className="w-full py-2.5 border border-border/30 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-foreground hover:bg-accent hover:border-primary"
+            >
+              <CloudDownload className={`h-4 w-4 ${isPulling ? "animate-bounce" : ""}`} />
+              {isPulling ? "Pulling..." : "Pull Cloud"}
+            </button>
+          </div>
         </section>
 
       </div>

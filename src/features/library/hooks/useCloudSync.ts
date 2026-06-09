@@ -36,7 +36,19 @@ export function useCloudSync(books: Book[], updateBook: (id: string, updates: Pa
       // 2. Upload to Supabase Storage
       await remoteStorageService.uploadBookFile(user.id, bookId, binary.fileBlob);
 
-      // 3. Update book metadata
+      // 3. Push to books_metadata in Supabase
+      import("@/core/config/services").then(({ remoteSyncService }) => {
+        const bookToPush = cloudBooks.find(b => b.id === bookId) || books.find(b => b.id === bookId);
+        if (bookToPush) {
+           remoteSyncService.pushChanges(user.id, {
+             books: [{ ...bookToPush, isInCloud: true }],
+             stats: [],
+             deletedBookIds: []
+           }).catch(console.warn);
+        }
+      });
+
+      // 4. Update book metadata locally
       updateBook(bookId, { isInCloud: true });
 
     } catch (err: any) {
