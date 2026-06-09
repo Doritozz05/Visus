@@ -81,6 +81,14 @@ export default function Home() {
             <span className="text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Configured</span>
           </div>
         </div>
+
+        {/* Footer Links */}
+        <footer className="pt-6 mt-6 border-t border-border/20 flex justify-center gap-6 text-[10px] text-muted-foreground/60 font-medium uppercase tracking-widest">
+          <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
+          <span>&bull;</span>
+          <span>&copy; 2026 Visus</span>
+        </footer>
       </div>
     </main>
   );
