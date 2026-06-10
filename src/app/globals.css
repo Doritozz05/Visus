@@ -37,6 +37,7 @@
 
   html, body {
     overscroll-behavior: none; /* Block browser pull-to-refresh, elastic scroll, and swipe gestures */
+    @apply scrollbar-none;
   }
   * {
     @apply border-border;

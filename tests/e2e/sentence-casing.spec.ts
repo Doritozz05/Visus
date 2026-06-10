@@ -16,7 +16,7 @@ test.describe('Visus Sentence Casing Validation', () => {
 
     const links = page.locator('a');
     const linkTexts = await links.allTextContents();
-    
+
     // Check key link buttons with case-insensitive matches
     const performanceLink = linkTexts.find(t => t.toLowerCase().includes('performance'));
     expect(performanceLink).toContain('Performance dashboard');
@@ -33,7 +33,7 @@ test.describe('Visus Sentence Casing Validation', () => {
 
   test('library page casing check', async ({ page }) => {
     await page.goto('/library');
-    
+
     // Wait for the loading spinner/hydration to complete
     await page.locator('text=Calibrating visual elements...').waitFor({ state: 'detached', timeout: 20000 });
 
@@ -43,13 +43,13 @@ test.describe('Visus Sentence Casing Validation', () => {
       console.log('Seeding library with test EPUB...');
       const fileInput = page.locator('input[type="file"]');
       const targetEpub = path.resolve(process.cwd(), 'epub', 'pg2701-images-3.epub'); // Moby Dick
-      
+
       if (!fs.existsSync(targetEpub)) {
         throw new Error(`Required EPUB file does not exist: ${targetEpub}`);
       }
 
       await fileInput.setInputFiles([targetEpub]);
-      
+
       // Wait for books to load
       await expect(page.locator('.bg-card:has(h3)').first()).toBeVisible({ timeout: 20000 });
     }
@@ -91,10 +91,10 @@ test.describe('Visus Sentence Casing Validation', () => {
     const generalTab = page.locator('button', { hasText: 'General & UI' });
     await expect(generalTab).toBeVisible();
 
-    const rsvpTab = page.locator('button', { hasText: 'RSVP engine' });
+    const rsvpTab = page.locator('button', { hasText: 'RSVP' });
     await expect(rsvpTab).toBeVisible();
 
-    const clusterTab = page.locator('button', { hasText: 'Cluster canvas' });
+    const clusterTab = page.locator('button', { hasText: 'Cluster' });
     await expect(clusterTab).toBeVisible();
 
     // Profile section

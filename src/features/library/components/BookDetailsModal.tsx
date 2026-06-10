@@ -18,18 +18,18 @@ export function BookDetailsModal({
 }: BookDetailsModalProps) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div 
+      <div
         onClick={onClose}
         className="absolute inset-0 bg-black/70 backdrop-blur-[6px] transition-opacity duration-300"
       />
       <div className="w-full max-w-2xl bg-card border border-border/30 rounded-2xl shadow-2xl relative z-10 glass-panel overflow-hidden animate-scale-up flex flex-col md:flex-row min-h-[420px] max-h-[90vh]">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none"></div>
-        
+
         {/* Left Column: Large Book Cover / Backdrop Visual */}
         <div className="w-full md:w-1/3 bg-accent/20 border-r border-border/10 flex flex-col items-center justify-center p-6 relative overflow-hidden shrink-0 min-h-[200px] md:min-h-0">
           {/* Blur backdrop reflection for ultra-premium vibe */}
           {book.coverUrl && (
-            <div 
+            <div
               className="absolute inset-0 opacity-20 blur-xl scale-125 pointer-events-none"
               style={{
                 backgroundImage: `url(${book.coverUrl})`,
@@ -38,7 +38,7 @@ export function BookDetailsModal({
               }}
             />
           )}
-          
+
           <div className="w-28 h-40 bg-gradient-to-br from-primary/10 to-primary/5 border border-border/20 rounded-xl flex items-center justify-center relative shadow-2xl overflow-hidden z-10 shrink-0 transform hover:scale-102 transition-transform duration-300">
             {book.coverUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
@@ -53,7 +53,7 @@ export function BookDetailsModal({
             )}
             <div className="absolute bottom-1 right-1 bg-accent/90 border border-border/10 px-1.5 py-0.5 rounded text-[8px] font-mono text-primary font-bold shadow-md">{book.format}</div>
           </div>
-          
+
           <div className="mt-4 text-[10px] font-mono uppercase tracking-widest text-primary font-bold z-10 bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
             {book.format} volume
           </div>
@@ -61,9 +61,9 @@ export function BookDetailsModal({
 
         {/* Right Column: Title, Synopsis and Technical Specifications */}
         <div className="flex-1 p-6 md:p-8 flex flex-col justify-between overflow-y-auto max-h-[50vh] md:max-h-none">
-          
+
           {/* Close Button */}
-          <button 
+          <button
             onClick={onClose}
             className="absolute right-4 top-4 w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground border border-border/20 transition-all z-20"
           >
@@ -81,8 +81,8 @@ export function BookDetailsModal({
             {book.genres && book.genres.length > 0 && (
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {book.genres.slice(0, 4).map((genre, i) => (
-                  <span 
-                    key={i} 
+                  <span
+                    key={i}
                     className="text-[9px] font-mono uppercase tracking-wider bg-accent border border-border/30 text-muted-foreground px-2 py-0.5 rounded-full"
                   >
                     {genre}
@@ -95,7 +95,7 @@ export function BookDetailsModal({
             <div className="pt-2 border-t border-border/10">
               <h4 className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1.5">Synopsis</h4>
               <div className="max-h-[160px] overflow-y-auto pr-2 text-xs md:text-sm text-foreground/80 leading-relaxed font-sans scrollbar-none whitespace-pre-wrap">
-                {book.description || `No synopsis available for this volume. Open the book to explore its complete visual elements and begin speed calibration.`}
+                {book.description || `No synopsis available for this volume. Open the book to explore its complete visual elements and begin speed adjusting.`}
               </div>
             </div>
 

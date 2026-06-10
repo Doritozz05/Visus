@@ -22,7 +22,7 @@ export default function SettingsClient() {
             Adjust global visual engine parameters and manage your account security.
           </p>
         </div>
-        <button 
+        <button
           onClick={resetSettings}
           className="px-4 py-2 border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary rounded font-mono text-[10px] uppercase tracking-wider transition-all"
         >
@@ -35,8 +35,8 @@ export default function SettingsClient() {
         {[
           { id: "general", name: "General & UI", icon: Settings },
           { id: "reader", name: "Reader", icon: BookOpen },
-          { id: "rsvp", name: "RSVP engine", icon: Zap },
-          { id: "cluster", name: "Cluster canvas", icon: Columns },
+          { id: "rsvp", name: "RSVP", icon: Zap },
+          { id: "cluster", name: "Cluster", icon: Columns },
           { id: "account", name: "Account & Sync", icon: UserCircle },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -44,11 +44,10 @@ export default function SettingsClient() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-3 border-b-2 font-mono text-xs uppercase tracking-wider transition-all shrink-0 ${
-                activeTab === tab.id
-                  ? "border-primary text-primary font-bold bg-accent/40"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/10"
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 border-b-2 font-mono text-xs uppercase tracking-wider transition-all shrink-0 ${activeTab === tab.id
+                ? "border-primary text-primary font-bold bg-accent/40"
+                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                }`}
             >
               <Icon className="h-4.5 w-4.5" />
               {tab.name}

@@ -14,7 +14,7 @@ export function ClusterSettingsForm() {
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <Columns className="text-primary h-5 w-5" />
-          <h3 className="text-sm font-bold font-heading text-foreground">Visual cluster engine</h3>
+          <h3 className="text-sm font-bold font-heading text-foreground">Cluster settings</h3>
         </div>
 
         {/* Size control */}
@@ -23,11 +23,11 @@ export function ClusterSettingsForm() {
             <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Active line optical font size</label>
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{cluster.fontSize}px</span>
           </div>
-          <input 
+          <input
             className="w-full accent-primary h-1 bg-accent rounded-lg appearance-none cursor-pointer"
-            max="48" 
-            min="14" 
-            type="range" 
+            max="48"
+            min="14"
+            type="range"
             value={cluster.fontSize}
             onChange={(e) => updateClusterSettings({ fontSize: Number(e.target.value) })}
           />
@@ -49,11 +49,10 @@ export function ClusterSettingsForm() {
               <button
                 key={tf.id}
                 onClick={() => updateClusterSettings({ fontFamily: tf.id as any })}
-                className={`p-2 border rounded text-center transition-all ${
-                  cluster.fontFamily === tf.id
-                    ? "border-primary bg-accent/40 text-primary font-bold"
-                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                }`}
+                className={`p-2 border rounded text-center transition-all ${cluster.fontFamily === tf.id
+                  ? "border-primary bg-accent/40 text-primary font-bold"
+                  : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
+                  }`}
               >
                 <span className="block text-[11px] font-semibold">{tf.name}</span>
                 <span className="block text-[7px] opacity-60 font-mono tracking-widest">{tf.desc}</span>
@@ -76,11 +75,10 @@ export function ClusterSettingsForm() {
               <button
                 key={style.id}
                 onClick={() => updateClusterSettings({ highlightStyle: style.id as any })}
-                className={`p-2 border rounded text-center transition-all text-xs ${
-                  cluster.highlightStyle === style.id
-                    ? "border-primary bg-accent/45 text-primary font-bold"
-                    : "border-border/20 hover:border-border/50 text-muted-foreground bg-card"
-                }`}
+                className={`p-2 border rounded text-center transition-all text-xs ${cluster.highlightStyle === style.id
+                  ? "border-primary bg-accent/45 text-primary font-bold"
+                  : "border-border/20 hover:border-border/50 text-muted-foreground bg-card"
+                  }`}
               >
                 {style.label}
               </button>
@@ -104,11 +102,10 @@ export function ClusterSettingsForm() {
               <button
                 key={col.id}
                 onClick={() => updateClusterSettings({ activeColor: col.id as any })}
-                className={`p-1.5 border rounded flex items-center justify-center gap-1 transition-all text-[10px] capitalize ${
-                  cluster.activeColor === col.id
-                    ? "border-primary bg-accent/40 text-primary font-bold"
-                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                }`}
+                className={`p-1.5 border rounded flex items-center justify-center gap-1 transition-all text-[10px] capitalize ${cluster.activeColor === col.id
+                  ? "border-primary bg-accent/40 text-primary font-bold"
+                  : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
+                  }`}
               >
                 <span className={`w-2.5 h-2.5 rounded-full ${col.css} inline-block border border-border/20`}></span>
                 {col.id}
@@ -124,12 +121,12 @@ export function ClusterSettingsForm() {
               <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Inactive lines opacity</label>
               <span className="text-[10px] font-mono text-primary font-semibold">{Math.round(cluster.inactiveOpacity * 100)}%</span>
             </div>
-            <input 
+            <input
               className="w-full accent-primary h-1 bg-accent rounded-lg appearance-none cursor-pointer"
-              max="0.7" 
-              min="0.1" 
+              max="0.7"
+              min="0.1"
               step="0.05"
-              type="range" 
+              type="range"
               value={cluster.inactiveOpacity}
               onChange={(e) => updateClusterSettings({ inactiveOpacity: Number(e.target.value) })}
             />
@@ -147,11 +144,10 @@ export function ClusterSettingsForm() {
                 <button
                   key={b.val}
                   onClick={() => updateClusterSettings({ blurAmount: b.val })}
-                  className={`flex-1 py-1.5 text-[9px] font-mono border rounded transition-all ${
-                    cluster.blurAmount === b.val 
-                      ? "bg-primary text-primary-foreground font-bold border-primary"
-                      : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                  }`}
+                  className={`flex-1 py-1.5 text-[9px] font-mono border rounded transition-all ${cluster.blurAmount === b.val
+                    ? "bg-primary text-primary-foreground font-bold border-primary"
+                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
+                    }`}
                 >
                   {b.label}
                 </button>
@@ -176,11 +172,10 @@ export function ClusterSettingsForm() {
               <button
                 key={glow.id}
                 onClick={() => updateClusterSettings({ glowEffect: glow.id as any })}
-                className={`px-2 py-1 text-[9px] font-mono border rounded transition-all ${
-                  cluster.glowEffect === glow.id
-                    ? "bg-primary text-primary-foreground font-bold border-primary"
-                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                }`}
+                className={`px-2 py-1 text-[9px] font-mono border rounded transition-all ${cluster.glowEffect === glow.id
+                  ? "bg-primary text-primary-foreground font-bold border-primary"
+                  : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
+                  }`}
               >
                 {glow.label}
               </button>

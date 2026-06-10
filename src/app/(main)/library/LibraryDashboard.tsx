@@ -5,9 +5,10 @@ import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { useLibrary } from "@/features/library/context/library-context";
 import { Book } from "@/core/entities/book";
 import { useRouter } from "next/navigation";
-import { Eraser, Search, Plus, Library } from "lucide-react";
+import { Eraser, Search, Plus, Library, Flame } from "lucide-react";
 
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { StatsService } from "@/core/services/stats-service";
 
 // Extracted Sub-Components
 import { IngestionDropzone } from "@/features/library/components/IngestionDropzone";
@@ -25,6 +26,19 @@ import { useCloudSync } from "@/features/library/hooks/useCloudSync";
 export default function LibraryDashboard() {
   const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, setActiveBookId, isHydrated } = useLibrary();
   const router = useRouter();
+
+  const [summary, setSummary] = React.useState({
+    currentStreakDays: 12,
+  });
+
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      const completedBooksCount = books.filter((b) => b.status === "completed").length;
+      const statsSummary = await StatsService.getStatsSummary(completedBooksCount);
+      setSummary({ currentStreakDays: statsSummary.currentStreakDays });
+    };
+    if (isHydrated) fetchStats();
+  }, [books, isHydrated]);
 
   // State controls for UI
   const [activeSyncingId, setActiveSyncingId] = React.useState<string | null>(null);
@@ -186,12 +200,35 @@ export default function LibraryDashboard() {
         className="hidden" 
       />
 
-      <div className="p-6 md:p-12 flex-1 max-w-5xl mx-auto w-full">
+      <div className="p-6 md:p-12 flex-1 max-w-5xl mx-auto w-full h-[calc(100vh-64px)] md:h-screen overflow-hidden flex flex-col">
+        <header className="border-b border-border/20 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-xs font-mono uppercase tracking-widest text-primary">Digital assets</h2>
+              <div className="h-3 w-px bg-border/40"></div>
+              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{books.length} Objects indexed</span>
+            </div>
+            <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Library &amp; archives</h1>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 bg-accent/30 px-4 py-2 rounded-xl border border-border/10 shadow-sm backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                <Flame className="text-primary w-5 h-5 animate-pulse" />
+                <span className="font-bold text-foreground">{summary.currentStreakDays} day streak</span>
+              </div>
+              <div className="h-4 w-px bg-border/30"></div>
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shadow-lg ring-2 ring-background">
+                VP
+              </div>
+            </div>
+          </div>
+        </header>
+
           {/* Bento Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-8">
             
             {/* Left Column: Ingestion Zone & Progress Stats */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
+            <div className="lg:col-span-4 flex flex-col gap-6 overflow-hidden">
               
               {/* Drag & Drop Upload Panel */}
               <IngestionDropzone
@@ -323,7 +360,7 @@ export default function LibraryDashboard() {
               )}
 
               {/* Book List Scrollable Grid Panel */}
-              <div className="relative flex-1 max-h-[58vh]">
+              <div className="relative flex-1 min-h-[380px] max-h-[58vh]">
                 <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pr-1 pb-48">
                   {filteredBooks.length === 0 ? (
                     <div className="border border-dashed border-border/40 rounded-xl flex flex-col items-center justify-center p-12 text-center bg-card/10 h-full min-h-[300px]">

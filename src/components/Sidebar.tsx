@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Library, Gauge, TrendingUp, Settings, Eye } from "lucide-react";
+import { Library, Glasses, TrendingUp, Settings, Eye } from "lucide-react";
 
 interface SidebarProps {
   activePath?: string;
@@ -14,7 +14,7 @@ export function Sidebar({ activePath }: SidebarProps) {
 
   const navItems = [
     { name: "Library", path: "/library", icon: Library },
-    { name: "Reading room", path: "/reader", icon: Gauge },
+    { name: "Reading room", path: "/reader", icon: Glasses },
     { name: "Performance", path: "/dashboard", icon: TrendingUp },
     { name: "Settings", path: "/settings", icon: Settings },
   ];

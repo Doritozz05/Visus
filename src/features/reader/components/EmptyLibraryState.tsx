@@ -36,7 +36,7 @@ export function EmptyLibraryState({
         <div className="relative z-10">
           <h2 className="text-xl font-bold font-heading text-foreground mb-2">Reading room</h2>
           <p className="text-xs text-muted-foreground font-sans leading-relaxed max-w-xs mx-auto">
-            Your speed reading center is ready, but your library is empty. Upload a PDF, EPUB, or TXT volume to begin calibrating foveal focus.
+            Your speed reading center is ready, but your library is empty. Upload a PDF, EPUB, or TXT volume to begin reading.
           </p>
         </div>
 

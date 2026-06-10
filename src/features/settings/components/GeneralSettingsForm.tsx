@@ -1,28 +1,28 @@
 "use client";
 
 import * as React from "react";
-import { Palette, CheckCircle, Check, Brain } from "lucide-react";
+import { Palette, CheckCircle, Check, Settings2 } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
 
 export function GeneralSettingsForm() {
   const { settings, updateGeneralSettings } = useSettings();
-  const { 
-    theme, 
-    accentColor, 
-    uiFont, 
-    glassmorphism, 
-    reducedMotion, 
-    soundEffects, 
+  const {
+    theme,
+    accentColor,
+    uiFont,
+    glassmorphism,
+    reducedMotion,
+    soundEffects,
     readingTimerReminder
   } = settings.general;
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div className="space-y-6">
       {/* Visual Themes Module */}
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <Palette className="text-primary h-5 w-5" />
-          <h3 className="text-sm font-bold font-heading text-foreground">Aesthetic schemes</h3>
+          <h3 className="text-sm font-bold font-heading text-foreground">Themes</h3>
         </div>
 
         {/* Predefined Themes Grid */}
@@ -37,11 +37,10 @@ export function GeneralSettingsForm() {
               <button
                 key={t.id}
                 onClick={() => updateGeneralSettings({ theme: t.id as any })}
-                className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between ${
-                  theme === t.id
-                    ? "border-primary bg-accent/65"
-                    : "border-border/30 bg-card hover:border-border/60"
-                }`}
+                className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between ${theme === t.id
+                  ? "border-primary bg-accent/65"
+                  : "border-border/30 bg-card hover:border-border/60"
+                  }`}
               >
                 <div className="flex items-center justify-between mb-2 w-full">
                   <span className="text-[11px] font-bold">{t.name}</span>
@@ -71,9 +70,8 @@ export function GeneralSettingsForm() {
               <button
                 key={c.id}
                 onClick={() => updateGeneralSettings({ accentColor: c.id as any })}
-                className={`w-7 h-7 rounded-full ${c.color} border-2 flex items-center justify-center transition-all ${
-                  accentColor === c.id ? "border-foreground scale-110 shadow-md" : "border-transparent hover:scale-105"
-                }`}
+                className={`w-7 h-7 rounded-full ${c.color} border-2 flex items-center justify-center transition-all ${accentColor === c.id ? "border-foreground scale-110 shadow-md" : "border-transparent hover:scale-105"
+                  }`}
               >
                 {accentColor === c.id && (
                   <Check className="text-white h-3.5 w-3.5 stroke-[3]" />
@@ -95,11 +93,10 @@ export function GeneralSettingsForm() {
               <button
                 key={f.id}
                 onClick={() => updateGeneralSettings({ uiFont: f.id as any })}
-                className={`p-1.5 border rounded text-center transition-all ${
-                  uiFont === f.id
-                    ? "border-primary bg-accent/30 text-primary font-bold"
-                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                }`}
+                className={`p-1.5 border rounded text-center transition-all ${uiFont === f.id
+                  ? "border-primary bg-accent/30 text-primary font-bold"
+                  : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
+                  }`}
               >
                 <span className="block text-[11px] font-semibold">{f.name}</span>
                 <span className="block text-[7px] opacity-60 font-mono tracking-widest">{f.desc}</span>
@@ -112,20 +109,20 @@ export function GeneralSettingsForm() {
       {/* Behavioral & Advanced Configuration */}
       <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
-          <Brain className="text-primary h-5 w-5" />
-          <h3 className="text-sm font-bold font-heading text-foreground">Advanced engine features</h3>
+          <Settings2 className="text-primary h-5 w-5" />
+          <h3 className="text-sm font-bold font-heading text-foreground">General features</h3>
         </div>
 
         {/* Settings toggles */}
         <div className="space-y-4">
-          
+
           {/* Glassmorphism */}
           <div className="flex items-center justify-between py-1">
             <div>
               <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Frosted glass panels</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Enables premium frosted glass styles. Disable on slow hardware.</p>
             </div>
-            <button 
+            <button
               onClick={() => updateGeneralSettings({ glassmorphism: !glassmorphism })}
               className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${glassmorphism ? "bg-primary" : "bg-accent"}`}
             >
@@ -139,7 +136,7 @@ export function GeneralSettingsForm() {
               <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Reduce UI motion</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Disables transitions for speed loads and pagination changes.</p>
             </div>
-            <button 
+            <button
               onClick={() => updateGeneralSettings({ reducedMotion: !reducedMotion })}
               className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${reducedMotion ? "bg-primary" : "bg-accent"}`}
             >
@@ -153,7 +150,7 @@ export function GeneralSettingsForm() {
               <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Sound feedbacks</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Subtle clicks on pacing ticks and chimes on completing sessions.</p>
             </div>
-            <button 
+            <button
               onClick={() => updateGeneralSettings({ soundEffects: !soundEffects })}
               className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${soundEffects ? "bg-primary" : "bg-accent"}`}
             >
@@ -177,11 +174,10 @@ export function GeneralSettingsForm() {
                 <button
                   key={o.val}
                   onClick={() => updateGeneralSettings({ readingTimerReminder: o.val })}
-                  className={`flex-1 py-1.5 text-[9px] font-mono border rounded transition-all ${
-                    readingTimerReminder === o.val 
-                      ? "bg-primary text-primary-foreground font-bold border-primary"
-                      : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                  }`}
+                  className={`flex-1 py-1.5 text-[9px] font-mono border rounded transition-all ${readingTimerReminder === o.val
+                    ? "bg-primary text-primary-foreground font-bold border-primary"
+                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
+                    }`}
                 >
                   {o.label}
                 </button>
