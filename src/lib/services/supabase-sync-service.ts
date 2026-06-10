@@ -125,6 +125,21 @@ export class SupabaseSyncService implements IRemoteSyncService {
 
     if (changes.deletedBookIds.length > 0) {
       // Handle soft/hard deletes remotely
+      // 1. Log the deletion for other devices to sync
+      const { error: delError } = await supabase
+        .from("deleted_records")
+        .insert(changes.deletedBookIds.map(id => ({
+          user_id: userId,
+          record_id: id,
+          table_name: "books_metadata"
+        })));
+      
+      if (delError) {
+        console.error("Error logging deletion to deleted_records:", delError);
+        // We continue anyway to try and delete the metadata, but the sync might be incomplete
+      }
+
+      // 2. Remove from remote metadata
       const { error } = await supabase
         .from("books_metadata")
         .delete()
