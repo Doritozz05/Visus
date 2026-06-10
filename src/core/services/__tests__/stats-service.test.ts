@@ -35,7 +35,7 @@ describe("StatsService", () => {
 
     it("should return empty array if window is undefined", async () => {
       const originalWindow = global.window;
-      // @ts-ignore
+      // @ts-expect-error
       delete global.window;
       
       const logs = await StatsService.getSessionLogs();
