@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { Book, Trash2, MoreVertical, Info, BookOpen, CheckCircle, Pencil, Archive, FolderPlus, Cloud, CloudOff, RefreshCw } from "lucide-react";
 import { Book as BookEntity } from "@/core/entities/book";
+import { toast } from "sonner";
 
 interface BookCardProps {
   book: BookEntity;
@@ -68,7 +69,13 @@ export function BookCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onDelete(book.id);
+            toast.warning(`Delete "${book.title}"?`, {
+              description: "This will remove the book and its progress forever.",
+              action: {
+                label: "Delete",
+                onClick: () => onDelete(book.id),
+              },
+            });
           }}
           className="w-7 h-7 rounded-full hover:bg-rose-500/10 flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-all animate-fade-in"
           title="Delete book"

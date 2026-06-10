@@ -2,17 +2,29 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { authService } from "@/core/config/services";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export function LoginForm() {
+  const searchParams = useSearchParams();
+  const oauthError = searchParams.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mfaCode, setMfaCode] = useState("");
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (oauthError === "OauthFailed") {
+      toast.error("Authentication failed", {
+        description: "There was a problem signing in with Google. Please try again.",
+      });
+    }
+  }, [oauthError]);
 
   // Check for existing AAL1 session that needs AAL2 (e.g., after Google Login or Middleware redirect)
   useEffect(() => {

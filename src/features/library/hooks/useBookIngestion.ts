@@ -2,6 +2,7 @@ import * as React from "react";
 import { parseUploadedFile } from "@/lib/services/book-ingestion-service";
 import { Book } from "@/core/entities/book";
 import { calculateFileHash } from "@/lib/utils";
+import { toast } from "sonner";
 
 export function useBookIngestion(
   addBook: (
@@ -60,8 +61,12 @@ export function useBookIngestion(
       );
       
       if (failures.length > 0) {
-        const errorMessages = failures.map(f => f.reason?.message || "Unknown file read error").join("\n");
-        alert(`Some files could not be imported:\n${errorMessages}`);
+        const errorMessages = failures.map(f => f.reason?.message || "Unknown file read error").join(", ");
+        toast.error("Some files could not be imported", {
+          description: errorMessages
+        });
+      } else if (files.length > 0) {
+        toast.success(files.length === 1 ? "Book imported successfully" : `${files.length} books imported successfully`);
       }
     } catch (err) {
       console.error("Batch file ingestion failed:", err);

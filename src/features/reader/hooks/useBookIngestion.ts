@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useLibrary } from "@/features/library/context/library-context";
 import { parseUploadedFile } from "@/lib/services/book-ingestion-service";
+import { toast } from "sonner";
 
 export function useBookIngestion() {
   const { addBook } = useLibrary();
@@ -24,7 +25,7 @@ export function useBookIngestion() {
       );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to import file";
-      alert(message);
+      toast.error(message);
     }
   };
 

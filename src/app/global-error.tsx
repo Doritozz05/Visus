@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { AlertCard } from "@/components/ui/AlertCard";
+
 export default function GlobalError({
   error,
 }: {
@@ -13,12 +15,16 @@ export default function GlobalError({
 
   return (
     <html>
-      <body>
-        <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-          <h2>Something went wrong</h2>
-          <p>{error.message || "An unexpected error occurred in the application."}</p>
-          <button onClick={() => window.location.reload()}>Retry</button>
-        </div>
+      <body className="min-h-screen bg-background flex items-center justify-center p-4">
+        <AlertCard
+          title="Something went wrong"
+          description={error.message || "An unexpected error occurred in the application."}
+          variant="error"
+          action={{
+            label: "Retry",
+            onClick: () => window.location.reload(),
+          }}
+        />
       </body>
     </html>
   );

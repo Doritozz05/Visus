@@ -24,6 +24,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
 import { READER_FONT_CLASSES } from "@/features/reader/utils/reader-fonts";
 import { Quiz } from "@/core/algorithms/quiz-generator";
+import { toast } from "sonner";
 
 export default function ReaderClient() {
   const router = useRouter();
@@ -111,7 +112,8 @@ export default function ReaderClient() {
         const binary = await dbService.getBookBinary(activeBookId);
         setBookBinary(binary || null);
       } catch (err) {
-        console.error("Failed to load book binary:", err);
+        const message = err instanceof Error ? err.message : "Database error";
+        toast.error("Failed to load book content", { description: message });
       } finally {
         setIsLoadingContent(false);
       }

@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useBookIngestion } from "../useBookIngestion";
 import { parseUploadedFile } from "@/lib/services/book-ingestion-service";
 import { calculateFileHash } from "@/lib/utils";
+import { toast } from "sonner";
 
 vi.mock("@/lib/services/book-ingestion-service", () => ({
   parseUploadedFile: vi.fn(),
@@ -11,6 +12,13 @@ vi.mock("@/lib/services/book-ingestion-service", () => ({
 vi.mock("@/lib/utils", () => ({
   calculateFileHash: vi.fn(),
   cn: vi.fn((...args) => args.filter(Boolean).join(" ")),
+}));
+
+vi.mock("sonner", () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
 }));
 
 describe("useBookIngestion", () => {
@@ -94,14 +102,17 @@ describe("useBookIngestion", () => {
     });
     mockAddBook.mockReturnValue(null); // Indicates duplicate
 
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
     await act(async () => {
       await result.current.handleFileChange({
         target: { files: mockFileList }
       } as any);
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining("already in your library"));
+    expect(toast.error).toHaveBeenCalledWith(
+      "Some files could not be imported",
+      expect.objectContaining({
+        description: expect.stringContaining("already in your library")
+      })
+    );
   });
 });

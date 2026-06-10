@@ -4,6 +4,7 @@ import * as React from "react";
 import { SettingsProvider, useSettings } from "@/features/settings/context/settings-context";
 import { LibraryProvider } from "@/features/library/context/library-context";
 import { AuthProvider } from "@/features/auth/context/auth-context";
+import { Toaster } from "sonner";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
@@ -82,7 +83,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <AuthProvider>
       <SettingsProvider>
         <LibraryProvider>
-          <ThemeProviderHelper>{children}</ThemeProviderHelper>
+          <ThemeProviderHelper>
+            {children}
+            <Toaster position="bottom-right" richColors closeButton />
+          </ThemeProviderHelper>
         </LibraryProvider>
       </SettingsProvider>
     </AuthProvider>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { authService } from "@/core/config/services";
+import { toast } from "sonner";
 
 export function MfaSetup() {
   const [isChecking, setIsChecking] = useState(true);
@@ -58,6 +59,22 @@ export function MfaSetup() {
     }
   };
 
+  const executeDisableMfa = async (factorId: string) => {
+    try {
+      setIsUnenrolling(true);
+      setError(null);
+      await authService.unenrollMFA(factorId);
+      await checkStatus();
+      toast.success("MFA has been disabled");
+    } catch (err) {
+      const message = err instanceof Error && err.message ? err.message : "Could not disable MFA.";
+      setError(message);
+      toast.error("Failed to disable MFA", { description: message });
+    } finally {
+      setIsUnenrolling(false);
+    }
+  };
+
   const disableMfa = async () => {
     if (!mfaStatus.factorId) return;
 
@@ -72,22 +89,13 @@ export function MfaSetup() {
       // If we can't check, we proceed and let the service fail
     }
     
-    // In a real production app, you might want to prompt for a password or another MFA code before disabling.
-    // For now, we allow direct unenrollment.
-    if (!window.confirm("Are you sure you want to disable Two-Factor Authentication? Your account will be less secure.")) {
-      return;
-    }
-
-    try {
-      setIsUnenrolling(true);
-      setError(null);
-      await authService.unenrollMFA(mfaStatus.factorId);
-      await checkStatus();
-    } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Could not disable MFA.");
-    } finally {
-      setIsUnenrolling(false);
-    }
+    toast.warning("Disable Two-Factor Authentication?", {
+      description: "Your account will be less secure. This action cannot be undone.",
+      action: {
+        label: "Disable",
+        onClick: () => executeDisableMfa(mfaStatus.factorId!),
+      },
+    });
   };
 
   if (isChecking) {

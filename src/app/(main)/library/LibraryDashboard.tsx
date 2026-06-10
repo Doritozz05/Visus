@@ -11,6 +11,7 @@ import Image from "next/image";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { StatsService } from "@/core/services/stats-service";
 import { useAuth } from "@/features/auth/context/auth-context";
+import { toast } from "sonner";
 
 // Extracted Sub-Components
 import { IngestionDropzone } from "@/features/library/components/IngestionDropzone";
@@ -73,7 +74,7 @@ export default function LibraryDashboard() {
   // Show sync error alert if any
   React.useEffect(() => {
     if (syncError) {
-      alert(syncError);
+      toast.error(syncError);
     }
   }, [syncError]);
 
