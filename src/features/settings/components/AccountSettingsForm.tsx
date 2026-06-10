@@ -61,13 +61,13 @@ export function AccountSettingsForm() {
       const remoteChanges = await remoteSyncService.pullChanges(user.id, new Date(0).toISOString());
 
       // Update local DB with remote changes
-      for (const remoteBook of remoteChanges.books) {
-        remoteBook.ownerId = user.id;
-        await dbService.saveBook(remoteBook);
-      }
-      for (const remoteLog of remoteChanges.stats) {
-        await dbService.saveLog(remoteLog);
-      }
+      await Promise.all([
+        ...remoteChanges.books.map(async (remoteBook) => {
+          remoteBook.ownerId = user.id;
+          await dbService.saveBook(remoteBook);
+        }),
+        ...remoteChanges.stats.map(remoteLog => dbService.saveLog(remoteLog))
+      ]);
 
       localStorage.setItem(`visus_last_sync_${user.id}`, new Date().toISOString());
       setSyncStatus("success");

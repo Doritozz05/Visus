@@ -63,10 +63,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             // 1. Migrate any local unauthenticated books to the cloud user
             const localBooks = await libraryService.loadLibrary('local');
             if (localBooks && localBooks.length > 0) {
-              for (const lb of localBooks) {
+              await Promise.all(localBooks.map(async (lb) => {
                 const migratedBook = { ...lb, ownerId: user.id };
                 await dbService.saveBook(migratedBook);
-              }
+              }));
               await dbService.clearBooksByOwnerId('local');
               // Reload to get merged list
               loadedBooks = await libraryService.loadLibrary(user.id);
@@ -81,7 +81,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
               // Apply deletions
               loadedBooks = loadedBooks.filter(b => !remoteChanges.deletedBookIds.includes(b.id));
 
-              for (const remoteBook of remoteChanges.books) {
+              await Promise.all(remoteChanges.books.map(async (remoteBook) => {
                 remoteBook.ownerId = user.id; // Enforce ownership
                 const existingIndex = loadedBooks.findIndex(b => b.id === remoteBook.id);
 
@@ -105,7 +105,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
                       }
                    }
                 }
-              }
+              }));
               localStorage.setItem(syncKey, new Date().toISOString());
             }
 
