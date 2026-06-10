@@ -77,20 +77,33 @@ export class SupabaseAuthService implements IAuthService {
   }
 
   async getAALStatus(): Promise<{ currentLevel: string; nextLevel: string; factorId?: string }> {
-    const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (error) throw new Error(error.message);
+    try {
+      // Pre-emptive offline check to avoid "Failed to fetch" noise
+      if (typeof window !== 'undefined' && !window.navigator.onLine) {
+        return { currentLevel: 'aal1', nextLevel: 'aal1' };
+      }
 
-    const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
-    if (factorsError) throw new Error(factorsError.message);
+      const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (error) throw error;
 
-    const allFactors = [...(factorsData.totp || []), ...(factorsData.phone || [])];
-    const verifiedFactor = allFactors.find(factor => factor.status === 'verified');
+      const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+      if (factorsError) throw factorsError;
 
-    return {
-      currentLevel: data?.currentLevel || 'aal1',
-      nextLevel: data?.nextLevel || 'aal1',
-      factorId: verifiedFactor?.id,
-    };
+      const allFactors = [...(factorsData.totp || []), ...(factorsData.phone || [])];
+      const verifiedFactor = allFactors.find(factor => factor.status === 'verified');
+
+      return {
+        currentLevel: data?.currentLevel || 'aal1',
+        nextLevel: data?.nextLevel || 'aal1',
+        factorId: verifiedFactor?.id,
+      };
+    } catch (err) {
+      // Fail silently for network errors
+      return {
+        currentLevel: 'aal1',
+        nextLevel: 'aal1',
+      };
+    }
   }
 
   async enrollMFA(): Promise<{ id: string; uri: string; secret: string }> {
@@ -136,14 +149,39 @@ export class SupabaseAuthService implements IAuthService {
   }
 
   async getUser(): Promise<User | null> {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error || !user) return null;
-    return {
-      id: user.id,
-      email: user.email || "",
-      name: user.user_metadata?.full_name,
-      avatarUrl: user.user_metadata?.avatar_url,
+    const isOffline = typeof window !== 'undefined' && !window.navigator.onLine;
+
+    const getLocalSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          return {
+            id: session.user.id,
+            email: session.user.email || "",
+            name: session.user.user_metadata?.full_name,
+            avatarUrl: session.user.user_metadata?.avatar_url,
+          };
+        }
+      } catch (_) { /* silent */ }
+      return null;
     };
+
+    if (isOffline) return getLocalSession();
+
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) return getLocalSession();
+      
+      return {
+        id: user.id,
+        email: user.email || "",
+        name: user.user_metadata?.full_name,
+        avatarUrl: user.user_metadata?.avatar_url,
+      };
+    } catch (err) {
+      // Capture all network/fetch errors silently and fallback
+      return getLocalSession();
+    }
   }
 
   onAuthStateChange(callback: (user: User | null) => void): () => void {

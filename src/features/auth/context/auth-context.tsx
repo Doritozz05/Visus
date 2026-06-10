@@ -38,7 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (error) {
-        console.error("Error initializing auth:", error);
+        // Use console.warn for initialization errors to avoid Next.js dev overlay in offline mode
+        console.warn("Auth initialization warning (expected if offline):", error);
       } finally {
         setIsLoading(false);
       }
@@ -50,15 +51,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = authService.onAuthStateChange(async (updatedUser) => {
       setUser(updatedUser);
       if (updatedUser) {
-        const aal = await authService.getAALStatus();
+        try {
+          const aal = await authService.getAALStatus();
 
-        // Client-side MFA Guard on state change
-        const protectedPaths = ['/library', '/settings', '/dashboard', '/reader'];
-        const isProtectedRoute = protectedPaths.some(path => window.location.pathname.startsWith(path));
+          // Client-side MFA Guard on state change
+          const protectedPaths = ['/library', '/settings', '/dashboard', '/reader'];
+          const isProtectedRoute = protectedPaths.some(path => window.location.pathname.startsWith(path));
 
-        if (isProtectedRoute && aal.currentLevel !== 'aal2' && aal.factorId) {
-          setIsRedirecting(true);
-          window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+          if (isProtectedRoute && aal.currentLevel !== 'aal2' && aal.factorId) {
+            setIsRedirecting(true);
+            window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+          }
+        } catch (aalErr) {
+          console.warn("Could not verify AAL status (offline):", aalErr);
         }
       }
       setIsLoading(false);

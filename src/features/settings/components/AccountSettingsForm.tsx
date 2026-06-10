@@ -5,82 +5,35 @@ import { useAuth } from "@/features/auth/context/auth-context";
 import { MfaSetup } from "@/features/auth/components/MfaSetup";
 import { UpdateEmailForm } from "@/features/auth/components/UpdateEmailForm";
 import { UpdatePasswordForm } from "@/features/auth/components/UpdatePasswordForm";
-import { User, ShieldCheck, Mail, Lock, LogOut, RefreshCw, UserCircle, CheckCircle, AlertTriangle, CloudUpload, CloudDownload } from "lucide-react";
+import { User, ShieldCheck, Mail, Lock, LogOut, RefreshCw, UserCircle, CheckCircle, AlertTriangle, Cloud } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { remoteSyncService } from "@/core/config/services";
-import { dbService } from "@/core/services/db-service";
-import { StatsService } from "@/core/services/stats-service";
+import { useLibrary } from "@/features/library/context/library-context";
 
 export function AccountSettingsForm() {
   const { user, logout } = useAuth();
-  const [isPushing, setIsPushing] = React.useState(false);
-  const [isPulling, setIsPulling] = React.useState(false);
+  const { forceSync } = useLibrary();
+  const [isSyncing, setIsSyncing] = React.useState(false);
   const [syncStatus, setSyncStatus] = React.useState<"idle" | "success" | "error">("idle");
   const [syncError, setSyncError] = React.useState<string | null>(null);
 
   const isGoogleUser = user?.avatarUrl !== undefined;
 
-  const handlePush = async () => {
+  const handleSync = async () => {
     if (!user) return;
     
-    setIsPushing(true);
+    setIsSyncing(true);
     setSyncStatus("idle");
     setSyncError(null);
 
     try {
-      // 1. Gather all local data
-      const books = await dbService.getAllBooks(user.id);
-      const logs = await StatsService.getSessionLogs();
-      
-      // 2. Push local changes to Supabase
-      await remoteSyncService.pushChanges(user.id, {
-        books,
-        stats: logs,
-        deletedBookIds: [] 
-      });
-
+      await forceSync();
       setSyncStatus("success");
     } catch (err) {
       setSyncStatus("error");
-      setSyncError(err instanceof Error ? err.message : "Unknown push error.");
+      setSyncError(err instanceof Error ? err.message : "Unknown synchronization error.");
     } finally {
-      setIsPushing(false);
-    }
-  };
-
-  const handlePull = async () => {
-    if (!user) return;
-    
-    setIsPulling(true);
-    setSyncStatus("idle");
-    setSyncError(null);
-
-    try {
-      // Pull remote changes from Supabase (using 0 to fetch all, which deduplicates on page reload)
-      const remoteChanges = await remoteSyncService.pullChanges(user.id, new Date(0).toISOString());
-
-      // Update local DB with remote changes
-      await Promise.all([
-        ...remoteChanges.books.map(async (remoteBook) => {
-          remoteBook.ownerId = user.id;
-          await dbService.saveBook(remoteBook);
-        }),
-        ...remoteChanges.stats.map(remoteLog => dbService.saveLog(remoteLog))
-      ]);
-
-      localStorage.setItem(`visus_last_sync_${user.id}`, new Date().toISOString());
-      setSyncStatus("success");
-      
-      // Reload page to trigger LibraryContext hydration & deduplication
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (err) {
-      setSyncStatus("error");
-      setSyncError(err instanceof Error ? err.message : "Unknown pull error.");
-    } finally {
-      setIsPulling(false);
+      setIsSyncing(false);
     }
   };
 
@@ -185,22 +138,14 @@ export function AccountSettingsForm() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-2 mt-auto">
+          <div className="mt-auto">
             <button 
-              onClick={handlePush}
-              disabled={isPushing || isPulling || !user}
-              className="w-full py-2.5 border border-border/30 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-foreground hover:bg-accent hover:border-primary"
+              onClick={handleSync}
+              disabled={isSyncing || !user}
+              className="w-full py-3 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border border-primary/20 rounded-xl font-mono text-xs uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-bold group"
             >
-              <CloudUpload className={`h-4 w-4 ${isPushing ? "animate-bounce" : ""}`} />
-              {isPushing ? "Pushing..." : "Push Local"}
-            </button>
-            <button 
-              onClick={handlePull}
-              disabled={isPushing || isPulling || !user}
-              className="w-full py-2.5 border border-border/30 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-foreground hover:bg-accent hover:border-primary"
-            >
-              <CloudDownload className={`h-4 w-4 ${isPulling ? "animate-bounce" : ""}`} />
-              {isPulling ? "Pulling..." : "Pull Cloud"}
+              <Cloud className={`h-5 w-5 ${isSyncing ? "animate-spin" : "group-hover:scale-110 transition-transform"}`} />
+              {isSyncing ? "Synchronizing..." : "Synchronize Library Now"}
             </button>
           </div>
         </section>

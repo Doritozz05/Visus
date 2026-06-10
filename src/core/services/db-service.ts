@@ -1,6 +1,13 @@
 import { Book, BookBinary } from "../entities/book";
 import { ReadingSessionLog } from "../entities/stats";
 
+export interface SyncAction {
+  id?: number;
+  type: "UPDATE_BOOK" | "DELETE_BOOK" | "UNSYNC_BOOK";
+  payload: any;
+  timestamp: string;
+}
+
 const DB_NAME = "visus_database";
 const DB_VERSION = 3;
 const STORES = {
@@ -292,6 +299,45 @@ class DbService {
         request.onerror = () => {
           reject(request.error);
         };
+      }));
+    });
+  }
+
+  // --- SYNC QUEUE STORE ACTIONS ---
+
+  async enqueueSyncAction(action: SyncAction): Promise<void> {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.SYNC_QUEUE, "readwrite");
+        const store = transaction.objectStore(STORES.SYNC_QUEUE);
+        const request = store.add(action);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      }));
+    });
+  }
+
+  async getSyncQueue(): Promise<SyncAction[]> {
+    return this.withDb((db) => new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORES.SYNC_QUEUE, "readonly");
+      const store = transaction.objectStore(STORES.SYNC_QUEUE);
+      const request = store.getAll();
+
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    }));
+  }
+
+  async removeSyncAction(id: number): Promise<void> {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.SYNC_QUEUE, "readwrite");
+        const store = transaction.objectStore(STORES.SYNC_QUEUE);
+        const request = store.delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
       }));
     });
   }

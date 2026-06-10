@@ -34,6 +34,7 @@ interface LibraryContextType {
   deleteBook: (id: string) => void;
   toggleCompleted: (id: string) => void;
   resetLibrary: () => void;
+  forceSync: () => Promise<void>;
 }
 
 const LibraryContext = React.createContext<LibraryContextType | undefined>(undefined);
@@ -45,200 +46,258 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const [isHydrated, setIsHydrated] = React.useState(false);
   const [isInitialSyncing, setIsInitialSyncing] = React.useState(false);
 
-  // 1. Hydrate state and handle auth-driven sync & migrations
-  React.useEffect(() => {
-    if (isAuthLoading) return; // Wait for auth to settle
+  const processSyncQueue = React.useCallback(async () => {
+    if (!user || !navigator.onLine) return;
+    
+    const { dbService } = await import("@/core/services/db-service");
+    const { remoteSyncService } = await import("@/core/config/services");
+    
+    const queue = await dbService.getSyncQueue();
+    if (queue.length === 0) return;
 
-    const hydrate = async () => {
+    console.log(`[SyncQueue] Processing ${queue.length} pending actions...`);
+
+    for (const action of queue) {
       try {
-        const ownerId = user ? user.id : 'local';
-        let loadedBooks = await libraryService.loadLibrary(ownerId);
+        if (action.type === "UPDATE_BOOK") {
+          await remoteSyncService.pushChanges(user.id, {
+            books: [action.payload],
+            stats: [],
+            deletedBookIds: []
+          });
+        } else if (action.type === "DELETE_BOOK") {
+          await remoteSyncService.pushChanges(user.id, {
+            books: [],
+            stats: [],
+            deletedBookIds: [action.payload]
+          });
+        } else if (action.type === "UNSYNC_BOOK") {
+          const { supabase } = await import("@/lib/supabase");
+          await supabase
+            .from("books_metadata")
+            .delete()
+            .eq("id", action.payload)
+            .eq("user_id", user.id);
+        }
+        
+        if (action.id !== undefined) {
+          await dbService.removeSyncAction(action.id);
+        }
+      } catch (err) {
+        console.warn("[SyncQueue] Failed to process action, will retry later:", err);
+        break; 
+      }
+    }
+  }, [user]);
 
-        if (user) {
-          setIsInitialSyncing(true);
-          try {
-            const { dbService } = await import("@/core/services/db-service");
-            const { remoteSyncService, remoteStorageService } = await import("@/core/config/services");
+  const performSync = React.useCallback(async (forceFull = false) => {
+    if (isAuthLoading) return;
+    
+    const ownerId = user ? user.id : 'local';
+    let loadedBooks = await libraryService.loadLibrary(ownerId);
 
-            // 1. Migrate any local unauthenticated books to the cloud user
-            const localBooks = await libraryService.loadLibrary('local');
-            if (localBooks && localBooks.length > 0) {
-              await Promise.all(localBooks.map(async (lb) => {
-                const migratedBook = { ...lb, ownerId: user.id };
-                await dbService.saveBook(migratedBook);
-              }));
-              await dbService.clearBooksByOwnerId('local');
-              // Reload to get merged list
-              loadedBooks = await libraryService.loadLibrary(user.id);
-            }
+    if (user) {
+      setIsInitialSyncing(true);
+      try {
+        const { dbService } = await import("@/core/services/db-service");
+        const { remoteSyncService, remoteStorageService } = await import("@/core/config/services");
 
-            // 2. Pull remote changes from cloud using user-specific timestamp
-            const syncKey = `visus_last_sync_${user.id}`;
-            const lastSyncStr = localStorage.getItem(syncKey);
-            const lastSyncDate = lastSyncStr ? new Date(lastSyncStr) : new Date(0);
-            const now = new Date();
+        // 1. Migrate any local unauthenticated books
+        const localBooks = await libraryService.loadLibrary('local');
+        if (localBooks && localBooks.length > 0) {
+          await Promise.all(localBooks.map(async (lb) => {
+            const migratedBook = { ...lb, ownerId: user.id };
+            await dbService.saveBook(migratedBook);
+          }));
+          await dbService.clearBooksByOwnerId('local');
+          loadedBooks = await libraryService.loadLibrary(user.id);
+        }
+
+        // 2. Pull remote changes
+        const syncKey = `visus_last_sync_${user.id}`;
+        const lastSyncStr = forceFull ? null : localStorage.getItem(syncKey);
+        const lastSyncDate = lastSyncStr ? new Date(lastSyncStr) : new Date(0);
+        const now = new Date();
+        
+        const diffDays = (now.getTime() - lastSyncDate.getTime()) / (1000 * 3600 * 24);
+        const isFullReconciliation = forceFull || diffDays > 7;
+
+        const remoteChanges = await remoteSyncService.pullChanges(user.id, lastSyncDate.toISOString());
+
+        if (isFullReconciliation) {
+          const { data: remoteBooks, error: remoteBooksErr } = await (await import("@/lib/supabase")).supabase
+            .from("books_metadata")
+            .select("id")
+            .eq("user_id", user.id);
+          
+          const { data: hardDeleted } = await (await import("@/lib/supabase")).supabase
+            .from("deleted_records")
+            .select("record_id")
+            .eq("user_id", user.id);
+
+          if (!remoteBooksErr && remoteBooks) {
+            const remoteIds = new Set(remoteBooks.map(b => b.id));
+            const hardDeletedIds = new Set((hardDeleted || []).map(d => d.record_id));
             
-            // Reconcile strategy: 
-            // - If last sync was > 7 days ago, do a FULL integrity check (Reconciliation)
-            // - Otherwise, do an incremental sync using deleted_records (Performance)
-            const diffDays = (now.getTime() - lastSyncDate.getTime()) / (1000 * 3600 * 24);
-            const isFullReconciliation = diffDays > 7;
+            const cloudMarkedBooks = loadedBooks.filter(b => b.isInCloud);
+            
+            for (const lb of cloudMarkedBooks) {
+               const isLocalOriginal = lb.isLocalOriginal !== false; 
 
-            const remoteChanges = await remoteSyncService.pullChanges(user.id, lastSyncDate.toISOString());
-
-            if (isFullReconciliation) {
-              // TOTAL RECONCILIATION: Verify integrity of all cloud-linked books
-              const { data: remoteBooks, error: remoteBooksErr } = await (await import("@/lib/supabase")).supabase
-                .from("books_metadata")
-                .select("id")
-                .eq("user_id", user.id);
-              
-              const { data: hardDeleted, error: hardDeletedErr } = await (await import("@/lib/supabase")).supabase
-                .from("deleted_records")
-                .select("record_id")
-                .eq("user_id", user.id);
-
-              if (!remoteBooksErr && remoteBooks) {
-                const remoteIds = new Set(remoteBooks.map(b => b.id));
-                const hardDeletedIds = new Set((hardDeleted || []).map(d => d.record_id));
-                
-                // Find local books that are marked as being in the cloud
-                const cloudMarkedBooks = loadedBooks.filter(b => b.isInCloud);
-                
-                for (const lb of cloudMarkedBooks) {
-                   // Backward compatibility: If undefined, assume it's a legacy local book
-                   const isLocalOriginal = lb.isLocalOriginal !== false; 
-
-                   if (hardDeletedIds.has(lb.id)) {
-                      // 1. HARD DELETE: User meant to kill the book everywhere
-                      await dbService.deleteBook(lb.id);
-                      await dbService.deleteBookBinary(lb.id);
-                      loadedBooks = loadedBooks.filter(b => b.id !== lb.id);
-                   } else if (!remoteIds.has(lb.id)) {
-                      // 2. UN-SYNC: Book removed from cloud
-                      if (isLocalOriginal) {
-                         // Master: Keep locally, just remove sync tag
-                         const updatedBook = { ...lb, isInCloud: false, isLocalOriginal: true };
-                         await dbService.saveBook(updatedBook);
-                         const idx = loadedBooks.findIndex(b => b.id === lb.id);
-                         if (idx >= 0) loadedBooks[idx] = updatedBook;
-                      } else {
-                         // Slave/Secondary: Delete completely to clean up
-                         await dbService.deleteBook(lb.id);
-                         await dbService.deleteBookBinary(lb.id);
-                         loadedBooks = loadedBooks.filter(b => b.id !== lb.id);
-                      }
-                   }
-                }
-              }
-            } else if (remoteChanges.deletedBookIds.length > 0) {
-              // INCREMENTAL SYNC: Hard delete books that were explicitly put in the trash
-              loadedBooks = loadedBooks.filter(b => !remoteChanges.deletedBookIds.includes(b.id));
-              await Promise.all(remoteChanges.deletedBookIds.map(async (id) => {
-                await dbService.deleteBook(id);
-                await dbService.deleteBookBinary(id);
-              }));
-            }
-
-            if (remoteChanges.books.length > 0) {
-              await Promise.all(remoteChanges.books.map(async (remoteBook) => {
-                remoteBook.ownerId = user.id; // Enforce ownership
-                remoteBook.isLocalOriginal = false; // It came from cloud
-                const existingIndex = loadedBooks.findIndex(b => b.id === remoteBook.id);
-
-                if (existingIndex >= 0) {
-                   // Preserve local original status if we already had it
-                   remoteBook.isLocalOriginal = loadedBooks[existingIndex].isLocalOriginal;
-                   loadedBooks[existingIndex] = remoteBook;
-                } else {
-                   loadedBooks.push(remoteBook);
-                }
-                
-                await dbService.saveBook(remoteBook);
-                
-                // ... rest of binary download ...
-                if (remoteBook.format !== "PHYSICAL" && remoteBook.isInCloud) {
-                   const binary = await dbService.getBookBinary(remoteBook.id);
-                   if (!binary || !binary.fileBlob) {
-                      try {
-                        const fileBlob = await remoteStorageService.downloadBookFile(user.id, remoteBook.id);
-                        await libraryService.ingestRemoteBinary(remoteBook, fileBlob);
-                      } catch (downloadErr) {
-                        console.warn("Auto-download binary failed for", remoteBook.id, downloadErr);
-                      }
-                   }
-                }
-              }));
-              localStorage.setItem(syncKey, new Date().toISOString());
-            }
-
-            // 3. Deduplication pass by fileHash
-            const hashGroups = new Map<string, Book[]>();
-            for (const b of loadedBooks) {
-               if (b.fileHash) {
-                   if (!hashGroups.has(b.fileHash)) hashGroups.set(b.fileHash, []);
-                   hashGroups.get(b.fileHash)!.push(b);
-               }
-            }
-
-            for (const [hash, group] of hashGroups.entries()) {
-               if (group.length > 1) {
-                  // Sort to find the winner: Local Originals win first, then Cloud, then newest
-                  group.sort((a, b) => {
-                     if (a.isLocalOriginal && !b.isLocalOriginal) return -1;
-                     if (!a.isLocalOriginal && b.isLocalOriginal) return 1;
-                     if (a.isInCloud && !b.isInCloud) return -1;
-                     if (!a.isInCloud && b.isInCloud) return 1;
-                     return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
-                  });
-                  
-                  const winner = group[0];
-                  const losers = group.slice(1);
-
-                  for (const loser of losers) {
-                     // Transfer original status to winner if loser was an original
-                     if (loser.isLocalOriginal) winner.isLocalOriginal = true;
-
-                     const winnerBinary = await dbService.getBookBinary(winner.id);
-                     if (!winnerBinary || !winnerBinary.fileBlob) {
-                        const loserBinary = await dbService.getBookBinary(loser.id);
-                        if (loserBinary && loserBinary.fileBlob) {
-                           loserBinary.bookId = winner.id;
-                           await dbService.saveBookBinary(loserBinary);
-                        }
-                     }
-                     
-                     await dbService.deleteBook(loser.id);
-                     await dbService.deleteBookBinary(loser.id);
-                     loadedBooks = loadedBooks.filter(b => b.id !== loser.id);
+               if (hardDeletedIds.has(lb.id)) {
+                  await dbService.deleteBook(lb.id);
+                  await dbService.deleteBookBinary(lb.id);
+                  loadedBooks = loadedBooks.filter(b => b.id !== lb.id);
+               } else if (!remoteIds.has(lb.id)) {
+                  if (isLocalOriginal) {
+                     const updatedBook = { ...lb, isInCloud: false, isLocalOriginal: true };
+                     await dbService.saveBook(updatedBook);
+                     const idx = loadedBooks.findIndex(b => b.id === lb.id);
+                     if (idx >= 0) loadedBooks[idx] = updatedBook;
+                  } else {
+                     await dbService.deleteBook(lb.id);
+                     await dbService.deleteBookBinary(lb.id);
+                     loadedBooks = loadedBooks.filter(b => b.id !== lb.id);
                   }
                }
             }
-          } catch (syncErr) {
-            console.warn("Background auto-sync failed:", syncErr);
-          } finally {
-            setIsInitialSyncing(false);
           }
+        } else if (remoteChanges.deletedBookIds.length > 0) {
+          loadedBooks = loadedBooks.filter(b => !remoteChanges.deletedBookIds.includes(b.id));
+          await Promise.all(remoteChanges.deletedBookIds.map(async (id) => {
+            await dbService.deleteBook(id);
+            await dbService.deleteBookBinary(id);
+          }));
         }
 
-        setBooks([...loadedBooks]);
+        if (remoteChanges.books.length > 0) {
+          await Promise.all(remoteChanges.books.map(async (remoteBook) => {
+            remoteBook.ownerId = user.id; 
+            remoteBook.isLocalOriginal = false; 
+            const existingIndex = loadedBooks.findIndex(b => b.id === remoteBook.id);
 
-        const activeId = localStorage.getItem(ACTIVE_BOOK_KEY);
-        if (activeId) {
-          setActiveBookIdState(activeId);
+            if (existingIndex >= 0) {
+               remoteBook.isLocalOriginal = loadedBooks[existingIndex].isLocalOriginal;
+               loadedBooks[existingIndex] = remoteBook;
+            } else {
+               loadedBooks.push(remoteBook);
+            }
+            
+            await dbService.saveBook(remoteBook);
+            
+            if (remoteBook.format !== "PHYSICAL" && remoteBook.isInCloud) {
+               const binary = await dbService.getBookBinary(remoteBook.id);
+               if (!binary || !binary.fileBlob) {
+                  try {
+                    const fileBlob = await remoteStorageService.downloadBookFile(user.id, remoteBook.id);
+                    await libraryService.ingestRemoteBinary(remoteBook, fileBlob);
+                  } catch (downloadErr) {
+                    console.warn("Auto-download binary failed for", remoteBook.id, downloadErr);
+                  }
+               }
+            }
+          }));
+          localStorage.setItem(syncKey, new Date().toISOString());
         }
-      } catch (err) {
-        console.warn("Could not parse library. Seeding default library data.", err);
-        setBooks(DEFAULT_BOOKS);
+
+        const hashGroups = new Map<string, Book[]>();
+        for (const b of loadedBooks) {
+           if (b.fileHash) {
+               if (!hashGroups.has(b.fileHash)) hashGroups.set(b.fileHash, []);
+               hashGroups.get(b.fileHash)!.push(b);
+           }
+        }
+
+        for (const [hash, group] of hashGroups.entries()) {
+           if (group.length > 1) {
+              group.sort((a, b) => {
+                 if (a.isLocalOriginal && !b.isLocalOriginal) return -1;
+                 if (!a.isLocalOriginal && b.isLocalOriginal) return 1;
+                 if (a.isInCloud && !b.isInCloud) return -1;
+                 if (!a.isInCloud && b.isInCloud) return 1;
+                 return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
+              });
+              
+              const winner = group[0];
+              const losers = group.slice(1);
+
+              for (const loser of losers) {
+                 if (loser.isLocalOriginal) winner.isLocalOriginal = true;
+                 const winnerBinary = await dbService.getBookBinary(winner.id);
+                 if (!winnerBinary || !winnerBinary.fileBlob) {
+                    const loserBinary = await dbService.getBookBinary(loser.id);
+                    if (loserBinary && loserBinary.fileBlob) {
+                       loserBinary.bookId = winner.id;
+                       await dbService.saveBookBinary(loserBinary);
+                    }
+                 }
+                 await dbService.deleteBook(loser.id);
+                 await dbService.deleteBookBinary(loser.id);
+                 loadedBooks = loadedBooks.filter(b => b.id !== loser.id);
+              }
+           }
+        }
+        
+        await processSyncQueue();
+
+      } catch (syncErr) {
+        console.warn("Background auto-sync failed:", syncErr);
       } finally {
-        setIsHydrated(true);
+        setIsInitialSyncing(false);
       }
+    }
+
+    setBooks([...loadedBooks]);
+
+    const activeId = localStorage.getItem(ACTIVE_BOOK_KEY);
+    if (activeId) {
+      setActiveBookIdState(activeId);
+    }
+    setIsHydrated(true);
+  }, [user, isAuthLoading, processSyncQueue]);
+
+  const [isOnline, setIsOnline] = React.useState(typeof window !== 'undefined' ? window.navigator.onLine : true);
+
+  // 2. Online/Offline Monitoring
+  React.useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      console.log("[SyncQueue] Device is back online.");
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      console.log("[SyncQueue] Device is offline.");
     };
 
-    hydrate();
-  }, [user, isAuthLoading]);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
-  // 2. Realtime Sync Subscription
+  // 3. Reactive Sync Queue Processing
+  React.useEffect(() => {
+    if (isOnline && user && isHydrated) {
+      // Small delay to let network stabilize and auth refresh if needed
+      const timer = setTimeout(() => {
+        processSyncQueue();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOnline, user, isHydrated, processSyncQueue]);
+
+  const forceSync = React.useCallback(async () => {
+    await performSync(true);
+  }, [performSync]);
+
+  // 1. Hydrate state and handle auth-driven sync & migrations
+  React.useEffect(() => {
+    performSync();
+  }, [user, isAuthLoading, performSync]);
+
+  // 3. Realtime Sync Subscription
   React.useEffect(() => {
     if (!user || !isHydrated) return;
 
@@ -474,7 +533,15 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             books: [updatedBook],
             stats: [],
             deletedBookIds: []
-          }).catch(console.warn);
+          }).catch(async (pushErr) => {
+            console.warn("Could not push update, adding to sync queue:", pushErr);
+            const { dbService } = await import("@/core/services/db-service");
+            await dbService.enqueueSyncAction({
+              type: "UPDATE_BOOK",
+              payload: updatedBook,
+              timestamp: new Date().toISOString()
+            });
+          });
         });
       }
 
@@ -496,7 +563,15 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             books: [],
             stats: [],
             deletedBookIds: [id]
-          }).catch(console.warn);
+          }).catch(async (pushErr) => {
+             console.warn("Could not push deletion, adding to sync queue:", pushErr);
+             const { dbService } = await import("@/core/services/db-service");
+             await dbService.enqueueSyncAction({
+               type: "DELETE_BOOK",
+               payload: id,
+               timestamp: new Date().toISOString()
+             });
+          });
         });
       }
       return prev.filter((book) => book.id !== id);
@@ -535,9 +610,26 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         console.warn("Could not save toggled book:", err);
       });
 
+      if (user && updatedBook.isInCloud) {
+        import("@/core/config/services").then(({ remoteSyncService }) => {
+           remoteSyncService.pushChanges(user.id, {
+             books: [updatedBook],
+             stats: [],
+             deletedBookIds: []
+           }).catch(async () => {
+              const { dbService } = await import("@/core/services/db-service");
+              await dbService.enqueueSyncAction({
+                type: "UPDATE_BOOK",
+                payload: updatedBook,
+                timestamp: new Date().toISOString()
+              });
+           });
+        });
+      }
+
       return prevBooks.map((book) => (book.id === id ? updatedBook : book));
     });
-  }, []);
+  }, [user]);
 
   const resetLibrary = React.useCallback(() => {
     setBooks(DEFAULT_BOOKS);
@@ -561,6 +653,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         deleteBook,
         toggleCompleted,
         resetLibrary,
+        forceSync
       }}
     >
       {/* Optional built-in blocking overlay can be added here or handled by consumers checking isInitialSyncing */}

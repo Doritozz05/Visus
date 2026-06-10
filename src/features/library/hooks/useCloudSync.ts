@@ -59,7 +59,14 @@ export function useCloudSync(books: Book[], updateBook: (id: string, updates: Pa
 
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
-      console.error("Sync to cloud failed:", err);
+      
+      // Silence Next.js Dev Overlay for expected offline network failures
+      const isNetworkError = !navigator.onLine || (err instanceof TypeError && err.message === "Failed to fetch") || (err instanceof Error && err.message.includes("Failed to fetch"));
+      if (isNetworkError) {
+        console.warn("Sync to cloud failed (Offline):", err);
+      } else {
+        console.error("Sync to cloud failed:", err);
+      }
     } finally {
       setIsSyncing(false);
     }
@@ -91,6 +98,18 @@ export function useCloudSync(books: Book[], updateBook: (id: string, updates: Pa
       updateBook(bookId, { isInCloud: false });
 
     } catch (err) {
+      // If it's a network error, queue it
+      if (!navigator.onLine || (err instanceof TypeError && err.message === "Failed to fetch")) {
+         console.warn("Offline: queueing un-sync action");
+         const { dbService } = await import("@/core/services/db-service");
+         await dbService.enqueueSyncAction({
+           type: "UNSYNC_BOOK",
+           payload: bookId,
+           timestamp: new Date().toISOString()
+         });
+         updateBook(bookId, { isInCloud: false });
+         return;
+      }
       setError(err instanceof Error ? err.message : String(err));
       console.error("Remove from cloud failed:", err);
     } finally {
