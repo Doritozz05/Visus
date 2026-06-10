@@ -1,5 +1,5 @@
-import parse from 'html-react-parser';
 "use client";
+import parse from 'html-react-parser';
 
 import * as React from "react";
 import { Bookmark } from "@/core/entities/book";
