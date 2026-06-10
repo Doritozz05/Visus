@@ -5,8 +5,8 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 export const createClient = () =>
   createBrowserClient(
-    supabaseUrl,
-    supabaseAnonKey
+    supabaseUrl || 'https://example.supabase.co',
+    supabaseAnonKey || 'dummy_key'
   )
 
 // Cliente para uso directo en componentes de cliente
