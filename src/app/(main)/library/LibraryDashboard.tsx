@@ -9,6 +9,7 @@ import { Eraser, Search, Plus, Library, Flame } from "lucide-react";
 
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { StatsService } from "@/core/services/stats-service";
+import { useAuth } from "@/features/auth/context/auth-context";
 
 // Extracted Sub-Components
 import { IngestionDropzone } from "@/features/library/components/IngestionDropzone";
@@ -26,10 +27,13 @@ import { useCloudSync } from "@/features/library/hooks/useCloudSync";
 export default function LibraryDashboard() {
   const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, setActiveBookId, isHydrated } = useLibrary();
   const router = useRouter();
+  const { user } = useAuth();
 
   const [summary, setSummary] = React.useState({
     currentStreakDays: 12,
   });
+
+  const userInitial = user?.email?.charAt(0).toUpperCase() || "V";
 
   React.useEffect(() => {
     const fetchStats = async () => {
@@ -217,8 +221,12 @@ export default function LibraryDashboard() {
                 <span className="font-bold text-foreground text-[11px]">{summary.currentStreakDays} day streak</span>
               </div>
               <div className="h-4 w-px bg-border/30"></div>
-              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shadow-lg ring-2 ring-background">
-                VP
+              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shadow-lg ring-2 ring-background overflow-hidden">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.name || "User"} className="w-full h-full object-cover" />
+                ) : (
+                  userInitial
+                )}
               </div>
             </div>
           </div>
