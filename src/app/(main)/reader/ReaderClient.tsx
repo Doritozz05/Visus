@@ -30,44 +30,19 @@ export default function ReaderClient() {
   const { settings } = useSettings();
   const { books, activeBookId, setActiveBookId, updateBook, isHydrated } = useLibrary();
 
-  // Active book derivation
-  const activeBook = React.useMemo(() => {
-    if (!activeBookId) return null;
-    return books.find((book) => book.id === activeBookId) || null;
-  }, [books, activeBookId]);
-
+  // --- 1. STATE & STORE HOOKS (TOP LEVEL) ---
   const [bookBinary, setBookBinary] = React.useState<BookBinary | null>(null);
   const [isLoadingContent, setIsLoadingContent] = React.useState(false);
-
-  React.useEffect(() => {
-    async function loadBinary() {
-      if (!activeBookId) {
-        setBookBinary(null);
-        return;
-      }
-      setIsLoadingContent(true);
-      try {
-        const binary = await dbService.getBookBinary(activeBookId);
-        if (binary) {
-          setBookBinary(binary);
-        } else {
-          setBookBinary(null);
-        }
-      } catch (err) {
-        console.error("Failed to load book binary:", err);
-      } finally {
-        setIsLoadingContent(false);
-      }
-    }
-    loadBinary();
-  }, [activeBookId, activeBook?.isInCloud]);
-
-  // Drawer / UI toggles
+  const [isInitializing, setIsInitializing] = React.useState(true);
+  
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster">("rsvp");
   const [isTocOpen, setIsTocOpen] = React.useState(false);
   const [activeQuiz, setActiveQuiz] = React.useState<Quiz | null>(null);
 
+  const mode = useReadingStore((state) => state.mode);
+  const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
+  const storeActiveBookId = useReadingStore((state) => state.activeBookId);
   const completedChapter = useReadingStore((state) => state.completedChapter);
   const setCompletedChapter = useReadingStore((state) => state.setCompletedChapter);
   const setIsPlaying = useReadingStore((state) => state.setIsPlaying);
@@ -75,18 +50,15 @@ export default function ReaderClient() {
   const setIsCompletionModalOpen = useReadingStore((state) => state.setIsCompletionModalOpen);
   const sessionStats = useReadingStore((state) => state.sessionStats);
 
-  React.useEffect(() => {
-    setActiveQuiz(null);
-  }, [activeBookId, completedChapter]);
+  // --- 2. CUSTOM HOOKS ---
+  const { localFileInputRef, handleLocalFileChange, triggerLocalFileBrowser } = useBookIngestion();
 
-  // Consuming modular custom hooks
-  const {
-    localFileInputRef,
-    handleLocalFileChange,
-    triggerLocalFileBrowser
-  } = useBookIngestion();
+  // Active book derivation
+  const activeBook = React.useMemo(() => {
+    if (!activeBookId) return null;
+    return books.find((book) => book.id === activeBookId) || null;
+  }, [books, activeBookId]);
 
-  // Font-adaptive visual words-per-page scaler to prevent any visual overflows/cuts
   const getSafeWordsPerPage = React.useCallback((fontSize: number, baseWords: number): number => {
     const scale = 16 / fontSize;
     return Math.max(100, Math.round(baseWords * scale * 0.82));
@@ -98,7 +70,6 @@ export default function ReaderClient() {
     return getSafeWordsPerPage(fontSize, baseWords);
   }, [settings.general.readerWordsPerPage, settings.general.readerFontSize, getSafeWordsPerPage]);
 
-  // Consuming the core speed reading engine playback hook
   const {
     saveProgressForBook,
     setMode,
@@ -126,11 +97,44 @@ export default function ReaderClient() {
     wordsPerPage,
   });
 
-  // Low-frequency subscriptions to Zustand store properties
-  const mode = useReadingStore((state) => state.mode);
-  const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
-  const storeActiveBookId = useReadingStore((state) => state.activeBookId);
+  // --- 3. EFFECTS ---
+  React.useEffect(() => {
+    setIsInitializing(true);
+    async function loadBinary() {
+      if (!activeBookId) {
+        setBookBinary(null);
+        setIsInitializing(false);
+        return;
+      }
+      setIsLoadingContent(true);
+      try {
+        const binary = await dbService.getBookBinary(activeBookId);
+        setBookBinary(binary || null);
+      } catch (err) {
+        console.error("Failed to load book binary:", err);
+      } finally {
+        setIsLoadingContent(false);
+      }
+    }
+    loadBinary();
+  }, [activeBookId, activeBook?.isInCloud]);
 
+  React.useEffect(() => {
+    if (isHydrated && !isLoadingContent) {
+      if (!activeBook) {
+        setIsInitializing(false);
+      } else if (storeActiveBookId === activeBook.id && initializedBookIdRef.current === activeBook.id) {
+        const timeout = setTimeout(() => setIsInitializing(false), 50);
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [isHydrated, isLoadingContent, storeActiveBookId, activeBook, initializedBookIdRef]);
+
+  React.useEffect(() => {
+    setActiveQuiz(null);
+  }, [activeBookId, completedChapter]);
+
+  // --- 4. DERIVED VALUES & HANDLERS ---
   const isStoreInitialized = activeBook && storeActiveBookId === activeBook.id && initializedBookIdRef.current === activeBook.id;
 
   const currentChapter = React.useMemo(() => {
@@ -142,11 +146,7 @@ export default function ReaderClient() {
 
   const openQuickSettings = () => {
     setIsPlaying(false);
-    if (mode === "normal") {
-      setDrawerTab("general");
-    } else {
-      setDrawerTab(mode);
-    }
+    setDrawerTab(mode === "normal" ? "general" : mode);
     setIsDrawerOpen(true);
   };
 
@@ -155,7 +155,8 @@ export default function ReaderClient() {
     return READER_FONT_CLASSES[ff as keyof typeof READER_FONT_CLASSES] || READER_FONT_CLASSES.serif;
   }, [settings.general.readerFontFamily]);
 
-  if (!isHydrated || isLoadingContent || (activeBook && !isStoreInitialized)) {
+  // --- 5. RENDER LOGIC ---
+  if (!isHydrated || isLoadingContent || isInitializing || (activeBook && !isStoreInitialized)) {
     return <LoadingSpinner message={activeBook?.isInCloud && !bookBinary ? "Downloading from cloud..." : "Loading reader session..."} fullScreen />;
   }
 
@@ -180,12 +181,9 @@ export default function ReaderClient() {
 
   return (
     <div className="h-screen overflow-hidden overscroll-none flex flex-col items-center justify-between relative transition-all duration-300">
-      {/* Mobile TopNav (Extracted) */}
       <MobileReaderNav onOpenSettings={openQuickSettings} />
 
-      {/* Main Content Workspace */}
       <main className="flex-1 flex flex-col items-center justify-between relative w-full h-[calc(100vh-80px)] md:h-screen p-6 pt-4 pb-8 overflow-hidden overscroll-none">
-        
         <ReaderHeader
           activeBook={activeBook}
           setActiveChapterIndex={handleChapterChange}
@@ -202,7 +200,6 @@ export default function ReaderClient() {
           onDeleteBookmark={handleRemoveBookmark}
         />
 
-        {/* Reading Canvas Container (Extracted) */}
         <ReadingCanvas
           mode={mode}
           completedChapter={completedChapter}
@@ -228,7 +225,6 @@ export default function ReaderClient() {
           handleUpdateBookmarkName={handleUpdateBookmarkName}
         />
 
-        {/* Player Bar (Hidden in standard page mode) */}
         {mode !== "normal" && (
           <ReaderPlayer
             onRewind={handleRewind}
@@ -240,14 +236,12 @@ export default function ReaderClient() {
         )}
       </main>
 
-      {/* QUICK SETTINGS DRAWER OVERLAY */}
       <SettingsDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         initialTab={drawerTab}
       />
 
-      {/* BOOK COMPLETION CELEBRATION MODAL */}
       <CompletionModal
         isOpen={isCompletionModalOpen}
         onClose={() => setIsCompletionModalOpen(false)}
