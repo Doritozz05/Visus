@@ -205,7 +205,105 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     hydrate();
   }, [user, isAuthLoading]);
 
-  // 2. Persist activeBookId to localStorage on change
+  // 2. Realtime Sync Subscription
+  React.useEffect(() => {
+    if (!user || !isHydrated) return;
+
+    const setupRealtime = async () => {
+      const { supabase } = await import("@/lib/supabase");
+      const { SupabaseSyncService } = await import("@/lib/services/supabase-sync-service");
+      const { dbService } = await import("@/core/services/db-service");
+      const { remoteStorageService } = await import("@/core/config/services");
+
+      const channel = supabase
+        .channel(`library_changes_${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'books_metadata',
+            filter: `user_id=eq.${user.id}`,
+          },
+          async (payload) => {
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+              const remoteBook = SupabaseSyncService.mapRowToBook(payload.new);
+              
+              // Only process if it's marked as in cloud (STRICT SYNC)
+              if (!remoteBook.isInCloud) return;
+
+              setBooks((prev) => {
+                const existingIndex = prev.findIndex(b => b.id === remoteBook.id);
+                
+                // If it's an update, check if the remote one is actually newer
+                if (existingIndex >= 0) {
+                  const localBook = prev[existingIndex];
+                  const remoteDate = new Date(remoteBook.updatedAt || 0).getTime();
+                  const localDate = new Date(localBook.updatedAt || 0).getTime();
+                  
+                  if (remoteDate <= localDate) return prev; // Local is newer or same
+                  
+                  const newBooks = [...prev];
+                  newBooks[existingIndex] = remoteBook;
+                  return newBooks;
+                }
+                
+                return [remoteBook, ...prev];
+              });
+
+              // Persist to local DB
+              await dbService.saveBook(remoteBook);
+
+              // Auto-download binary if missing
+              if (remoteBook.format !== "PHYSICAL") {
+                const binary = await dbService.getBookBinary(remoteBook.id);
+                if (!binary || !binary.fileBlob) {
+                  try {
+                    const fileBlob = await remoteStorageService.downloadBookFile(user.id, remoteBook.id);
+                    await libraryService.ingestRemoteBinary(remoteBook, fileBlob);
+                  } catch (err) {
+                    console.warn("Realtime binary download failed:", err);
+                  }
+                }
+              }
+            } else if (payload.eventType === 'DELETE') {
+              const deletedId = payload.old.id;
+              setBooks((prev) => prev.filter(b => b.id !== deletedId));
+              await dbService.deleteBook(deletedId);
+              await dbService.deleteBookBinary(deletedId);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'deleted_records',
+            filter: `user_id=eq.${user.id}`,
+          },
+          async (payload) => {
+            const deletedId = payload.new.record_id;
+            setBooks((prev) => prev.filter(b => b.id !== deletedId));
+            await dbService.deleteBook(deletedId);
+            await dbService.deleteBookBinary(deletedId);
+          }
+        )
+        .subscribe();
+
+      return channel;
+    };
+
+    const channelPromise = setupRealtime();
+
+    return () => {
+      channelPromise.then(channel => {
+        if (channel) channel.unsubscribe();
+      });
+    };
+  }, [user, isHydrated]);
+
+  // 3. Persist activeBookId to localStorage on change
   const setActiveBookId = React.useCallback((id: string | null) => {
     setActiveBookIdState(id);
     try {
@@ -313,17 +411,35 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         console.warn("Could not save updated book:", err);
       });
 
+      if (user && updatedBook.isInCloud) {
+        import("@/core/config/services").then(({ remoteSyncService }) => {
+          remoteSyncService.pushChanges(user.id, {
+            books: [updatedBook],
+            stats: [],
+            deletedBookIds: []
+          }).catch(console.warn);
+        });
+      }
+
       return prevBooks.map((book) => (book.id === id ? updatedBook : book));
     });
-  }, []);
+  }, [user]);
 
   const deleteBook = React.useCallback((id: string) => {
     setBooks((prev) => {
       const bookToDelete = prev.find(b => b.id === id);
       
-      if (bookToDelete?.isInCloud && user) {
-        import("@/core/config/services").then(({ remoteStorageService }) => {
+      if (user && bookToDelete?.isInCloud) {
+        import("@/core/config/services").then(({ remoteStorageService, remoteSyncService }) => {
+          // 1. Delete file from storage
           remoteStorageService.deleteBookFile(user.id, id).catch(console.warn);
+          
+          // 2. Notify cloud about deletion
+          remoteSyncService.pushChanges(user.id, {
+            books: [],
+            stats: [],
+            deletedBookIds: [id]
+          }).catch(console.warn);
         });
       }
       return prev.filter((book) => book.id !== id);
@@ -332,16 +448,6 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     libraryService.deleteBook(id).catch((err) => {
       console.warn("Could not delete book from local DB:", err);
     });
-    
-    if (user) {
-      import("@/core/config/services").then(({ remoteSyncService }) => {
-         remoteSyncService.pushChanges(user.id, {
-           books: [],
-           stats: [],
-           deletedBookIds: [id]
-         }).catch(console.warn);
-      });
-    }
 
     setActiveBookIdState((prevActiveId) => {
       if (prevActiveId === id) {

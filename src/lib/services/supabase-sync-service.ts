@@ -29,32 +29,7 @@ export class SupabaseSyncService implements IRemoteSyncService {
     }
 
     return {
-      books: (books || []).map(b => ({
-        id: b.id,
-        title: b.title,
-        author: b.author,
-        format: b.format,
-        progress: b.progress,
-        estimatedReadingTime: b.estimated_reading_time,
-        status: b.status,
-        createdAt: b.created_at,
-        updatedAt: b.updated_at,
-        lastChapterIndex: b.last_chapter_index,
-        lastWordIndex: b.last_word_index,
-        lastLocalPageIndex: b.last_local_page_index,
-        bookmarks: b.bookmarks || [],
-        coverUrl: b.cover_url,
-        description: b.description,
-        genres: b.genres,
-        publisher: b.publisher,
-        publishDate: b.publish_date,
-        language: b.language,
-        currentPage: b.current_page,
-        totalPages: b.total_pages,
-        isInCloud: b.is_in_cloud,
-        fileHash: b.file_hash,
-        ownerId: b.user_id
-      })),
+      books: (books || []).map(b => SupabaseSyncService.mapRowToBook(b)),
       stats: (stats || []).map(s => ({
         id: s.id,
         bookId: s.book_id,
@@ -66,6 +41,35 @@ export class SupabaseSyncService implements IRemoteSyncService {
         completedAt: s.completed_at
       })),
       deletedBookIds: deleted?.map((d) => d.record_id) || [],
+    };
+  }
+
+  static mapRowToBook(b: any): Book {
+    return {
+      id: b.id,
+      title: b.title,
+      author: b.author,
+      format: b.format,
+      progress: b.progress,
+      estimatedReadingTime: b.estimated_reading_time,
+      status: b.status,
+      createdAt: b.created_at,
+      updatedAt: b.updated_at,
+      lastChapterIndex: b.last_chapter_index,
+      lastWordIndex: b.last_word_index,
+      lastLocalPageIndex: b.last_local_page_index,
+      bookmarks: b.bookmarks || [],
+      coverUrl: b.cover_url,
+      description: b.description,
+      genres: b.genres,
+      publisher: b.publisher,
+      publishDate: b.publish_date,
+      language: b.language,
+      currentPage: b.current_page,
+      totalPages: b.total_pages,
+      isInCloud: b.is_in_cloud,
+      fileHash: b.file_hash,
+      ownerId: b.user_id
     };
   }
 
