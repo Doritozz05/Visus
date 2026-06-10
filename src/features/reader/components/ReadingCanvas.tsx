@@ -113,7 +113,6 @@ export function ReadingCanvas({
         ) : (
           <ChapterCompletionCard
             completedChapter={completedChapter}
-            currentChapterContent={currentChapter.content}
             onTakeQuiz={(generated) => setActiveQuiz(generated)}
             onBackToReader={() => {
               setCompletedChapter(null);
