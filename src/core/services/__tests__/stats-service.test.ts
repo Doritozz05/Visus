@@ -35,7 +35,7 @@ describe("StatsService", () => {
 
     it("should return empty array if window is undefined", async () => {
       const originalWindow = global.window;
-      // @ts-ignore
+      // @ts-expect-error - The operand of a 'delete' operator must be optional, but we need to delete it to simulate a non-browser environment
       delete global.window;
       
       const logs = await StatsService.getSessionLogs();
