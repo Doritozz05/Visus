@@ -11,6 +11,7 @@ vi.mock("@/lib/supabase", () => ({
       in: vi.fn().mockReturnThis(),
       upsert: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
     })),
   },
 }));
@@ -76,10 +77,12 @@ describe("SupabaseSyncService", () => {
       };
 
       const upsertSpy = vi.fn().mockResolvedValue({ error: null });
+      const insertSpy = vi.fn().mockResolvedValue({ error: null });
       const deleteSpy = vi.fn().mockResolvedValue({ error: null });
 
       (supabase.from as any).mockImplementation(() => ({
         upsert: upsertSpy,
+        insert: insertSpy,
         delete: vi.fn().mockReturnThis(),
         in: deleteSpy,
       }));
@@ -87,6 +90,11 @@ describe("SupabaseSyncService", () => {
       await service.pushChanges("user-1", payload);
 
       expect(upsertSpy).toHaveBeenCalledTimes(2); // One for books, one for stats
+      expect(insertSpy).toHaveBeenCalledWith([{
+        user_id: "user-1",
+        record_id: "book-deleted",
+        table_name: "books_metadata"
+      }]);
       expect(deleteSpy).toHaveBeenCalledWith("id", ["book-deleted"]);
     });
   });

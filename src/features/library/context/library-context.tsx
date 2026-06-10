@@ -74,19 +74,48 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
             // 2. Pull remote changes from cloud using user-specific timestamp
             const syncKey = `visus_last_sync_${user.id}`;
-            const lastSync = localStorage.getItem(syncKey) || new Date(0).toISOString();
-            const remoteChanges = await remoteSyncService.pullChanges(user.id, lastSync);
+            const lastSyncStr = localStorage.getItem(syncKey);
+            const lastSyncDate = lastSyncStr ? new Date(lastSyncStr) : new Date(0);
+            const now = new Date();
+            
+            // Reconcile strategy: 
+            // - If last sync was > 7 days ago, do a FULL integrity check (Reconciliation)
+            // - Otherwise, do an incremental sync using deleted_records (Performance)
+            const diffDays = (now.getTime() - lastSyncDate.getTime()) / (1000 * 3600 * 24);
+            const isFullReconciliation = diffDays > 7;
 
-            if (remoteChanges.books.length > 0 || remoteChanges.deletedBookIds.length > 0) {
-              // Apply deletions locally
-              if (remoteChanges.deletedBookIds.length > 0) {
-                loadedBooks = loadedBooks.filter(b => !remoteChanges.deletedBookIds.includes(b.id));
-                await Promise.all(remoteChanges.deletedBookIds.map(async (id) => {
-                  await dbService.deleteBook(id);
-                  await dbService.deleteBookBinary(id);
-                }));
+            const remoteChanges = await remoteSyncService.pullChanges(user.id, lastSyncDate.toISOString());
+
+            if (isFullReconciliation) {
+              // TOTAL RECONCILIATION: Verify integrity of all cloud-linked books
+              const { data: remoteBooks, error: remoteBooksErr } = await (await import("@/lib/supabase")).supabase
+                .from("books_metadata")
+                .select("id")
+                .eq("user_id", user.id);
+
+              if (!remoteBooksErr && remoteBooks) {
+                const remoteIds = new Set(remoteBooks.map(b => b.id));
+                // Find local books that are marked as being in the cloud but are NOT in the remote list
+                const ghostBooks = loadedBooks.filter(b => b.isInCloud && !remoteIds.has(b.id));
+                
+                if (ghostBooks.length > 0) {
+                  await Promise.all(ghostBooks.map(async (gb) => {
+                    await dbService.deleteBook(gb.id);
+                    await dbService.deleteBookBinary(gb.id);
+                  }));
+                  loadedBooks = loadedBooks.filter(b => !ghostBooks.some(gb => gb.id === b.id));
+                }
               }
+            } else if (remoteChanges.deletedBookIds.length > 0) {
+              // INCREMENTAL SYNC: Use the deleted_records table (Fast)
+              loadedBooks = loadedBooks.filter(b => !remoteChanges.deletedBookIds.includes(b.id));
+              await Promise.all(remoteChanges.deletedBookIds.map(async (id) => {
+                await dbService.deleteBook(id);
+                await dbService.deleteBookBinary(id);
+              }));
+            }
 
+            if (remoteChanges.books.length > 0) {
               await Promise.all(remoteChanges.books.map(async (remoteBook) => {
                 remoteBook.ownerId = user.id; // Enforce ownership
                 const existingIndex = loadedBooks.findIndex(b => b.id === remoteBook.id);
