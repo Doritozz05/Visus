@@ -78,8 +78,14 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             const remoteChanges = await remoteSyncService.pullChanges(user.id, lastSync);
 
             if (remoteChanges.books.length > 0 || remoteChanges.deletedBookIds.length > 0) {
-              // Apply deletions
-              loadedBooks = loadedBooks.filter(b => !remoteChanges.deletedBookIds.includes(b.id));
+              // Apply deletions locally
+              if (remoteChanges.deletedBookIds.length > 0) {
+                loadedBooks = loadedBooks.filter(b => !remoteChanges.deletedBookIds.includes(b.id));
+                await Promise.all(remoteChanges.deletedBookIds.map(async (id) => {
+                  await dbService.deleteBook(id);
+                  await dbService.deleteBookBinary(id);
+                }));
+              }
 
               await Promise.all(remoteChanges.books.map(async (remoteBook) => {
                 remoteBook.ownerId = user.id; // Enforce ownership
