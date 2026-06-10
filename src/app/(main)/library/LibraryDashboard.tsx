@@ -200,10 +200,10 @@ export default function LibraryDashboard() {
         className="hidden" 
       />
 
-      <div className="p-6 md:p-12 flex-1 max-w-5xl mx-auto w-full h-[calc(100vh-64px)] md:h-screen overflow-hidden flex flex-col">
-        <header className="border-b border-border/20 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4">
+      <div className="p-6 md:p-10 flex-1 max-w-5xl mx-auto w-full h-[calc(100vh-64px)] md:h-screen overflow-hidden flex flex-col">
+        <header className="border-b border-border/20 pb-4 mb-6 flex flex-col md:flex-row justify-between items-end gap-4 shrink-0">
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-1">
               <h2 className="text-xs font-mono uppercase tracking-widest text-primary">Digital assets</h2>
               <div className="h-3 w-px bg-border/40"></div>
               <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{books.length} Objects indexed</span>
@@ -211,13 +211,13 @@ export default function LibraryDashboard() {
             <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Library &amp; archives</h1>
           </div>
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 bg-accent/30 px-4 py-2 rounded-xl border border-border/10 shadow-sm backdrop-blur-sm">
+            <div className="flex items-center gap-4 bg-accent/30 px-4 py-1.5 rounded-xl border border-border/10 shadow-sm backdrop-blur-sm">
               <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-                <Flame className="text-primary w-5 h-5 animate-pulse" />
-                <span className="font-bold text-foreground">{summary.currentStreakDays} day streak</span>
+                <Flame className="text-primary w-4 h-4 animate-pulse" />
+                <span className="font-bold text-foreground text-[11px]">{summary.currentStreakDays} day streak</span>
               </div>
               <div className="h-4 w-px bg-border/30"></div>
-              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shadow-lg ring-2 ring-background">
+              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shadow-lg ring-2 ring-background">
                 VP
               </div>
             </div>
@@ -225,7 +225,7 @@ export default function LibraryDashboard() {
         </header>
 
           {/* Bento Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-4">
             
             {/* Left Column: Ingestion Zone & Progress Stats */}
             <div className="lg:col-span-4 flex flex-col gap-6 overflow-hidden">
