@@ -51,8 +51,8 @@ export function useCloudSync(books: Book[], updateBook: (id: string, updates: Pa
       // 4. Update book metadata locally
       updateBook(bookId, { isInCloud: true });
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
       console.error("Sync to cloud failed:", err);
     } finally {
       setIsSyncing(false);
@@ -82,8 +82,8 @@ export function useCloudSync(books: Book[], updateBook: (id: string, updates: Pa
       // 3. Update book metadata locally
       updateBook(bookId, { isInCloud: false });
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
       console.error("Remove from cloud failed:", err);
     } finally {
       setIsSyncing(false);

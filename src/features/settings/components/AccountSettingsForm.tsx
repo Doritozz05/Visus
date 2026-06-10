@@ -41,9 +41,9 @@ export function AccountSettingsForm() {
       });
 
       setSyncStatus("success");
-    } catch (err: any) {
+    } catch (err) {
       setSyncStatus("error");
-      setSyncError(err.message || "Unknown push error.");
+      setSyncError(err instanceof Error ? err.message : "Unknown push error.");
     } finally {
       setIsPushing(false);
     }
@@ -76,9 +76,9 @@ export function AccountSettingsForm() {
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-    } catch (err: any) {
+    } catch (err) {
       setSyncStatus("error");
-      setSyncError(err.message || "Unknown pull error.");
+      setSyncError(err instanceof Error ? err.message : "Unknown pull error.");
     } finally {
       setIsPulling(false);
     }

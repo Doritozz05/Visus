@@ -25,8 +25,8 @@ export function RegisterForm() {
       setTimeout(() => {
         window.location.href = "/library";
       }, 3000);
-    } catch (err: any) {
-      setError(err.message || "Error creating account.");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Error creating account.");
       setIsLoading(false);
     }
   };
