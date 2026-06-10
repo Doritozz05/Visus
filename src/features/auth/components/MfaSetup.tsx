@@ -207,6 +207,7 @@ export function MfaSetup() {
                       await authService.unenrollMFA(qrCodeData.id);
                     } catch (err) {
                       // Silently fail if we can't unenroll
+                      console.debug("Failed to unenroll MFA during cancellation:", err);
                     }
                   }
                   setQrCodeData(null);
