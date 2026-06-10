@@ -27,8 +27,8 @@ export function UpdatePasswordForm({ disabled }: { disabled?: boolean }) {
       setSuccess(true);
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err: any) {
-      setError(err.message || "Could not update password.");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Could not update password.");
     } finally {
       setIsLoading(false);
     }

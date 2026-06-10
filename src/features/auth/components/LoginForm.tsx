@@ -63,8 +63,8 @@ export function LoginForm() {
         // No MFA or already verified
         window.location.href = "/library";
       }
-    } catch (err: any) {
-      setError(err.message || "Error signing in.");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Error signing in.");
       setIsLoading(false);
     }
   };

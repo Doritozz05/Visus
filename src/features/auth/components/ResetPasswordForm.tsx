@@ -18,8 +18,8 @@ export function ResetPasswordForm() {
     try {
       await authService.resetPasswordForEmail(email);
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || "Failed to send recovery email.");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Failed to send recovery email.");
     } finally {
       setIsLoading(false);
     }
