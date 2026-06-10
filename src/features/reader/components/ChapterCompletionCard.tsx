@@ -8,7 +8,7 @@ interface ChapterCompletionCardProps {
   completedChapter: string;
   currentChapterContent: string;
   onTakeQuiz: (quiz: Quiz) => void;
-  onBackToPages: () => void;
+  onBackToReader: () => void;
   onSkipQuiz: () => void;
 }
 
@@ -16,7 +16,7 @@ export function ChapterCompletionCard({
   completedChapter,
   currentChapterContent,
   onTakeQuiz,
-  onBackToPages,
+  onBackToReader,
   onSkipQuiz,
 }: ChapterCompletionCardProps) {
   const handleGenerateQuiz = React.useCallback(() => {
@@ -55,10 +55,10 @@ export function ChapterCompletionCard({
 
         <div className="flex gap-3 w-full">
           <button
-            onClick={onBackToPages}
+            onClick={onBackToReader}
             className="flex-1 px-4 py-2.5 border border-border/30 rounded text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
           >
-            Back to pages
+            Back to reader
           </button>
           <button
             onClick={onSkipQuiz}

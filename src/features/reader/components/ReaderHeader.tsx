@@ -145,7 +145,7 @@ export function ReaderHeader({
                 : "text-muted-foreground hover:text-primary"
             }`}
           >
-            Pages
+            Reader
           </button>
           <button
             onClick={() => {

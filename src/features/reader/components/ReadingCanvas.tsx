@@ -115,7 +115,7 @@ export function ReadingCanvas({
             completedChapter={completedChapter}
             currentChapterContent={currentChapter.content}
             onTakeQuiz={(generated) => setActiveQuiz(generated)}
-            onBackToPages={() => {
+            onBackToReader={() => {
               setCompletedChapter(null);
               setMode("normal");
             }}

@@ -36,7 +36,7 @@ export default function ReaderClient() {
   const [isInitializing, setIsInitializing] = React.useState(true);
   
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-  const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster">("rsvp");
+  const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster" | "normal">("rsvp");
   const [isTocOpen, setIsTocOpen] = React.useState(false);
   const [activeQuiz, setActiveQuiz] = React.useState<Quiz | null>(null);
 
@@ -146,7 +146,7 @@ export default function ReaderClient() {
 
   const openQuickSettings = () => {
     setIsPlaying(false);
-    setDrawerTab(mode === "normal" ? "general" : mode);
+    setDrawerTab(mode);
     setIsDrawerOpen(true);
   };
 
