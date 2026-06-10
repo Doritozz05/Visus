@@ -1,4 +1,5 @@
 "use client";
+import parse from 'html-react-parser';
 
 import * as React from "react";
 import { Bookmark } from "@/core/entities/book";
@@ -307,8 +308,9 @@ export function PagesVisualBox({
               fontSize: `${scaledFontSize}px`,
               lineHeight: "1.75",
             }}
-            dangerouslySetInnerHTML={{ __html: formattedHtml }}
-          />
+            >
+            {parse(formattedHtml)}
+          </div>
         </div>
       </div>
 
