@@ -1,15 +1,19 @@
+import { BookChapter } from "@/core/entities/book";
+
 export function buildChaptersData(
   activeBookId: string | null,
-  activeBookChapters: any[] | undefined,
-  activeBookContent: string | undefined
+  activeBookChapters: BookChapter[] | undefined,
+  activeBookContent: string | undefined,
 ) {
   if (!activeBookId) return [];
-  
-  let rawChapters = activeBookChapters || [];
-  
+
+  let rawChapters: BookChapter[] = activeBookChapters || [];
+
   if (rawChapters.length === 0 && activeBookContent) {
-    const paragraphs = activeBookContent.split(/\n\s*\n+/).filter(p => p.trim() !== "");
-    const legacyChapters = [];
+    const paragraphs = activeBookContent
+      .split(/\n\s*\n+/)
+      .filter((p) => p.trim() !== "");
+    const legacyChapters: BookChapter[] = [];
     for (let i = 0; i < paragraphs.length; i += 6) {
       const title = `Section ${Math.floor(i / 6) + 1}`;
       const content = paragraphs.slice(i, i + 6).join("\n\n");
@@ -19,10 +23,12 @@ export function buildChaptersData(
   }
 
   if (rawChapters.length === 0) {
-    rawChapters = [{
-      title: "Section 1",
-      content: activeBookContent || "Empty book content."
-    }];
+    rawChapters = [
+      {
+        title: "Section 1",
+        content: activeBookContent || "Empty book content.",
+      },
+    ];
   }
 
   return rawChapters.map((ch, idx) => ({

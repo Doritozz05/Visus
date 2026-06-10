@@ -19,8 +19,8 @@ export function UpdateEmailForm({ currentEmail, disabled }: { currentEmail: stri
       await authService.updateEmail(newEmail);
       setSuccess(true);
       setNewEmail("");
-    } catch (err: any) {
-      setError(err.message || "Could not update email address.");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Could not update email address.");
     } finally {
       setIsLoading(false);
     }

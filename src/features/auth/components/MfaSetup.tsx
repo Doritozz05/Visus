@@ -35,8 +35,8 @@ export function MfaSetup() {
       setError(null);
       const data = await authService.enrollMFA();
       setQrCodeData(data);
-    } catch (err: any) {
-      setError(err.message || "Could not start MFA setup.");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Could not start MFA setup.");
     } finally {
       setIsEnrolling(false);
     }
@@ -51,7 +51,7 @@ export function MfaSetup() {
       setQrCodeData(null);
       setVerificationCode("");
       await checkStatus(); // Refresh status to show the enabled UI
-    } catch (err: any) {
+    } catch (err) {
       setError("Incorrect code. Please try again.");
     } finally {
       setIsEnrolling(false);
@@ -83,8 +83,8 @@ export function MfaSetup() {
       setError(null);
       await authService.unenrollMFA(mfaStatus.factorId);
       await checkStatus();
-    } catch (err: any) {
-      setError(err.message || "Could not disable MFA.");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Could not disable MFA.");
     } finally {
       setIsUnenrolling(false);
     }
@@ -207,6 +207,7 @@ export function MfaSetup() {
                       await authService.unenrollMFA(qrCodeData.id);
                     } catch (err) {
                       // Silently fail if we can't unenroll
+                      console.debug("Failed to unenroll MFA during cancellation:", err);
                     }
                   }
                   setQrCodeData(null);

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { StatsService } from "../stats-service";
+import { ReadingSessionLog, ReadingMode } from "../../entities/stats";
 import { dbService } from "../db-service";
 
 vi.mock("../db-service", () => ({
@@ -14,12 +15,12 @@ describe("StatsService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Simulate browser environment for window-checked methods
-    global.window = {} as any;
+    global.window = {} as Window & typeof globalThis;
   });
 
   describe("getSessionLogs", () => {
     it("should return logs from dbService", async () => {
-      const mockLogs = [{ id: "1", speedWpm: 500 } as any];
+      const mockLogs = [{ id: "1", speedWpm: 500 } as Partial<ReadingSessionLog>] as ReadingSessionLog[];
       vi.mocked(dbService.getAllLogs).mockResolvedValue(mockLogs);
 
       const logs = await StatsService.getSessionLogs();
@@ -50,7 +51,7 @@ describe("StatsService", () => {
       const sessionData = {
         bookId: "book-1",
         bookTitle: "Title",
-        mode: "rsvp" as any,
+        mode: "rsvp" as ReadingMode,
         speedWpm: 600,
         durationSeconds: 120,
         accuracy: 98,
@@ -70,7 +71,7 @@ describe("StatsService", () => {
       const mockLogs = [
         { speedWpm: 400, durationSeconds: 60, completedAt: "2026-06-01T10:00:00Z" },
         { speedWpm: 600, durationSeconds: 120, completedAt: "2026-06-02T10:00:00Z" },
-      ] as any;
+      ] as Partial<ReadingSessionLog>[] as ReadingSessionLog[];
       vi.mocked(dbService.getAllLogs).mockResolvedValue(mockLogs);
 
       const summary = await StatsService.getStatsSummary(2);

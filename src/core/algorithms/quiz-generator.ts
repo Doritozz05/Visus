@@ -23,10 +23,9 @@ export interface Quiz {
  * Generates a standard 5-question metacognitive comprehension quiz.
  * 
  * @param chapterTitle - Title of the completed chapter
- * @param _content - Chapter text (unused, kept for signature compatibility)
  * @returns A Quiz object containing exactly 5 questions
  */
-export function generateQuizForChapter(chapterTitle: string, _content?: string): Quiz {
+export function generateQuizForChapter(chapterTitle: string): Quiz {
   const questions: QuizQuestion[] = [
     {
       id: "q-gist",

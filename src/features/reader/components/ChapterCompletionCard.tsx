@@ -6,7 +6,6 @@ import { generateQuizForChapter, Quiz } from "@/core/algorithms/quiz-generator";
 
 interface ChapterCompletionCardProps {
   completedChapter: string;
-  currentChapterContent: string;
   onTakeQuiz: (quiz: Quiz) => void;
   onBackToReader: () => void;
   onSkipQuiz: () => void;
@@ -14,15 +13,14 @@ interface ChapterCompletionCardProps {
 
 export function ChapterCompletionCard({
   completedChapter,
-  currentChapterContent,
   onTakeQuiz,
   onBackToReader,
   onSkipQuiz,
 }: ChapterCompletionCardProps) {
   const handleGenerateQuiz = React.useCallback(() => {
-    const generated = generateQuizForChapter(completedChapter, currentChapterContent);
+    const generated = generateQuizForChapter(completedChapter);
     onTakeQuiz(generated);
-  }, [completedChapter, currentChapterContent, onTakeQuiz]);
+  }, [completedChapter, onTakeQuiz]);
 
   return (
     <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl glass-panel relative overflow-hidden flex flex-col items-center justify-center gap-6 transition-all duration-300">
