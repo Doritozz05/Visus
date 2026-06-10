@@ -1,3 +1,4 @@
+import parse from 'html-react-parser';
 "use client";
 
 import * as React from "react";
@@ -307,8 +308,9 @@ export function PagesVisualBox({
               fontSize: `${scaledFontSize}px`,
               lineHeight: "1.75",
             }}
-            dangerouslySetInnerHTML={{ __html: formattedHtml }}
-          />
+            >
+            {parse(formattedHtml)}
+          </div>
         </div>
       </div>
 
