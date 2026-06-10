@@ -3,6 +3,7 @@
 import { Sidebar } from "@/components/Sidebar";
 import { usePathname } from "next/navigation";
 import { Flame } from "lucide-react";
+import Image from "next/image";
 import { useAuth } from "@/features/auth/context/auth-context";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -26,7 +27,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <Flame className="text-primary w-6 h-6" />
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary border border-border/30 overflow-hidden">
               {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user.name || "User"} className="w-full h-full object-cover" />
+                <Image src={user.avatarUrl} alt={user.name || "User"} width={32} height={32} className="w-full h-full object-cover" />
               ) : (
                 userInitial
               )}

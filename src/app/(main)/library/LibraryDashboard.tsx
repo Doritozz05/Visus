@@ -6,6 +6,7 @@ import { useLibrary } from "@/features/library/context/library-context";
 import { Book } from "@/core/entities/book";
 import { useRouter } from "next/navigation";
 import { Eraser, Search, Plus, Library, Flame } from "lucide-react";
+import Image from "next/image";
 
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { StatsService } from "@/core/services/stats-service";
@@ -223,7 +224,7 @@ export default function LibraryDashboard() {
               <div className="h-4 w-px bg-border/30"></div>
               <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shadow-lg ring-2 ring-background overflow-hidden">
                 {user?.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.name || "User"} className="w-full h-full object-cover" />
+                  <Image src={user.avatarUrl} alt={user.name || "User"} width={28} height={28} className="w-full h-full object-cover" />
                 ) : (
                   userInitial
                 )}
