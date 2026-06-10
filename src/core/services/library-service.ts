@@ -39,6 +39,7 @@ export function createBookEntity(data: ParsedBookData, customId?: string): Book 
     currentPage: data.metadata?.currentPage,
     totalPages: data.metadata?.totalPages,
     ownerId: data.ownerId || 'local',
+    isLocalOriginal: true,
   };
 }
 

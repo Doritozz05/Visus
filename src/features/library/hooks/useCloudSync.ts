@@ -76,14 +76,16 @@ export function useCloudSync(books: Book[], updateBook: (id: string, updates: Pa
       // 1. Delete from Supabase Storage
       await remoteStorageService.deleteBookFile(user.id, bookId);
 
-      // 2. Remove metadata from Supabase
-      import("@/core/config/services").then(({ remoteSyncService }) => {
-        remoteSyncService.pushChanges(user.id, {
-          books: [],
-          stats: [],
-          deletedBookIds: [bookId]
-        }).catch(console.warn);
-      });
+      // 2. Remove metadata from Supabase WITHOUT logging in deleted_records
+      // This allows other devices to keep the book locally but un-synced.
+      const { supabase } = await import("@/lib/supabase");
+      const { error: metaErr } = await supabase
+        .from("books_metadata")
+        .delete()
+        .eq("id", bookId)
+        .eq("user_id", user.id);
+      
+      if (metaErr) throw metaErr;
 
       // 3. Update book metadata locally
       updateBook(bookId, { isInCloud: false });

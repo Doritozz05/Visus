@@ -62,6 +62,7 @@ export interface Book {
   updatedAt?: string;
   fileHash?: string;
   ownerId: string;
+  isLocalOriginal?: boolean;
 }
 
 export interface ParsedBookData {

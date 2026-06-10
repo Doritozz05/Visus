@@ -92,22 +92,47 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
                 .from("books_metadata")
                 .select("id")
                 .eq("user_id", user.id);
+              
+              const { data: hardDeleted, error: hardDeletedErr } = await (await import("@/lib/supabase")).supabase
+                .from("deleted_records")
+                .select("record_id")
+                .eq("user_id", user.id);
 
               if (!remoteBooksErr && remoteBooks) {
                 const remoteIds = new Set(remoteBooks.map(b => b.id));
-                // Find local books that are marked as being in the cloud but are NOT in the remote list
-                const ghostBooks = loadedBooks.filter(b => b.isInCloud && !remoteIds.has(b.id));
+                const hardDeletedIds = new Set((hardDeleted || []).map(d => d.record_id));
                 
-                if (ghostBooks.length > 0) {
-                  await Promise.all(ghostBooks.map(async (gb) => {
-                    await dbService.deleteBook(gb.id);
-                    await dbService.deleteBookBinary(gb.id);
-                  }));
-                  loadedBooks = loadedBooks.filter(b => !ghostBooks.some(gb => gb.id === b.id));
+                // Find local books that are marked as being in the cloud
+                const cloudMarkedBooks = loadedBooks.filter(b => b.isInCloud);
+                
+                for (const lb of cloudMarkedBooks) {
+                   // Backward compatibility: If undefined, assume it's a legacy local book
+                   const isLocalOriginal = lb.isLocalOriginal !== false; 
+
+                   if (hardDeletedIds.has(lb.id)) {
+                      // 1. HARD DELETE: User meant to kill the book everywhere
+                      await dbService.deleteBook(lb.id);
+                      await dbService.deleteBookBinary(lb.id);
+                      loadedBooks = loadedBooks.filter(b => b.id !== lb.id);
+                   } else if (!remoteIds.has(lb.id)) {
+                      // 2. UN-SYNC: Book removed from cloud
+                      if (isLocalOriginal) {
+                         // Master: Keep locally, just remove sync tag
+                         const updatedBook = { ...lb, isInCloud: false, isLocalOriginal: true };
+                         await dbService.saveBook(updatedBook);
+                         const idx = loadedBooks.findIndex(b => b.id === lb.id);
+                         if (idx >= 0) loadedBooks[idx] = updatedBook;
+                      } else {
+                         // Slave/Secondary: Delete completely to clean up
+                         await dbService.deleteBook(lb.id);
+                         await dbService.deleteBookBinary(lb.id);
+                         loadedBooks = loadedBooks.filter(b => b.id !== lb.id);
+                      }
+                   }
                 }
               }
             } else if (remoteChanges.deletedBookIds.length > 0) {
-              // INCREMENTAL SYNC: Use the deleted_records table (Fast)
+              // INCREMENTAL SYNC: Hard delete books that were explicitly put in the trash
               loadedBooks = loadedBooks.filter(b => !remoteChanges.deletedBookIds.includes(b.id));
               await Promise.all(remoteChanges.deletedBookIds.map(async (id) => {
                 await dbService.deleteBook(id);
@@ -118,17 +143,20 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             if (remoteChanges.books.length > 0) {
               await Promise.all(remoteChanges.books.map(async (remoteBook) => {
                 remoteBook.ownerId = user.id; // Enforce ownership
+                remoteBook.isLocalOriginal = false; // It came from cloud
                 const existingIndex = loadedBooks.findIndex(b => b.id === remoteBook.id);
 
                 if (existingIndex >= 0) {
+                   // Preserve local original status if we already had it
+                   remoteBook.isLocalOriginal = loadedBooks[existingIndex].isLocalOriginal;
                    loadedBooks[existingIndex] = remoteBook;
                 } else {
                    loadedBooks.push(remoteBook);
                 }
                 
                 await dbService.saveBook(remoteBook);
-
-                // Download missing binary for newly synced cloud books
+                
+                // ... rest of binary download ...
                 if (remoteBook.format !== "PHYSICAL" && remoteBook.isInCloud) {
                    const binary = await dbService.getBookBinary(remoteBook.id);
                    if (!binary || !binary.fileBlob) {
@@ -155,8 +183,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
             for (const [hash, group] of hashGroups.entries()) {
                if (group.length > 1) {
-                  // Sort to find the winner: Cloud wins first, then newest updatedAt
+                  // Sort to find the winner: Local Originals win first, then Cloud, then newest
                   group.sort((a, b) => {
+                     if (a.isLocalOriginal && !b.isLocalOriginal) return -1;
+                     if (!a.isLocalOriginal && b.isLocalOriginal) return 1;
                      if (a.isInCloud && !b.isInCloud) return -1;
                      if (!a.isInCloud && b.isInCloud) return 1;
                      return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
@@ -166,6 +196,9 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
                   const losers = group.slice(1);
 
                   for (const loser of losers) {
+                     // Transfer original status to winner if loser was an original
+                     if (loser.isLocalOriginal) winner.isLocalOriginal = true;
+
                      const winnerBinary = await dbService.getBookBinary(winner.id);
                      if (!winnerBinary || !winnerBinary.fileBlob) {
                         const loserBinary = await dbService.getBookBinary(loser.id);
@@ -235,9 +268,11 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
               setBooks((prev) => {
                 const existingIndex = prev.findIndex(b => b.id === remoteBook.id);
                 
-                // If it's an update, check if the remote one is actually newer
                 if (existingIndex >= 0) {
                   const localBook = prev[existingIndex];
+                  // Keep our local original status
+                  remoteBook.isLocalOriginal = localBook.isLocalOriginal;
+
                   const remoteDate = new Date(remoteBook.updatedAt || 0).getTime();
                   const localDate = new Date(localBook.updatedAt || 0).getTime();
                   
@@ -248,6 +283,8 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
                   return newBooks;
                 }
                 
+                // If it's new to us, it's definitely not a local original
+                remoteBook.isLocalOriginal = false;
                 return [remoteBook, ...prev];
               });
 
@@ -268,9 +305,28 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
               }
             } else if (payload.eventType === 'DELETE') {
               const deletedId = payload.old.id;
-              setBooks((prev) => prev.filter(b => b.id !== deletedId));
-              await dbService.deleteBook(deletedId);
-              await dbService.deleteBookBinary(deletedId);
+              
+              setBooks((prev) => {
+                const localBook = prev.find(b => b.id === deletedId);
+                
+                if (localBook?.isLocalOriginal) {
+                  // I AM THE MASTER: Keep it locally, just remove cloud tag
+                  return prev.map(b => b.id === deletedId ? { ...b, isInCloud: false } : b);
+                } else {
+                  // I AM A SLAVE/SECONDARY: Delete it completely
+                  return prev.filter(b => b.id !== deletedId);
+                }
+              });
+
+              const localBook = await dbService.getBook(deletedId);
+              if (localBook) {
+                if (localBook.isLocalOriginal) {
+                  await dbService.saveBook({ ...localBook, isInCloud: false });
+                } else {
+                  await dbService.deleteBook(deletedId);
+                  await dbService.deleteBookBinary(deletedId);
+                }
+              }
             }
           }
         )
@@ -284,6 +340,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
           },
           async (payload) => {
             const deletedId = payload.new.record_id;
+            // HARD DELETE: Explicit trash icon action
             setBooks((prev) => prev.filter(b => b.id !== deletedId));
             await dbService.deleteBook(deletedId);
             await dbService.deleteBookBinary(deletedId);

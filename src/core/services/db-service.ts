@@ -124,6 +124,17 @@ class DbService {
     }));
   }
 
+  async getBook(id: string): Promise<Book | null> {
+    return this.withDb((db) => new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORES.BOOKS_METADATA, "readonly");
+      const store = transaction.objectStore(STORES.BOOKS_METADATA);
+      const request = store.get(id);
+
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    }));
+  }
+
   async saveBook(book: Book): Promise<void> {
     return this.enqueueWrite(() => {
       return this.withDb((db) => new Promise<void>((resolve, reject) => {
