@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { Trash2 } from "lucide-react";
 import { Bookmark } from "@/core/entities/book";
 
@@ -41,22 +42,25 @@ export function TableOfContents({
   anchorY,
 }: TableOfContentsProps) {
   const [activeTab, setActiveTab] = React.useState<"sections" | "bookmarks">("sections");
+  const [mounted, setMounted] = React.useState(false);
 
-  if (!isTocOpen) return null;
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isTocOpen || !mounted) return null;
 
   // Center the dropdown on the button, but clamp so it never overflows the viewport
   const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 800;
-  const sidebarOffset = typeof window !== "undefined" && window.innerWidth >= 768 ? 256 : 0;
   
-  // If anchorX is provided, it's already viewport-relative from getBoundingClientRect
-  // If not provided, we center it in the available content area (viewport - sidebar)
-  const contentCenter = sidebarOffset + (viewportWidth - sidebarOffset) / 2;
-  const rawLeft = (anchorX ?? contentCenter) - DROPDOWN_WIDTH / 2;
+  // Since we use createPortal, we position strictly relative to the document viewport.
+  // We no longer need to subtract any parent offsets, even if the parent has backdrop-blur.
+  const rawLeft = anchorX ? (anchorX - DROPDOWN_WIDTH / 2) : (viewportWidth / 2 - DROPDOWN_WIDTH / 2);
   
   const clampedLeft = Math.max(8, Math.min(rawLeft, viewportWidth - DROPDOWN_WIDTH - 8));
   const top = (anchorY ?? 120) + MARGIN;
 
-  return (
+  const content = (
     <>
       {/* Click-outside backdrop */}
       <div
@@ -173,4 +177,6 @@ export function TableOfContents({
       </div>
     </>
   );
+
+  return createPortal(content, document.body);
 }

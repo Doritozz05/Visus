@@ -237,7 +237,7 @@ export default function LibraryDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-4">
             
             {/* Left Column: Ingestion Zone & Progress Stats */}
-            <div className="lg:col-span-4 flex flex-col gap-6 overflow-hidden">
+            <div className="lg:col-span-4 flex flex-col gap-6">
               
               {/* Drag & Drop Upload Panel */}
               <IngestionDropzone
