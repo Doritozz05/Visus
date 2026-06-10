@@ -224,18 +224,19 @@ export function BookCard({
       </div>
 
       {/* Footer Area: Fixed Position Actions & Progress */}
-      <div className="mt-auto pt-4 border-t border-border/5 flex flex-col gap-4">
+      <div className="mt-auto pt-4 border-t border-border/5 flex flex-col items-center gap-4">
         {book.format !== "PHYSICAL" && (
           <button
             onClick={() => onRead(book.id)}
-            className="w-full flex items-center justify-center gap-1.5 px-4 py-2 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded-lg transition-all shadow-sm group/btn"
+            className="w-fit px-6 py-2 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded-lg transition-all shadow-sm group/btn flex items-center gap-1.5"
+            title="Read book"
           >
             <BookOpen className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform" />
-            Read book
+            <span>Read book</span>
           </button>
         )}
 
-        <div>
+        <div className="w-full">
           <div className="flex justify-between items-end text-[10px] font-mono mb-1.5">
             <span className="text-primary font-bold">{book.progress}%</span>
             <span className="text-muted-foreground/80 truncate max-w-[120px]">{book.estimatedReadingTime}</span>

@@ -41,10 +41,10 @@ export interface SettingsState {
 
 export const DEFAULT_SETTINGS: SettingsState = {
   general: {
-    theme: "dark-violet",
+    theme: "light",
     accentColor: "violet",
     uiFont: "inter",
-    glassmorphism: true,
+    glassmorphism: false,
     reducedMotion: false,
     soundEffects: false,
     readingTimerReminder: 0,
