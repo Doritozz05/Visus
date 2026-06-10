@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Palette, CheckCircle, Check, Settings2 } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
+import type { GeneralSettings } from "@/core/entities/settings";
 
 export function GeneralSettingsForm() {
   const { settings, updateGeneralSettings } = useSettings();
@@ -36,7 +37,7 @@ export function GeneralSettingsForm() {
             ].map((t) => (
               <button
                 key={t.id}
-                onClick={() => updateGeneralSettings({ theme: t.id as any })}
+                onClick={() => updateGeneralSettings({ theme: t.id as GeneralSettings["theme"] })}
                 className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between ${theme === t.id
                   ? "border-primary bg-accent/65"
                   : "border-border/30 bg-card hover:border-border/60"
@@ -69,7 +70,7 @@ export function GeneralSettingsForm() {
             ].map((c) => (
               <button
                 key={c.id}
-                onClick={() => updateGeneralSettings({ accentColor: c.id as any })}
+                onClick={() => updateGeneralSettings({ accentColor: c.id as GeneralSettings["accentColor"] })}
                 className={`w-7 h-7 rounded-full ${c.color} border-2 flex items-center justify-center transition-all ${accentColor === c.id ? "border-foreground scale-110 shadow-md" : "border-transparent hover:scale-105"
                   }`}
               >
@@ -92,7 +93,7 @@ export function GeneralSettingsForm() {
             ].map((f) => (
               <button
                 key={f.id}
-                onClick={() => updateGeneralSettings({ uiFont: f.id as any })}
+                onClick={() => updateGeneralSettings({ uiFont: f.id as GeneralSettings["uiFont"] })}
                 className={`p-1.5 border rounded text-center transition-all ${uiFont === f.id
                   ? "border-primary bg-accent/30 text-primary font-bold"
                   : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"

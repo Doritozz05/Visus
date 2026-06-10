@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Glasses } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
+import type { GeneralSettings } from "@/core/entities/settings";
 
 export function ReaderSettingsForm() {
   const { settings, updateGeneralSettings } = useSettings();
@@ -77,7 +78,7 @@ export function ReaderSettingsForm() {
               <button
                 key={tf.id}
                 data-testid={`font-family-button-${tf.id}`}
-                onClick={() => updateGeneralSettings({ readerFontFamily: tf.id as any })}
+                onClick={() => updateGeneralSettings({ readerFontFamily: tf.id as GeneralSettings["readerFontFamily"] })}
                 className={`p-2 border rounded text-left transition-all ${readerFontFamily === tf.id
                     ? "border-primary bg-accent/40 text-primary font-bold"
                     : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
