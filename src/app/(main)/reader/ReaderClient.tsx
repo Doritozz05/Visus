@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Sidebar } from "@/components/Sidebar";
 import { ReaderPlayer } from "@/features/reader/components/ReaderPlayer";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { useLibrary } from "@/features/library/context/library-context";
@@ -180,14 +179,12 @@ export default function ReaderClient() {
   }
 
   return (
-    <div className="bg-background text-foreground font-sans h-screen overflow-hidden overscroll-none flex flex-col md:flex-row antialiased transition-all duration-300 relative">
-      <Sidebar activePath="/reader" />
-
+    <div className="h-screen overflow-hidden overscroll-none flex flex-col items-center justify-between relative transition-all duration-300">
       {/* Mobile TopNav (Extracted) */}
       <MobileReaderNav onOpenSettings={openQuickSettings} />
 
       {/* Main Content Workspace */}
-      <main className="flex-1 flex flex-col items-center justify-between relative md:pl-64 h-[calc(100vh-80px)] md:h-screen p-6 pt-4 pb-8 overflow-hidden overscroll-none">
+      <main className="flex-1 flex flex-col items-center justify-between relative w-full h-[calc(100vh-80px)] md:h-screen p-6 pt-4 pb-8 overflow-hidden overscroll-none">
         
         <ReaderHeader
           activeBook={activeBook}

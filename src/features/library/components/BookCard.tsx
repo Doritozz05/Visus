@@ -60,7 +60,7 @@ export function BookCard({
 
   return (
     <div
-      className="bg-card border border-border/20 rounded-xl p-5 flex flex-col justify-between relative hover:border-primary/50 transition-all shadow-md glass-panel min-h-[160px]"
+      className="bg-card border border-border/20 rounded-xl p-5 flex flex-col relative hover:border-primary/50 transition-all shadow-md glass-panel min-h-[200px]"
     >
       {/* Option Actions Row */}
       <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-20">
@@ -154,7 +154,7 @@ export function BookCard({
           )}
         </div>
 
-        {/* Cloud Sync Toggle (Repositioned below Dots) */}
+        {/* Cloud Sync Toggle */}
         {book.format !== "PHYSICAL" && onToggleCloudSync && (
           <button
             onClick={(e) => {
@@ -180,73 +180,74 @@ export function BookCard({
         )}
       </div>
 
-      {/* Card Info Cover Row */}
-      <div className="flex gap-4 items-start pr-12 mb-4">
-        <button 
-          className="w-12 h-16 bg-gradient-to-br from-primary/10 to-primary/5 border border-border/30 rounded-lg flex items-center justify-center shrink-0 relative shadow-inner overflow-hidden cursor-pointer p-0" 
-          onClick={() => onDetails(book)}
-          aria-label={`View details for ${book.title}`}
-        >
-          {book.coverUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <Image src={book.coverUrl} fill alt={book.title} className="object-cover transition-transform duration-300 hover:scale-105" />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full w-full bg-accent/30">
-              <span className="text-[10px] font-extrabold text-primary/70 font-mono tracking-tighter uppercase leading-none mb-1">
-                {book.title.slice(0, 2)}
-              </span>
-              <Book className="w-4 h-4 text-muted-foreground/40" />
-            </div>
-          )}
-          <div className="absolute bottom-0.5 right-0.5 bg-accent/90 border border-border/10 px-1.5 py-0.5 rounded text-[7px] font-mono text-primary font-bold shadow-sm">{book.format}</div>
-        </button>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">{book.title}</h3>
-          <p className="text-[11px] text-muted-foreground font-mono truncate mt-0.5 mb-2">{book.author}</p>
-
-          {/* Tags */}
-          {book.genres && book.genres.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2">
-              {book.genres.slice(0, 2).map((genre) => (
-                <span key={genre} className="px-1.5 py-0.5 bg-accent text-muted-foreground rounded text-[8px] font-mono uppercase tracking-widest border border-border/40">
-                  {genre}
+      {/* Main Content Area */}
+      <div className="flex-1">
+        <div className="flex gap-4 items-start pr-12 mb-3">
+          <button 
+            className="w-12 h-16 bg-gradient-to-br from-primary/10 to-primary/5 border border-border/30 rounded-lg flex items-center justify-center shrink-0 relative shadow-inner overflow-hidden cursor-pointer p-0" 
+            onClick={() => onDetails(book)}
+            aria-label={`View details for ${book.title}`}
+          >
+            {book.coverUrl ? (
+              <Image src={book.coverUrl} fill alt={book.title} className="object-cover transition-transform duration-300 hover:scale-105" />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full w-full bg-accent/30">
+                <span className="text-[10px] font-extrabold text-primary/70 font-mono tracking-tighter uppercase leading-none mb-1">
+                  {book.title.slice(0, 2)}
                 </span>
-              ))}
-              {book.genres.length > 2 && (
-                <span className="px-1.5 py-0.5 bg-accent/50 text-muted-foreground/70 rounded text-[8px] font-mono uppercase tracking-widest border border-border/20">
-                  +{book.genres.length - 2}
-                </span>
-              )}
-            </div>
-          )}
+                <Book className="w-4 h-4 text-muted-foreground/40" />
+              </div>
+            )}
+            <div className="absolute bottom-0.5 right-0.5 bg-accent/90 border border-border/10 px-1.5 py-0.5 rounded text-[7px] font-mono text-primary font-bold shadow-sm">{book.format}</div>
+          </button>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-bold font-heading text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">{book.title}</h3>
+            <p className="text-[11px] text-muted-foreground font-mono truncate mt-0.5 mb-2">{book.author}</p>
 
-          {/* Prominent Read Book Button */}
-          {book.format !== "PHYSICAL" && (
-            <button
-              onClick={() => onRead(book.id)}
-              className="flex items-center gap-1 px-3 py-1 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded transition-all shadow-sm"
-            >
-              <BookOpen className="w-3 h-3" />
-              Read book
-            </button>
-          )}
+            {/* Tags */}
+            {book.genres && book.genres.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {book.genres.slice(0, 2).map((genre) => (
+                  <span key={genre} className="px-1.5 py-0.5 bg-accent text-muted-foreground rounded text-[8px] font-mono uppercase tracking-widest border border-border/40">
+                    {genre}
+                  </span>
+                ))}
+                {book.genres.length > 2 && (
+                  <span className="px-1.5 py-0.5 bg-accent/50 text-muted-foreground/70 rounded text-[8px] font-mono uppercase tracking-widest border border-border/20">
+                    +{book.genres.length - 2}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Progress Bar & Reading Stats */}
-      <div className="mt-auto pt-2 flex flex-col gap-1.5">
-        <div className="flex justify-between items-end text-[10px] font-mono">
-          <span className="text-primary font-bold">{book.progress}%</span>
-          <span className="text-muted-foreground/80 truncate max-w-[120px]">{book.estimatedReadingTime}</span>
-        </div>
-        <div className="w-full h-1 bg-background border border-border/5 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300"
-            style={{ width: `${book.progress}%` }}
-          />
+      {/* Footer Area: Fixed Position Actions & Progress */}
+      <div className="mt-auto pt-4 border-t border-border/5 flex flex-col gap-4">
+        {book.format !== "PHYSICAL" && (
+          <button
+            onClick={() => onRead(book.id)}
+            className="w-full flex items-center justify-center gap-1.5 px-4 py-2 bg-primary/10 border border-primary/20 text-[10px] font-mono uppercase tracking-wider text-primary font-bold hover:bg-primary hover:text-primary-foreground rounded-lg transition-all shadow-sm group/btn"
+          >
+            <BookOpen className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform" />
+            Read book
+          </button>
+        )}
+
+        <div>
+          <div className="flex justify-between items-end text-[10px] font-mono mb-1.5">
+            <span className="text-primary font-bold">{book.progress}%</span>
+            <span className="text-muted-foreground/80 truncate max-w-[120px]">{book.estimatedReadingTime}</span>
+          </div>
+          <div className="w-full h-1 bg-background border border-border/5 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300"
+              style={{ width: `${book.progress}%` }}
+            />
+          </div>
         </div>
       </div>
-
     </div>
   );
 }

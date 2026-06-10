@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const aal = await authService.getAALStatus();
 
           // Client-side MFA Guard
-          const protectedPaths = ['/library', '/settings', '/dashboard'];
+          const protectedPaths = ['/library', '/settings', '/dashboard', '/reader'];
           const isProtectedRoute = protectedPaths.some(path => window.location.pathname.startsWith(path));
 
           if (isProtectedRoute && aal.currentLevel !== 'aal2' && aal.factorId) {
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const aal = await authService.getAALStatus();
 
         // Client-side MFA Guard on state change
-        const protectedPaths = ['/library', '/settings', '/dashboard'];
+        const protectedPaths = ['/library', '/settings', '/dashboard', '/reader'];
         const isProtectedRoute = protectedPaths.some(path => window.location.pathname.startsWith(path));
 
         if (isProtectedRoute && aal.currentLevel !== 'aal2' && aal.factorId) {

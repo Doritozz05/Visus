@@ -57,10 +57,11 @@ export async function updateSession(request: NextRequest) {
   // refrescar el token si es necesario
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Proteger rutas que requieren MFA (ejemplo: /library, /settings, /dashboard)
+  // Proteger rutas que requieren MFA (ejemplo: /library, /settings, /dashboard, /reader)
   const isProtectedRoute = request.nextUrl.pathname.startsWith('/library') || 
                           request.nextUrl.pathname.startsWith('/settings') ||
-                          request.nextUrl.pathname.startsWith('/dashboard');
+                          request.nextUrl.pathname.startsWith('/dashboard') ||
+                          request.nextUrl.pathname.startsWith('/reader');
 
   if (user && isProtectedRoute) {
     // 1. Verificar el nivel actual
