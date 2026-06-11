@@ -29,7 +29,7 @@ export function useReaderBookmarks({
     const chapterTitle = chaptersData[chapterIndex]?.title || `Section ${chapterIndex + 1}`;
     
     const newBookmark = {
-      id: `bookmark-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: `bookmark-${crypto.randomUUID()}`,
       chapterIndex,
       wordIndex,
       name,

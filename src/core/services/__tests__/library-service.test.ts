@@ -16,7 +16,7 @@ describe("libraryService", () => {
       expect(book.title).toBe("Test Book");
       expect(book.author).toBe("Test Author");
       expect(book.format).toBe("EPUB");
-      expect(book.id).toMatch(/^book-\d+-\d+$/);
+      expect(book.id).toMatch(/^book-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
     });
 
     it("should use provided content and metadata", () => {

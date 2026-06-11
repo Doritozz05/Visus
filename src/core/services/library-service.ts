@@ -10,7 +10,7 @@ export function getBookProgressKey(bookId: string): string {
 }
 
 export function generateBookId(): string {
-  return `book-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  return `book-${crypto.randomUUID()}`;
 }
 
 export function createBookEntity(data: ParsedBookData, customId?: string): Book {
