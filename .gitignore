@@ -84,3 +84,5 @@ sentry.properties
 *.key
 *.p12
 *.pfx
+
+assets/email-templates/
