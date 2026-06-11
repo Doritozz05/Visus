@@ -2,6 +2,7 @@ import * as React from "react";
 import { BookVisualPage } from "@/lib/parser/paginator";
 import { useReadingStore } from "../stores/reading-store";
 import { ChevronLeft, ChevronRight, RotateCcw, RotateCw, Play, Pause, Zap } from "lucide-react";
+import { findPageForWordIndex, findFirstPageOfChapter } from "../utils/binarySearch";
 
 interface ReaderPlayerProps {
   onRewind: () => void;
@@ -26,15 +27,10 @@ export function ReaderPlayer({
   // Derive activePage ONLY in normal mode to prevent high-frequency re-renders during RSVP/Cluster playback
   const activePage = useReadingStore((state) => {
     if (state.mode !== "normal" || allBookPages.length === 0) return null;
-    const found = allBookPages.find(
-      (p) =>
-        p.chapterIndex === state.activeChapterIndex &&
-        state.wordIndex >= p.startWordIndex &&
-        state.wordIndex <= p.endWordIndex
-    );
+    const found = findPageForWordIndex(allBookPages, state.activeChapterIndex, state.wordIndex);
     return (
       found ||
-      allBookPages.find((p) => p.chapterIndex === state.activeChapterIndex) ||
+      findFirstPageOfChapter(allBookPages, state.activeChapterIndex) ||
       allBookPages[0]
     );
   });

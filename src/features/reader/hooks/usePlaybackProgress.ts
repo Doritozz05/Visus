@@ -3,6 +3,7 @@ import { Book } from "@/core/entities/book";
 import { BookVisualPage } from "@/lib/parser/paginator";
 import { ChapterHtmlData } from "@/features/reader/utils/chapterHtml";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
+import { findPageForWordIndex } from "../utils/binarySearch";
 
 interface UsePlaybackProgressProps {
   activeBookRef: React.MutableRefObject<Book | null>;
@@ -64,9 +65,7 @@ export function usePlaybackProgress({
         ? localPageIdx
         : (() => {
             if (allBookPages.length > 0) {
-              const page = allBookPages.find(
-                (p) => p.chapterIndex === chIdx && wIdx >= p.startWordIndex && wIdx <= p.endWordIndex
-              );
+              const page = findPageForWordIndex(allBookPages, chIdx, wIdx);
               return page ? page.pageIndex : undefined;
             }
             return undefined;

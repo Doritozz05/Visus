@@ -67,7 +67,10 @@ export function PagesFooter({
                 disabled={!isPaginationReady}
                 onChange={(e) => {
                   const targetPageNum = Number(e.target.value);
-                  const targetPage = allBookPages.find(p => p.absolutePageIndex === targetPageNum - 1);
+                  let targetPage = allBookPages[targetPageNum - 1];
+                  if (!targetPage || targetPage.absolutePageIndex !== targetPageNum - 1) {
+                    targetPage = allBookPages.find((p) => p.absolutePageIndex === targetPageNum - 1) as BookVisualPage;
+                  }
                   if (targetPage) {
                     if (targetPage.chapterIndex !== currentChapterIndex) {
                       setActiveChapterIndex(targetPage.chapterIndex);

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { BookVisualPage } from "@/lib/parser/paginator";
+import { findPageForWordIndex, findPageForPageIndex } from "../utils/binarySearch";
 
 interface UsePageNavigationProps {
   allBookPages: BookVisualPage[];
@@ -32,9 +33,7 @@ export function usePageNavigation({
   // Helper to map wordIndex to the exact page index using DOM coordinates!
   const getPageIndexForWord = React.useCallback((wIdx: number): number => {
     if (allBookPages.length > 0) {
-      const page = allBookPages.find(
-        (p) => p.chapterIndex === currentChapterIndex && wIdx >= p.startWordIndex && wIdx <= p.endWordIndex
-      );
+      const page = findPageForWordIndex(allBookPages, currentChapterIndex, wIdx);
       if (page) {
         return page.pageIndex;
       }
@@ -79,9 +78,7 @@ export function usePageNavigation({
   // Helper to map page index to its starting word index using DOM coordinates!
   const getWordIndexForPage = React.useCallback((pIdx: number): number => {
     if (allBookPages.length > 0) {
-      const page = allBookPages.find(
-        (p) => p.chapterIndex === currentChapterIndex && p.pageIndex === pIdx
-      );
+      const page = findPageForPageIndex(allBookPages, currentChapterIndex, pIdx);
       if (page) {
         return page.startWordIndex;
       }

@@ -3,6 +3,7 @@ import { Book } from "@/core/entities/book";
 import { StatsService } from "@/core/services/stats-service";
 import { useReadingStore } from "../stores/reading-store";
 import { BookVisualPage } from "@/lib/parser/paginator";
+import { findPageForWordIndex, findFirstPageOfChapter, findLastPageOfChapter } from "../utils/binarySearch";
 
 export interface UseReaderNavigationProps {
   activeBookRef: React.MutableRefObject<Book | null>;
@@ -27,16 +28,18 @@ export function useReaderNavigation({
     
     const activeBookVal = activeBookRef.current;
     const { wordIndex, activeChapterIndex, wpm, mode } = useReadingStore.getState();
-    const activePage = allBookPages.find(
-      (p) => p.chapterIndex === activeChapterIndex && wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
-    ) || allBookPages.find(
-      (p) => p.chapterIndex === activeChapterIndex && wordIndex < p.startWordIndex
-    ) || (() => {
-      for (let i = allBookPages.length - 1; i >= 0; i--) {
-        if (allBookPages[i].chapterIndex === activeChapterIndex) return allBookPages[i];
-      }
-      return null;
-    })() || allBookPages[0];
+
+    const activePage =
+      findPageForWordIndex(allBookPages, activeChapterIndex, wordIndex) ||
+      (() => {
+        // Find first or last depending on if we are under or over
+        const first = findFirstPageOfChapter(allBookPages, activeChapterIndex);
+        if (first && wordIndex < first.startWordIndex) return first;
+        const last = findLastPageOfChapter(allBookPages, activeChapterIndex);
+        if (last && wordIndex > last.endWordIndex) return last;
+        return null;
+      })() ||
+      allBookPages[0];
 
     if (!activePage) return;
     
@@ -93,8 +96,7 @@ export function useReaderNavigation({
     if (activeChapterIndex > 0) {
       const prevChapterIdx = activeChapterIndex - 1;
       
-      const prevChapterPages = allBookPages.filter(p => p.chapterIndex === prevChapterIdx);
-      const lastPage = prevChapterPages.length > 0 ? prevChapterPages[prevChapterPages.length - 1] : null;
+      const lastPage = findLastPageOfChapter(allBookPages, prevChapterIdx);
       
       const lastWordIdx = lastPage
         ? lastPage.startWordIndex

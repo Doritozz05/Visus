@@ -13,6 +13,7 @@ import { PagesFooter } from "./PagesFooter";
 import { useDomPagination } from "../hooks/useDomPagination";
 import { usePageNavigation } from "../hooks/usePageNavigation";
 import { useReadingStore } from "../stores/reading-store";
+import { findPageForWordIndex, findFirstPageOfChapter } from "../utils/binarySearch";
 
 interface PagesVisualBoxProps {
   currentChapter: ChapterHtmlData;
@@ -70,27 +71,32 @@ export function PagesVisualBox({
   const currentPageIndex = React.useMemo(() => {
     if (!allBookPages || allBookPages.length === 0) return 0;
     
-    const chapterPages = allBookPages.filter(p => p.chapterIndex === currentChapter.index);
-    if (chapterPages.length === 0) return 0;
-
-    const foundIndex = chapterPages.findIndex(
-      (p) => wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
-    );
-    
-    if (foundIndex !== -1) return foundIndex;
+    const page = findPageForWordIndex(allBookPages, currentChapter.index, wordIndex);
+    if (page) {
+      return page.pageIndex;
+    }
     
     // Fallback if out of bounds: 0 if before, last if after
-    if (chapterPages[0] && wordIndex < chapterPages[0].startWordIndex) return 0;
-    return chapterPages.length - 1;
+    const firstPage = findFirstPageOfChapter(allBookPages, currentChapter.index);
+    if (firstPage && wordIndex < firstPage.startWordIndex) return 0;
+
+    // Count pages for the current chapter to return the last page index
+    // This is essentially fallback but binary search makes the prior step fast
+    let lastIdx = 0;
+    for (let i = allBookPages.length - 1; i >= 0; i--) {
+      if (allBookPages[i].chapterIndex === currentChapter.index) {
+        lastIdx = allBookPages[i].pageIndex;
+        break;
+      }
+    }
+    return lastIdx;
   }, [allBookPages, currentChapter.index, wordIndex]);
 
   // Derived active visual page object
   const activePage = React.useMemo(() => {
     if (allBookPages.length === 0) return null;
-    const found = allBookPages.find(
-      (p) => p.chapterIndex === activeChapterIndex && wordIndex >= p.startWordIndex && wordIndex <= p.endWordIndex
-    );
-    return found || allBookPages.find(p => p.chapterIndex === activeChapterIndex) || allBookPages[0];
+    const found = findPageForWordIndex(allBookPages, activeChapterIndex, wordIndex);
+    return found || findFirstPageOfChapter(allBookPages, activeChapterIndex) || allBookPages[0];
   }, [allBookPages, activeChapterIndex, wordIndex]);
   
   // Track visible container dimensions for offscreen DOM pagination
