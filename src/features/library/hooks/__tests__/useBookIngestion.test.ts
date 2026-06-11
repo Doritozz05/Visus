@@ -18,6 +18,7 @@ vi.mock("sonner", () => ({
   toast: {
     error: vi.fn(),
     success: vi.fn(),
+    info: vi.fn(),
   },
 }));
 
@@ -108,11 +109,43 @@ describe("useBookIngestion", () => {
       } as any);
     });
 
-    expect(toast.error).toHaveBeenCalledWith(
-      "Some files could not be imported",
-      expect.objectContaining({
-        description: expect.stringContaining("already in your library")
-      })
+    expect(toast.info).toHaveBeenCalledWith("This book is already in your library");
+  });
+
+  it("should handle mixed success and duplicates in batch ingestion", async () => {
+    const { result } = renderHook(() => useBookIngestion(mockAddBook));
+    const file1 = new File(["test1"], "test1.txt");
+    const file2 = new File(["test2"], "test2.txt");
+    const mockFileList = {
+      0: file1,
+      1: file2,
+      length: 2,
+      item: (index: number) => (index === 0 ? file1 : file2),
+      [Symbol.iterator]: function* () {
+        yield file1;
+        yield file2;
+      },
+    } as any;
+
+    vi.mocked(parseUploadedFile).mockImplementation(async (file) => ({
+      title: file.name,
+      author: "Author",
+      format: "TXT",
+      fileBlob: file as File,
+    }));
+
+    mockAddBook
+      .mockReturnValueOnce("id1") // Success for file1
+      .mockReturnValueOnce(null); // Duplicate for file2
+
+    await act(async () => {
+      await result.current.handleFileChange({
+        target: { files: mockFileList },
+      } as any);
+    });
+
+    expect(toast.success).toHaveBeenCalledWith(
+      "Book imported successfully. 1 duplicate was skipped."
     );
   });
 });

@@ -51,22 +51,60 @@ export function useBookIngestion(
     setIsIngesting(true);
     const files = Array.from(fileList);
     
+    // Immutable tracking for accurate batch reporting
+    const successes: string[] = [];
+    const duplicates: string[] = [];
+    const failures: { name: string; message: string }[] = [];
+    
+    // Track intra-batch duplicates explicitly before heavy parsing
+    const intraBatchSignatures = new Set<string>();
+    
     try {
-      const results = await Promise.allSettled(
-        files.map(file => processAndAddFile(file))
-      );
+      for (const file of files) {
+        // Basic intra-batch file deduplication
+        const fileSignature = `${file.name}-${file.size}`;
+        if (intraBatchSignatures.has(fileSignature)) {
+          duplicates.push(file.name);
+          continue; // Skip entirely, it's a duplicate in this exact batch
+        }
+        intraBatchSignatures.add(fileSignature);
+
+        try {
+          await processAndAddFile(file);
+          successes.push(file.name);
+        } catch (err: any) {
+          if (err?.message?.includes("already in your library")) {
+            duplicates.push(file.name);
+          } else {
+            console.warn(`Failed to process file "${file.name}":`, err);
+            failures.push({
+              name: file.name,
+              message: err?.message || "Unknown file read error"
+            });
+          }
+        }
+      }
       
-      const failures = results.filter(
-        (r): r is PromiseRejectedResult => r.status === "rejected"
-      );
-      
+      const successCount = successes.length;
+      const duplicateCount = duplicates.length;
+
+      // Notify failures if any
       if (failures.length > 0) {
-        const errorMessages = failures.map(f => f.reason?.message || "Unknown file read error").join(", ");
-        toast.error("Some files could not be imported", {
+        const errorMessages = failures.map(f => `${f.name}: ${f.message}`).join(", ");
+        toast.error(failures.length === 1 ? "File could not be imported" : "Some files could not be imported", {
           description: errorMessages
         });
-      } else if (files.length > 0) {
-        toast.success(files.length === 1 ? "Book imported successfully" : `${files.length} books imported successfully`);
+      }
+      
+      // Consolidated success & duplicate reporting
+      if (successCount > 0) {
+        let message = successCount === 1 ? "Book imported successfully" : `${successCount} books imported successfully`;
+        if (duplicateCount > 0) {
+          message += `. ${duplicateCount} ${duplicateCount === 1 ? "duplicate was" : "duplicates were"} skipped.`;
+        }
+        toast.success(message);
+      } else if (duplicateCount > 0 && failures.length === 0) {
+        toast.info(duplicateCount === 1 ? "This book is already in your library" : `${duplicateCount} books were already in your library`);
       }
     } catch (err) {
       console.error("Batch file ingestion failed:", err);

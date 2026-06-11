@@ -42,9 +42,42 @@ const LibraryContext = React.createContext<LibraryContextType | undefined>(undef
 export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoading: isAuthLoading } = useAuth();
   const [books, setBooks] = React.useState<Book[]>([]);
+  const booksRef = React.useRef<Book[]>(books);
   const [activeBookId, setActiveBookIdState] = React.useState<string | null>(null);
+
   const [isHydrated, setIsHydrated] = React.useState(false);
   const [isInitialSyncing, setIsInitialSyncing] = React.useState(false);
+  const inFlightHashes = React.useRef<Set<string>>(new Set());
+  const inFlightTitles = React.useRef<Set<string>>(new Set());
+
+  // Sync booksRef and clean up in-flight hashes/titles atomically when books state changes
+  React.useEffect(() => {
+    booksRef.current = books;
+    
+    let changed = false;
+    
+    if (inFlightHashes.current.size > 0) {
+      for (const hash of inFlightHashes.current) {
+        if (books.some(b => b.fileHash === hash)) {
+          inFlightHashes.current.delete(hash);
+          changed = true;
+        }
+      }
+    }
+    
+    if (inFlightTitles.current.size > 0) {
+      for (const title of inFlightTitles.current) {
+        if (books.some(b => b.title.toLowerCase().trim() === title)) {
+          inFlightTitles.current.delete(title);
+          changed = true;
+        }
+      }
+    }
+    
+    if (changed) {
+      console.debug("[LibraryContext] In-flight tracking updated, remaining hashes:", inFlightHashes.current.size, "remaining titles:", inFlightTitles.current.size);
+    }
+  }, [books]);
 
   const processSyncQueue = React.useCallback(async () => {
     if (!user || !navigator.onLine) return;
@@ -454,13 +487,29 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     fileBlob?: Blob,
     fileHash?: string
   ) => {
-    // Duplicate Check
-    if (fileHash) {
-      const isDuplicate = books.some(b => b.fileHash === fileHash);
-      if (isDuplicate) {
-        return null;
-      }
+    const normalizedTitle = title.toLowerCase().trim();
+    
+    // Primary Duplicate Check (Hash-based)
+    const isDuplicateByHash = fileHash && (
+      booksRef.current.some(b => b.fileHash === fileHash) || 
+      inFlightHashes.current.has(fileHash)
+    );
+
+    // Fallback Duplicate Check (Title-based) to catch missing hashes in batch ingestion
+    const isDuplicateByTitle = !isDuplicateByHash && (
+      booksRef.current.some(b => b.title.toLowerCase().trim() === normalizedTitle) ||
+      inFlightTitles.current.has(normalizedTitle)
+    );
+
+    if (isDuplicateByHash || isDuplicateByTitle) {
+      return null;
     }
+
+    // Register in-flight signatures to block subsequent duplicates in the same batch
+    if (fileHash) {
+      inFlightHashes.current.add(fileHash);
+    }
+    inFlightTitles.current.add(normalizedTitle);
 
     const ownerId = user ? user.id : 'local';
 
@@ -478,7 +527,17 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       newBook.fileHash = fileHash;
     }
 
-    setBooks((prev) => [newBook, ...prev]);
+    setBooks((prev) => {
+      // Final sanity check before state commit
+      if (
+        (fileHash && prev.some(b => b.fileHash === fileHash)) ||
+        prev.some(b => b.title.toLowerCase().trim() === normalizedTitle)
+      ) {
+        console.warn("[LibraryContext] Duplicate book detected in setBooks functional update:", title);
+        return prev;
+      }
+      return [newBook, ...prev];
+    });
 
     // Create binary data if we have content or a file
     const binary = libraryService.createBookBinary(newBook.id, {
@@ -495,7 +554,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     });
 
     return newBook.id;
-  }, [user, books]);
+  }, [user]);
 
   const updateBook = React.useCallback((id: string, updates: Partial<Book>) => {
     setBooks((prevBooks) => {

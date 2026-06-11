@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useLibrary } from "@/features/library/context/library-context";
 import { parseUploadedFile } from "@/lib/services/book-ingestion-service";
+import { calculateFileHash } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function useBookIngestion() {
@@ -15,14 +16,32 @@ export function useBookIngestion() {
     
     try {
       const parsed = await parseUploadedFile(file);
-      addBook(
+      let fileHash: string | undefined = undefined;
+      
+      if (parsed.fileBlob) {
+        try {
+          fileHash = await calculateFileHash(parsed.fileBlob);
+        } catch (err) {
+          console.warn("Could not calculate file hash:", err);
+        }
+      }
+
+      const resultId = addBook(
         parsed.title,
         parsed.author,
         parsed.format,
         parsed.content,
         parsed.chapters,
-        parsed.metadata
+        parsed.metadata,
+        parsed.fileBlob,
+        fileHash
       );
+
+      if (!resultId) {
+        toast.info(`The file "${parsed.title}" is already in your library.`);
+      } else {
+        toast.success("Book imported successfully");
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to import file";
       toast.error(message);
