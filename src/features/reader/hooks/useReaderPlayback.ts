@@ -19,6 +19,7 @@ export interface UseReaderPlaybackProps {
   updateBook: (id: string, updates: Partial<Book>, silent?: boolean) => void;
   settings: SettingsState;
   wordsPerPage: number;
+  isLoadingContent: boolean;
 }
 
 export function useReaderPlayback({
@@ -27,6 +28,7 @@ export function useReaderPlayback({
   updateBook,
   settings,
   wordsPerPage,
+  isLoadingContent,
 }: UseReaderPlaybackProps) {
   // Active book reference to prevent state loops
   const activeBookRef = React.useRef(activeBook);
@@ -45,13 +47,6 @@ export function useReaderPlayback({
 
   const allBookPages = useReadingStore((state) => state.allBookPages);
   const setAllBookPages = useReadingStore((state) => state.setAllBookPages);
-
-  // Reset allBookPages when there is no book or chapters loaded
-  React.useEffect(() => {
-    if (chaptersData.length === 0) {
-      setAllBookPages([]);
-    }
-  }, [chaptersData.length, setAllBookPages]);
 
   const mode = useReadingStore((state) => state.mode);
   const wpm = useReadingStore((state) => state.wpm);
@@ -99,6 +94,7 @@ export function useReaderPlayback({
     activeBookId,
     chaptersData,
     updateBook,
+    isLoadingContent,
   });
 
   // Consuming custom Navigation Hook

@@ -7,6 +7,7 @@ export interface UseReaderStateSyncProps {
   activeBookId: string | null;
   chaptersData: any[]; // Assuming it's the mapped chapters
   updateBook: (id: string, updates: Partial<Book>, silent?: boolean) => void;
+  isLoadingContent?: boolean;
 }
 
 export function useReaderStateSync({
@@ -14,14 +15,16 @@ export function useReaderStateSync({
   activeBookId,
   chaptersData,
   updateBook,
+  isLoadingContent,
 }: UseReaderStateSyncProps) {
   const initializedBookIdRef = React.useRef<string | null>(null);
 
   // Reset player indexes when active book changes, resuming from exact saved position
   React.useEffect(() => {
+    if (isLoadingContent) return;
+
     const book = activeBookRef.current;
     if (!book || !activeBookId) {
-      useReadingStore.getState().initBook("", 0, 0, 600, "normal", []);
       initializedBookIdRef.current = null;
       return;
     }
@@ -94,7 +97,7 @@ export function useReaderStateSync({
       initializedBookIdRef.current = null;
       useReadingStore.getState().setIsPlaying(false);
     };
-  }, [activeBookId, chaptersData, updateBook, activeBookRef]);
+  }, [activeBookId, chaptersData, updateBook, activeBookRef, isLoadingContent]);
 
   const setMode = React.useCallback((newMode: "rsvp" | "cluster" | "normal") => {
     const currentMode = useReadingStore.getState().mode;

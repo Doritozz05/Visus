@@ -33,7 +33,7 @@ export default function ReaderClient() {
 
   // --- 1. STATE & STORE HOOKS (TOP LEVEL) ---
   const [bookBinary, setBookBinary] = React.useState<BookBinary | null>(null);
-  const [isLoadingContent, setIsLoadingContent] = React.useState(false);
+  const [isLoadingContent, setIsLoadingContent] = React.useState(true);
   const [isInitializing, setIsInitializing] = React.useState(true);
   
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
@@ -96,6 +96,7 @@ export default function ReaderClient() {
     updateBook,
     settings,
     wordsPerPage,
+    isLoadingContent,
   });
 
   // --- 3. EFFECTS ---
@@ -104,6 +105,7 @@ export default function ReaderClient() {
     async function loadBinary() {
       if (!activeBookId) {
         setBookBinary(null);
+        setIsLoadingContent(false);
         setIsInitializing(false);
         return;
       }

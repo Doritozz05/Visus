@@ -85,6 +85,7 @@ describe("useReaderPlayback hook", () => {
       updateBook: mockUpdateBook,
       settings: mockSettings,
       wordsPerPage: 300,
+      isLoadingContent: false,
     });
 
     // Check initialized properties exist

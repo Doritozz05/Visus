@@ -40,7 +40,7 @@ export function useReaderAutosave({
   React.useEffect(() => {
     const handleBeforeUnload = () => {
       const state = useReadingStore.getState();
-      if (activeBook?.id) {
+      if (activeBook?.id && state.activeBookId === activeBook.id) {
         saveProgressRef.current(
           activeBook.id,
           state.activeChapterIndex,
@@ -52,7 +52,7 @@ export function useReaderAutosave({
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
         const state = useReadingStore.getState();
-        if (activeBook?.id) {
+        if (activeBook?.id && state.activeBookId === activeBook.id) {
           saveProgressRef.current(
             activeBook.id,
             state.activeChapterIndex,
@@ -80,7 +80,7 @@ export function useReaderAutosave({
       const state = useReadingStore.getState();
       // Ensure we save for the book that was actually active in this hook instance, 
       // even if the global activeBookId has already been cleared.
-      if (activeBook?.id) {
+      if (activeBook?.id && state.activeBookId === activeBook.id) {
         saveProgressRef.current(
           activeBook.id,
           state.activeChapterIndex,
