@@ -45,7 +45,7 @@ export class SupabaseAuthService implements IAuthService {
 
   async resetPasswordForEmail(email: string): Promise<void> {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/reset-password` : undefined,
+      redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback?next=/update-password` : undefined,
     });
     if (error) throw new Error(error.message);
   }

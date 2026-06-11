@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { authService } from "@/core/config/services";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 
-export function UpdatePasswordForm({ disabled }: { disabled?: boolean }) {
+export function UpdatePasswordForm({ disabled, onSuccess }: { disabled?: boolean, onSuccess?: () => void }) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +28,7 @@ export function UpdatePasswordForm({ disabled }: { disabled?: boolean }) {
       setSuccess(true);
       setNewPassword("");
       setConfirmPassword("");
+      if (onSuccess) onSuccess();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : "Could not update password.");
     } finally {
