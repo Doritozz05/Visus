@@ -139,9 +139,12 @@ export function useDomPagination({
           if (currentCI === activeChapterIndex) {
             if (isInitialLoad && currentSLPI !== undefined) {
               const maxLocalPage = Math.max(0, pagesByChapter[activeChapterIndex].length - 1);
-              const clampedPage = Math.min(currentSLPI, maxLocalPage);
-              if (pagesByChapter[activeChapterIndex][clampedPage]) {
-                useReadingStore.getState().setWordIndex(pagesByChapter[activeChapterIndex][clampedPage].startWordIndex);
+              // Only snap to the page start if the page actually exists. 
+              // If it exceeds the current layout (due to premature measurement), trust the raw wordIndex.
+              if (currentSLPI <= maxLocalPage) {
+                if (pagesByChapter[activeChapterIndex][currentSLPI]) {
+                  useReadingStore.getState().setWordIndex(pagesByChapter[activeChapterIndex][currentSLPI].startWordIndex);
+                }
               }
             }
           }
