@@ -19,7 +19,14 @@ export function ResetPasswordForm() {
       await authService.resetPasswordForEmail(email);
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Failed to send recovery email.");
+      // To prevent account enumeration, we show success even if the email doesn't exist
+      // Only show error for real issues like invalid email format or rate limiting
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("User not found") || message.includes("not registered")) {
+        setSuccess(true);
+      } else {
+        setError(err instanceof Error && err.message ? err.message : "Failed to send recovery email.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -33,9 +40,9 @@ export function ResetPasswordForm() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
-        <h3 className="text-xl font-medium text-foreground">Check your inbox</h3>
+        <h3 className="text-xl font-medium text-foreground">Recovery Email Sent</h3>
         <p className="text-muted-foreground text-sm">
-          We have sent a recovery link to <strong>{email}</strong>. Check your email to reset your password.
+          If an account exists for <strong>{email}</strong>, you will receive a password reset link shortly.
         </p>
       </div>
     );

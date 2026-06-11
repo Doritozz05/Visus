@@ -5,7 +5,12 @@ import { cookies } from 'next/headers'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/library'
+  let next = searchParams.get('next') ?? '/library'
+
+  // Safety rail: Prevent open redirects by ensuring 'next' is a relative path
+  if (!next.startsWith('/') || next.startsWith('//')) {
+    next = '/library'
+  }
 
   if (code) {
     const cookieStore = await cookies()

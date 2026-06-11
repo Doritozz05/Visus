@@ -4,15 +4,23 @@ import React, { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { authService } from "@/core/config/services";
 import { toast } from "sonner";
+import { useAuth } from "@/features/auth/context/auth-context";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 export function MfaSetup() {
+  const { user } = useAuth();
   const [isChecking, setIsChecking] = useState(true);
   const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; factorId?: string }>({ enabled: false });
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [isUnenrolling, setIsUnenrolling] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<{ id: string; uri: string; secret: string } | null>(null);
   const [verificationCode, setVerificationCode] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Robust check: Does the user have an email/password identity?
+  const hasPassword = user?.hasPassword === true;
 
   useEffect(() => {
     checkStatus();
@@ -59,12 +67,28 @@ export function MfaSetup() {
     }
   };
 
-  const executeDisableMfa = async (factorId: string) => {
+  const executeDisableMfa = async () => {
+    if (!mfaStatus.factorId) return;
+    
     try {
       setIsUnenrolling(true);
       setError(null);
-      await authService.unenrollMFA(factorId);
+
+      // 1. Re-authenticate ONLY if user has a password identity
+      if (hasPassword) {
+        if (!confirmPassword) {
+          setError("Password is required to disable MFA.");
+          setIsUnenrolling(false);
+          return;
+        }
+        await authService.reauthenticate(confirmPassword);
+      }
+
+      // 2. Unenroll
+      await authService.unenrollMFA(mfaStatus.factorId);
       await checkStatus();
+      setShowPasswordConfirm(false);
+      setConfirmPassword("");
       toast.success("MFA has been disabled");
     } catch (err) {
       const message = err instanceof Error && err.message ? err.message : "Could not disable MFA.";
@@ -75,27 +99,33 @@ export function MfaSetup() {
     }
   };
 
-  const disableMfa = async () => {
+  const startDisableMfa = async () => {
     if (!mfaStatus.factorId) return;
 
-    // Check if we have AAL2 level before allowing unenrollment
+    // Safety check: AAL2 level is required to modify MFA settings
     try {
       const { currentLevel } = await authService.getAALStatus();
       if (currentLevel !== 'aal2') {
-        setError("You need to verify your MFA code before you can disable it. Please log out and log in again to verify.");
+        setError("For security, you must verify your MFA code before disabling it. Please log out and log in again.");
         return;
       }
     } catch (err) {
-      // If we can't check, we proceed and let the service fail
+      // Proceed and let service fail if necessary
     }
-    
-    toast.warning("Disable Two-Factor Authentication?", {
-      description: "Your account will be less secure. This action cannot be undone.",
-      action: {
-        label: "Disable",
-        onClick: () => executeDisableMfa(mfaStatus.factorId!),
-      },
-    });
+
+    if (!hasPassword) {
+      // For Google-only users, we rely on their active AAL2 session
+      toast.warning("Disable Two-Factor Authentication?", {
+        description: "Your account will be less secure. This action cannot be undone.",
+        action: {
+          label: "Disable",
+          onClick: () => executeDisableMfa(),
+        },
+      });
+    } else {
+      // For Email/Password users, we require their password as an extra proof
+      setShowPasswordConfirm(true);
+    }
   };
 
   if (isChecking) {
@@ -111,29 +141,68 @@ export function MfaSetup() {
             {error}
           </div>
         )}
-        <div className="glass-panel p-5 rounded-2xl border border-border/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        
+        {!showPasswordConfirm ? (
+          <div className="glass-panel p-5 rounded-2xl border border-border/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground font-heading">Two-Factor Authentication Active</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Your account is protected by an authenticator app.
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-foreground font-heading">Two-Factor Authentication Active</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Your account is protected by an authenticator app.
-              </p>
+            
+            <button
+              onClick={startDisableMfa}
+              disabled={isUnenrolling}
+              className="w-full md:w-auto px-5 py-2 text-xs font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/5 border border-border hover:border-destructive/30 rounded-xl transition-all disabled:opacity-50"
+            >
+              {isUnenrolling ? "Disabling..." : "Disable MFA"}
+            </button>
+          </div>
+        ) : (
+          <div className="glass-panel p-6 rounded-2xl border border-destructive/30 bg-destructive/5 space-y-4 animate-in fade-in slide-in-from-bottom-2">
+            <h4 className="text-sm font-bold text-foreground">Confirm Password to Disable MFA</h4>
+            <p className="text-xs text-muted-foreground">
+              This is a sensitive action. Please enter your password to confirm.
+            </p>
+            <div className="max-w-sm">
+              <PasswordInput
+                id="disable-mfa-password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Enter your current password"
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={executeDisableMfa}
+                disabled={isUnenrolling || !confirmPassword}
+                className="px-4 py-2 bg-destructive text-destructive-foreground text-xs font-bold rounded-lg hover:brightness-110 disabled:opacity-50"
+              >
+                {isUnenrolling ? "Disabling..." : "Confirm & Disable"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowPasswordConfirm(false);
+                  setConfirmPassword("");
+                  setError(null);
+                }}
+                className="px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                Cancel
+              </button>
             </div>
           </div>
-          
-          <button
-            onClick={disableMfa}
-            disabled={isUnenrolling}
-            className="w-full md:w-auto px-5 py-2 text-xs font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/5 border border-border hover:border-destructive/30 rounded-xl transition-all disabled:opacity-50"
-          >
-            {isUnenrolling ? "Disabling..." : "Disable MFA"}
-          </button>
-        </div>
+        )}
       </div>
     );
   }

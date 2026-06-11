@@ -10,12 +10,21 @@ export interface User {
   email: string;
   name?: string;
   avatarUrl?: string;
+  provider?: string;
+  hasPassword?: boolean;
 }
 
 export interface Session {
   access_token: string;
   refresh_token: string;
   expires_at: number;
+}
+
+export interface UserIdentity {
+  id: string;
+  provider: string;
+  identity_data?: Record<string, any>;
+  last_sign_in_at?: string;
 }
 
 export interface IAuthService {
@@ -25,7 +34,13 @@ export interface IAuthService {
   signInWithGoogle(): Promise<void>;
   logout(): Promise<void>;
   
+  // Account Linking
+  linkIdentity(provider: 'google'): Promise<void>;
+  unlinkIdentity(identityId: string): Promise<void>;
+  getUserIdentities(): Promise<UserIdentity[]>;
+  
   // Security and Recovery
+  reauthenticate(password: string): Promise<void>;
   resetPasswordForEmail(email: string): Promise<void>;
   updatePassword(newPassword: string): Promise<void>;
   updateEmail(newEmail: string): Promise<void>;

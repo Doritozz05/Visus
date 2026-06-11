@@ -1,4 +1,4 @@
-import { IAuthService, Session, User } from "@/core/services/interfaces";
+import { IAuthService, Session, User, UserIdentity } from "@/core/services/interfaces";
 import { supabase } from "@/lib/supabase";
 
 export class SupabaseAuthService implements IAuthService {
@@ -41,7 +41,56 @@ export class SupabaseAuthService implements IAuthService {
     if (error) throw new Error(error.message);
   }
 
+  // --- Account Linking ---
+
+  async linkIdentity(provider: 'google'): Promise<void> {
+    const { error } = await supabase.auth.linkIdentity({
+      provider,
+      options: {
+        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback?next=/settings/account` : undefined,
+      }
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  async unlinkIdentity(identityId: string): Promise<void> {
+    // Note: To unlink, user must have at least 2 identities.
+    // Supabase will throw error otherwise.
+    const { data: identities, error: fetchError } = await supabase.auth.getUserIdentities();
+    if (fetchError) throw new Error(fetchError.message);
+
+    const identity = identities.identities.find(id => id.id === identityId);
+    if (!identity) throw new Error("Identity not found.");
+
+    const { error } = await supabase.auth.unlinkIdentity(identity);
+    if (error) throw new Error(error.message);
+  }
+
+  async getUserIdentities(): Promise<UserIdentity[]> {
+    const { data, error } = await supabase.auth.getUserIdentities();
+    if (error) throw new Error(error.message);
+    
+    return data.identities.map(id => ({
+      id: id.id,
+      provider: id.provider,
+      identity_data: id.identity_data,
+      last_sign_in_at: id.last_sign_in_at,
+    }));
+  }
+
   // --- Security and Recovery ---
+
+  async reauthenticate(password: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !user.email) throw new Error("No user session found.");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password,
+    });
+    
+    if (error) throw new Error("Invalid current password.");
+  }
 
   async resetPasswordForEmail(email: string): Promise<void> {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -155,11 +204,14 @@ export class SupabaseAuthService implements IAuthService {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
+          const hasPassword = session.user.identities?.some(id => id.provider === 'email') || false;
           return {
             id: session.user.id,
             email: session.user.email || "",
             name: session.user.user_metadata?.full_name,
             avatarUrl: session.user.user_metadata?.avatar_url,
+            provider: session.user.app_metadata?.provider || session.user.identities?.[0]?.provider,
+            hasPassword,
           };
         }
       } catch (_) { /* silent */ }
@@ -172,11 +224,15 @@ export class SupabaseAuthService implements IAuthService {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) return getLocalSession();
       
+      const hasPassword = user.identities?.some(id => id.provider === 'email') || false;
+
       return {
         id: user.id,
         email: user.email || "",
         name: user.user_metadata?.full_name,
         avatarUrl: user.user_metadata?.avatar_url,
+        provider: user.app_metadata?.provider || user.identities?.[0]?.provider,
+        hasPassword,
       };
     } catch (err) {
       // Capture all network/fetch errors silently and fallback
@@ -187,11 +243,14 @@ export class SupabaseAuthService implements IAuthService {
   onAuthStateChange(callback: (user: User | null) => void): () => void {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
+        const hasPassword = session.user.identities?.some(id => id.provider === 'email') || false;
         callback({
           id: session.user.id,
           email: session.user.email || "",
           name: session.user.user_metadata?.full_name,
           avatarUrl: session.user.user_metadata?.avatar_url,
+          provider: session.user.app_metadata?.provider || session.user.identities?.[0]?.provider,
+          hasPassword,
         });
       } else {
         callback(null);

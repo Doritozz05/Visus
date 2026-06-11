@@ -3,19 +3,18 @@
 import React from "react";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { MfaSetup } from "@/features/auth/components/MfaSetup";
+import { IdentityManagement } from "@/features/auth/components/IdentityManagement";
 import { UpdateEmailForm } from "@/features/auth/components/UpdateEmailForm";
 import { UpdatePasswordForm } from "@/features/auth/components/UpdatePasswordForm";
-import { User, ShieldCheck, Mail, Lock, ArrowLeft } from "lucide-react";
+import { User, ShieldCheck, Mail, Lock, ArrowLeft, Fingerprint } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export function AccountSettingsClient() {
   const { user, isLoading } = useAuth();
 
-  // Determine if the user is using Google OAuth
-  // Supabase user identities usually contain the provider info
-  // For this implementation, we'll assume Google if the name/avatar exists but we can be more precise
-  const isGoogleUser = user?.avatarUrl !== undefined; 
+  // Determine if the user is using Google OAuth or other social providers
+  const isSocialUser = !!(user?.provider && user.provider !== 'email');
 
   if (isLoading) {
     return (
@@ -68,7 +67,7 @@ export function AccountSettingsClient() {
                 ID: {user?.id.substring(0, 8)}...
               </span>
               <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-mono uppercase tracking-wider font-bold">
-                {isGoogleUser ? "Google Authenticated" : "Email & Password"}
+                {isSocialUser ? `${user?.provider} Authenticated` : "Email & Password"}
               </span>
             </div>
           </div>
@@ -76,6 +75,15 @@ export function AccountSettingsClient() {
 
         <div className="grid grid-cols-1 gap-8">
           
+          {/* Identity Management Section */}
+          <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel">
+            <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
+              <Fingerprint className="text-primary h-5 w-5" />
+              <h3 className="text-lg font-bold font-heading">Login Methods</h3>
+            </div>
+            <IdentityManagement />
+          </section>
+
           {/* MFA Section */}
           <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel relative overflow-hidden">
             <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
@@ -91,7 +99,7 @@ export function AccountSettingsClient() {
               <Mail className="text-primary h-5 w-5" />
               <h3 className="text-lg font-bold font-heading">Email Address</h3>
             </div>
-            <UpdateEmailForm currentEmail={user?.email || ""} disabled={isGoogleUser} />
+            <UpdateEmailForm currentEmail={user?.email || ""} disabled={isSocialUser} />
           </section>
 
           {/* Password Management */}
@@ -100,7 +108,7 @@ export function AccountSettingsClient() {
               <Lock className="text-primary h-5 w-5" />
               <h3 className="text-lg font-bold font-heading">Password</h3>
             </div>
-            <UpdatePasswordForm disabled={isGoogleUser} />
+            <UpdatePasswordForm disabled={isSocialUser} requireCurrentPassword={!isSocialUser} />
           </section>
 
         </div>

@@ -4,7 +4,16 @@ import React, { useState } from "react";
 import { authService } from "@/core/config/services";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 
-export function UpdatePasswordForm({ disabled, onSuccess }: { disabled?: boolean, onSuccess?: () => void }) {
+export function UpdatePasswordForm({ 
+  disabled, 
+  onSuccess,
+  requireCurrentPassword = false
+}: { 
+  disabled?: boolean, 
+  onSuccess?: () => void,
+  requireCurrentPassword?: boolean
+}) {
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,13 +30,23 @@ export function UpdatePasswordForm({ disabled, onSuccess }: { disabled?: boolean
       return;
     }
 
+    if (requireCurrentPassword && !currentPassword) {
+      setError("Current password is required.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      if (requireCurrentPassword) {
+        await authService.reauthenticate(currentPassword);
+      }
+
       await authService.updatePassword(newPassword);
       setSuccess(true);
       setNewPassword("");
       setConfirmPassword("");
+      setCurrentPassword("");
       
       // Force logout after update so they have to log in with new password
       await authService.logout();
@@ -65,6 +84,18 @@ export function UpdatePasswordForm({ disabled, onSuccess }: { disabled?: boolean
       )}
 
       <div className="grid grid-cols-1 gap-4">
+        {requireCurrentPassword && (
+          <PasswordInput
+            id="current-password"
+            label="Current Password"
+            required
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            className="text-sm font-mono border-border/50 rounded-lg focus:ring-1 focus:border-primary"
+            placeholder="••••••••"
+          />
+        )}
+
         <PasswordInput
           id="new-password"
           label="New Password"
@@ -88,7 +119,7 @@ export function UpdatePasswordForm({ disabled, onSuccess }: { disabled?: boolean
 
       <button
         type="submit"
-        disabled={isLoading || !newPassword || !confirmPassword}
+        disabled={isLoading || !newPassword || !confirmPassword || (requireCurrentPassword && !currentPassword)}
         className="w-full py-3 bg-primary text-primary-foreground text-[10px] font-mono uppercase tracking-wider font-bold rounded-xl hover:brightness-110 transition-all disabled:opacity-50"
       >
         {isLoading ? "Updating..." : "Update Password"}
