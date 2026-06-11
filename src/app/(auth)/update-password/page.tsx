@@ -10,7 +10,7 @@ export default function UpdatePasswordPage() {
   const handleSuccess = () => {
     // Wait a bit so the user can see the success message
     setTimeout(() => {
-      router.push("/library");
+      router.push("/login");
     }, 2000);
   };
 
@@ -18,10 +18,9 @@ export default function UpdatePasswordPage() {
     <AuthLayout 
       title="Update Password" 
       subtitle="Enter your new password below to secure your account"
+      showBackButton={false}
     >
-      <div className="bg-card/50 border border-border/50 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
-        <UpdatePasswordForm onSuccess={handleSuccess} />
-      </div>
+      <UpdatePasswordForm onSuccess={handleSuccess} />
     </AuthLayout>
   );
 }
