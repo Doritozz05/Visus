@@ -27,7 +27,7 @@ export class StatsService {
   static async recordSession(session: Omit<ReadingSessionLog, "id" | "completedAt">): Promise<ReadingSessionLog> {
     const newLog: ReadingSessionLog = {
       ...session,
-      id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: `log-${crypto.randomUUID()}`,
       completedAt: new Date().toISOString(),
     };
 
