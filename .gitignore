@@ -39,38 +39,29 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# IDE / Editor configurations
-.idea/
-.vscode/
+# AI Agents & Automation
 .agents/
 .junie/
 .jules/
+.serena/
+.audit_history/
+.gemini/
 AGENTS.md
 audit_log.md
 .cursorrules
+prompts.txt
+plan.md
+skills-lock.json
+serena.db
+
+# IDE / Editor configurations
+.idea/
+.vscode/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-prompts.txt
-plan.md
-
-# OS metadata
-.DS_Store
-Thumbs.db
-
-# generated files
-/public/pdf.worker.min.mjs
-
-# Serena MCP
-.serena/
-serena.db
-
-# Audit history
-.audit_history/
-
-skills-lock.json
 
 # Sentry Config Files
 .env.sentry-build-plugin
