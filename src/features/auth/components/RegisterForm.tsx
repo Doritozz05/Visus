@@ -55,7 +55,7 @@ export function RegisterForm() {
         <div className="space-y-2">
           <h3 className="text-2xl font-bold text-foreground">Check your inbox</h3>
           <p className="text-muted-foreground text-sm">
-            We've sent a confirmation link to <strong>{email}</strong>.
+            We&apos;ve sent a confirmation link to <strong>{email}</strong>.
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export function RegisterForm() {
             Already have an account?
           </p>
           <p className="text-sm text-foreground">
-            If you didn't receive the email, you might have signed up with Google before.
+            If you didn&apos;t receive the email, you might have signed up with Google before.
           </p>
           <GoogleSignInButton />
         </div>
