@@ -48,6 +48,13 @@ export function useReaderPlayback({
   const allBookPages = useReadingStore((state) => state.allBookPages);
   const setAllBookPages = useReadingStore((state) => state.setAllBookPages);
 
+  // Reset allBookPages when there is no book or chapters loaded
+  React.useEffect(() => {
+    if (chaptersData.length === 0) {
+      setAllBookPages([]);
+    }
+  }, [chaptersData.length, setAllBookPages]);
+
   const mode = useReadingStore((state) => state.mode);
   const wpm = useReadingStore((state) => state.wpm);
   const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);

@@ -25,6 +25,7 @@ export function useReaderStateSync({
 
     const book = activeBookRef.current;
     if (!book || !activeBookId) {
+      useReadingStore.getState().initBook("", 0, 0, 600, "normal", []);
       initializedBookIdRef.current = null;
       return;
     }

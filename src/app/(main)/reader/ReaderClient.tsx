@@ -71,6 +71,9 @@ export default function ReaderClient() {
     return getSafeWordsPerPage(fontSize, baseWords);
   }, [settings.general.readerWordsPerPage, settings.general.readerFontSize, getSafeWordsPerPage]);
 
+  // Synchronously derive loading state to prevent race conditions during book transitions
+  const isActuallyLoading = isLoadingContent || (!!activeBookId && bookBinary?.bookId !== activeBookId);
+
   const {
     saveProgressForBook,
     setMode,
@@ -96,7 +99,7 @@ export default function ReaderClient() {
     updateBook,
     settings,
     wordsPerPage,
-    isLoadingContent,
+    isLoadingContent: isActuallyLoading,
   });
 
   // --- 3. EFFECTS ---
