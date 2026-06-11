@@ -13,11 +13,13 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [highlightGoogle, setHighlightGoogle] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+    setHighlightGoogle(false);
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
@@ -30,10 +32,10 @@ export function RegisterForm() {
       await authService.signUp(email, password);
       setSuccess(true);
     } catch (err) {
-      // To prevent account enumeration, we can show success even if the user exists
       const message = err instanceof Error ? err.message : "";
       if (message.includes("already registered") || message.includes("already exists")) {
-        setSuccess(true);
+        setError("An account with this email already exists. Try signing in with Google.");
+        setHighlightGoogle(true);
       } else {
         setError(err instanceof Error && err.message ? err.message : "Error creating account.");
       }
@@ -65,7 +67,9 @@ export function RegisterForm() {
 
   return (
     <div className="space-y-6">
-      <GoogleSignInButton />
+      <div className={highlightGoogle ? "animate-bounce ring-2 ring-primary rounded-xl p-0.5" : ""}>
+        <GoogleSignInButton />
+      </div>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -98,7 +102,7 @@ export function RegisterForm() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div className="space-y-2">
             <PasswordInput
               id="password"
