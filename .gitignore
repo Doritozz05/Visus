@@ -43,6 +43,8 @@ next-env.d.ts
 .idea/
 .vscode/
 .agents/
+.junie/
+.jules/
 AGENTS.md
 audit_log.md
 .cursorrules

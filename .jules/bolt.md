@@ -1,3 +1,0 @@
-## 2023-11-20 - Replace O(n) array `.find()` with O(log n) Binary Search
-**Learning:** The reader component manages an `allBookPages` array containing many objects mapping chapter and word indices. Finding pages using `.find()` inside `useMemo` hooks or frequently called render lifecycle methods acts as an O(n) bottleneck causing UI jank when paginating or jumping in long texts.
-**Action:** Implemented utility functions (`findPageForWordIndex`, `findFirstPageOfChapter`, `findLastPageOfChapter`) in `src/features/reader/utils/binarySearch.ts` and replaced all `.find` lookups. Use O(1) array index access if indexing by `absolutePageIndex`.
