@@ -46,7 +46,6 @@ next-env.d.ts
 .serena/
 .audit_history/
 .gemini/
-AGENTS.md
 audit_log.md
 .cursorrules
 prompts.txt
