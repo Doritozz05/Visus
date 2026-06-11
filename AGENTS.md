@@ -81,4 +81,8 @@ When the user requests a durable behavior change, record it here or in the relev
 
 ## Child DOX Index
 
-This project is not yet indexed. Before continuing you must scan the project, build the DOX tree and replace this message with the actual index. Go deep and scan files recursively to properly evaluate complexity and create nested DOX files where needed.
+- [src/app/AGENTS.md](src/app/AGENTS.md)
+- [src/core/AGENTS.md](src/core/AGENTS.md)
+- [src/features/AGENTS.md](src/features/AGENTS.md)
+- [src/lib/AGENTS.md](src/lib/AGENTS.md)
+- [supabase/AGENTS.md](supabase/AGENTS.md)
