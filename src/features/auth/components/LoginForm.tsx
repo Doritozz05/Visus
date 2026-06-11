@@ -7,8 +7,13 @@ import { authService } from "@/core/config/services";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
-export function LoginForm() {
+interface LoginFormProps {
+  onMfaStateChange?: (isMfa: boolean) => void;
+}
+
+export function LoginForm({ onMfaStateChange }: LoginFormProps) {
   const searchParams = useSearchParams();
   const oauthError = searchParams.get("error");
   const [email, setEmail] = useState("");
@@ -17,6 +22,10 @@ export function LoginForm() {
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    onMfaStateChange?.(!!mfaFactorId);
+  }, [mfaFactorId, onMfaStateChange]);
 
   useEffect(() => {
     if (oauthError === "OauthFailed") {
@@ -121,14 +130,23 @@ export function LoginForm() {
 
           <button
             type="button"
-            onClick={() => {
-              setMfaFactorId(null);
-              setMfaCode("");
-              setError(null);
+            disabled={isLoading}
+            onClick={async () => {
+              setIsLoading(true);
+              try {
+                await authService.logout();
+                setMfaFactorId(null);
+                setMfaCode("");
+                setError(null);
+              } catch (err) {
+                setError("Error cancelling login.");
+              } finally {
+                setIsLoading(false);
+              }
             }}
-            className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
           >
-            Back to login
+            {isLoading ? "Cancelling..." : "Back to login"}
           </button>
         </form>
       </div>
@@ -179,13 +197,11 @@ export function LoginForm() {
               Forgot your password?
             </Link>
           </div>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             placeholder="••••••••"
           />
         </div>

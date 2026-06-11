@@ -40,7 +40,7 @@ interface LibraryContextType {
 const LibraryContext = React.createContext<LibraryContextType | undefined>(undefined);
 
 export function LibraryProvider({ children }: { children: React.ReactNode }) {
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading, isMfaPending } = useAuth();
   const [books, setBooks] = React.useState<Book[]>([]);
   const booksRef = React.useRef<Book[]>(books);
   const [activeBookId, setActiveBookIdState] = React.useState<string | null>(null);
@@ -80,7 +80,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   }, [books]);
 
   const processSyncQueue = React.useCallback(async () => {
-    if (!user || !navigator.onLine) return;
+    if (!user || isMfaPending || !navigator.onLine) return;
     
     const { dbService } = await import("@/core/services/db-service");
     const { remoteSyncService } = await import("@/core/config/services");
@@ -121,15 +121,15 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         break; 
       }
     }
-  }, [user]);
+  }, [user, isMfaPending]);
 
   const performSync = React.useCallback(async (forceFull = false) => {
-    if (isAuthLoading) return;
+    if (isAuthLoading || isMfaPending) return;
     
-    const ownerId = user ? user.id : 'local';
+    const ownerId = (user && !isMfaPending) ? user.id : 'local';
     let loadedBooks = await libraryService.loadLibrary(ownerId);
 
-    if (user) {
+    if (user && !isMfaPending) {
       setIsInitialSyncing(true);
       try {
         const { dbService } = await import("@/core/services/db-service");
@@ -287,7 +287,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       setActiveBookIdState(activeId);
     }
     setIsHydrated(true);
-  }, [user, isAuthLoading, processSyncQueue]);
+  }, [user, isAuthLoading, isMfaPending, processSyncQueue]);
 
   const [isOnline, setIsOnline] = React.useState(typeof window !== 'undefined' ? window.navigator.onLine : true);
 
@@ -312,14 +312,14 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
   // 3. Reactive Sync Queue Processing
   React.useEffect(() => {
-    if (isOnline && user && isHydrated) {
+    if (isOnline && user && !isMfaPending && isHydrated) {
       // Small delay to let network stabilize and auth refresh if needed
       const timer = setTimeout(() => {
         processSyncQueue();
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [isOnline, user, isHydrated, processSyncQueue]);
+  }, [isOnline, user, isMfaPending, isHydrated, processSyncQueue]);
 
   const forceSync = React.useCallback(async () => {
     await performSync(true);
@@ -332,7 +332,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
   // 3. Realtime Sync Subscription
   React.useEffect(() => {
-    if (!user || !isHydrated) return;
+    if (!user || isMfaPending || !isHydrated) return;
 
     const setupRealtime = async () => {
       const { supabase } = await import("@/lib/supabase");
@@ -450,7 +450,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         if (channel) channel.unsubscribe();
       });
     };
-  }, [user, isHydrated]);
+  }, [user, isMfaPending, isHydrated]);
 
   // 3. Persist activeBookId to localStorage on change
   const setActiveBookId = React.useCallback((id: string | null) => {

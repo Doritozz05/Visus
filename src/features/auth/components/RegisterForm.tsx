@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { authService } from "@/core/config/services";
 import { GoogleSignInButton } from "./GoogleSignInButton";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -83,17 +84,13 @@ export function RegisterForm() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground" htmlFor="password">
-            Password
-          </label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
+            label="Password"
             required
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             placeholder="Minimum 6 characters"
           />
         </div>

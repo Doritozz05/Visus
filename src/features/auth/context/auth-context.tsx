@@ -7,6 +7,7 @@ import { authService } from "@/core/config/services";
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isMfaPending: boolean;
   logout: () => Promise<void>;
 }
 
@@ -15,6 +16,7 @@ const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isMfaPending, setIsMfaPending] = React.useState(false);
   const [isRedirecting, setIsRedirecting] = React.useState(false);
 
   React.useEffect(() => {
@@ -26,12 +28,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (currentUser) {
           const aal = await authService.getAALStatus();
+          const mfaRequired = aal.currentLevel !== 'aal2' && !!aal.factorId;
+          setIsMfaPending(mfaRequired);
 
           // Client-side MFA Guard
           const protectedPaths = ['/library', '/settings', '/dashboard', '/reader'];
           const isProtectedRoute = protectedPaths.some(path => window.location.pathname.startsWith(path));
 
-          if (isProtectedRoute && aal.currentLevel !== 'aal2' && aal.factorId) {
+          if (isProtectedRoute && mfaRequired) {
             setIsRedirecting(true);
             window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
             return;
@@ -53,18 +57,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (updatedUser) {
         try {
           const aal = await authService.getAALStatus();
+          const mfaRequired = aal.currentLevel !== 'aal2' && !!aal.factorId;
+          setIsMfaPending(mfaRequired);
 
           // Client-side MFA Guard on state change
           const protectedPaths = ['/library', '/settings', '/dashboard', '/reader'];
           const isProtectedRoute = protectedPaths.some(path => window.location.pathname.startsWith(path));
 
-          if (isProtectedRoute && aal.currentLevel !== 'aal2' && aal.factorId) {
+          if (isProtectedRoute && mfaRequired) {
             setIsRedirecting(true);
             window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
           }
         } catch (aalErr) {
           console.warn("Could not verify AAL status (offline):", aalErr);
         }
+      } else {
+        setIsMfaPending(false);
       }
       setIsLoading(false);
     });
@@ -75,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await authService.logout();
     setUser(null);
+    setIsMfaPending(false);
   };
 
   if (isLoading || isRedirecting) {
@@ -82,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isMfaPending, logout }}>
       {children}
     </AuthContext.Provider>
   );

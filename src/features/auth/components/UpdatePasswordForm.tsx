@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { authService } from "@/core/config/services";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 export function UpdatePasswordForm({ disabled }: { disabled?: boolean }) {
   const [newPassword, setNewPassword] = useState("");
@@ -69,35 +70,25 @@ export function UpdatePasswordForm({ disabled }: { disabled?: boolean }) {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-[10px] font-mono uppercase tracking-wider font-bold text-foreground" htmlFor="new-password">
-              New Password
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              required
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-background border border-border/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-sm font-mono"
-              placeholder="••••••••"
-            />
-          </div>
+          <PasswordInput
+            id="new-password"
+            label="New Password"
+            required
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="text-sm font-mono border-border/50 rounded-lg focus:ring-1 focus:border-primary"
+            placeholder="••••••••"
+          />
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-mono uppercase tracking-wider font-bold text-foreground" htmlFor="confirm-password">
-              Confirm New Password
-            </label>
-            <input
-              id="confirm-password"
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-background border border-border/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-sm font-mono"
-              placeholder="••••••••"
-            />
-          </div>
+          <PasswordInput
+            id="confirm-password"
+            label="Confirm New Password"
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="text-sm font-mono border-border/50 rounded-lg focus:ring-1 focus:border-primary"
+            placeholder="••••••••"
+          />
         </div>
 
         <button
