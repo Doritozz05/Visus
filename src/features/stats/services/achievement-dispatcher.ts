@@ -14,68 +14,47 @@ export interface Achievement {
   description: string;
   tier: "bronze" | "silver" | "gold" | "platinum";
   criteria: {
-    type: "first_read" | "speed" | "streak" | "words" | "time";
+    type: "sessions" | "first_read" | "speed" | "streak" | "words" | "time";
     target?: number;
   };
 }
 
 export const MASTER_ACHIEVEMENTS: Achievement[] = [
-  {
-    id: "first-read",
-    title: "First Steps",
-    description: "Complete your first reading session.",
-    tier: "bronze",
-    criteria: { type: "first_read" }
-  },
-  {
-    id: "speed-500-wpm",
-    title: "Reading Falcon",
-    description: "Reach a reading speed of 500 WPM.",
-    tier: "silver",
-    criteria: { type: "speed", target: 500 }
-  },
-  {
-    id: "speed-700-wpm",
-    title: "Escape Velocity",
-    description: "Reach a reading speed of 700 WPM.",
-    tier: "gold",
-    criteria: { type: "speed", target: 700 }
-  },
-  {
-    id: "streak-3-days",
-    title: "Constant Reader",
-    description: "Read for 3 consecutive days.",
-    tier: "bronze",
-    criteria: { type: "streak", target: 3 }
-  },
-  {
-    id: "streak-10-days",
-    title: "Steel Habit",
-    description: "Read for 10 consecutive days.",
-    tier: "gold",
-    criteria: { type: "streak", target: 10 }
-  },
-  {
-    id: "total-words-10k",
-    title: "Page Devourer",
-    description: "Read a total of 10,000 words.",
-    tier: "silver",
-    criteria: { type: "words", target: 10000 }
-  },
-  {
-    id: "total-words-50k",
-    title: "Bibliophile",
-    description: "Read a total of 50,000 words.",
-    tier: "platinum",
-    criteria: { type: "words", target: 50000 }
-  },
-  {
-    id: "time-1-hour",
-    title: "Deep Focus",
-    description: "Accumulate 1 hour (60 minutes) of active reading time.",
-    tier: "silver",
-    criteria: { type: "time", target: 60 }
-  }
+  { id: 'sessions-1', title: 'First Steps', description: 'Complete your first reading session.', tier: 'bronze', criteria: { type: 'sessions', target: 1 } },
+  { id: 'sessions-10', title: 'Casual Reader', description: 'Complete 10 reading sessions.', tier: 'bronze', criteria: { type: 'sessions', target: 10 } },
+  { id: 'sessions-50', title: 'Regular Reader', description: 'Complete 50 reading sessions.', tier: 'silver', criteria: { type: 'sessions', target: 50 } },
+  { id: 'sessions-100', title: 'Dedicated Reader', description: 'Complete 100 reading sessions.', tier: 'gold', criteria: { type: 'sessions', target: 100 } },
+  { id: 'sessions-500', title: 'Bookworm', description: 'Complete 500 reading sessions.', tier: 'platinum', criteria: { type: 'sessions', target: 500 } },
+  
+  { id: 'streak-3', title: 'Consistency is Key', description: 'Read for 3 consecutive days.', tier: 'bronze', criteria: { type: 'streak', target: 3 } },
+  { id: 'streak-7', title: 'Weekly Habit', description: 'Read for 7 consecutive days.', tier: 'silver', criteria: { type: 'streak', target: 7 } },
+  { id: 'streak-14', title: 'Fortnight Focus', description: 'Read for 14 consecutive days.', tier: 'gold', criteria: { type: 'streak', target: 14 } },
+  { id: 'streak-30', title: 'Monthly Milestone', description: 'Read for 30 consecutive days.', tier: 'platinum', criteria: { type: 'streak', target: 30 } },
+  { id: 'streak-50', title: 'Unbreakable', description: 'Read for 50 consecutive days.', tier: 'platinum', criteria: { type: 'streak', target: 50 } },
+  { id: 'streak-100', title: 'Century Streak', description: 'Read for 100 consecutive days.', tier: 'platinum', criteria: { type: 'streak', target: 100 } },
+
+  { id: 'speed-300', title: 'Finding the Pace', description: 'Reach a reading speed of 300 WPM.', tier: 'bronze', criteria: { type: 'speed', target: 300 } },
+  { id: 'speed-400', title: 'Accelerating', description: 'Reach a reading speed of 400 WPM.', tier: 'silver', criteria: { type: 'speed', target: 400 } },
+  { id: 'speed-500', title: 'Speed Reader', description: 'Reach a reading speed of 500 WPM.', tier: 'gold', criteria: { type: 'speed', target: 500 } },
+  { id: 'speed-600', title: 'Blur of Words', description: 'Reach a reading speed of 600 WPM.', tier: 'platinum', criteria: { type: 'speed', target: 600 } },
+  { id: 'speed-700', title: 'Escape Velocity', description: 'Reach a reading speed of 700 WPM.', tier: 'platinum', criteria: { type: 'speed', target: 700 } },
+  { id: 'speed-800', title: 'Supersonic', description: 'Reach a reading speed of 800 WPM.', tier: 'platinum', criteria: { type: 'speed', target: 800 } },
+  { id: 'speed-1000', title: 'Speed of Light', description: 'Reach a reading speed of 1000 WPM.', tier: 'platinum', criteria: { type: 'speed', target: 1000 } },
+
+  { id: 'words-5k', title: 'Word Gatherer', description: 'Read a total of 5,000 words.', tier: 'bronze', criteria: { type: 'words', target: 5000 } },
+  { id: 'words-10k', title: 'Page Turner', description: 'Read a total of 10,000 words.', tier: 'silver', criteria: { type: 'words', target: 10000 } },
+  { id: 'words-50k', title: 'Chapter Eater', description: 'Read a total of 50,000 words.', tier: 'gold', criteria: { type: 'words', target: 50000 } },
+  { id: 'words-100k', title: 'Novel Finisher', description: 'Read a total of 100,000 words.', tier: 'platinum', criteria: { type: 'words', target: 100000 } },
+  { id: 'words-250k', title: 'Epic Journey', description: 'Read a total of 250,000 words.', tier: 'platinum', criteria: { type: 'words', target: 250000 } },
+  { id: 'words-500k', title: 'Library Consumer', description: 'Read a total of 500,000 words.', tier: 'platinum', criteria: { type: 'words', target: 500000 } },
+  { id: 'words-1m', title: 'Millionaire of Words', description: 'Read a total of 1,000,000 words.', tier: 'platinum', criteria: { type: 'words', target: 1000000 } },
+
+  { id: 'time-1h', title: 'Getting Lost', description: 'Accumulate 1 hour of active reading time.', tier: 'bronze', criteria: { type: 'time', target: 60 } },
+  { id: 'time-5h', title: 'Deep Immersion', description: 'Accumulate 5 hours of active reading time.', tier: 'silver', criteria: { type: 'time', target: 300 } },
+  { id: 'time-10h', title: 'Time Traveler', description: 'Accumulate 10 hours of active reading time.', tier: 'gold', criteria: { type: 'time', target: 600 } },
+  { id: 'time-24h', title: 'A Day in Books', description: 'Accumulate 24 hours of active reading time.', tier: 'platinum', criteria: { type: 'time', target: 1440 } },
+  { id: 'time-50h', title: 'Reading Veteran', description: 'Accumulate 50 hours of active reading time.', tier: 'platinum', criteria: { type: 'time', target: 3000 } },
+  { id: 'time-100h', title: 'Time Master', description: 'Accumulate 100 hours of active reading time.', tier: 'platinum', criteria: { type: 'time', target: 6000 } }
 ];
 
 export class AchievementDispatcher {
@@ -107,6 +86,7 @@ export class AchievementDispatcher {
       if (logs.length === 0) return;
 
       // Calculate totals
+      const totalSessions = logs.length;
       const totalWords = logs.reduce((sum, log) => sum + Math.round((log.durationSeconds / 60) * log.speedWpm), 0);
       const maxSpeed = logs.reduce((max, log) => Math.max(max, log.speedWpm), 0);
       const totalTimeSeconds = logs.reduce((sum, log) => sum + log.durationSeconds, 0);
@@ -126,7 +106,8 @@ export class AchievementDispatcher {
 
       // Seeding achievements list in IndexedDB if needed
       const storedAchievements = await dbService.getAllAchievements();
-      if (storedAchievements.length === 0) {
+      if (storedAchievements.length !== MASTER_ACHIEVEMENTS.length) {
+        // Sync full new list if it has changed length
         for (const ach of MASTER_ACHIEVEMENTS) {
           await dbService.saveAchievement(ach);
         }
@@ -135,32 +116,28 @@ export class AchievementDispatcher {
       // Check each achievement
       for (const ach of MASTER_ACHIEVEMENTS) {
         let currentProgress = 0;
-        let targetProgress = 0;
+        let targetProgress = ach.criteria.target || 1;
         let isUnlockedNow = false;
 
         switch (ach.criteria.type) {
-          case "first_read":
-            currentProgress = logs.length > 0 ? 1 : 0;
-            targetProgress = 1;
-            isUnlockedNow = logs.length > 0;
+          case "sessions":
+          case "first_read": // For backwards compatibility
+            currentProgress = totalSessions;
+            isUnlockedNow = totalSessions >= targetProgress;
             break;
           case "speed":
-            targetProgress = ach.criteria.target || 500;
             currentProgress = maxSpeed;
             isUnlockedNow = maxSpeed >= targetProgress;
             break;
           case "words":
-            targetProgress = ach.criteria.target || 10000;
             currentProgress = totalWords;
             isUnlockedNow = totalWords >= targetProgress;
             break;
           case "time":
-            targetProgress = ach.criteria.target || 60; // targets are in minutes
             currentProgress = totalTimeMinutes;
             isUnlockedNow = totalTimeMinutes >= targetProgress;
             break;
           case "streak":
-            targetProgress = ach.criteria.target || 3;
             currentProgress = streakCount;
             isUnlockedNow = streakCount >= targetProgress;
             break;
@@ -202,13 +179,10 @@ export class AchievementDispatcher {
 
   /**
    * Streak calculation algorithm supporting a Grace Day Period.
-   * A grace day is earned every 30 reading days (capped at 3).
-   * If a user misses exactly 1 calendar day, a grace day is consumed to bridge the gap.
    */
   static calculateStreakWithGrace(logs: ReadingSessionLog[]): number {
     if (logs.length === 0) return 0;
 
-    // Map logs to unique date strings in local time zone, e.g., "YYYY-MM-DD"
     const uniqueDates = Array.from(
       new Set(
         logs.map((log) => {
@@ -216,7 +190,7 @@ export class AchievementDispatcher {
           return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
         })
       )
-    ).sort(); // Sort in ascending order
+    ).sort();
 
     const totalActiveReadingDays = uniqueDates.length;
     let graceDaysRemaining = Math.min(3, Math.floor(totalActiveReadingDays / 30));
@@ -224,7 +198,6 @@ export class AchievementDispatcher {
     let maxStreak = 0;
     let currentStreak = 0;
 
-    // Today and yesterday dates for check
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     
@@ -232,9 +205,6 @@ export class AchievementDispatcher {
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
 
-    if (uniqueDates.length === 0) return 0;
-
-    // Walk dates chronologically
     let prevDate: Date | null = null;
 
     for (let i = 0; i < uniqueDates.length; i++) {
@@ -247,14 +217,11 @@ export class AchievementDispatcher {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays === 1) {
-          // Consecutive day
           currentStreak++;
         } else if (diffDays === 2 && graceDaysRemaining > 0) {
-          // Exactly 1 day skipped, consume 1 grace day to bridge
           graceDaysRemaining--;
-          currentStreak += 2; // Count the skipped day as bridged
+          currentStreak += 2; 
         } else {
-          // Streak broken
           if (currentStreak > maxStreak) {
             maxStreak = currentStreak;
           }
@@ -269,16 +236,12 @@ export class AchievementDispatcher {
       maxStreak = currentStreak;
     }
 
-    // Verify if streak is still active today or yesterday
     const lastReadDateStr = uniqueDates[uniqueDates.length - 1];
     const isStreakActive = lastReadDateStr === todayStr || lastReadDateStr === yesterdayStr;
 
     return isStreakActive ? currentStreak : 0;
   }
 
-  /**
-   * Push achievement unlock to Supabase remotely
-   */
   private static async pushUserAchievementToCloud(
     userId: string,
     achievementId: string,
@@ -299,9 +262,6 @@ export class AchievementDispatcher {
     }
   }
 
-  /**
-   * Premium styled unlock Toast UI using Sonner
-   */
   private static triggerToast(achievement: Achievement) {
     const tierColors = {
       bronze: "from-amber-600 to-amber-800 border-amber-500 text-amber-100",
@@ -323,11 +283,9 @@ export class AchievementDispatcher {
         {
           className: `w-full max-w-sm bg-gradient-to-r ${tierColors[achievement.tier]} border p-4 rounded-xl shadow-2xl flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300 relative overflow-hidden backdrop-blur-md`
         },
-        // Neon ambient glow overlay
         React.createElement("div", {
           className: "absolute inset-0 bg-white/5 pointer-events-none mix-blend-overlay"
         }),
-        // Trophy/Icon container
         React.createElement(
           "div",
           {
@@ -335,7 +293,6 @@ export class AchievementDispatcher {
           },
           tierBadges[achievement.tier]
         ),
-        // Texts
         React.createElement(
           "div",
           { className: "flex-1" },
@@ -355,7 +312,6 @@ export class AchievementDispatcher {
             achievement.description
           )
         ),
-        // Close button
         React.createElement(
           "button",
           {

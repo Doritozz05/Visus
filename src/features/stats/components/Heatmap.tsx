@@ -113,7 +113,7 @@ export function Heatmap({ logs }: HeatmapProps) {
         <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Minutes read each day over the past year</p>
       </div>
 
-      <div className="relative w-full overflow-x-auto flex justify-center py-2 min-h-[120px]">
+      <div className="relative w-full overflow-x-auto custom-scrollbar flex justify-center py-2 min-h-[120px]">
         <svg width={width} height={height} className="overflow-visible select-none">
           {/* Month labels */}
           {monthLabels.map((lbl, idx) => (

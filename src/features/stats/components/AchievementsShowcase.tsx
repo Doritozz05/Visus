@@ -91,7 +91,7 @@ export function AchievementsShowcase({ userId }: AchievementsShowcaseProps) {
         <Award className="w-4 h-4 text-primary shrink-0" />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 overflow-y-auto max-h-[320px] pr-1 py-1">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 overflow-y-auto custom-scrollbar max-h-[320px] pr-1 py-1">
         {achievements.map((ach) => {
           const isUnlocked = !!ach.unlockedAt;
           

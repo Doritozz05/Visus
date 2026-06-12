@@ -54,15 +54,50 @@ USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
 -- 6. Populate default achievements
+-- Clear out old ones if this is a rerun or update
+DELETE FROM public.achievements;
+
 INSERT INTO public.achievements (id, title, description, tier, criteria_json) VALUES
-('first-read', 'Primeros Pasos', 'Completa tu primera sesión de lectura.', 'bronze', '{"type": "first_read"}'),
-('speed-500-wpm', 'Halcón de Lectura', 'Alcanza una velocidad de lectura de 500 WPM.', 'silver', '{"type": "speed", "target": 500}'),
-('speed-700-wpm', 'Velocidad de Escape', 'Alcanza una velocidad de lectura de 700 WPM.', 'gold', '{"type": "speed", "target": 700}'),
-('streak-3-days', 'Lector Constante', 'Lee durante 3 días consecutivos.', 'bronze', '{"type": "streak", "target": 3}'),
-('streak-10-days', 'Hábito de Acero', 'Lee durante 10 días consecutivos.', 'gold', '{"type": "streak", "target": 10}'),
-('total-words-10k', 'Devorador de Páginas', 'Lee un total de 10,000 palabras.', 'silver', '{"type": "words", "target": 10000}'),
-('total-words-50k', 'Bibliófilo', 'Lee un total de 50,000 palabras.', 'platinum', '{"type": "words", "target": 50000}'),
-('time-1-hour', 'Enfoque Profundo', 'Acumula 1 hora (60 minutos) de tiempo de lectura activa.', 'silver', '{"type": "time", "target": 60}')
+-- SESSIONS
+('sessions-1', 'First Steps', 'Complete your first reading session.', 'bronze', '{"type": "sessions", "target": 1}'),
+('sessions-10', 'Casual Reader', 'Complete 10 reading sessions.', 'bronze', '{"type": "sessions", "target": 10}'),
+('sessions-50', 'Regular Reader', 'Complete 50 reading sessions.', 'silver', '{"type": "sessions", "target": 50}'),
+('sessions-100', 'Dedicated Reader', 'Complete 100 reading sessions.', 'gold', '{"type": "sessions", "target": 100}'),
+('sessions-500', 'Bookworm', 'Complete 500 reading sessions.', 'platinum', '{"type": "sessions", "target": 500}'),
+
+-- STREAKS
+('streak-3', 'Consistency is Key', 'Read for 3 consecutive days.', 'bronze', '{"type": "streak", "target": 3}'),
+('streak-7', 'Weekly Habit', 'Read for 7 consecutive days.', 'silver', '{"type": "streak", "target": 7}'),
+('streak-14', 'Fortnight Focus', 'Read for 14 consecutive days.', 'gold', '{"type": "streak", "target": 14}'),
+('streak-30', 'Monthly Milestone', 'Read for 30 consecutive days.', 'platinum', '{"type": "streak", "target": 30}'),
+('streak-50', 'Unbreakable', 'Read for 50 consecutive days.', 'platinum', '{"type": "streak", "target": 50}'),
+('streak-100', 'Century Streak', 'Read for 100 consecutive days.', 'platinum', '{"type": "streak", "target": 100}'),
+
+-- SPEED
+('speed-300', 'Finding the Pace', 'Reach a reading speed of 300 WPM.', 'bronze', '{"type": "speed", "target": 300}'),
+('speed-400', 'Accelerating', 'Reach a reading speed of 400 WPM.', 'silver', '{"type": "speed", "target": 400}'),
+('speed-500', 'Speed Reader', 'Reach a reading speed of 500 WPM.', 'gold', '{"type": "speed", "target": 500}'),
+('speed-600', 'Blur of Words', 'Reach a reading speed of 600 WPM.', 'platinum', '{"type": "speed", "target": 600}'),
+('speed-700', 'Escape Velocity', 'Reach a reading speed of 700 WPM.', 'platinum', '{"type": "speed", "target": 700}'),
+('speed-800', 'Supersonic', 'Reach a reading speed of 800 WPM.', 'platinum', '{"type": "speed", "target": 800}'),
+('speed-1000', 'Speed of Light', 'Reach a reading speed of 1000 WPM.', 'platinum', '{"type": "speed", "target": 1000}'),
+
+-- WORDS
+('words-5k', 'Word Gatherer', 'Read a total of 5,000 words.', 'bronze', '{"type": "words", "target": 5000}'),
+('words-10k', 'Page Turner', 'Read a total of 10,000 words.', 'silver', '{"type": "words", "target": 10000}'),
+('words-50k', 'Chapter Eater', 'Read a total of 50,000 words.', 'gold', '{"type": "words", "target": 50000}'),
+('words-100k', 'Novel Finisher', 'Read a total of 100,000 words.', 'platinum', '{"type": "words", "target": 100000}'),
+('words-250k', 'Epic Journey', 'Read a total of 250,000 words.', 'platinum', '{"type": "words", "target": 250000}'),
+('words-500k', 'Library Consumer', 'Read a total of 500,000 words.', 'platinum', '{"type": "words", "target": 500000}'),
+('words-1m', 'Millionaire of Words', 'Read a total of 1,000,000 words.', 'platinum', '{"type": "words", "target": 1000000}'),
+
+-- TIME (targets in minutes)
+('time-1h', 'Getting Lost', 'Accumulate 1 hour of active reading time.', 'bronze', '{"type": "time", "target": 60}'),
+('time-5h', 'Deep Immersion', 'Accumulate 5 hours of active reading time.', 'silver', '{"type": "time", "target": 300}'),
+('time-10h', 'Time Traveler', 'Accumulate 10 hours of active reading time.', 'gold', '{"type": "time", "target": 600}'),
+('time-24h', 'A Day in Books', 'Accumulate 24 hours of active reading time.', 'platinum', '{"type": "time", "target": 1440}'),
+('time-50h', 'Reading Veteran', 'Accumulate 50 hours of active reading time.', 'platinum', '{"type": "time", "target": 3000}'),
+('time-100h', 'Time Master', 'Accumulate 100 hours of active reading time.', 'platinum', '{"type": "time", "target": 6000}')
 ON CONFLICT (id) DO UPDATE SET
     title = EXCLUDED.title,
     description = EXCLUDED.description,
@@ -76,14 +111,17 @@ DECLARE
     total_words INTEGER;
     max_speed INTEGER;
     total_time INTEGER;
+    total_sessions INTEGER;
     streak_count INTEGER;
     ach_rec RECORD;
     unlocked BOOLEAN;
     progress_val JSONB;
+    criteria_type TEXT;
+    target_val INTEGER;
 BEGIN
     -- Compute aggregate metrics for this user
-    SELECT COALESCE(SUM(words_read), 0), COALESCE(MAX(speed_wpm), 0), COALESCE(SUM(duration_seconds), 0)
-    INTO total_words, max_speed, total_time
+    SELECT COALESCE(SUM(words_read), 0), COALESCE(MAX(speed_wpm), 0), COALESCE(SUM(duration_seconds), 0), COUNT(*)
+    INTO total_words, max_speed, total_time, total_sessions
     FROM public.stats_logs
     WHERE user_id = NEW.user_id;
 
@@ -109,35 +147,29 @@ BEGIN
         streak_count := 0;
     END IF;
 
-    -- Loop through all achievements to update user progress
+    -- Loop through all achievements to update user progress dynamically
     FOR ach_rec IN SELECT * FROM public.achievements LOOP
         unlocked := false;
         progress_val := '{}'::jsonb;
+        
+        criteria_type := ach_rec.criteria_json->>'type';
+        target_val := (ach_rec.criteria_json->>'target')::integer;
 
-        IF ach_rec.id = 'first-read' THEN
-            unlocked := true;
-            progress_val := '{"current": 1, "target": 1}'::jsonb;
-        ELSIF ach_rec.id = 'speed-500-wpm' THEN
-            progress_val := jsonb_build_object('current', max_speed, 'target', 500);
-            IF max_speed >= 500 THEN unlocked := true; END IF;
-        ELSIF ach_rec.id = 'speed-700-wpm' THEN
-            progress_val := jsonb_build_object('current', max_speed, 'target', 700);
-            IF max_speed >= 700 THEN unlocked := true; END IF;
-        ELSIF ach_rec.id = 'streak-3-days' THEN
-            progress_val := jsonb_build_object('current', streak_count, 'target', 3);
-            IF streak_count >= 3 THEN unlocked := true; END IF;
-        ELSIF ach_rec.id = 'streak-10-days' THEN
-            progress_val := jsonb_build_object('current', streak_count, 'target', 10);
-            IF streak_count >= 10 THEN unlocked := true; END IF;
-        ELSIF ach_rec.id = 'total-words-10k' THEN
-            progress_val := jsonb_build_object('current', total_words, 'target', 10000);
-            IF total_words >= 10000 THEN unlocked := true; END IF;
-        ELSIF ach_rec.id = 'total-words-50k' THEN
-            progress_val := jsonb_build_object('current', total_words, 'target', 50000);
-            IF total_words >= 50000 THEN unlocked := true; END IF;
-        ELSIF ach_rec.id = 'time-1-hour' THEN
-            progress_val := jsonb_build_object('current', ROUND(total_time / 60), 'target', 60); -- target is 60 minutes
-            IF total_time >= 3600 THEN unlocked := true; END IF;
+        IF criteria_type = 'sessions' THEN
+            progress_val := jsonb_build_object('current', total_sessions, 'target', target_val);
+            IF total_sessions >= target_val THEN unlocked := true; END IF;
+        ELSIF criteria_type = 'speed' THEN
+            progress_val := jsonb_build_object('current', max_speed, 'target', target_val);
+            IF max_speed >= target_val THEN unlocked := true; END IF;
+        ELSIF criteria_type = 'streak' THEN
+            progress_val := jsonb_build_object('current', streak_count, 'target', target_val);
+            IF streak_count >= target_val THEN unlocked := true; END IF;
+        ELSIF criteria_type = 'words' THEN
+            progress_val := jsonb_build_object('current', total_words, 'target', target_val);
+            IF total_words >= target_val THEN unlocked := true; END IF;
+        ELSIF criteria_type = 'time' THEN
+            progress_val := jsonb_build_object('current', ROUND(total_time / 60), 'target', target_val);
+            IF (total_time / 60) >= target_val THEN unlocked := true; END IF;
         END IF;
 
         -- Upsert to public.user_achievements

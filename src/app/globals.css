@@ -199,6 +199,28 @@ body[data-glass="disabled"] .glass-panel {
   scrollbar-width: none;  /* Firefox */
 }
 
+/* Custom themed scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--secondary) / 0.5);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.4);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.8);
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.4) hsl(var(--secondary) / 0.5);
+}
+
 .scroll-fade-bottom {
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 84%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0%, #000 84%, transparent 100%);
