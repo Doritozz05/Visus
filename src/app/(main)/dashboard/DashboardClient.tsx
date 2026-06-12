@@ -19,10 +19,10 @@ import { toast } from "sonner";
 import { RadarChart } from "@/features/stats/components/RadarChart";
 import { Heatmap } from "@/features/stats/components/Heatmap";
 import { WpmChart } from "@/features/stats/components/WpmChart";
-import { PredictiveWidget } from "@/features/stats/components/PredictiveWidget";
 import { MethodComparison } from "@/features/stats/components/MethodComparison";
-import { ShareCard } from "@/features/stats/components/ShareCard";
 import { AchievementsShowcase } from "@/features/stats/components/AchievementsShowcase";
+import { ShareCard } from "@/features/stats/components/ShareCard";
+import { PredictiveWidget } from "@/features/stats/components/PredictiveWidget";
 
 // Export utilities
 import { exportToJSON, exportToCSV } from "@/features/stats/utils/export";
@@ -140,14 +140,10 @@ export default function DashboardClient() {
         </div>
       </header>
 
-      {/* Main Bento Box Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        
-        {/* ROW 1 */}
-        {/* Box 1: Core Stats Cards Column */}
-        <div className="flex flex-col gap-4 justify-between h-full">
+      {/* Top Row: Core Metrics (Horizontal) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Card A: WPM */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
+          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between min-h-[140px]">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <Gauge className="w-14 h-14 text-foreground" />
             </div>
@@ -165,13 +161,13 @@ export default function DashboardClient() {
           </div>
 
           {/* Card B: Racha */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
+          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between min-h-[140px]">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
               <Flame className="w-14 h-14 text-foreground" />
             </div>
 
             <div 
-              className="absolute right-[84px] top-[48px] -translate-y-1/2 flex items-center gap-1 bg-accent/80 px-2 py-1 rounded-md text-muted-foreground hover:text-primary transition-colors cursor-help z-20 shadow-sm"
+              className="absolute right-4 bottom-4 flex items-center gap-1 bg-accent/80 px-2 py-1 rounded-md text-muted-foreground hover:text-primary transition-colors cursor-help z-20 shadow-sm"
               title="Streak Shields: Protects your streak if you miss a day"
             >
               <span className="text-[10px] font-mono font-bold">{Math.min(3, Math.floor((summary.currentStreakDays || 0) / 30))}/3</span>
@@ -194,7 +190,7 @@ export default function DashboardClient() {
           </div>
 
           {/* Card C: Comprensión */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
+          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between min-h-[140px]">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <Brain className="w-14 h-14 text-foreground" />
             </div>
@@ -213,7 +209,7 @@ export default function DashboardClient() {
           </div>
 
           {/* Card D: Books Read Progress */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
+          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between min-h-[140px]">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none">
               <BookOpen className="w-14 h-14 text-foreground" />
             </div>
@@ -239,13 +235,13 @@ export default function DashboardClient() {
                     max="999"
                     value={tempGoal}
                     onChange={(e) => setTempGoal(parseInt(e.target.value) || 1)}
-                    className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-xl font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-16 bg-background border border-border/50 rounded px-2 py-1 text-xl font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
                     autoFocus
                     onKeyDown={(e) => e.key === 'Enter' && handleUpdateGoal()}
                   />
                   <button 
                     onClick={handleUpdateGoal}
-                    className="bg-primary text-primary-foreground px-3 py-1 rounded text-[10px] font-mono font-bold hover:brightness-110 transition-all"
+                    className="bg-primary text-primary-foreground px-2 py-1 rounded text-[10px] font-mono font-bold hover:brightness-110 transition-all"
                   >
                     SAVE
                   </button>
@@ -267,15 +263,18 @@ export default function DashboardClient() {
               </div>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* Box 2: Radar Chart */}
-        <div className="h-full">
+      {/* Main Bento Box Grid (Visuals) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+        
+        {/* Box 1: Radar Chart */}
+        <div className="lg:col-span-5 h-full">
           <RadarChart logs={logs} books={books} />
         </div>
 
-        {/* Box 3: Heatmap Chart */}
-        <div className="h-full">
+        {/* Box 2: Heatmap Chart */}
+        <div className="lg:col-span-7 h-full">
           <Heatmap logs={logs} />
         </div>
 

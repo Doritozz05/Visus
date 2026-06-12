@@ -71,8 +71,8 @@ export function Heatmap({ logs }: HeatmapProps) {
 
   // Color mapper based on minutes read
   const getColor = (minutes: number) => {
-    if (minutes === 0) return "fill-neutral-200 dark:fill-white/10";
-    if (minutes < 5) return "fill-emerald-200 dark:fill-emerald-900/80";
+    if (minutes === 0) return "fill-neutral-300 dark:fill-white/10";
+    if (minutes < 5) return "fill-emerald-300 dark:fill-emerald-900/80";
     if (minutes < 15) return "fill-emerald-400 dark:fill-emerald-700/80";
     if (minutes < 30) return "fill-emerald-500 dark:fill-emerald-500/80";
     return "fill-emerald-600 dark:fill-emerald-400"; // Highest intensity
@@ -202,8 +202,8 @@ export function Heatmap({ logs }: HeatmapProps) {
       {/* Legend */}
       <div className="flex justify-end items-center gap-1.5 text-[9px] font-mono text-muted-foreground/85 mt-2">
         <span>Less</span>
-        <div className="w-2.5 h-2.5 rounded-[1.5px] bg-neutral-200 dark:bg-white/10 border border-background"></div>
-        <div className="w-2.5 h-2.5 rounded-[1.5px] bg-emerald-200 dark:bg-emerald-900/80 border border-background"></div>
+        <div className="w-2.5 h-2.5 rounded-[1.5px] bg-neutral-300 dark:bg-white/10 border border-background"></div>
+        <div className="w-2.5 h-2.5 rounded-[1.5px] bg-emerald-300 dark:bg-emerald-900/80 border border-background"></div>
         <div className="w-2.5 h-2.5 rounded-[1.5px] bg-emerald-400 dark:bg-emerald-700/80 border border-background"></div>
         <div className="w-2.5 h-2.5 rounded-[1.5px] bg-emerald-500 dark:bg-emerald-500/80 border border-background"></div>
         <div className="w-2.5 h-2.5 rounded-[1.5px] bg-emerald-600 dark:bg-emerald-400 border border-background"></div>
