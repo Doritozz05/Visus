@@ -64,7 +64,12 @@ export function prepareChapterHtml(chapter: ChapterHtmlData): string {
     console.warn("Failed to sanitize/trim trailing empty tags:", e);
   }
 
-  finalHtml = DOMPurify.sanitize(finalHtml);
+  // Harden DOMPurify configuration to prevent rendering of potentially dangerous tags like iframes, objects, scripts, and forms.
+  // This provides defense in depth against XSS and malicious media injection in EPUB contents.
+  finalHtml = DOMPurify.sanitize(finalHtml, {
+    FORBID_TAGS: ['iframe', 'object', 'embed', 'script', 'form', 'input', 'button', 'textarea', 'select', 'base', 'link'],
+    FORBID_ATTR: ['formaction', 'on*']
+  });
 
   const tagged = tagHtmlBlocksWithWordIndices(finalHtml);
   return tagged.html;
