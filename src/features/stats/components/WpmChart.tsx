@@ -162,7 +162,7 @@ export function WpmChart({ logs }: WpmChartProps) {
         )}
       </div>
 
-      <div className="relative w-full overflow-x-auto flex justify-center py-2 min-h-[160px]">
+      <div className="relative w-full overflow-x-auto overflow-y-hidden custom-scrollbar flex justify-center py-2 min-h-[160px]">
         <svg
           width={width}
           height={height}

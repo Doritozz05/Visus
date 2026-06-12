@@ -172,6 +172,11 @@ export class AchievementDispatcher {
           }
         }
       }
+      
+      // Dispatch global event so the UI can refresh immediately
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("achievements-updated"));
+      }
     } catch (err) {
       console.warn("[AchievementDispatcher] Evaluation error:", err);
     }

@@ -267,7 +267,7 @@ export default function DashboardClient() {
               </div>
             </div>
 
-            <div className="overflow-x-auto max-h-[200px] overflow-y-auto pr-1">
+            <div className="overflow-x-auto max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-border/30 text-muted-foreground font-mono text-[9px] uppercase tracking-wider">

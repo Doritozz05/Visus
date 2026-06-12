@@ -105,7 +105,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <LibraryProvider>
           <ThemeProviderHelper>
             {children}
-            <Toaster position="bottom-right" richColors closeButton />
+            <Toaster 
+              position="bottom-right" 
+              richColors 
+              closeButton 
+              expand={true}
+              visibleToasts={5}
+            />
           </ThemeProviderHelper>
         </LibraryProvider>
       </SettingsProvider>

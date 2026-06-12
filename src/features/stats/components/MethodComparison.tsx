@@ -114,7 +114,7 @@ export function MethodComparison({ logs }: MethodComparisonProps) {
         </div>
       ) : (
         <>
-          <div className="relative w-full overflow-x-auto flex justify-center py-2 min-h-[140px]">
+          <div className="relative w-full overflow-x-auto overflow-y-hidden custom-scrollbar flex justify-center py-2 min-h-[140px]">
             <svg width={width} height={height} className="overflow-visible select-none">
               {/* Method Rows */}
               {(["normal", "rsvp", "cluster"] as const).map((mode, idx) => {

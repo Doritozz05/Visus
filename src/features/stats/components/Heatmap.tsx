@@ -121,7 +121,7 @@ export function Heatmap({ logs }: HeatmapProps) {
         <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Minutes read each day over the past year</p>
       </div>
 
-      <div ref={scrollContainerRef} className="relative w-full overflow-x-auto custom-scrollbar flex justify-start py-2 min-h-[120px]">
+      <div ref={scrollContainerRef} className="relative w-full overflow-x-auto overflow-y-hidden custom-scrollbar flex justify-start py-2 min-h-[120px]">
         <svg width={width} height={height} className="overflow-visible select-none shrink-0 pr-4">
           {/* Month labels */}
           {monthLabels.map((lbl, idx) => (

@@ -6,7 +6,7 @@ import { Trophy } from "lucide-react";
 interface SessionStats {
   speedWpm: number;
   durationSeconds: number;
-  accuracy: number;
+  accuracy: number | null;
   wordsCount: number;
 }
 

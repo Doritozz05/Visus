@@ -18,6 +18,7 @@ export function PomodoroTimer() {
 
   const totalDuration = mode === "focus" ? 25 * 60 : 5 * 60;
   const progress = (timeLeft / totalDuration) * 100;
+  const circumference = 2 * Math.PI * 54;
 
   const handleCycleComplete = React.useCallback(() => {
     setIsActive(false);
@@ -117,9 +118,10 @@ export function PomodoroTimer() {
             strokeWidth="4"
             className="text-primary"
             fill="transparent"
-            strokeDasharray={2 * Math.PI * 54}
-            animate={{ strokeDashoffset: (2 * Math.PI * 54) * (1 - progress / 100) }}
-            transition={{ ease: "linear" }}
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference * (1 - progress / 100) }}
+            animate={{ strokeDashoffset: circumference * (1 - progress / 100) }}
+            transition={{ ease: "linear", duration: 0.5 }}
           />
         </svg>
 

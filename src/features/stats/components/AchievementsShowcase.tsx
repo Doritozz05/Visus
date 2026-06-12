@@ -54,6 +54,16 @@ export function AchievementsShowcase({ userId }: AchievementsShowcaseProps) {
     };
 
     loadAchievements();
+
+    // Listen for background achievement evaluations (e.g. finishing a reading session)
+    const handleUpdate = () => {
+      loadAchievements();
+    };
+    window.addEventListener("achievements-updated", handleUpdate);
+
+    return () => {
+      window.removeEventListener("achievements-updated", handleUpdate);
+    };
   }, [userId]);
 
   if (isLoading) {

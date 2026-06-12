@@ -22,7 +22,7 @@ export interface ReadingState {
   sessionStats: {
     speedWpm: number;
     durationSeconds: number;
-    accuracy: number;
+    accuracy: number | null;
     wordsCount: number;
   } | null;
 
@@ -36,7 +36,7 @@ export interface ReadingState {
   setCompletedChapter: (completedChapter: string | null) => void;
   setAllBookPages: (pages: BookVisualPage[]) => void;
   setIsCompletionModalOpen: (isOpen: boolean) => void;
-  setSessionStats: (stats: { speedWpm: number; durationSeconds: number; accuracy: number; wordsCount: number; } | null) => void;
+  setSessionStats: (stats: { speedWpm: number; durationSeconds: number; accuracy: number | null; wordsCount: number; } | null) => void;
   initBook: (
     bookId: string,
     chapterIndex: number,
