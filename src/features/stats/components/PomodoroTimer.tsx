@@ -6,7 +6,7 @@
 "use client";
 
 import * as React from "react";
-import { Play, Pause, RotateCcw, Timer, Award } from "lucide-react";
+import { Play, Pause, RotateCcw, Timer, Award, FastForward } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -80,7 +80,11 @@ export function PomodoroTimer() {
   };
 
   return (
-    <div className="bg-card/40 border border-border/20 p-4 rounded-xl shadow-md glass-panel flex flex-col items-center gap-4 w-full">
+    <motion.div
+      drag
+      dragMomentum={false}
+      className="bg-card/40 border border-border/20 p-4 rounded-xl shadow-md glass-panel flex flex-col items-center gap-4 w-full cursor-move"
+    >
       <div className="flex items-center gap-2 border-b border-border/10 pb-2 w-full justify-between">
         <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-muted-foreground">
           <Timer className="w-4 h-4 text-primary" />
@@ -129,10 +133,20 @@ export function PomodoroTimer() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 w-full">
+      <div className="relative flex items-center justify-center w-full mt-2">
+        <div className="absolute left-0 flex items-center gap-1.5">
+          <button
+            onClick={handleCycleComplete}
+            title="Skip timer (Debug)"
+            className="p-1.5 border border-border/30 hover:bg-accent text-muted-foreground hover:text-foreground rounded transition-all shrink-0"
+          >
+            <FastForward className="w-4 h-4" />
+          </button>
+        </div>
+
         <button
           onClick={toggleTimer}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded text-xs font-mono uppercase tracking-wider transition-all font-bold ${
+          className={`flex items-center justify-center gap-1.5 py-1.5 px-6 rounded text-xs font-mono uppercase tracking-wider transition-all font-bold ${
             isActive
               ? "bg-amber-600/20 hover:bg-amber-600/30 text-amber-500 border border-amber-500/30"
               : "bg-primary text-primary-foreground hover:brightness-110 shadow-[0_0_15px_rgba(var(--primary),0.15)]"
@@ -151,14 +165,16 @@ export function PomodoroTimer() {
           )}
         </button>
 
-        <button
-          onClick={resetTimer}
-          title="Reset Pomodoro"
-          className="p-1.5 border border-border/30 hover:bg-accent text-muted-foreground hover:text-foreground rounded transition-all shrink-0"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </button>
+        <div className="absolute right-0 flex items-center gap-1.5">
+          <button
+            onClick={resetTimer}
+            title="Reset Pomodoro"
+            className="p-1.5 border border-border/30 hover:bg-accent text-muted-foreground hover:text-foreground rounded transition-all shrink-0"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

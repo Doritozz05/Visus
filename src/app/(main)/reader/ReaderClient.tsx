@@ -266,11 +266,16 @@ export default function ReaderClient() {
         )}
       </main>
 
-      {isPomodoroOpen && (
-        <div className="absolute bottom-6 right-6 z-40 w-64 md:block hidden">
-          <PomodoroTimer />
-        </div>
-      )}
+      {/* Pomodoro Timer - Rendered constantly to keep timer running, toggled via CSS */}
+      <div 
+        className={`absolute bottom-6 left-6 z-50 w-64 md:block hidden transition-all duration-300 ${
+          isPomodoroOpen 
+            ? "opacity-100 translate-y-0 pointer-events-auto" 
+            : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+      >
+        <PomodoroTimer />
+      </div>
 
       <SettingsDrawer
         isOpen={isDrawerOpen}

@@ -264,10 +264,10 @@ export class AchievementDispatcher {
 
   private static triggerToast(achievement: Achievement) {
     const tierColors = {
-      bronze: "from-amber-600 to-amber-800 border-amber-500 text-amber-100",
-      silver: "from-slate-400 to-slate-600 border-slate-300 text-slate-100",
-      gold: "from-yellow-500 to-amber-500 border-yellow-400 text-yellow-100",
-      platinum: "from-indigo-400 to-cyan-500 border-cyan-300 text-cyan-100"
+      bronze: "text-amber-600 dark:text-amber-500",
+      silver: "text-slate-500 dark:text-slate-400",
+      gold: "text-yellow-600 dark:text-yellow-500",
+      platinum: "text-indigo-500 dark:text-cyan-400"
     };
 
     const tierBadges = {
@@ -281,15 +281,15 @@ export class AchievementDispatcher {
       return React.createElement(
         "div",
         {
-          className: `w-full max-w-sm bg-gradient-to-r ${tierColors[achievement.tier]} border p-4 rounded-xl shadow-2xl flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300 relative overflow-hidden backdrop-blur-md`
+          className: `w-full max-w-sm bg-card border border-border p-4 rounded-xl shadow-lg flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300 relative overflow-hidden backdrop-blur-md`
         },
         React.createElement("div", {
-          className: "absolute inset-0 bg-white/5 pointer-events-none mix-blend-overlay"
+          className: "absolute inset-0 bg-primary/5 pointer-events-none mix-blend-overlay"
         }),
         React.createElement(
           "div",
           {
-            className: "w-12 h-12 bg-white/10 border border-white/20 rounded-full flex items-center justify-center text-2xl shadow-inner shrink-0"
+            className: `w-12 h-12 bg-muted/50 border border-border/50 rounded-full flex items-center justify-center text-2xl shadow-inner shrink-0 ${tierColors[achievement.tier]}`
           },
           tierBadges[achievement.tier]
         ),
@@ -298,17 +298,17 @@ export class AchievementDispatcher {
           { className: "flex-1" },
           React.createElement(
             "p",
-            { className: "text-[10px] font-mono uppercase tracking-widest text-white/75 font-bold" },
+            { className: `text-[10px] font-mono uppercase tracking-widest font-bold ${tierColors[achievement.tier]}` },
             `Achievement Unlocked! (${achievement.tier})`
           ),
           React.createElement(
             "h4",
-            { className: "text-sm font-extrabold font-heading text-white mt-0.5 leading-tight" },
+            { className: "text-sm font-extrabold font-heading text-foreground mt-0.5 leading-tight" },
             achievement.title
           ),
           React.createElement(
             "p",
-            { className: "text-xs text-white/90 font-sans mt-1 leading-normal" },
+            { className: "text-xs text-muted-foreground font-sans mt-1 leading-normal" },
             achievement.description
           )
         ),
@@ -316,7 +316,7 @@ export class AchievementDispatcher {
           "button",
           {
             onClick: () => toast.dismiss(t),
-            className: "text-white/60 hover:text-white text-lg shrink-0 self-start p-1 transition-colors"
+            className: "text-muted-foreground hover:text-foreground text-lg shrink-0 self-start p-1 transition-colors"
           },
           "×"
         )

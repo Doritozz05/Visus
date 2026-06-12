@@ -182,15 +182,14 @@ export function ReaderHeader({
         {/* Pomodoro Timer Toggle */}
         <button
           onClick={() => setIsPomodoroOpen?.(!isPomodoroOpen)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm text-xs font-mono ${
+          className={`flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm ${
             isPomodoroOpen
-              ? "bg-primary text-primary-foreground font-bold shadow-[0_0_10px_rgba(var(--primary),0.2)]"
+              ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(var(--primary),0.2)]"
               : "bg-card hover:bg-accent text-muted-foreground hover:text-primary"
           }`}
           title="Toggle Pomodoro Timer"
         >
-          <span className="text-sm">🍅</span>
-          <span className="hidden lg:inline">Pomodoro</span>
+          <span className="text-base">🍅</span>
         </button>
 
         {/* Quick Settings Trigger (Desktop) */}
