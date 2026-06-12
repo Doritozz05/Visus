@@ -2,6 +2,14 @@ import * as React from "react";
 import { StatsService } from "@/core/services/stats-service";
 import { findPageForWordIndex } from "../utils/binarySearch";
 import { SettingsState } from "@/core/entities/settings";
+import { toast } from "sonner";
+
+function getStdDev(arr: number[]): { mean: number; stdDev: number } {
+  if (arr.length === 0) return { mean: 0, stdDev: 0 };
+  const mean = arr.reduce((s, x) => s + x, 0) / arr.length;
+  const variance = arr.reduce((s, x) => s + Math.pow(x - mean, 2), 0) / arr.length;
+  return { mean, stdDev: Math.sqrt(variance) };
+}
 
 export interface TelemetryTrackerProps {
   activeBookId: string | null;
@@ -46,6 +54,9 @@ export function useTelemetryTracker({
     lastPageChangeTime: 0,
     isActiveSession: false,
     startTime: 0,
+    pageTurnIntervals: [] as number[],
+    isFlowState: false,
+    hasTriggeredFatigueWarning: false,
   });
 
   const themeRef = React.useRef(theme);
@@ -181,6 +192,9 @@ export function useTelemetryTracker({
       lastPageChangeTime: Date.now(),
       isActiveSession: true,
       startTime: Date.now(),
+      pageTurnIntervals: [],
+      isFlowState: false,
+      hasTriggeredFatigueWarning: false,
     };
 
     if (mode === "normal" && allBookPages.length > 0) {
@@ -244,6 +258,10 @@ export function useTelemetryTracker({
                   offsetSeconds: session.activeSeconds,
                   wpm: pageWpm,
                 });
+                session.pageTurnIntervals.push(pageTimeSeconds);
+                if (session.pageTurnIntervals.length > 10) {
+                  session.pageTurnIntervals.shift();
+                }
                 console.debug(`[Telemetry] Recorded page WPM: ${pageWpm} (duration: ${pageTimeSeconds.toFixed(1)}s)`);
               }
             }
@@ -310,6 +328,57 @@ export function useTelemetryTracker({
           });
         }
 
+        // Flow State detection
+        if (state.mode === "rsvp" || state.mode === "cluster") {
+          if (session.speedHistory.length >= 8) {
+            const last8 = session.speedHistory.slice(-8).map(h => h.wpm);
+            const { mean, stdDev } = getStdDev(last8);
+            if (mean > 0 && (stdDev / mean) < 0.05) {
+              if (!session.isFlowState) {
+                session.isFlowState = true;
+                window.dispatchEvent(new CustomEvent("flow-state-change", { detail: { active: true } }));
+                toast.success("✨ You have entered Flow State! Optimal focus.", { id: "flow-state" });
+              }
+            } else if (session.isFlowState) {
+              session.isFlowState = false;
+              window.dispatchEvent(new CustomEvent("flow-state-change", { detail: { active: false } }));
+            }
+          }
+        } else if (state.mode === "normal") {
+          if (session.pageTurnIntervals.length >= 6) {
+            const { mean, stdDev } = getStdDev(session.pageTurnIntervals.slice(-6));
+            if (mean > 0 && (stdDev / mean) < 0.10) {
+              if (!session.isFlowState) {
+                session.isFlowState = true;
+                window.dispatchEvent(new CustomEvent("flow-state-change", { detail: { active: true } }));
+                toast.success("✨ You have entered Flow State! Optimal focus.", { id: "flow-state" });
+              }
+            } else if (session.isFlowState) {
+              session.isFlowState = false;
+              window.dispatchEvent(new CustomEvent("flow-state-change", { detail: { active: false } }));
+            }
+          }
+        }
+
+        // Cognitive Fatigue detection (every 60 seconds)
+        if (session.activeSeconds > 0 && session.activeSeconds % 60 === 0) {
+          const last60sRegressions = session.regressionEvents.filter(t => t > session.activeSeconds - 60).length;
+          
+          let isWpmDecaying = false;
+          if (session.speedHistory.length >= 10) {
+            const recentAvg = session.speedHistory.slice(-3).reduce((s, h) => s + h.wpm, 0) / 3;
+            const historicalAvg = session.speedHistory.slice(-10, -3).reduce((s, h) => s + h.wpm, 0) / 7;
+            isWpmDecaying = historicalAvg > 0 && (historicalAvg - recentAvg) / historicalAvg > 0.15;
+          }
+
+          if (isWpmDecaying || last60sRegressions > 3) {
+            if (!session.hasTriggeredFatigueWarning) {
+              session.hasTriggeredFatigueWarning = true;
+              toast.info("Your WPM has decreased by 15% or you are registering frequent regressions. Is it time to rest a minute to recover cognitive clarity?", { duration: 8000 });
+            }
+          }
+        }
+
         // Automatic 30-minute session flush to prevent massive log payloads
         if (session.activeSeconds >= 1800) {
           console.log("[Telemetry] Session time reached 30m limit. Splitting logs.");
@@ -327,6 +396,9 @@ export function useTelemetryTracker({
           session.lastInteractionTime = Date.now();
           session.startTime = Date.now();
           session.isActiveSession = true;
+          session.pageTurnIntervals = [];
+          session.isFlowState = false;
+          session.hasTriggeredFatigueWarning = false;
         }
       }
     }, 1000);

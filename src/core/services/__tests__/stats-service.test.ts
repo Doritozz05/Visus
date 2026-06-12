@@ -74,12 +74,17 @@ describe("StatsService", () => {
       ] as Partial<ReadingSessionLog>[] as ReadingSessionLog[];
       vi.mocked(dbService.getAllLogs).mockResolvedValue(mockLogs);
 
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-06-02T15:00:00Z"));
+
       const summary = await StatsService.getStatsSummary(2);
 
       expect(summary.totalBooksRead).toBe(2);
       expect(summary.averageWpm).toBe(500); // (400+600)/2
       expect(summary.totalReadingTimeMinutes).toBe(3); // (60+120)/60
       expect(summary.currentStreakDays).toBe(2);
+
+      vi.useRealTimers();
     });
 
     it("should handle empty logs", async () => {

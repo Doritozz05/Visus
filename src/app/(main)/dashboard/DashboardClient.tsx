@@ -1,180 +1,311 @@
+/**
+ * @file DashboardClient.tsx
+ * @description Premium glassmorphic Bento Box dashboard client with integrated SVG charts and telemetry analytics.
+ */
+
 "use client";
 
 import * as React from "react";
 import { useLibrary } from "@/features/library/context/library-context";
+import { useAuth } from "@/features/auth/context/auth-context";
 import { StatsService } from "@/core/services/stats-service";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ReadingSessionLog, LibraryStatsSummary } from "@/core/entities/stats";
-import { Flame, Gauge, TrendingUp, Brain, CheckCircle, BarChart } from "lucide-react";
+import { Flame, Gauge, TrendingUp, Brain, CheckCircle, BarChart, Download, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+// Custom premium visual components
+import { RadarChart } from "@/features/stats/components/RadarChart";
+import { Heatmap } from "@/features/stats/components/Heatmap";
+import { WpmChart } from "@/features/stats/components/WpmChart";
+import { PredictiveWidget } from "@/features/stats/components/PredictiveWidget";
+import { MethodComparison } from "@/features/stats/components/MethodComparison";
+import { ShareCard } from "@/features/stats/components/ShareCard";
+import { AchievementsShowcase } from "@/features/stats/components/AchievementsShowcase";
+
+// Export utilities
+import { exportToJSON, exportToCSV } from "@/features/stats/utils/export";
 
 export default function DashboardClient() {
   const { books } = useLibrary();
+  const { user } = useAuth();
   const [isHydrated, setIsHydrated] = React.useState(false);
   const [logs, setLogs] = React.useState<ReadingSessionLog[]>([]);
   const [summary, setSummary] = React.useState<LibraryStatsSummary>({
     totalBooksRead: 0,
-    averageWpm: 550,
-    currentStreakDays: 12,
-    completionRatePercent: 75,
-    totalReadingTimeMinutes: 45
+    averageWpm: 450,
+    currentStreakDays: 0,
+    completionRatePercent: 0,
+    totalReadingTimeMinutes: 0
   });
 
-  React.useEffect(() => {
-    const fetchStats = async () => {
-      const completedBooksCount = books.filter((b) => b.status === "completed").length;
-      const sessionLogs = await StatsService.getSessionLogs();
-      const statsSummary = await StatsService.getStatsSummary(completedBooksCount);
-      
-      setLogs(sessionLogs);
-      setSummary(statsSummary);
-      setIsHydrated(true);
-    };
+  const fetchStats = React.useCallback(async () => {
+    const completedBooksCount = books.filter((b) => b.status === "completed").length;
+    const sessionLogs = await StatsService.getSessionLogs();
+    const statsSummary = await StatsService.getStatsSummary(completedBooksCount);
+    
+    // Sort logs descending by date
+    const sortedLogs = [...sessionLogs].sort(
+      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    );
 
-    fetchStats();
+    setLogs(sortedLogs);
+    setSummary(statsSummary);
+    setIsHydrated(true);
   }, [books]);
+
+  React.useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   // Derived average accuracy
   const averageAccuracy = React.useMemo(() => {
     if (logs.length === 0) return 92;
-    const totalAccuracy = logs.reduce((sum, log) => sum + (log.accuracy || 90), 0);
-    return Math.round(totalAccuracy / logs.length);
+    const logsWithAccuracy = logs.filter((l) => l.accuracy !== undefined);
+    if (logsWithAccuracy.length === 0) return 90;
+    const totalAccuracy = logsWithAccuracy.reduce((sum, log) => sum + (log.accuracy || 90), 0);
+    return Math.round(totalAccuracy / logsWithAccuracy.length);
   }, [logs]);
 
+  const handleResetStats = async () => {
+    if (window.confirm("Are you sure you want to reset all your stats history? This action is irreversible.")) {
+      await StatsService.resetStats();
+      toast.success("Telemetry history successfully reset.");
+      fetchStats();
+    }
+  };
+
+  if (!isHydrated) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-screen">
+        <LoadingSpinner message="Loading system diagnostics..." />
+      </div>
+    );
+  }
+
+  const userId = user?.id || "local-user";
+
   return (
-    <div className="p-6 md:p-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full transition-all duration-300">
-      {/* Diagnostics & Stats Header */}
+    <div className="p-4 md:p-8 pb-24 md:pb-12 max-w-7xl mx-auto w-full transition-all duration-300">
+      {/* Bento Header */}
       <header className="border-b border-border/20 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4">
         <div>
-          <h2 className="text-xs font-mono uppercase tracking-widest text-primary mb-2">System diagnostics</h2>
-          <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Telemetry &amp; performance</h1>
+          <h2 className="text-xs font-mono uppercase tracking-widest text-primary mb-2">System Diagnostics</h2>
+          <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Telemetry & Performance</h1>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Global rank</p>
-            <p className="text-2xl font-bold font-heading text-primary">#4,092</p>
+            <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Profile Id</p>
+            <p className="text-xl font-bold font-heading text-primary truncate max-w-[120px]">
+              {userId.slice(0, 8)}
+            </p>
           </div>
           <div className="h-10 w-px bg-border/30"></div>
           <div className="text-right">
             <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Status</p>
             <p className="text-sm font-semibold text-primary flex items-center justify-end gap-1">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse inline-block"></span> 
-              Optimal
+              OPTIMAL
             </p>
           </div>
         </div>
       </header>
 
-      {/* Key Metrics Bento Cards */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        {/* Card 1: Average WPM */}
-        <div className="bg-card border border-border/20 p-6 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Gauge className="w-24 h-24 text-foreground" />
+      {/* Main Bento Box Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        
+        {/* ROW 1 */}
+        {/* Box 1: Core Stats Cards Column */}
+        <div className="flex flex-col gap-4 justify-between h-full">
+          {/* Card A: WPM */}
+          <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Gauge className="w-16 h-16 text-foreground" />
+            </div>
+            <div>
+              <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Average Speed</h3>
+              <div className="flex items-baseline gap-1 mt-2">
+                <span className="text-4xl font-extrabold font-heading text-foreground">{summary.averageWpm}</span>
+                <span className="text-xs font-mono text-primary uppercase font-bold">WPM</span>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-emerald-500 dark:text-emerald-400">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Total time: {summary.totalReadingTimeMinutes} mins</span>
+            </div>
           </div>
-          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Average WPM</h3>
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-extrabold font-heading text-foreground">
-              {isHydrated ? summary.averageWpm : 640}
-            </span>
-            <span className="text-xs font-mono text-primary uppercase">WPM</span>
+
+          {/* Card B: Racha */}
+          <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Flame className="w-16 h-16 text-foreground" />
+            </div>
+            <div>
+              <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Active Streak</h3>
+              <div className="flex items-baseline gap-1 mt-2">
+                <span className="text-4xl font-extrabold font-heading text-foreground">{summary.currentStreakDays}</span>
+                <span className="text-xs font-mono text-muted-foreground uppercase">{summary.currentStreakDays === 1 ? 'Day' : 'Days'}</span>
+              </div>
+            </div>
+            <div className="mt-3 w-full bg-accent h-1 rounded-full overflow-hidden">
+              <div 
+                className="bg-primary h-full rounded-full transition-all duration-500" 
+                style={{ width: `${Math.min(100, summary.currentStreakDays * 10)}%` }}
+              ></div>
+            </div>
           </div>
-          <div className="mt-4 flex items-center gap-2 text-xs font-mono text-emerald-500 dark:text-emerald-400">
-            <TrendingUp className="w-4 h-4" />
-            <span>{isHydrated ? `Total time: ${summary.totalReadingTimeMinutes} mins` : "+12% vs last week"}</span>
+
+          {/* Card C: Comprensión */}
+          <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Brain className="w-16 h-16 text-foreground" />
+            </div>
+            <div>
+              <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Reading Retention</h3>
+              <div className="flex items-baseline gap-1 mt-2">
+                <span className="text-4xl font-extrabold font-heading text-foreground">{averageAccuracy}</span>
+                <span className="text-xs font-mono text-muted-foreground">%</span>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>Self-assessment quizzes</span>
+            </div>
           </div>
         </div>
 
-        {/* Card 2: Streak */}
-        <div className="bg-card border border-border/20 p-6 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Flame className="w-24 h-24 text-foreground" />
-          </div>
-          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Current streak</h3>
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-extrabold font-heading text-foreground">
-              {isHydrated ? summary.currentStreakDays : 14}
-            </span>
-            <span className="text-xs font-mono text-muted-foreground uppercase">Days</span>
-          </div>
-          <div className="mt-4 w-full bg-accent h-1.5 rounded-full overflow-hidden">
-            <div 
-              className="bg-primary h-full rounded-full transition-all duration-500" 
-              style={{ width: isHydrated ? `${Math.min(100, summary.currentStreakDays * 7)}%` : "80%" }}
-            ></div>
-          </div>
+        {/* Box 2: Radar Chart */}
+        <div className="h-full">
+          <RadarChart logs={logs} books={books} />
         </div>
 
-        {/* Card 3: Comprehension */}
-        <div className="bg-card border border-border/20 p-6 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Brain className="w-24 h-24 text-foreground" />
-          </div>
-          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">Comprehension</h3>
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-extrabold font-heading text-foreground">
-              {isHydrated ? averageAccuracy : 92}
-            </span>
-            <span className="text-xs font-mono text-muted-foreground">%</span>
-          </div>
-          <div className="mt-4 flex items-center gap-2 text-xs font-mono text-muted-foreground">
-            <CheckCircle className="w-4 h-4" />
-            <span>Based on reading telemetry logs</span>
-          </div>
+        {/* Box 3: Heatmap Chart */}
+        <div className="h-full">
+          <Heatmap logs={logs} />
         </div>
-      </section>
 
-      {/* Detailed Session Logs */}
-      <section className="bg-card border border-border/20 rounded-xl p-6 shadow-md glass-panel">
-        <div className="flex items-center gap-2 mb-6 border-b border-border/20 pb-4">
-          <BarChart className="text-primary w-5 h-5" />
-          <h3 className="text-lg font-bold font-heading text-foreground">Recent reading activity</h3>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* ROW 2 */}
+        {/* Box 4: WPM fluctuation Chart */}
+        <div className="md:col-span-2 h-full">
+          <WpmChart logs={logs} />
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border/30 text-muted-foreground font-mono text-[10px] uppercase tracking-wider">
-                <th className="pb-3 font-semibold">Document title</th>
-                <th className="pb-3 font-semibold">Reading mode</th>
-                <th className="pb-3 font-semibold">Speed</th>
-                <th className="pb-3 font-semibold">Duration</th>
-                <th className="pb-3 font-semibold">Accuracy</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/10 text-sm font-sans">
-              {isHydrated ? (
-                logs.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-8 text-center text-muted-foreground text-xs font-mono">
-                      No reading activity logged yet. Finish a book to see telemetries!
-                    </td>
+
+        {/* Box 5: Share Card */}
+        <div className="h-full">
+          <ShareCard summary={summary} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* ROW 3 */}
+        {/* Box 6: Achievements showcase */}
+        <div className="md:col-span-2 h-full">
+          <AchievementsShowcase userId={userId} />
+        </div>
+
+        {/* Box 7: Predictive Widget */}
+        <div className="h-full">
+          <PredictiveWidget books={books} summary={summary} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* ROW 4 */}
+        {/* Box 8: Method Comparison */}
+        <div className="h-full">
+          <MethodComparison logs={logs} />
+        </div>
+
+        {/* Box 9: Session Log Table & Export Actions */}
+        <div className="md:col-span-2 bg-card border border-border/20 rounded-xl p-5 shadow-md glass-panel flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-4 border-b border-border/20 pb-4">
+              <div className="flex items-center gap-2">
+                <BarChart className="text-primary w-5 h-5" />
+                <h3 className="text-base font-bold font-heading text-foreground">Recent Telemetry Log</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => exportToJSON(logs)}
+                  disabled={logs.length === 0}
+                  className="flex items-center gap-1 px-2.5 py-1.5 border border-border/30 rounded text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-50 disabled:hover:bg-transparent transition-all"
+                  title="Export as JSON"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>JSON</span>
+                </button>
+                <button
+                  onClick={() => exportToCSV(logs)}
+                  disabled={logs.length === 0}
+                  className="flex items-center gap-1 px-2.5 py-1.5 border border-border/30 rounded text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-50 disabled:hover:bg-transparent transition-all"
+                  title="Export as CSV"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>CSV</span>
+                </button>
+                <button
+                  onClick={handleResetStats}
+                  disabled={logs.length === 0}
+                  className="flex items-center gap-1 px-2.5 py-1.5 border border-destructive/30 hover:border-destructive/60 hover:bg-destructive/10 rounded text-[10px] font-mono uppercase tracking-wider text-destructive transition-all"
+                  title="Reset all stats history"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Reset</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto max-h-[200px] overflow-y-auto pr-1">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border/30 text-muted-foreground font-mono text-[9px] uppercase tracking-wider">
+                    <th className="pb-2 font-semibold">Document Title</th>
+                    <th className="pb-2 font-semibold">Mode</th>
+                    <th className="pb-2 font-semibold">Speed</th>
+                    <th className="pb-2 font-semibold">Duration</th>
+                    <th className="pb-2 font-semibold">Comprehension</th>
                   </tr>
-                ) : (
-                  logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-accent/40 transition-colors">
-                      <td className="py-4 font-semibold text-foreground">{log.bookTitle}</td>
-                      <td className="py-4 font-mono text-xs uppercase">{log.mode}</td>
-                      <td className="py-4 font-mono text-xs text-primary">{log.speedWpm} WPM</td>
-                      <td className="py-4 font-mono text-xs text-muted-foreground">
-                        {log.durationSeconds >= 60 
-                          ? `${Math.floor(log.durationSeconds / 60)}m ${log.durationSeconds % 60}s` 
-                          : `${log.durationSeconds}s`
-                        }
+                </thead>
+                <tbody className="divide-y divide-border/10 text-xs font-sans">
+                  {logs.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-muted-foreground text-xs font-mono">
+                        No reading logs saved in the local database.
                       </td>
-                      <td className="py-4 font-mono text-xs text-emerald-500 dark:text-emerald-400 font-bold">{log.accuracy}%</td>
                     </tr>
-                  ))
-                )
-              ) : (
-                <tr>
-                  <td colSpan={5} className="py-8">
-                    <LoadingSpinner message="Loading telemetry logs..." className="min-h-[150px] p-0" />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  ) : (
+                    logs.map((log) => (
+                      <tr key={log.id} className="hover:bg-accent/30 transition-colors">
+                        <td className="py-3 font-semibold text-foreground truncate max-w-[180px]" title={log.bookTitle}>
+                          {log.bookTitle}
+                        </td>
+                        <td className="py-3 font-mono text-[10px] uppercase text-muted-foreground">
+                          {log.mode}
+                        </td>
+                        <td className="py-3 font-mono text-[10px] text-primary font-semibold">
+                          {log.speedWpm} WPM
+                        </td>
+                        <td className="py-3 font-mono text-[10px] text-muted-foreground">
+                          {log.durationSeconds >= 60 
+                            ? `${Math.floor(log.durationSeconds / 60)}m ${log.durationSeconds % 60}s` 
+                            : `${log.durationSeconds}s`
+                          }
+                        </td>
+                        <td className="py-3 font-mono text-[10px] text-emerald-500 dark:text-emerald-400 font-bold">
+                          {log.accuracy}%
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

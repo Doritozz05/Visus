@@ -79,6 +79,16 @@ export class StatsService {
             }
           }
         }
+
+        // Evaluate achievements and compress older logs locally after saving log
+        try {
+          const { AchievementDispatcher } = await import("@/features/stats/services/achievement-dispatcher");
+          await AchievementDispatcher.evaluate();
+          const { compressOlderLogs } = await import("@/features/stats/utils/compression");
+          await compressOlderLogs();
+        } catch (achErr) {
+          console.warn("[StatsService] Local achievement evaluation or compression failed:", achErr);
+        }
       } catch (err) {
         console.warn("Could not save or sync reading log:", err);
       }
@@ -98,13 +108,11 @@ export class StatsService {
     const totalReadingTimeSeconds = logs.reduce((sum, log) => sum + log.durationSeconds, 0);
     const totalReadingTimeMinutes = Math.round(totalReadingTimeSeconds / 60);
 
-    // Simple streak calculation (based on consecutive active days in logs)
+    // Streak calculation supporting grace day period
     let currentStreakDays = 0;
     try {
-      const uniqueDays = new Set(
-        logs.map((log) => new Date(log.completedAt).toDateString())
-      );
-      currentStreakDays = uniqueDays.size;
+      const { AchievementDispatcher } = await import("@/features/stats/services/achievement-dispatcher");
+      currentStreakDays = AchievementDispatcher.calculateStreakWithGrace(logs);
     } catch (_) {}
 
     return {

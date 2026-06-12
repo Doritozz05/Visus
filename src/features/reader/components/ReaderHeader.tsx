@@ -24,6 +24,8 @@ interface ReaderHeaderProps {
   bookmarks: Bookmark[];
   onGoToBookmark: (chapterIndex: number, wordIndex: number) => void;
   onDeleteBookmark: (id: string) => void;
+  isPomodoroOpen?: boolean;
+  setIsPomodoroOpen?: (open: boolean) => void;
 }
 
 export function ReaderHeader({
@@ -40,6 +42,8 @@ export function ReaderHeader({
   bookmarks,
   onGoToBookmark,
   onDeleteBookmark,
+  isPomodoroOpen = false,
+  setIsPomodoroOpen,
 }: ReaderHeaderProps) {
   const chapterBtnRef = React.useRef<HTMLButtonElement>(null);
   const [anchorPos, setAnchorPos] = React.useState<{ x: number; y: number } | null>(null);
@@ -174,6 +178,20 @@ export function ReaderHeader({
             Cluster
           </button>
         </div>
+
+        {/* Pomodoro Timer Toggle */}
+        <button
+          onClick={() => setIsPomodoroOpen?.(!isPomodoroOpen)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm text-xs font-mono ${
+            isPomodoroOpen
+              ? "bg-primary text-primary-foreground font-bold shadow-[0_0_10px_rgba(var(--primary),0.2)]"
+              : "bg-card hover:bg-accent text-muted-foreground hover:text-primary"
+          }`}
+          title="Toggle Pomodoro Timer"
+        >
+          <span className="text-sm">🍅</span>
+          <span className="hidden lg:inline">Pomodoro</span>
+        </button>
 
         {/* Quick Settings Trigger (Desktop) */}
         <button

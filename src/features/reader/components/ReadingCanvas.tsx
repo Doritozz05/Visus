@@ -12,6 +12,7 @@ import { Book } from "@/core/entities/book";
 import { SettingsState } from "@/core/entities/settings";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
 import { DynamicCluster } from "@/core/algorithms/clusters";
+import { toast } from "sonner";
 
 interface ReadingCanvasProps {
   mode: "normal" | "rsvp" | "cluster";
@@ -98,6 +99,25 @@ export function ReadingCanvas({
                   accuracy: accuracy,
                 });
               });
+
+              // Adaptive RSVP Calibration
+              if (accuracy === 100) {
+                toast.success(`🎯 Excellent retention! Score: 100%. We suggest increasing your speed by +25 WPM.`, {
+                  action: {
+                    label: "Increase",
+                    onClick: () => useReadingStore.getState().setWpm(speedWpm + 25),
+                  },
+                  duration: 8000,
+                });
+              } else if (accuracy < 70) {
+                toast.info(`⚠️ Low retention: ${accuracy}%. We suggest reducing your speed for better assimilation.`, {
+                  action: {
+                    label: "Decrease",
+                    onClick: () => useReadingStore.getState().setWpm(Math.max(100, speedWpm - 50)),
+                  },
+                  duration: 8000,
+                });
+              }
             }}
             onClose={() => {
               setActiveQuiz(null);

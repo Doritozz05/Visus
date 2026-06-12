@@ -26,6 +26,7 @@ import { useTelemetryTracker } from "@/features/reader/hooks/useTelemetryTracker
 import { READER_FONT_CLASSES } from "@/features/reader/utils/reader-fonts";
 import { Quiz } from "@/core/algorithms/quiz-generator";
 import { toast } from "sonner";
+import { PomodoroTimer } from "@/features/stats/components/PomodoroTimer";
 
 export default function ReaderClient() {
   const router = useRouter();
@@ -41,6 +42,7 @@ export default function ReaderClient() {
   const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster" | "normal">("rsvp");
   const [isTocOpen, setIsTocOpen] = React.useState(false);
   const [activeQuiz, setActiveQuiz] = React.useState<Quiz | null>(null);
+  const [isPomodoroOpen, setIsPomodoroOpen] = React.useState(false);
 
   const mode = useReadingStore((state) => state.mode);
   const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
@@ -224,6 +226,8 @@ export default function ReaderClient() {
           bookmarks={activeBook.bookmarks || []}
           onGoToBookmark={handleGoToBookmark}
           onDeleteBookmark={handleRemoveBookmark}
+          isPomodoroOpen={isPomodoroOpen}
+          setIsPomodoroOpen={setIsPomodoroOpen}
         />
 
         <ReadingCanvas
@@ -261,6 +265,12 @@ export default function ReaderClient() {
           />
         )}
       </main>
+
+      {isPomodoroOpen && (
+        <div className="absolute bottom-6 right-6 z-40 w-64 md:block hidden">
+          <PomodoroTimer />
+        </div>
+      )}
 
       <SettingsDrawer
         isOpen={isDrawerOpen}
