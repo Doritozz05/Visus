@@ -164,7 +164,7 @@ export default function ReaderClient() {
 
   // --- 5. RENDER LOGIC ---
   if (!isHydrated || isLoadingContent || isInitializing || (activeBook && !isStoreInitialized)) {
-    return <LoadingSpinner message={activeBook?.isInCloud && !bookBinary ? "Downloading from cloud..." : "Loading reader session..."} fullScreen />;
+    return <LoadingSpinner message={activeBook?.isInCloud && !bookBinary ? "Downloading from cloud..." : "Loading reader session..."} className="h-full" />;
   }
 
   if (books.length === 0) {

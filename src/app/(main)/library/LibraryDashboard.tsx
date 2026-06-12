@@ -191,7 +191,7 @@ export default function LibraryDashboard() {
   }, []);
 
   if (!isHydrated) {
-    return <LoadingSpinner fullScreen />;
+    return <LoadingSpinner className="h-full" />;
   }
 
   return (
