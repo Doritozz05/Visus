@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import { ReadingSessionLog } from "@/core/entities/stats";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Activity } from "lucide-react";
 
 interface WpmChartProps {
   logs: ReadingSessionLog[];
@@ -18,48 +18,11 @@ export function WpmChart({ logs }: WpmChartProps) {
   const activeLog = React.useMemo(() => {
     const logWithHistory = logs.find((l) => l.telemetryData?.speed_history && l.telemetryData.speed_history.length > 1);
     if (logWithHistory) return logWithHistory;
-    
-    // Fallback Mock log
-    if (logs.length > 0) {
-      const first = logs[0];
-      return {
-        ...first,
-        telemetryData: {
-          ...first.telemetryData,
-          speed_history: [
-            { offsetSeconds: 0, wpm: Math.max(100, first.speedWpm - 100) },
-            { offsetSeconds: 30, wpm: first.speedWpm - 30 },
-            { offsetSeconds: 60, wpm: first.speedWpm },
-            { offsetSeconds: 90, wpm: first.speedWpm + 40 },
-            { offsetSeconds: 120, wpm: first.speedWpm + 10 },
-            { offsetSeconds: 150, wpm: Math.max(80, first.speedWpm - 50) }
-          ]
-        }
-      } as ReadingSessionLog;
-    }
-
-    // Default Mock
-    return {
-      id: "mock",
-      bookTitle: "Example Book",
-      speedWpm: 450,
-      durationSeconds: 180,
-      telemetryData: {
-        speed_history: [
-          { offsetSeconds: 0, wpm: 350 },
-          { offsetSeconds: 30, wpm: 420 },
-          { offsetSeconds: 60, wpm: 490 },
-          { offsetSeconds: 90, wpm: 450 },
-          { offsetSeconds: 120, wpm: 470 },
-          { offsetSeconds: 150, wpm: 380 },
-          { offsetSeconds: 180, wpm: 340 }
-        ]
-      }
-    } as unknown as ReadingSessionLog;
+    return null;
   }, [logs]);
 
   const speedData = React.useMemo(() => {
-    return activeLog.telemetryData?.speed_history || [];
+    return activeLog?.telemetryData?.speed_history || [];
   }, [activeLog]);
 
   const [hoveredPoint, setHoveredPoint] = React.useState<{ index: number; x: number; y: number; wpm: number; offset: number } | null>(null);
@@ -75,10 +38,10 @@ export function WpmChart({ logs }: WpmChartProps) {
   const chartWidth = width - paddingLeft - paddingRight;
   const chartHeight = height - paddingTop - paddingBottom;
 
-  // Compute scale boundaries
-  const maxWpm = Math.max(...speedData.map((d) => d.wpm), 600);
-  const minWpm = Math.min(...speedData.map((d) => d.wpm), 200);
-  const maxOffset = Math.max(...speedData.map((d) => d.offsetSeconds), 180);
+  // Compute scale boundaries safely
+  const maxWpm = speedData.length > 0 ? Math.max(...speedData.map((d) => d.wpm), 600) : 600;
+  const minWpm = speedData.length > 0 ? Math.min(...speedData.map((d) => d.wpm), 200) : 200;
+  const maxOffset = speedData.length > 0 ? Math.max(...speedData.map((d) => d.offsetSeconds), 180) : 180;
 
   const getX = React.useCallback((offset: number) => {
     return paddingLeft + (offset / maxOffset) * chartWidth;
@@ -168,6 +131,21 @@ export function WpmChart({ logs }: WpmChartProps) {
     const s = sec % 60;
     return m > 0 ? `${m}m ${s}s` : `${s}s`;
   };
+
+  if (!activeLog) {
+    return (
+      <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md glass-panel overflow-hidden">
+        <div className="w-full border-b border-border/10 pb-2 mb-3">
+          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Speed Fluctuation</h3>
+          <p className="text-[10px] font-mono text-muted-foreground mt-0.5">WPM dynamics in session</p>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center py-6 text-muted-foreground opacity-50">
+          <Activity className="w-8 h-8 mb-2" />
+          <p className="text-xs font-mono">No telemetry data recorded yet.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md glass-panel overflow-hidden">

@@ -11,7 +11,7 @@ import { useAuth } from "@/features/auth/context/auth-context";
 import { StatsService } from "@/core/services/stats-service";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ReadingSessionLog, LibraryStatsSummary } from "@/core/entities/stats";
-import { Flame, Gauge, TrendingUp, Brain, CheckCircle, BarChart, Download, Trash2 } from "lucide-react";
+import { Flame, Gauge, TrendingUp, Brain, CheckCircle, BarChart, Download, Trash2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 // Custom premium visual components
@@ -137,17 +137,26 @@ export default function DashboardClient() {
 
           {/* Card B: Racha */}
           <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
               <Flame className="w-16 h-16 text-foreground" />
             </div>
-            <div>
+
+            <div 
+              className="absolute right-[84px] top-[48px] -translate-y-1/2 flex items-center gap-1 bg-accent/80 px-2 py-1 rounded-md text-muted-foreground hover:text-primary transition-colors cursor-help z-20 shadow-sm"
+              title="Streak Shields: Protects your streak if you miss a day"
+            >
+              <span className="text-[10px] font-mono font-bold">{Math.min(3, Math.floor((summary.currentStreakDays || 0) / 30))}/3</span>
+              <ShieldCheck className="w-3.5 h-3.5" />
+            </div>
+
+            <div className="relative z-10 pointer-events-none">
               <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Active Streak</h3>
               <div className="flex items-baseline gap-1 mt-2">
                 <span className="text-4xl font-extrabold font-heading text-foreground">{summary.currentStreakDays}</span>
                 <span className="text-xs font-mono text-muted-foreground uppercase">{summary.currentStreakDays === 1 ? 'Day' : 'Days'}</span>
               </div>
             </div>
-            <div className="mt-3 w-full bg-accent h-1 rounded-full overflow-hidden">
+            <div className="mt-3 w-full bg-accent h-1 rounded-full overflow-hidden relative z-10">
               <div 
                 className="bg-primary h-full rounded-full transition-all duration-500" 
                 style={{ width: `${Math.min(100, summary.currentStreakDays * 10)}%` }}

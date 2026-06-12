@@ -20,13 +20,7 @@ export function RadarChart({ logs, books }: RadarChartProps) {
   // 1. Compute reading profile metrics
   const metrics = React.useMemo(() => {
     if (logs.length === 0) {
-      return [
-        { name: "Speed", value: 0.6, label: "600 WPM" },
-        { name: "Endurance", value: 0.5, label: "15 min/session" },
-        { name: "Comprehension", value: 0.9, label: "90%" },
-        { name: "Consistency", value: 0.4, label: "6 days/month" },
-        { name: "Diversity", value: 0.2, label: "1 genre" }
-      ];
+      return null;
     }
 
     // Speed: average session WPM relative to 1000 WPM target
@@ -63,6 +57,23 @@ export function RadarChart({ logs, books }: RadarChartProps) {
       { name: "Diversity", value: diversityScore, label: `${Math.max(1, uniqueGenres.size)} ${Math.max(1, uniqueGenres.size) === 1 ? 'genre' : 'genres'}` }
     ];
   }, [logs, books]);
+
+  if (!metrics) {
+    return (
+      <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md glass-panel overflow-hidden">
+        <div className="w-full border-b border-border/10 pb-2 mb-3">
+          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Reader Profile</h3>
+          <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Balanced view of your skills</p>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center py-6 text-muted-foreground opacity-50">
+          <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          <p className="text-xs font-mono">Not enough data to calculate profile.</p>
+        </div>
+      </div>
+    );
+  }
 
   // SVG parameters
   const size = 300;
