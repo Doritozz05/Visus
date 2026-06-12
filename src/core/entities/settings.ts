@@ -10,6 +10,7 @@ export interface GeneralSettings {
   readerFontSize: number;      // Font size in px
   readerFontFamily: "inter" | "atkinson" | "dyslexic" | "serif";
   readerWordsPerPage: number;  // Target words per page
+  telemetryPreference: "cloud" | "anonymous" | "disabled";
 }
 
 export interface RsvpSettings {
@@ -52,6 +53,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
     readerFontSize: 16,
     readerFontFamily: "serif",
     readerWordsPerPage: 300,
+    telemetryPreference: "cloud",
   },
   rsvp: {
     fontSize: 48,

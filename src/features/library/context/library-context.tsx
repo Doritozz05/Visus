@@ -111,6 +111,12 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             .delete()
             .eq("id", action.payload)
             .eq("user_id", user.id);
+        } else if (action.type === "INSERT_STAT") {
+          await remoteSyncService.pushChanges(user.id, {
+            books: [],
+            stats: [action.payload],
+            deletedBookIds: []
+          });
         }
         
         if (action.id !== undefined) {
@@ -238,6 +244,12 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             }
           }));
           localStorage.setItem(syncKey, new Date().toISOString());
+        }
+
+        if (remoteChanges.stats && remoteChanges.stats.length > 0) {
+          await Promise.all(remoteChanges.stats.map(async (stat) => {
+            await dbService.saveLog(stat);
+          }));
         }
 
         const hashGroups = new Map<string, Book[]>();

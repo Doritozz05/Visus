@@ -38,7 +38,8 @@ export class SupabaseSyncService implements IRemoteSyncService {
         speedWpm: s.speed_wpm,
         durationSeconds: s.duration_seconds,
         accuracy: s.accuracy,
-        completedAt: s.completed_at
+        completedAt: s.completed_at,
+        telemetryData: s.telemetry_data
       })),
       deletedBookIds: deleted?.map((d) => d.record_id) || [],
     };
@@ -111,20 +112,49 @@ export class SupabaseSyncService implements IRemoteSyncService {
     }
 
     if (changes.stats.length > 0) {
-      const { error } = await supabase
-        .from("stats_logs")
-        .upsert(changes.stats.map(s => ({
-          id: s.id,
-          user_id: userId,
-          book_id: s.bookId,
-          book_title: s.bookTitle,
-          mode: s.mode,
-          speed_wpm: s.speedWpm,
-          duration_seconds: s.durationSeconds,
-          accuracy: s.accuracy,
-          completed_at: s.completedAt
-        })));
-      if (error) throw new Error(`Push stats failed: ${error.message}`);
+      const storedSettings = typeof window !== "undefined" ? localStorage.getItem("visus_settings") : null;
+      let preference = "cloud";
+      if (storedSettings) {
+        try {
+          const parsed = JSON.parse(storedSettings);
+          preference = parsed?.general?.telemetryPreference || "cloud";
+        } catch (_) {}
+      }
+
+      if (preference === "disabled") {
+        console.log("[SupabaseSyncService] Telemetry is disabled. Skipping upload of stats.");
+      } else {
+        const { hashString } = await import("@/lib/utils");
+        const statsToUpload = await Promise.all(changes.stats.map(async s => {
+          let bookTitle = s.bookTitle;
+          let bookId = s.bookId;
+          
+          if (preference === "anonymous") {
+            bookTitle = await hashString(s.bookTitle);
+            bookId = "anonymous-book";
+          }
+          
+          return {
+            id: s.id,
+            user_id: userId,
+            book_id: bookId,
+            book_title: bookTitle,
+            mode: s.mode,
+            speed_wpm: s.speedWpm,
+            duration_seconds: s.durationSeconds,
+            accuracy: s.accuracy,
+            completed_at: s.completedAt,
+            telemetry_data: s.telemetryData || {}
+          };
+        }));
+
+        if (statsToUpload.length > 0) {
+          const { error } = await supabase
+            .from("stats_logs")
+            .upsert(statsToUpload);
+          if (error) throw new Error(`Push stats failed: ${error.message}`);
+        }
+      }
     }
 
     if (changes.deletedBookIds.length > 0) {

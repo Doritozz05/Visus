@@ -34,8 +34,53 @@ export class StatsService {
     if (typeof window !== "undefined") {
       try {
         await dbService.saveLog(newLog);
+
+        // Check privacy/telemetry preference from localStorage
+        const storedSettings = localStorage.getItem("visus_settings");
+        let preference = "cloud";
+        if (storedSettings) {
+          try {
+            const parsed = JSON.parse(storedSettings);
+            preference = parsed?.general?.telemetryPreference || "cloud";
+          } catch (_) {}
+        }
+
+        if (preference !== "disabled") {
+          const hasSupabaseConfig = typeof process !== "undefined" && process.env && process.env.NEXT_PUBLIC_SUPABASE_URL;
+          
+          if (hasSupabaseConfig) {
+            const { supabase } = await import("@/lib/supabase");
+            const { data: { session: currentSession } } = await supabase.auth.getSession();
+            const user = currentSession?.user;
+
+            if (user) {
+              if (navigator.onLine) {
+                const { remoteSyncService } = await import("@/core/config/services");
+                await remoteSyncService.pushChanges(user.id, {
+                  books: [],
+                  stats: [newLog],
+                  deletedBookIds: []
+                }).catch(async (syncErr) => {
+                  console.warn("[StatsService] Live telemetry push failed, queueing offline:", syncErr);
+                  await dbService.enqueueSyncAction({
+                    type: "INSERT_STAT",
+                    payload: newLog,
+                    timestamp: new Date().toISOString()
+                  });
+                });
+              } else {
+                console.log("[StatsService] Device offline, queueing telemetry log for synchronization.");
+                await dbService.enqueueSyncAction({
+                  type: "INSERT_STAT",
+                  payload: newLog,
+                  timestamp: new Date().toISOString()
+                });
+              }
+            }
+          }
+        }
       } catch (err) {
-        console.warn("Could not save reading log to IndexedDB:", err);
+        console.warn("Could not save or sync reading log:", err);
       }
     }
     return newLog;

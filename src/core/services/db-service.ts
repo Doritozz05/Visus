@@ -3,18 +3,20 @@ import { ReadingSessionLog } from "../entities/stats";
 
 export interface SyncAction {
   id?: number;
-  type: "UPDATE_BOOK" | "DELETE_BOOK" | "UNSYNC_BOOK";
+  type: "UPDATE_BOOK" | "DELETE_BOOK" | "UNSYNC_BOOK" | "INSERT_STAT";
   payload: any;
   timestamp: string;
 }
 
 const DB_NAME = "visus_database";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const STORES = {
   BOOKS_METADATA: "books_metadata",
   BOOKS_BINARY: "books_binary",
   STATS: "stats_logs",
-  SYNC_QUEUE: "sync_queue"
+  SYNC_QUEUE: "sync_queue",
+  ACHIEVEMENTS: "achievements",
+  USER_ACHIEVEMENTS: "user_achievements"
 };
 
 class DbService {
@@ -69,6 +71,15 @@ class DbService {
             if (!store.indexNames.contains("ownerId")) {
               store.createIndex("ownerId", "ownerId", { unique: false });
             }
+          }
+        }
+
+        if (oldVersion < 4) {
+          if (!db.objectStoreNames.contains(STORES.ACHIEVEMENTS)) {
+            db.createObjectStore(STORES.ACHIEVEMENTS, { keyPath: "id" });
+          }
+          if (!db.objectStoreNames.contains(STORES.USER_ACHIEVEMENTS)) {
+            db.createObjectStore(STORES.USER_ACHIEVEMENTS, { keyPath: ["userId", "achievementId"] });
           }
         }
       };
@@ -336,6 +347,55 @@ class DbService {
         const store = transaction.objectStore(STORES.SYNC_QUEUE);
         const request = store.delete(id);
 
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      }));
+    });
+  }
+
+  // --- ACHIEVEMENTS ACTIONS ---
+  async getAllAchievements(): Promise<any[]> {
+    return this.withDb((db) => new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORES.ACHIEVEMENTS, "readonly");
+      const store = transaction.objectStore(STORES.ACHIEVEMENTS);
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    }));
+  }
+
+  async saveAchievement(achievement: any): Promise<void> {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.ACHIEVEMENTS, "readwrite");
+        const store = transaction.objectStore(STORES.ACHIEVEMENTS);
+        const request = store.put(achievement);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      }));
+    });
+  }
+
+  // --- USER ACHIEVEMENTS ACTIONS ---
+  async getUserAchievements(userId: string): Promise<any[]> {
+    return this.withDb((db) => new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORES.USER_ACHIEVEMENTS, "readonly");
+      const store = transaction.objectStore(STORES.USER_ACHIEVEMENTS);
+      const request = store.getAll();
+      request.onsuccess = () => {
+        const results = request.result || [];
+        resolve(results.filter((ua: any) => ua.userId === userId));
+      };
+      request.onerror = () => reject(request.error);
+    }));
+  }
+
+  async saveUserAchievement(userAchievement: any): Promise<void> {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.USER_ACHIEVEMENTS, "readwrite");
+        const store = transaction.objectStore(STORES.USER_ACHIEVEMENTS);
+        const request = store.put(userAchievement);
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
       }));

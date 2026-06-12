@@ -7,13 +7,14 @@ Migrations, database maintenance, and security hardening.
 # Local Contracts
 - All schema changes must be versioned in `migrations/`.
 - RLS policies must be applied to all public tables.
+- Achievement updates are evaluated asynchronously via triggers after `stats_logs` insertions.
 
 # Work Guidance
 - Use snake_case for database entities.
 - Ensure migrations are idempotent.
 
 # Verification
-None.
+- Use Supabase CLI or execute migrations sequentially via direct queries.
 
 # Child DOX Index
 None.

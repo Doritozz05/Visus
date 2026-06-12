@@ -14,6 +14,19 @@ export interface ReadingSessionLog {
   durationSeconds: number;
   accuracy: number;
   completedAt: string; // ISO Date String
+  telemetryData?: {
+    speed_history?: { offsetSeconds: number; wpm: number; }[];
+    regression_events?: number[];
+    interruption_count?: number;
+    eye_strain_index?: number;
+    focus_level?: string;
+    device_context?: {
+      device_type?: string;
+      screen_width?: number;
+      theme?: string;
+      font_size?: number;
+    };
+  };
 }
 
 export interface LibraryStatsSummary {
