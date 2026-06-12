@@ -67,24 +67,21 @@ export function useReaderPlayback({
     updateBook,
   });
 
+  const currentChapterWithWords = React.useMemo(() => {
+    const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
+    const ch = chaptersData[safeIdx] || { title: "No Book", content: "" };
+    const wordsArr = ch.content ? ch.content.split(/\s+/).filter((w: string) => w.trim() !== "") : [];
+    return { ...ch, words: wordsArr, index: safeIdx };
+  }, [chaptersData, activeChapterIndex]);
+
   const { rsvpSequence } = useRsvpEngine({
-    currentChapter: React.useMemo(() => {
-      const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
-      const ch = chaptersData[safeIdx] || { title: "No Book", content: "" };
-      const wordsArr = ch.content ? ch.content.split(/\s+/).filter((w: string) => w.trim() !== "") : [];
-      return { ...ch, words: wordsArr, index: safeIdx };
-    }, [chaptersData, activeChapterIndex]),
+    currentChapter: currentChapterWithWords,
     mode,
     wpm,
   });
 
   const { clusterChunks } = useClusterEngine({
-    currentChapter: React.useMemo(() => {
-      const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
-      const ch = chaptersData[safeIdx] || { title: "No Book", content: "" };
-      const wordsArr = ch.content ? ch.content.split(/\s+/).filter((w: string) => w.trim() !== "") : [];
-      return { ...ch, words: wordsArr, index: safeIdx };
-    }, [chaptersData, activeChapterIndex]),
+    currentChapter: currentChapterWithWords,
     mode,
     wpm,
   });
