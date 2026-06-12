@@ -210,7 +210,14 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             const existingIndex = loadedBooks.findIndex(b => b.id === remoteBook.id);
 
             if (existingIndex >= 0) {
-               remoteBook.isLocalOriginal = loadedBooks[existingIndex].isLocalOriginal;
+               const localBook = loadedBooks[existingIndex];
+               remoteBook.isLocalOriginal = localBook.isLocalOriginal;
+
+               const remoteDate = new Date(remoteBook.updatedAt || 0).getTime();
+               const localDate = new Date(localBook.updatedAt || 0).getTime();
+               if (remoteDate <= localDate) {
+                  return; // Local is newer or same, keep local
+               }
                loadedBooks[existingIndex] = remoteBook;
             } else {
                loadedBooks.push(remoteBook);
