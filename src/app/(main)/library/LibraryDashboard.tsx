@@ -3,10 +3,12 @@
 import * as React from "react";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { useLibrary } from "@/features/library/context/library-context";
+import { useSettings } from "@/features/settings/context/settings-context";
 import { Book } from "@/core/entities/book";
 import { useRouter } from "next/navigation";
-import { Eraser, Search, Plus, Library, Flame } from "lucide-react";
+import { Eraser, Search, Plus, Library, Flame, Pencil, BookOpen, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { StatsService } from "@/core/services/stats-service";
@@ -30,12 +32,21 @@ export default function LibraryDashboard() {
   const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, setActiveBookId, isHydrated } = useLibrary();
   const router = useRouter();
   const { user } = useAuth();
+  const { settings, updateGeneralSettings } = useSettings();
+  const { yearlyReadingGoal } = settings.general;
 
   const [summary, setSummary] = React.useState({
     currentStreakDays: 12,
   });
 
   const userInitial = user?.email?.charAt(0).toUpperCase() || "V";
+
+  const [isEditingGoal, setIsEditingGoal] = React.useState(false);
+  const [tempGoal, setTempGoal] = React.useState(yearlyReadingGoal);
+
+  React.useEffect(() => {
+    setTempGoal(yearlyReadingGoal);
+  }, [yearlyReadingGoal]);
 
   React.useEffect(() => {
     const fetchStats = async () => {
@@ -150,13 +161,18 @@ export default function LibraryDashboard() {
     router.push("/reader");
   };
 
+  const handleUpdateGoal = () => {
+    updateGeneralSettings({ yearlyReadingGoal: tempGoal });
+    setIsEditingGoal(false);
+    toast.success("Yearly reading goal updated.");
+  };
+
   // Stats computation
   const completedBooksCount = React.useMemo(() => {
     return books.filter((b) => b.status === "completed").length;
   }, [books]);
 
-  const yearlyGoal = 15;
-  const goalProgressPercentage = Math.min(Math.round((completedBooksCount / yearlyGoal) * 100), 100);
+  const goalProgressPercentage = Math.min(Math.round((completedBooksCount / yearlyReadingGoal) * 100), 100);
 
   const availableGenres = React.useMemo(() => {
     const genres = new Set<string>();
@@ -217,20 +233,24 @@ export default function LibraryDashboard() {
             <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Library &amp; archives</h1>
           </div>
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 bg-accent/30 px-4 py-1.5 rounded-xl border border-border/10 shadow-sm backdrop-blur-sm">
+            <Link 
+              href="/dashboard"
+              className="flex items-center gap-4 bg-accent/30 px-4 py-1.5 rounded-xl border border-border/10 shadow-sm backdrop-blur-sm hover:bg-accent/50 hover:border-primary/30 transition-all group/header"
+            >
               <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
                 <Flame className="text-primary w-4 h-4 animate-pulse" />
-                <span className="font-bold text-foreground text-[11px]">{summary.currentStreakDays} day streak</span>
+                <span className="font-bold text-foreground text-[11px] group-hover/header:text-primary transition-colors">{summary.currentStreakDays} day streak</span>
               </div>
               <div className="h-4 w-px bg-border/30"></div>
-              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shadow-lg ring-2 ring-background overflow-hidden">
+              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shadow-lg ring-2 ring-background overflow-hidden group-hover/header:ring-primary/50 transition-all">
                 {user?.avatarUrl ? (
                   <Image src={user.avatarUrl} alt={user.name || "User"} width={28} height={28} className="w-full h-full object-cover" />
                 ) : (
                   userInitial
                 )}
               </div>
-            </div>
+              <ChevronRight className="w-3 h-3 text-muted-foreground group-hover/header:text-primary transition-all group-hover/header:translate-x-0.5" />
+            </Link>
           </div>
         </header>
 
@@ -270,19 +290,55 @@ export default function LibraryDashboard() {
                 {/* Dynamic Reading Stats (Compact) */}
                 <div className="bg-card rounded-xl border border-border/20 p-4 shadow-lg glass-panel relative overflow-hidden group shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+                  <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none">
+                    <BookOpen className="w-16 h-16 text-foreground" />
+                  </div>
                   <div className="flex justify-between items-center mb-2 relative z-10">
-                    <h2 className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Books Read</h2>
-                    <span className="text-[10px] font-mono text-primary font-bold">{goalProgressPercentage}% Goal</span>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Books Read</h2>
+                      <button 
+                        onClick={() => setIsEditingGoal(!isEditingGoal)}
+                        className="p-1 hover:bg-accent rounded-md transition-colors text-muted-foreground hover:text-primary"
+                        title="Edit yearly goal"
+                      >
+                        <Pencil className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-baseline gap-1 mb-2 relative z-10">
-                    <span className="text-2xl font-extrabold font-heading text-foreground">{completedBooksCount}</span>
-                    <span className="text-xs text-muted-foreground/80 font-normal">/ {yearlyGoal}</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-background rounded-full overflow-hidden relative z-10 border border-border/10">
-                    <div 
-                      className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-500 group-hover:brightness-110" 
-                      style={{ width: `${goalProgressPercentage}%` }}
-                    ></div>
+                  
+                  {isEditingGoal ? (
+                    <div className="flex items-center gap-2 mb-2 relative z-10 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <input
+                        type="number"
+                        min="1"
+                        max="999"
+                        value={tempGoal}
+                        onChange={(e) => setTempGoal(parseInt(e.target.value) || 1)}
+                        className="w-16 bg-background border border-border/50 rounded px-1.5 py-0.5 text-lg font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
+                        autoFocus
+                        onKeyDown={(e) => e.key === 'Enter' && handleUpdateGoal()}
+                      />
+                      <button 
+                        onClick={handleUpdateGoal}
+                        className="bg-primary text-primary-foreground px-2 py-1 rounded text-[9px] font-mono font-bold hover:brightness-110 transition-all"
+                      >
+                        SAVE
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-baseline gap-1 mb-2 relative z-10">
+                      <span className="text-2xl font-extrabold font-heading text-foreground">{completedBooksCount}</span>
+                      <span className="text-xs text-muted-foreground/80 font-normal">/ {yearlyReadingGoal}</span>
+                    </div>
+                  )}
+
+                  <div className="relative z-10 mt-auto">
+                    <div className="w-full h-1.5 bg-background rounded-full overflow-hidden border border-border/10">
+                      <div 
+                        className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-500 group-hover:brightness-110" 
+                        style={{ width: `${goalProgressPercentage}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
               </div>

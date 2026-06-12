@@ -11,6 +11,7 @@ export interface GeneralSettings {
   readerFontFamily: "inter" | "atkinson" | "dyslexic" | "serif";
   readerWordsPerPage: number;  // Target words per page
   telemetryPreference: "cloud" | "anonymous" | "disabled";
+  yearlyReadingGoal: number;   // Yearly reading target in books
 }
 
 export interface RsvpSettings {
@@ -54,6 +55,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
     readerFontFamily: "serif",
     readerWordsPerPage: 300,
     telemetryPreference: "cloud",
+    yearlyReadingGoal: 15,
   },
   rsvp: {
     fontSize: 48,

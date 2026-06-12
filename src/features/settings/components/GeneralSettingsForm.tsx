@@ -14,7 +14,8 @@ export function GeneralSettingsForm() {
     glassmorphism,
     reducedMotion,
     soundEffects,
-    readingTimerReminder
+    readingTimerReminder,
+    yearlyReadingGoal
   } = settings.general;
 
   return (

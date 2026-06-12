@@ -124,8 +124,8 @@ export function RadarChart({ logs, books }: RadarChartProps) {
               points={points}
               fill="none"
               stroke="currentColor"
-              strokeWidth="0.5"
-              className="text-border/40"
+              strokeWidth="1"
+              className="text-border/60 dark:text-border/40"
             />
           ))}
 
@@ -137,7 +137,7 @@ export function RadarChart({ logs, books }: RadarChartProps) {
                 key={idx}
                 x={x + 4}
                 y={y + 10}
-                className="fill-muted-foreground/50 font-mono text-[8px]"
+                className="fill-muted-foreground font-mono text-[8px]"
               >
                 {Math.round(level * 100)}%
               </text>
@@ -163,8 +163,8 @@ export function RadarChart({ logs, books }: RadarChartProps) {
                   x2={outer.x}
                   y2={outer.y}
                   stroke="currentColor"
-                  className="text-border/40"
-                  strokeWidth="0.75"
+                  className="text-border/60 dark:text-border/40"
+                  strokeWidth="1"
                 />
                 {/* Axis label */}
                 <text
@@ -193,9 +193,9 @@ export function RadarChart({ logs, books }: RadarChartProps) {
           {/* Filled Value Polygon */}
           <polygon
             points={valuePoints}
-            fill="hsl(var(--primary) / 0.15)"
+            fill="hsl(var(--primary) / 0.25)"
             stroke="hsl(var(--primary))"
-            strokeWidth="2"
+            strokeWidth="2.5"
             filter="url(#radar-glow)"
             className="transition-all duration-500"
           />

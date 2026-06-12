@@ -7,11 +7,12 @@
 
 import * as React from "react";
 import { useLibrary } from "@/features/library/context/library-context";
+import { useSettings } from "@/features/settings/context/settings-context";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { StatsService } from "@/core/services/stats-service";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ReadingSessionLog, LibraryStatsSummary } from "@/core/entities/stats";
-import { Flame, Gauge, TrendingUp, Brain, CheckCircle, BarChart, Download, Trash2, ShieldCheck } from "lucide-react";
+import { Flame, Gauge, TrendingUp, Brain, CheckCircle, BarChart, Download, Trash2, ShieldCheck, BookOpen, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 // Custom premium visual components
@@ -28,8 +29,12 @@ import { exportToJSON, exportToCSV } from "@/features/stats/utils/export";
 
 export default function DashboardClient() {
   const { books } = useLibrary();
+  const { settings, updateGeneralSettings } = useSettings();
+  const { yearlyReadingGoal } = settings.general;
   const { user } = useAuth();
   const [isHydrated, setIsHydrated] = React.useState(false);
+  const [isEditingGoal, setIsEditingGoal] = React.useState(false);
+  const [tempGoal, setTempGoal] = React.useState(yearlyReadingGoal);
   const [logs, setLogs] = React.useState<ReadingSessionLog[]>([]);
   const [summary, setSummary] = React.useState<LibraryStatsSummary>({
     totalBooksRead: 0,
@@ -68,6 +73,11 @@ export default function DashboardClient() {
     };
   }, [fetchStats]);
 
+  // Sync tempGoal with yearlyReadingGoal from settings
+  React.useEffect(() => {
+    setTempGoal(yearlyReadingGoal);
+  }, [yearlyReadingGoal]);
+
   // Derived average accuracy
   const averageAccuracy = React.useMemo(() => {
     const logsWithAccuracy = logs.filter((l) => l.accuracy != null);
@@ -75,6 +85,16 @@ export default function DashboardClient() {
     const totalAccuracy = logsWithAccuracy.reduce((sum, log) => sum + log.accuracy!, 0);
     return Math.round(totalAccuracy / logsWithAccuracy.length);
   }, [logs]);
+
+  const goalProgressPercentage = React.useMemo(() => {
+    return Math.min(Math.round((summary.totalBooksRead / yearlyReadingGoal) * 100), 100);
+  }, [summary.totalBooksRead, yearlyReadingGoal]);
+
+  const handleUpdateGoal = () => {
+    updateGeneralSettings({ yearlyReadingGoal: tempGoal });
+    setIsEditingGoal(false);
+    toast.success("Yearly reading goal updated.");
+  };
 
   const handleResetStats = async () => {
     if (window.confirm("Are you sure you want to reset all your stats history? This action is irreversible.")) {
@@ -129,7 +149,7 @@ export default function DashboardClient() {
           {/* Card A: WPM */}
           <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Gauge className="w-16 h-16 text-foreground" />
+              <Gauge className="w-14 h-14 text-foreground" />
             </div>
             <div>
               <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Average Speed</h3>
@@ -147,7 +167,7 @@ export default function DashboardClient() {
           {/* Card B: Racha */}
           <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-              <Flame className="w-16 h-16 text-foreground" />
+              <Flame className="w-14 h-14 text-foreground" />
             </div>
 
             <div 
@@ -176,7 +196,7 @@ export default function DashboardClient() {
           {/* Card C: Comprensión */}
           <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Brain className="w-16 h-16 text-foreground" />
+              <Brain className="w-14 h-14 text-foreground" />
             </div>
             <div>
               <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Reading Retention</h3>
@@ -189,6 +209,62 @@ export default function DashboardClient() {
             <div className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
               <CheckCircle className="w-3.5 h-3.5" />
               <span>Self-assessment quizzes</span>
+            </div>
+          </div>
+
+          {/* Card D: Books Read Progress */}
+          <div className="bg-card border border-border/20 p-5 rounded-xl flex-1 relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none">
+              <BookOpen className="w-14 h-14 text-foreground" />
+            </div>
+            <div className="relative z-10">
+              <div className="flex justify-between items-center mb-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Yearly Goal</h3>
+                  <button 
+                    onClick={() => setIsEditingGoal(!isEditingGoal)}
+                    className="p-1 hover:bg-accent rounded-md transition-colors text-muted-foreground hover:text-primary"
+                    title="Edit yearly goal"
+                  >
+                    <Pencil className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+
+              {isEditingGoal ? (
+                <div className="flex items-center gap-2 mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <input
+                    type="number"
+                    min="1"
+                    max="999"
+                    value={tempGoal}
+                    onChange={(e) => setTempGoal(parseInt(e.target.value) || 1)}
+                    className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-xl font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
+                    autoFocus
+                    onKeyDown={(e) => e.key === 'Enter' && handleUpdateGoal()}
+                  />
+                  <button 
+                    onClick={handleUpdateGoal}
+                    className="bg-primary text-primary-foreground px-3 py-1 rounded text-[10px] font-mono font-bold hover:brightness-110 transition-all"
+                  >
+                    SAVE
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-baseline gap-1 mt-2">
+                  <span className="text-4xl font-extrabold font-heading text-foreground">{summary.totalBooksRead}</span>
+                  <span className="text-xs text-muted-foreground/80 font-normal">/ {yearlyReadingGoal}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="relative z-10 mt-auto">
+              <div className="w-full bg-accent h-1.5 rounded-full overflow-hidden border border-border/10">
+                <div 
+                  className="bg-gradient-to-r from-primary to-emerald-500 h-full rounded-full transition-all duration-500 group-hover:brightness-110" 
+                  style={{ width: `${goalProgressPercentage}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
