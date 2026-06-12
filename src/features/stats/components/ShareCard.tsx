@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import { LibraryStatsSummary } from "@/core/entities/stats";
-import { Share2, Download } from "lucide-react";
+import { Share2, Download, MessageSquarePlus, MessageCircle, Smartphone } from "lucide-react";
 
 interface ShareCardProps {
   summary: LibraryStatsSummary;
@@ -16,27 +16,25 @@ interface ShareCardProps {
 export function ShareCard({ summary }: ShareCardProps) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
-  const drawAndDownload = () => {
+  const drawCanvas = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return null;
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) return null;
 
-    // Dimensions
     const w = canvas.width;
     const h = canvas.height;
 
-    // 1. Draw premium background gradient
+    // 1. Draw premium background gradient (matches web preview)
     const bgGrad = ctx.createLinearGradient(0, 0, w, h);
-    bgGrad.addColorStop(0, "#0f0c20");   // Deep dark navy
-    bgGrad.addColorStop(0.5, "#15102a"); // Dark indigo
-    bgGrad.addColorStop(1, "#25123e");   // Dark violet/purple
+    bgGrad.addColorStop(0, "#0f0c20");
+    bgGrad.addColorStop(1, "#25123e");
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
 
     // 2. Draw aesthetic grid mesh (subtle)
-    ctx.strokeStyle = "rgba(139, 92, 246, 0.08)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
     ctx.lineWidth = 1;
     const gridGap = 40;
     for (let x = 0; x < w; x += gridGap) {
@@ -52,92 +50,118 @@ export function ShareCard({ summary }: ShareCardProps) {
       ctx.stroke();
     }
 
-    // 3. Draw ambient neon glowing circles
-    const radGrad = ctx.createRadialGradient(w * 0.8, h * 0.2, 50, w * 0.8, h * 0.2, 300);
-    radGrad.addColorStop(0, "rgba(139, 92, 246, 0.15)"); // Primary/Purple
-    radGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = radGrad;
-    ctx.beginPath();
-    ctx.arc(w * 0.8, h * 0.2, 300, 0, Math.PI * 2);
-    ctx.fill();
+    // 3. Top left: VISUS // READING TELEMETRY
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.font = "20px monospace";
+    if ('letterSpacing' in ctx) {
+      (ctx as any).letterSpacing = "4px";
+    }
+    ctx.fillText("VISUS // READING TELEMETRY", 40, 60);
 
-    const radGrad2 = ctx.createRadialGradient(w * 0.2, h * 0.8, 50, w * 0.2, h * 0.8, 300);
-    radGrad2.addColorStop(0, "rgba(16, 185, 129, 0.12)"); // Emerald/Green
-    radGrad2.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = radGrad2;
-    ctx.beginPath();
-    ctx.arc(w * 0.2, h * 0.8, 300, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 4. Draw outer border
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-    ctx.lineWidth = 20;
-    ctx.strokeRect(10, 10, w - 20, h - 20);
-
-    // Inner glowing thin line
-    ctx.strokeStyle = "rgba(139, 92, 246, 0.3)";
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(30, 30, w - 60, h - 60);
-
-    // 5. Title / Logo
-    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-    ctx.font = "bold 12px monospace";
-    ctx.letterSpacing = "4px";
-    ctx.fillText("VISUS // READING TELEMETRY", 55, 65);
-
-    // 6. Large metric card: Speed (Left side)
+    // 4. Large metric card: Speed
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 72px sans-serif";
-    ctx.fillText(String(summary.averageWpm || 550), 55, 200);
+    ctx.font = "900 130px sans-serif";
+    const wpmStr = String(summary.averageWpm || 0);
+    ctx.fillText(wpmStr, 35, 230);
     
-    ctx.fillStyle = "rgba(139, 92, 246, 1)"; // Neon purple label
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText("AVERAGE WPM", 55, 230);
+    const wpmWidth = ctx.measureText(wpmStr).width;
+    ctx.fillStyle = "hsl(243, 75%, 65%)"; // Primary color approximate
+    ctx.font = "bold 32px sans-serif";
+    ctx.fillText("WPM", 35 + wpmWidth + 15, 230);
 
-    // 7. Right column stats
-    const rightX = 350;
-    
-    // Stat 1: Racha
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 38px sans-serif";
-    ctx.fillText(`${summary.currentStreakDays || 0} ${summary.currentStreakDays === 1 ? 'Day' : 'Days'}`, rightX, 130);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.font = "bold 11px monospace";
-    ctx.fillText("READING STREAK", rightX, 155);
+    // Average Speed Label
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    if ('letterSpacing' in ctx) {
+      (ctx as any).letterSpacing = "2px";
+    }
+    ctx.font = "20px monospace";
+    ctx.fillText("AVERAGE SPEED", 45, 280);
 
-    // Stat 2: Tiempo Total
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 38px sans-serif";
-    ctx.fillText(`${summary.totalReadingTimeMinutes || 0} ${summary.totalReadingTimeMinutes === 1 ? 'Minute' : 'Minutes'}`, rightX, 230);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.font = "bold 11px monospace";
-    ctx.fillText("TOTAL ACTIVE TIME", rightX, 255);
+    // Reset letter spacing
+    if ('letterSpacing' in ctx) {
+      (ctx as any).letterSpacing = "0px";
+    }
 
-    // Stat 3: Libros leídos
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 38px sans-serif";
-    ctx.fillText(`${summary.totalBooksRead || 0} ${summary.totalBooksRead === 1 ? 'Book' : 'Books'}`, rightX, 330);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.font = "bold 11px monospace";
-    ctx.fillText("COMPLETED IN LIBRARY", rightX, 355);
-
-    // 8. Footer tagline
+    // 5. Bottom left: Tagline
     ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-    ctx.font = "italic 13px sans-serif";
-    ctx.fillText("Speed and retention in perfect harmony.", 55, 380);
+    ctx.font = "italic 24px sans-serif";
+    ctx.fillText("Perfect speed & comprehension.", 40, 410);
 
-    // 9. Download anchor
+    // 6. Bottom right: Streak
+    const streakDays = summary.currentStreakDays || 0;
+    const streakStr = `${streakDays} ${streakDays === 1 ? 'Day' : 'Days'}`;
+    
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 42px sans-serif";
+    const streakWidth = ctx.measureText(streakStr).width;
+    ctx.fillText(streakStr, w - streakWidth - 40, 375);
+
+    const lblStr = "CURRENT STREAK";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.font = "20px monospace";
+    const lblWidth = ctx.measureText(lblStr).width;
+    ctx.fillText(lblStr, w - lblWidth - 40, 410);
+
+    return canvas;
+  };
+
+  const shareToNative = async () => {
+    const canvas = drawCanvas();
+    if (!canvas) return;
+
+    const text = `I'm reading at ${summary.averageWpm || 0} WPM with a ${summary.currentStreakDays || 0}-day streak on Visus! 🚀📚`;
+
+    // Try Web Share API with image if supported
+    if (navigator.share && navigator.canShare) {
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], "visus-stats.png", { type: "image/png" });
+        try {
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'Visus Reading Stats',
+              text,
+              files: [file]
+            });
+            return;
+          } else {
+            // Fallback to text only share
+            await navigator.share({ title: 'Visus', text });
+          }
+        } catch (err) {
+          console.warn("[ShareCard] Native share failed/cancelled:", err);
+        }
+      });
+    } else {
+      // Fallback: just download
+      downloadImage();
+    }
+  };
+
+  const downloadImage = () => {
+    const canvas = drawCanvas();
+    if (!canvas) return;
     try {
       const dataUrl = canvas.toDataURL("image/png");
       const downloadAnchor = document.createElement("a");
       downloadAnchor.setAttribute("href", dataUrl);
-      downloadAnchor.setAttribute("download", `visus_reading_milestone_${summary.averageWpm}_wpm.png`);
+      downloadAnchor.setAttribute("download", `visus_stats_${summary.averageWpm}_wpm.png`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
     } catch (err) {
-      console.error("[ShareCard] Failed to convert canvas to image:", err);
+      console.error("[ShareCard] Failed to download image:", err);
     }
+  };
+
+  const shareToX = () => {
+    const text = `I'm reading at ${summary.averageWpm || 0} WPM with a ${summary.currentStreakDays || 0}-day streak on Visus! 🚀📚`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const shareToWhatsApp = () => {
+    const text = `I'm reading at ${summary.averageWpm || 0} WPM with a ${summary.currentStreakDays || 0}-day streak on Visus! 🚀📚`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   return (
@@ -182,13 +206,40 @@ export function ShareCard({ summary }: ShareCardProps) {
           className="hidden"
         />
 
-        <button
-          onClick={drawAndDownload}
-          className="w-full py-2 bg-primary text-primary-foreground hover:brightness-110 shadow-[0_0_15px_rgba(var(--primary),0.15)] rounded font-mono text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-1.5 transition-all"
-        >
-          <Download className="w-4 h-4" />
-          <span>Download Card</span>
-        </button>
+        <div className="w-full flex gap-2 mt-2">
+          <button
+            onClick={shareToNative}
+            className="flex-1 py-2 bg-primary text-primary-foreground hover:brightness-110 shadow-[0_0_15px_rgba(var(--primary),0.15)] rounded font-mono text-[10px] uppercase tracking-wider font-bold flex items-center justify-center gap-1.5 transition-all"
+            title="Share via device"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Share</span>
+          </button>
+          
+          <button
+            onClick={shareToX}
+            className="px-3 bg-card border border-border/40 hover:bg-accent rounded text-foreground transition-all flex items-center justify-center"
+            title="Share on X"
+          >
+            <MessageSquarePlus className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={shareToWhatsApp}
+            className="px-3 bg-card border border-border/40 hover:bg-accent rounded text-foreground transition-all flex items-center justify-center"
+            title="Share on WhatsApp"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={downloadImage}
+            className="px-3 bg-card border border-border/40 hover:bg-accent rounded text-foreground transition-all flex items-center justify-center"
+            title="Download Image"
+          >
+            <Download className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );
