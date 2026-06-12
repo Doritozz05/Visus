@@ -10,7 +10,7 @@ import { Play, Pause, RotateCcw, Timer, Award, FastForward } from "lucide-react"
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function PomodoroTimer() {
+export const PomodoroTimer = React.memo(function PomodoroTimer() {
   const [mode, setMode] = React.useState<"focus" | "break">("focus");
   const [isActive, setIsActive] = React.useState(false);
   const [timeLeft, setTimeLeft] = React.useState(25 * 60); // 25 minutes default
@@ -85,7 +85,7 @@ export function PomodoroTimer() {
       drag
       dragMomentum={false}
       dragElastic={0}
-      className="bg-card/40 border border-border/20 p-4 rounded-xl shadow-md glass-panel flex flex-col items-center gap-4 w-full cursor-move"
+      className="bg-card/40 border border-border/20 p-4 rounded-xl shadow-md glass-panel flex flex-col items-center gap-4 w-full cursor-move !transition-none"
     >
       <div className="flex items-center gap-2 border-b border-border/10 pb-2 w-full justify-between">
         <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-muted-foreground">
@@ -180,4 +180,4 @@ export function PomodoroTimer() {
       </div>
     </motion.div>
   );
-}
+});
