@@ -100,6 +100,13 @@ class DbService {
       };
 
       request.onerror = () => {
+        // Handle version mismatch (e.g., cached code requesting V3 but DB is already V4)
+        if (request.error?.name === "VersionError") {
+          console.warn("[DbService] IndexedDB version mismatch. Forcing reload to update client code...");
+          if (typeof window !== "undefined") {
+            window.location.reload();
+          }
+        }
         this.dbPromise = null;
         reject(request.error);
       };

@@ -72,10 +72,30 @@ export function Providers({ children }: { children: React.ReactNode }) {
         .register("/sw.js")
         .then((reg) => {
           console.log("Visus Service Worker successfully registered. Scope:", reg.scope);
+          
+          // Check for updates periodically or on registration
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker?.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // At this point, the old service worker is still in control, 
+                // but a new one is waiting. SkipWaiting in sw.js will trigger controllerchange.
+                console.log("New content available, preparing to update...");
+              }
+            });
+          });
         })
         .catch((error) => {
           console.error("Error registering Visus Service Worker:", error);
         });
+
+      // Handle the refresh when the new service worker takes control
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
     }
   }, []);
 
