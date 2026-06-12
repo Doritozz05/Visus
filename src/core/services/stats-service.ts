@@ -89,6 +89,11 @@ export class StatsService {
         } catch (achErr) {
           console.warn("[StatsService] Local achievement evaluation or compression failed:", achErr);
         }
+
+        // Dispatch global event for real-time dashboard updates
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("stats-updated"));
+        }
       } catch (err) {
         console.warn("Could not save or sync reading log:", err);
       }

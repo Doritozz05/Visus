@@ -56,6 +56,16 @@ export default function DashboardClient() {
 
   React.useEffect(() => {
     fetchStats();
+
+    // Listen for real-time telemetry updates
+    const handleUpdate = () => {
+      fetchStats();
+    };
+    window.addEventListener("stats-updated", handleUpdate);
+
+    return () => {
+      window.removeEventListener("stats-updated", handleUpdate);
+    };
   }, [fetchStats]);
 
   // Derived average accuracy
