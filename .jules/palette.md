@@ -1,0 +1,3 @@
+## 2024-06-12 - [Password Input A11y]
+**Learning:** Found a password input field where the visibility toggle button (the eye icon) had `tabIndex={-1}`. This disabled keyboard access entirely, meaning keyboard users couldn't toggle the password visibility. Additionally, it lacked an `aria-label`, leaving screen readers without context on what the button did.
+**Action:** Always ensure that icon-only interactive elements in forms have an explicit `aria-label` or `aria-labelledby`, remove `tabIndex={-1}` unless specifically meant to hide it from the tab order for a valid reason, and make sure that a `focus-visible` ring indicates the element has been focused.
