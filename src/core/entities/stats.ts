@@ -12,7 +12,7 @@ export interface ReadingSessionLog {
   mode: ReadingMode;
   speedWpm: number;
   durationSeconds: number;
-  accuracy: number;
+  accuracy?: number | null;
   completedAt: string; // ISO Date String
   telemetryData?: {
     speed_history?: { offsetSeconds: number; wpm: number; }[];

@@ -60,10 +60,9 @@ export default function DashboardClient() {
 
   // Derived average accuracy
   const averageAccuracy = React.useMemo(() => {
-    if (logs.length === 0) return 92;
-    const logsWithAccuracy = logs.filter((l) => l.accuracy !== undefined);
-    if (logsWithAccuracy.length === 0) return 90;
-    const totalAccuracy = logsWithAccuracy.reduce((sum, log) => sum + (log.accuracy || 90), 0);
+    const logsWithAccuracy = logs.filter((l) => l.accuracy != null);
+    if (logsWithAccuracy.length === 0) return null;
+    const totalAccuracy = logsWithAccuracy.reduce((sum, log) => sum + log.accuracy!, 0);
     return Math.round(totalAccuracy / logsWithAccuracy.length);
   }, [logs]);
 
@@ -172,8 +171,9 @@ export default function DashboardClient() {
             <div>
               <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Reading Retention</h3>
               <div className="flex items-baseline gap-1 mt-2">
-                <span className="text-4xl font-extrabold font-heading text-foreground">{averageAccuracy}</span>
-                <span className="text-xs font-mono text-muted-foreground">%</span>
+                <span className="text-4xl font-extrabold font-heading text-foreground">
+                  {averageAccuracy !== null ? `${averageAccuracy}%` : "-"}
+                </span>
               </div>
             </div>
             <div className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
@@ -304,7 +304,7 @@ export default function DashboardClient() {
                           }
                         </td>
                         <td className="py-3 font-mono text-[10px] text-emerald-500 dark:text-emerald-400 font-bold">
-                          {log.accuracy}%
+                          {log.accuracy != null ? `${log.accuracy}%` : "-"}
                         </td>
                       </tr>
                     ))

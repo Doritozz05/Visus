@@ -16,6 +16,14 @@ interface HeatmapProps {
 
 export function Heatmap({ logs }: HeatmapProps) {
   const [hoveredDay, setHoveredDay] = React.useState<{ date: string; minutes: number; x: number; y: number } | null>(null);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to the rightmost edge on mount
+  React.useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft = scrollContainerRef.current.scrollWidth;
+    }
+  }, [logs]);
 
   // 1. Map logs into date map (YYYY-MM-DD -> minutes)
   const dateMap = React.useMemo(() => {
@@ -113,8 +121,8 @@ export function Heatmap({ logs }: HeatmapProps) {
         <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Minutes read each day over the past year</p>
       </div>
 
-      <div className="relative w-full overflow-x-auto custom-scrollbar flex justify-center py-2 min-h-[120px]">
-        <svg width={width} height={height} className="overflow-visible select-none">
+      <div ref={scrollContainerRef} className="relative w-full overflow-x-auto custom-scrollbar flex justify-start py-2 min-h-[120px]">
+        <svg width={width} height={height} className="overflow-visible select-none shrink-0 pr-4">
           {/* Month labels */}
           {monthLabels.map((lbl, idx) => (
             <text
@@ -158,10 +166,12 @@ export function Heatmap({ logs }: HeatmapProps) {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const container = e.currentTarget.ownerSVGElement?.getBoundingClientRect();
                     if (container) {
+                      const rawX = rect.left - container.left + boxSize / 2;
+                      const clampedX = Math.min(Math.max(rawX, 60), width - 60);
                       setHoveredDay({
                         date: formatDate(day.date),
                         minutes: Math.round(day.minutes * 10) / 10,
-                        x: rect.left - container.left + boxSize / 2,
+                        x: clampedX,
                         y: rect.top - container.top - 40
                       });
                     }

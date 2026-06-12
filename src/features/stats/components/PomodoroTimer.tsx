@@ -83,6 +83,7 @@ export function PomodoroTimer() {
     <motion.div
       drag
       dragMomentum={false}
+      dragElastic={0}
       className="bg-card/40 border border-border/20 p-4 rounded-xl shadow-md glass-panel flex flex-col items-center gap-4 w-full cursor-move"
     >
       <div className="flex items-center gap-2 border-b border-border/10 pb-2 w-full justify-between">

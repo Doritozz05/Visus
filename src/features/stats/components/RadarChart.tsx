@@ -32,7 +32,10 @@ export function RadarChart({ logs, books }: RadarChartProps) {
     const enduranceScore = Math.min(1.0, avgDuration / 1800);
 
     // Comprehension: average accuracy
-    const avgAccuracy = logs.reduce((sum, l) => sum + (l.accuracy || 90), 0) / logs.length;
+    const logsWithAccuracy = logs.filter(l => l.accuracy != null);
+    const avgAccuracy = logsWithAccuracy.length > 0 
+      ? logsWithAccuracy.reduce((sum, l) => sum + l.accuracy!, 0) / logsWithAccuracy.length
+      : 0;
     const compScore = avgAccuracy / 100;
 
     // Consistency: active days in last 30 days relative to 15 days

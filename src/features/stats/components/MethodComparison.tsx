@@ -19,34 +19,37 @@ export function MethodComparison({ logs }: MethodComparisonProps) {
     if (logs.length === 0) return null;
 
     const sums = {
-      normal: { wpm: 0, accuracy: 0, count: 0 },
-      rsvp: { wpm: 0, accuracy: 0, count: 0 },
-      cluster: { wpm: 0, accuracy: 0, count: 0 }
+      normal: { wpm: 0, accuracySum: 0, accuracyCount: 0, count: 0 },
+      rsvp: { wpm: 0, accuracySum: 0, accuracyCount: 0, count: 0 },
+      cluster: { wpm: 0, accuracySum: 0, accuracyCount: 0, count: 0 }
     };
 
     logs.forEach((log) => {
       const mode = log.mode as "normal" | "rsvp" | "cluster";
       if (sums[mode]) {
         sums[mode].wpm += log.speedWpm;
-        sums[mode].accuracy += log.accuracy || 90;
         sums[mode].count += 1;
+        if (log.accuracy != null) {
+          sums[mode].accuracySum += log.accuracy;
+          sums[mode].accuracyCount += 1;
+        }
       }
     });
 
     const result = {
-      normal: { wpm: 0, accuracy: 0, count: 0 },
-      rsvp: { wpm: 0, accuracy: 0, count: 0 },
-      cluster: { wpm: 0, accuracy: 0, count: 0 }
+      normal: { wpm: 0, accuracy: null as number | null, count: 0 },
+      rsvp: { wpm: 0, accuracy: null as number | null, count: 0 },
+      cluster: { wpm: 0, accuracy: null as number | null, count: 0 }
     };
 
     (Object.keys(sums) as Array<keyof typeof sums>).forEach((mode) => {
       const s = sums[mode];
       if (s.count > 0) {
-        result[mode] = {
-          wpm: Math.round(s.wpm / s.count),
-          accuracy: Math.round(s.accuracy / s.count),
-          count: s.count
-        };
+        result[mode].wpm = Math.round(s.wpm / s.count);
+        result[mode].count = s.count;
+        if (s.accuracyCount > 0) {
+          result[mode].accuracy = Math.round(s.accuracySum / s.accuracyCount);
+        }
       }
     });
 
@@ -58,9 +61,9 @@ export function MethodComparison({ logs }: MethodComparisonProps) {
     if (!stats) return null;
 
     const scores = {
-      normal: stats.normal.wpm * (stats.normal.accuracy / 100),
-      rsvp: stats.rsvp.wpm * (stats.rsvp.accuracy / 100),
-      cluster: stats.cluster.wpm * (stats.cluster.accuracy / 100)
+      normal: stats.normal.wpm * ((stats.normal.accuracy || 100) / 100),
+      rsvp: stats.rsvp.wpm * ((stats.rsvp.accuracy || 100) / 100),
+      cluster: stats.cluster.wpm * ((stats.cluster.accuracy || 100) / 100)
     };
 
     let bestMode: "normal" | "rsvp" | "cluster" = "normal";
@@ -118,10 +121,11 @@ export function MethodComparison({ logs }: MethodComparisonProps) {
                 const y = idx * rowGap + 20;
                 const modeStats = stats[mode];
                 const hasData = modeStats.count > 0;
+                const hasAccuracy = modeStats.accuracy != null;
                 
                 // Width computations
                 const wpmWidth = hasData ? Math.min(1.0, modeStats.wpm / maxWpmValue) * 250 : 5;
-                const accWidth = hasData ? (modeStats.accuracy / 100) * 250 : 5;
+                const accWidth = hasAccuracy ? (modeStats.accuracy! / 100) * 250 : 5;
 
                 const modeLabels = {
                   normal: "Normal",
@@ -166,15 +170,13 @@ export function MethodComparison({ logs }: MethodComparisonProps) {
                       rx="2.5"
                       className="fill-emerald-500/60 dark:fill-emerald-400/40 hover:brightness-110 transition-all duration-500"
                     />
-                    {hasData && (
-                      <text
-                        x={80 + accWidth + 6}
-                        y={y + barHeight + barGap + 6}
-                        className="fill-emerald-500 dark:text-emerald-400 font-mono text-[8px] font-semibold"
-                      >
-                        {modeStats.accuracy}% Retention
-                      </text>
-                    )}
+                    <text
+                      x={80 + accWidth + 6}
+                      y={y + barHeight + barGap + 6}
+                      className="fill-emerald-500 dark:text-emerald-400 font-mono text-[8px] font-semibold"
+                    >
+                      {hasAccuracy ? `${modeStats.accuracy}% Retention` : "No retention data"}
+                    </text>
                   </g>
                 );
               })}

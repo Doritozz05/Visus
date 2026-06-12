@@ -157,7 +157,7 @@ export function useTelemetryTracker({
         mode: state.mode,
         speedWpm: finalWpm,
         durationSeconds: duration,
-        accuracy: 100, // Will be updated by ComprehensionQuiz on completing a quiz, defaults to 100
+        accuracy: null, // No quiz taken during this background session tracking
         telemetryData: telemetryData,
       });
     } catch (err) {

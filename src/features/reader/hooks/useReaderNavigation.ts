@@ -58,12 +58,11 @@ export function useReaderNavigation({
           : 4500;
         const currentSpeed = mode === "normal" ? 280 : wpm;
         const calculatedSeconds = Math.round(totalWords / (currentSpeed / 60));
-        const accuracyRating = Math.floor(Math.random() * 8) + 92;
         
         const stats = {
           speedWpm: currentSpeed,
           durationSeconds: calculatedSeconds,
-          accuracy: accuracyRating,
+          accuracy: null,
           wordsCount: totalWords
         };
         
@@ -75,7 +74,7 @@ export function useReaderNavigation({
           mode: mode,
           speedWpm: currentSpeed,
           durationSeconds: calculatedSeconds,
-          accuracy: accuracyRating
+          accuracy: null
         });
         
         updateBook(activeBookVal.id, {
