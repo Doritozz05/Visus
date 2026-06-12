@@ -94,6 +94,7 @@ export function useReaderPlayback({
 
   // Consuming custom State Sync Hook
   const { setMode, initializedBookIdRef } = useReaderStateSync({
+    activeBook,
     activeBookRef,
     activeBookId,
     chaptersData,

@@ -582,14 +582,17 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
       if (!bookChanged) return prevBooks;
 
-      libraryService.saveBook(updatedBook).catch((err) => {
+      const timestamp = new Date().toISOString();
+      const finalBook = { ...updatedBook, updatedAt: timestamp };
+
+      libraryService.saveBook(finalBook).catch((err) => {
         console.warn("Could not save updated book:", err);
       });
 
-      if (user && updatedBook.isInCloud) {
+      if (user && finalBook.isInCloud) {
         import("@/core/config/services").then(({ remoteSyncService }) => {
           remoteSyncService.pushChanges(user.id, {
-            books: [updatedBook],
+            books: [finalBook],
             stats: [],
             deletedBookIds: []
           }).catch(async (pushErr) => {
@@ -597,14 +600,14 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             const { dbService } = await import("@/core/services/db-service");
             await dbService.enqueueSyncAction({
               type: "UPDATE_BOOK",
-              payload: updatedBook,
-              timestamp: new Date().toISOString()
+              payload: finalBook,
+              timestamp: timestamp
             });
           });
         });
       }
 
-      return prevBooks.map((book) => (book.id === id ? updatedBook : book));
+      return prevBooks.map((book) => (book.id === id ? finalBook : book));
     });
   }, [user]);
 
@@ -665,28 +668,31 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         progress: newProgress,
       });
 
-      libraryService.saveBook(updatedBook).catch((err) => {
+      const timestamp = new Date().toISOString();
+      const finalBook = { ...updatedBook, updatedAt: timestamp };
+
+      libraryService.saveBook(finalBook).catch((err) => {
         console.warn("Could not save toggled book:", err);
       });
 
-      if (user && updatedBook.isInCloud) {
+      if (user && finalBook.isInCloud) {
         import("@/core/config/services").then(({ remoteSyncService }) => {
            remoteSyncService.pushChanges(user.id, {
-             books: [updatedBook],
+             books: [finalBook],
              stats: [],
              deletedBookIds: []
            }).catch(async () => {
               const { dbService } = await import("@/core/services/db-service");
               await dbService.enqueueSyncAction({
                 type: "UPDATE_BOOK",
-                payload: updatedBook,
-                timestamp: new Date().toISOString()
+                payload: finalBook,
+                timestamp: timestamp
               });
            });
         });
       }
 
-      return prevBooks.map((book) => (book.id === id ? updatedBook : book));
+      return prevBooks.map((book) => (book.id === id ? finalBook : book));
     });
   }, [user]);
 

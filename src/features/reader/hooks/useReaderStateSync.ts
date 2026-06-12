@@ -3,6 +3,7 @@ import { Book } from "@/core/entities/book";
 import { useReadingStore } from "../stores/reading-store";
 
 export interface UseReaderStateSyncProps {
+  activeBook: Book | null;
   activeBookRef: React.MutableRefObject<Book | null>;
   activeBookId: string | null;
   chaptersData: any[]; // Assuming it's the mapped chapters
@@ -11,6 +12,7 @@ export interface UseReaderStateSyncProps {
 }
 
 export function useReaderStateSync({
+  activeBook,
   activeBookRef,
   activeBookId,
   chaptersData,
@@ -23,7 +25,7 @@ export function useReaderStateSync({
   React.useEffect(() => {
     if (isLoadingContent) return;
 
-    const book = activeBookRef.current;
+    const book = activeBook;
     if (!book || !activeBookId) {
       useReadingStore.getState().initBook("", 0, 0, 600, "normal", []);
       initializedBookIdRef.current = null;
@@ -92,13 +94,31 @@ export function useReaderStateSync({
           ...(savedLocalPageIdx !== undefined ? { lastLocalPageIndex: savedLocalPageIdx } : {}),
         });
       }
+    } else if (activeBook) {
+      // If the book is already initialized, sync the local Zustand store reactively
+      // if a newer progress update is received from the cloud (Supabase)
+      const state = useReadingStore.getState();
+      const remoteChapter = activeBook.lastChapterIndex ?? 0;
+      const remoteWord = activeBook.lastWordIndex ?? 0;
+
+      if (remoteChapter !== state.activeChapterIndex || remoteWord !== state.wordIndex) {
+        if (remoteChapter !== state.activeChapterIndex) {
+          useReadingStore.getState().setActiveChapterIndex(remoteChapter);
+        }
+        useReadingStore.getState().setWordIndex(remoteWord);
+      }
     }
 
+  }, [activeBookId, activeBook, chaptersData, updateBook, activeBookRef, isLoadingContent]);
+
+  // Handle unmount or book transition cleanup to prevent stale data in the store
+  React.useEffect(() => {
     return () => {
       initializedBookIdRef.current = null;
       useReadingStore.getState().setIsPlaying(false);
+      useReadingStore.getState().initBook("", 0, 0, 600, "normal", []);
     };
-  }, [activeBookId, chaptersData, updateBook, activeBookRef, isLoadingContent]);
+  }, [activeBookId]);
 
   const setMode = React.useCallback((newMode: "rsvp" | "cluster" | "normal") => {
     const currentMode = useReadingStore.getState().mode;

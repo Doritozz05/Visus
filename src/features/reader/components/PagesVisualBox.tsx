@@ -16,6 +16,7 @@ import { useReadingStore } from "../stores/reading-store";
 import { findPageForWordIndex, findFirstPageOfChapter } from "../utils/binarySearch";
 
 interface PagesVisualBoxProps {
+  activeBookId: string;
   currentChapter: ChapterHtmlData;
   chaptersData: ChapterHtmlData[];
 
@@ -36,6 +37,7 @@ interface PagesVisualBoxProps {
 }
 
 export function PagesVisualBox({
+  activeBookId,
   currentChapter,
   chaptersData,
 
@@ -62,6 +64,7 @@ export function PagesVisualBox({
   const wordIndex = useReadingStore((state) => state.wordIndex);
   const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
   const allBookPages = useReadingStore((state) => state.allBookPages);
+  const storeActiveBookId = useReadingStore((state) => state.activeBookId);
 
   const setWordIndex = React.useCallback((w: number) => {
     useReadingStore.getState().setWordIndex(w);
@@ -154,7 +157,7 @@ export function PagesVisualBox({
     hiddenPaginatorRef,
     columnGap,
     latestRestoreTargetRef,
-    initialReady: allBookPages.length > 0,
+    initialReady: allBookPages.length > 0 && storeActiveBookId === activeBookId,
   });
 
   // Consuming custom Page navigation hook

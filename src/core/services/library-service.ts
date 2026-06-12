@@ -96,6 +96,8 @@ export function calculateProgress(book: Book, updates: Partial<Book>): Book {
 }
 
 export async function saveBook(book: Book, binary?: BookBinary): Promise<void> {
+  const timestamp = book.updatedAt || new Date().toISOString();
+
   // Cache progress synchronously in localStorage FIRST to guarantee persistence on tab close / reload
   if (typeof window !== "undefined" && book.format !== "PHYSICAL") {
     try {
@@ -107,13 +109,13 @@ export async function saveBook(book: Book, binary?: BookBinary): Promise<void> {
         progress: book.progress,
         estimatedReadingTime: book.estimatedReadingTime,
         status: book.status,
-        updatedAt: new Date().toISOString()
+        updatedAt: timestamp
       }));
     } catch (_) {}
   }
 
   // Save to IndexedDB asynchronously
-  await dbService.saveBook({ ...book, updatedAt: new Date().toISOString() });
+  await dbService.saveBook({ ...book, updatedAt: timestamp });
   
   if (binary) {
     await dbService.saveBookBinary(binary);

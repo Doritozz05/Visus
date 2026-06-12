@@ -128,6 +128,7 @@ export function ReadingCanvas({
         <ErrorBoundary>
           <PagesVisualBox
             key={activeBook.id}
+            activeBookId={activeBook.id}
             currentChapter={currentChapter}
             chaptersData={chaptersData}
             savedLocalPageIndex={
