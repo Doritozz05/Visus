@@ -22,11 +22,12 @@ import { useBookIngestion } from "@/features/reader/hooks/useBookIngestion";
 import { useReaderPlayback } from "@/features/reader/hooks/useReaderPlayback";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
-import { useTelemetryTracker } from "@/features/reader/hooks/useTelemetryTracker";
+
 import { READER_FONT_CLASSES } from "@/features/reader/utils/reader-fonts";
 import { Quiz } from "@/core/algorithms/quiz-generator";
 import { toast } from "sonner";
 import { PomodoroTimer } from "@/features/stats/components/PomodoroTimer";
+import { TelemetryTrackerWrapper } from "@/features/reader/components/TelemetryTrackerWrapper";
 
 export default function ReaderClient() {
   const router = useRouter();
@@ -105,23 +106,7 @@ export default function ReaderClient() {
     isLoadingContent: isActuallyLoading,
   });
 
-  // --- 2.1 TELEMETRY TRACKING ---
-  const wordIndex = useReadingStore((state) => state.wordIndex);
-  const isPlaying = useReadingStore((state) => state.isPlaying);
-  const wpm = useReadingStore((state) => state.wpm);
 
-  useTelemetryTracker({
-    activeBookId,
-    bookTitle: activeBook?.title || "",
-    mode,
-    isPlaying,
-    wordIndex,
-    activeChapterIndex,
-    allBookPages,
-    theme: settings.general.theme,
-    settings,
-    wpm,
-  });
 
   // --- 3. EFFECTS ---
   React.useEffect(() => {
@@ -209,6 +194,16 @@ export default function ReaderClient() {
 
   return (
     <div className="h-screen overflow-hidden overscroll-none flex flex-col items-center justify-between relative transition-all duration-300">
+      <TelemetryTrackerWrapper
+        activeBookId={activeBookId}
+        bookTitle={activeBook?.title || ""}
+        mode={mode}
+        activeChapterIndex={activeChapterIndex}
+        allBookPages={allBookPages}
+        theme={settings.general.theme}
+        settings={settings}
+      />
+
       <MobileReaderNav onOpenSettings={openQuickSettings} />
 
       <main className="flex-1 flex flex-col items-center justify-between relative w-full h-[calc(100vh-80px)] md:h-screen p-6 pt-4 pb-8 overflow-hidden overscroll-none">
