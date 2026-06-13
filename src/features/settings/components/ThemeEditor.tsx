@@ -14,7 +14,7 @@ import { AdvancedCssTab } from "./ThemeEditor/AdvancedCssTab";
 import { ThemeEditorFooter } from "./ThemeEditor/ThemeEditorFooter";
 
 // Utilities
-import { DEFAULT_NEW_THEME, compressImage } from "./ThemeEditor/utils";
+import { DEFAULT_NEW_THEME, compressImage, deepCloneTheme } from "./ThemeEditor/utils";
 
 interface ThemeEditorProps {
   themeToEdit?: CustomTheme | null;
@@ -26,16 +26,16 @@ interface ThemeEditorProps {
 export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEditorProps) {
   const [activeTab, setActiveTab] = React.useState<"colors" | "components" | "background" | "advanced">("colors");
   const [themeState, setThemeState] = React.useState<CustomTheme>(() => {
-    if (themeToEdit) return { ...themeToEdit };
+    if (themeToEdit) return deepCloneTheme(themeToEdit);
     const randId = `theme-custom-${Date.now()}`;
     return DEFAULT_NEW_THEME(randId);
   });
   
   // Capture initial state for reset functionality
-  const [initialTheme] = React.useState({ ...themeState });
+  const [initialTheme] = React.useState(() => deepCloneTheme(themeState));
 
   // History management
-  const [history, setHistory] = React.useState<CustomTheme[]>([themeState]);
+  const [history, setHistory] = React.useState<CustomTheme[]>(() => [deepCloneTheme(themeState)]);
   const [historyIndex, setHistoryIndex] = React.useState(0);
   const isInternalUpdate = React.useRef(false);
 
@@ -50,7 +50,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
     if (isInternalUpdate.current) return;
     
     const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(newState);
+    newHistory.push(deepCloneTheme(newState));
     
     // Limit history size to 5 as requested
     if (newHistory.length > 5) {
@@ -66,7 +66,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
       isInternalUpdate.current = true;
       const prevIndex = historyIndex - 1;
       const prevState = history[prevIndex];
-      setThemeState(prevState);
+      setThemeState(deepCloneTheme(prevState));
       setHistoryIndex(prevIndex);
       setTimeout(() => { isInternalUpdate.current = false; }, 0);
     }
@@ -77,7 +77,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
       isInternalUpdate.current = true;
       const nextIndex = historyIndex + 1;
       const nextState = history[nextIndex];
-      setThemeState(nextState);
+      setThemeState(deepCloneTheme(nextState));
       setHistoryIndex(nextIndex);
       setTimeout(() => { isInternalUpdate.current = false; }, 0);
     }
@@ -194,7 +194,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
     if (!themeState.name.trim()) {
       themeState.name = "My custom theme";
     }
-    onSave(themeState);
+    onSave(deepCloneTheme(themeState));
   };
 
   const handleDelete = () => {

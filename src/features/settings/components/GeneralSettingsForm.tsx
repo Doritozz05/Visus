@@ -7,7 +7,7 @@ import { useSettings } from "@/features/settings/context/settings-context";
 import type { GeneralSettings, CustomTheme } from "@/core/entities/settings";
 import { ColorSelector } from "@/components/ui/ColorSelector";
 import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
-import { PRESETS_TEMPLATES } from "./ThemeEditor/utils";
+import { PRESETS_TEMPLATES, DEFAULT_NEW_THEME, deepCloneTheme } from "./ThemeEditor/utils";
 
 export function GeneralSettingsForm() {
   const router = useRouter();
@@ -44,7 +44,7 @@ export function GeneralSettingsForm() {
     if (e) e.stopPropagation();
     const newId = `theme-custom-${Date.now()}`;
     const newTheme = {
-      ...t,
+      ...deepCloneTheme(t),
       id: newId,
       name: `${t.name} (Copy)`
     };
@@ -68,27 +68,32 @@ export function GeneralSettingsForm() {
       items.push(
         {
           id: "activate",
-          label: "Establecer como activo",
+          label: "Set as active",
           icon: <Check className="w-4 h-4" />,
           onClick: () => updateGeneralSettings({ theme: t.id as any }),
           disabled: theme === t.id
         },
         {
           id: "duplicate",
-          label: "Duplicar para editar",
+          label: "Duplicate to edit",
           icon: <Copy className="w-4 h-4" />,
           onClick: () => {
-            const preset = PRESETS_TEMPLATES.find(p => p.name.toLowerCase().includes(t.name.toLowerCase().split(' ')[0].toLowerCase()));
+            const presetIdToTemplateName: Record<string, string> = {
+              "dark-violet": "Dark violet",
+              "light": "Light minimal",
+              "sepia": "Warm sepia",
+              "nord": "Nord arctic"
+            };
+            const templateName = presetIdToTemplateName[t.id];
+            const preset = PRESETS_TEMPLATES.find(p => p.name === templateName);
             if (preset) {
               const newId = `theme-custom-${Date.now()}`;
               const newTheme: CustomTheme = {
-                ...preset,
+                ...DEFAULT_NEW_THEME(newId),
+                ...deepCloneTheme(preset as any),
                 id: newId,
                 name: `${t.name} Custom`,
-                overrideSidebar: false,
-                overrideReader: false,
-                bgType: "solid",
-                cardBorder: (preset as any).cardBorder || preset.border
+                bgType: (preset as any).bgType || "solid",
               };
               updateGeneralSettings({
                 customThemes: [...customThemes, newTheme],
@@ -104,27 +109,27 @@ export function GeneralSettingsForm() {
       items.push(
         {
           id: "activate",
-          label: "Establecer como activo",
+          label: "Set as active",
           icon: <Check className="w-4 h-4" />,
           onClick: () => updateGeneralSettings({ theme: customT.id }),
           disabled: theme === customT.id
         },
         {
           id: "edit",
-          label: "Editar tema",
+          label: "Edit theme",
           icon: <Edit className="w-4 h-4" />,
           onClick: () => handleEditTheme(customT)
         },
         {
           id: "duplicate",
-          label: "Duplicar tema",
+          label: "Duplicate theme",
           icon: <Copy className="w-4 h-4" />,
           onClick: () => handleDuplicateTheme(customT)
         },
         { id: "divider-1", label: "", divider: true },
         {
           id: "delete",
-          label: "Eliminar tema",
+          label: "Delete theme",
           icon: <Trash2 className="w-4 h-4" />,
           tone: "danger",
           onClick: () => handleDeleteTheme(customT.id)
@@ -150,7 +155,7 @@ export function GeneralSettingsForm() {
           <div className="grid grid-cols-2 gap-2.5">
             {[
               { id: "dark-violet", name: "Dark Violet", desc: "Original Clinical Navy", preview: "bg-[#0b1326]" },
-              { id: "light", name: "Claro Paper", desc: "Warm Minimal Light", preview: "bg-[#f1f3f6]" },
+              { id: "light", name: "Light Paper", desc: "Warm Minimal Light", preview: "bg-[#f1f3f6]" },
               { id: "sepia", name: "Sepia Warm", desc: "Parchment Reading", preview: "bg-[#f4ecd8]" },
               { id: "nord", name: "Nord Arctic", desc: "Snowy Blue Cold", preview: "bg-[#2e3440]" },
             ].map((t) => (

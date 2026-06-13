@@ -91,10 +91,18 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--border", toHslString(customTheme.border));
       root.style.setProperty("--card", toHslString(customTheme.cardBackground));
       root.style.setProperty("--card-foreground", toHslString(customTheme.cardForeground));
+      root.style.setProperty("--popover", toHslString(customTheme.popover || customTheme.cardBackground));
+      root.style.setProperty("--popover-foreground", toHslString(customTheme.popoverForeground || customTheme.cardForeground));
       root.style.setProperty("--primary", toHslString(customTheme.accent));
       root.style.setProperty("--primary-foreground", toHslString(customTheme.accentForeground));
+      root.style.setProperty("--secondary", toHslString(customTheme.secondary || (customTheme.isDark ? "#1e293b" : "#f1f5f9")));
+      root.style.setProperty("--secondary-foreground", toHslString(customTheme.secondaryForeground || customTheme.foreground));
       root.style.setProperty("--muted", toHslString(customTheme.muted));
       root.style.setProperty("--muted-foreground", toHslString(customTheme.mutedForeground));
+      root.style.setProperty("--accent", toHslString(customTheme.uiAccent || customTheme.muted));
+      root.style.setProperty("--accent-foreground", toHslString(customTheme.uiAccentForeground || customTheme.accent));
+      root.style.setProperty("--input", toHslString(customTheme.input || customTheme.border));
+      root.style.setProperty("--ring", toHslString(customTheme.ring || customTheme.accent));
 
       // Sidebar overrides
       if (customTheme.overrideSidebar) {
@@ -141,7 +149,7 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
 
       // Background graphics engine
       if (customTheme.bgType === "image" && customTheme.bgImageUrl) {
-        root.style.setProperty("--bg-image", `url(${customTheme.bgImageUrl})`);
+        root.style.setProperty("--bg-image", `url("${customTheme.bgImageUrl}")`);
         root.style.setProperty("--bg-image-opacity", (customTheme.bgImageOpacity ?? 1).toString());
         root.style.setProperty("--bg-image-blur", `${customTheme.bgImageBlur ?? 0}px`);
         if (customTheme.bgImageOverlay) {
@@ -166,6 +174,7 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       body.setAttribute("data-accent", "custom");
       body.setAttribute("data-ui-font", customTheme.uiFont || uiFont);
       body.setAttribute("data-glass", customTheme.glassmorphism?.enabled ? "enabled" : "disabled");
+      body.setAttribute("data-bg-type", customTheme.bgType);
 
       if (customTheme.uiFont === "system-ui") {
         root.style.setProperty("--font-sans", "system-ui, -apple-system, sans-serif");
@@ -192,18 +201,22 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
 
       const propertiesToClear = [
         "--background", "--foreground", "--border", "--card", "--card-foreground",
-        "--primary", "--primary-foreground", "--muted", "--muted-foreground",
+        "--popover", "--popover-foreground", "--primary", "--primary-foreground",
+        "--secondary", "--secondary-foreground", "--muted", "--muted-foreground",
+        "--accent", "--accent-foreground", "--input", "--ring",
         "--sidebar-background", "--sidebar-foreground", "--sidebar-border", "--sidebar-active-background", "--sidebar-active-foreground",
         "--reader-background", "--reader-foreground", "--reader-border",
         "--radius", "--card-shadow", "--primary-shadow",
         "--glass-bg", "--glass-blur", "--glass-border",
-        "--bg-image", "--bg-image-opacity", "--bg-image-blur", "--bg-image-overlay"
+        "--bg-image", "--bg-image-opacity", "--bg-image-blur", "--bg-image-overlay",
+        "--font-sans"
       ];
       propertiesToClear.forEach((p) => root.style.removeProperty(p));
 
       body.setAttribute("data-accent", accentColor);
       body.setAttribute("data-ui-font", uiFont);
       body.setAttribute("data-glass", glassmorphism ? "enabled" : "disabled");
+      body.setAttribute("data-bg-type", "solid");
 
       try {
         const hex = resolveColor(accentColor);

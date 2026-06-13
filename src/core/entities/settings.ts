@@ -16,6 +16,16 @@ export interface CustomTheme {
   accent: string;
   accentForeground: string;
 
+  // Additional UI Colors
+  secondary?: string;
+  secondaryForeground?: string;
+  popover?: string;
+  popoverForeground?: string;
+  uiAccent?: string;
+  uiAccentForeground?: string;
+  input?: string;
+  ring?: string;
+
   // Panel & Card Override Styles
   cardBackground: string;
   cardForeground: string;

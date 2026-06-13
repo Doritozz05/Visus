@@ -48,7 +48,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const hideMobileNav = isReader || isThemeDesigner;
 
   return (
-    <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300">
+    <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300 main-layout-wrapper">
       <div className={`transition-all duration-300 ${hideSidebar ? 'w-0 overflow-hidden opacity-0 translate-x-[-100%]' : ''}`}>
         <Sidebar activePath={pathname} />
       </div>

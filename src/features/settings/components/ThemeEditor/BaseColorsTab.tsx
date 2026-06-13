@@ -27,11 +27,17 @@ export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseC
   const colorFields = [
     { label: "App background", key: "background" as const },
     { label: "Primary text", key: "foreground" as const },
+    { label: "Secondary background", key: "secondary" as const },
+    { label: "Secondary text", key: "secondaryForeground" as const },
+    { label: "Popover/Menu background", key: "popover" as const },
+    { label: "Popover/Menu text", key: "popoverForeground" as const },
     { label: "Card background", key: "cardBackground" as const },
     { label: "Card text", key: "cardForeground" as const },
     { label: "Borders & Lines", key: "border" as const },
-    { label: "Accent highlight", key: "accent" as const },
+    { label: "Accent highlight (brand)", key: "accent" as const },
     { label: "Accent button text", key: "accentForeground" as const },
+    { label: "UI Accent highlight", key: "uiAccent" as const },
+    { label: "UI Accent text", key: "uiAccentForeground" as const },
     { label: "Muted background", key: "muted" as const },
     { label: "Muted text", key: "mutedForeground" as const },
   ];
