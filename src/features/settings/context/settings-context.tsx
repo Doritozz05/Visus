@@ -30,11 +30,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           // Dynamic theme migration for legacy configurations in local development
           if (parsed.general && parsed.general.theme) {
             const t = parsed.general.theme;
-            if (t === "dark" || t === "midnight" || t === "sepia" || t === "nordic" || t === "forest" || t === "light") {
+            if (t === "dark" || t === "midnight" || t === "sepia" || t === "nordic" || t === "forest" || t === "light" || t === "matrix-green") {
               if (t === "dark" || t === "midnight") {
                 parsed.general.theme = "dark-violet";
-              } else if (t === "forest") {
-                parsed.general.theme = "matrix-green";
+              } else if (t === "forest" || t === "matrix-green") {
+                parsed.general.theme = "dark-violet";
               } else if (t === "light") {
                 parsed.general.theme = "light";
               } else {

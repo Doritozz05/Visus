@@ -6,6 +6,7 @@ import { LibraryProvider } from "@/features/library/context/library-context";
 import { AuthProvider } from "@/features/auth/context/auth-context";
 import { Toaster } from "sonner";
 import { ContextMenuProvider } from "@/components/ui/ContextMenu";
+import { hexToHsl, resolveColor } from "@/lib/color-utils";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
@@ -31,7 +32,7 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     root.classList.add(`theme-${theme}`);
 
     // Toggle classic Tailwind dark utilities
-    if (theme === "dark-violet" || theme === "matrix-green" || theme === "nord") {
+    if (theme === "dark-violet" || theme === "nord") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
@@ -41,6 +42,18 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     body.setAttribute("data-accent", accentColor);
     body.setAttribute("data-ui-font", uiFont);
     body.setAttribute("data-glass", glassmorphism ? "enabled" : "disabled");
+
+    // Dynamic HSL injection for all accent colors (presets and custom hexes)
+    try {
+      const hex = resolveColor(accentColor);
+      const { stringVal } = hexToHsl(hex);
+      root.style.setProperty("--primary", stringVal);
+      root.style.setProperty("--ring", stringVal);
+    } catch (err) {
+      console.warn("Failed to apply dynamic accent color:", err);
+      root.style.removeProperty("--primary");
+      root.style.removeProperty("--ring");
+    }
 
     // 3. Motion preferences
     if (reducedMotion) {

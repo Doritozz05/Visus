@@ -3,6 +3,7 @@ import { RsvpSettings } from "@/core/entities/settings";
 import { RSVPWord } from "@/core/entities/text";
 import { useReadingStore } from "../../stores/reading-store";
 import { SPEED_READER_FONT_CLASSES } from "../../utils/reader-fonts";
+import { hexToRgba } from "@/lib/color-utils";
 
 interface RsvpVisualBoxProps {
   rsvpSequence: RSVPWord[];
@@ -47,9 +48,25 @@ export function RsvpVisualBox({
   };
 
   const fontFamilyClass = SPEED_READER_FONT_CLASSES[settings.fontFamily as keyof typeof SPEED_READER_FONT_CLASSES] || SPEED_READER_FONT_CLASSES.inter;
-  const orpColorClass = orpColors[settings.orpColor as keyof typeof orpColors] || orpColors.orange;
-  const orpGlowClass = orpGlows[settings.orpColor as keyof typeof orpGlows] || orpGlows.orange;
-  const unmarkedColorClass = unmarkedColors[settings.unmarkedColor as keyof typeof unmarkedColors] || unmarkedColors.foreground;
+  
+  const isPreset = settings.orpColor in orpColors;
+  const orpColorClass = isPreset ? orpColors[settings.orpColor as keyof typeof orpColors] : "";
+  const orpGlowClass = isPreset && settings.orpGlow ? orpGlows[settings.orpColor as keyof typeof orpGlows] : "";
+  
+  const isUnmarkedPreset = settings.unmarkedColor in unmarkedColors;
+  const unmarkedColorClass = isUnmarkedPreset ? unmarkedColors[settings.unmarkedColor as keyof typeof unmarkedColors] : "";
+  
+  const customOrpStyle: React.CSSProperties = !isPreset ? {
+    color: settings.orpColor,
+    textShadow: settings.orpGlow
+      ? `0 0 12px ${hexToRgba(settings.orpColor, 0.55)}, 0 0 2px ${hexToRgba(settings.orpColor, 0.3)}`
+      : undefined
+  } : {};
+
+  const customUnmarkedStyle: React.CSSProperties = {
+    opacity: settings.unmarkedOpacity,
+    color: !isUnmarkedPreset ? settings.unmarkedColor : undefined,
+  };
   
   const fontSizeStyle: React.CSSProperties = {
     fontSize: `${settings.fontSize}px`,
@@ -75,7 +92,7 @@ export function RsvpVisualBox({
           className="absolute -translate-x-1/2 flex items-center justify-center h-full"
         >
           <div 
-            style={{ opacity: settings.unmarkedOpacity }}
+            style={customUnmarkedStyle}
             className={`absolute right-full pr-[0.08em] font-bold text-right whitespace-nowrap select-none pointer-events-none transition-opacity duration-350 ${unmarkedColorClass}`}
           >
             {leftPart}
@@ -83,16 +100,15 @@ export function RsvpVisualBox({
           
           <div className="relative flex items-center justify-center z-10">
             <span 
-              className={`font-extrabold text-center relative transition-colors duration-200 ${orpColorClass} ${
-                settings.orpGlow ? orpGlowClass : ""
-              }`}
+              style={customOrpStyle}
+              className={`font-extrabold text-center relative transition-colors duration-200 ${orpColorClass} ${orpGlowClass}`}
             >
               {focusLetter}
             </span>
           </div>
           
           <div 
-            style={{ opacity: settings.unmarkedOpacity }}
+            style={customUnmarkedStyle}
             className={`absolute left-full pl-[0.08em] font-bold text-left whitespace-nowrap select-none pointer-events-none transition-opacity duration-350 ${unmarkedColorClass}`}
           >
             {rightPart}

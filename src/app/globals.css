@@ -95,26 +95,6 @@ html.theme-dark-violet {
   --ring: 239 100% 88%;
 }
 
-html.theme-matrix-green {
-  --background: 240 10% 0%; /* OLED pure black */
-  --foreground: 142 70% 80%; /* soft green text */
-  --card: 150 40% 6%; /* deep green slate */
-  --card-foreground: 142 70% 85%;
-  --popover: 150 40% 6%;
-  --popover-foreground: 142 70% 85%;
-  --primary: 142 71% 45%; /* glowing emerald/mint green */
-  --primary-foreground: 240 10% 0%;
-  --secondary: 150 30% 12%;
-  --secondary-foreground: 142 70% 85%;
-  --muted: 150 30% 12%;
-  --muted-foreground: 142 30% 60%;
-  --accent: 150 30% 12%;
-  --accent-foreground: 142 71% 45%;
-  --border: 150 30% 16%;
-  --input: 150 30% 16%;
-  --ring: 142 71% 45%;
-}
-
 html.theme-sepia {
   --background: 42 54% 90%; /* warm parchment */
   --foreground: 26 26% 28%; /* deep coffee text */

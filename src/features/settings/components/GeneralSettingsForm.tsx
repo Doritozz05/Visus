@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Palette, CheckCircle, Check, Settings2 } from "lucide-react";
+import { Palette, CheckCircle, Settings2 } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
 import type { GeneralSettings } from "@/core/entities/settings";
+import { ColorSelector } from "@/components/ui/ColorSelector";
 
 export function GeneralSettingsForm() {
   const { settings, updateGeneralSettings } = useSettings();
@@ -36,7 +37,6 @@ export function GeneralSettingsForm() {
               { id: "light", name: "Claro Paper", desc: "Warm Minimal Light", preview: "bg-[#f1f3f6]" },
               { id: "sepia", name: "Sepia Warm", desc: "Parchment Reading", preview: "bg-[#f4ecd8]" },
               { id: "nord", name: "Nord Arctic", desc: "Snowy Blue Cold", preview: "bg-[#2e3440]" },
-              { id: "matrix-green", name: "Matrix OLED", desc: "Pure Black & Neon Green", preview: "bg-[#000000]" },
             ].map((t) => (
               <button
                 key={t.id}
@@ -61,28 +61,11 @@ export function GeneralSettingsForm() {
 
         {/* Accent Highlight Color Selection */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Accent tint color</label>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { id: "indigo", color: "bg-indigo-500" },
-              { id: "violet", color: "bg-violet-500" },
-              { id: "emerald", color: "bg-emerald-500" },
-              { id: "amber", color: "bg-amber-500" },
-              { id: "rose", color: "bg-rose-500" },
-              { id: "blue", color: "bg-blue-500" },
-            ].map((c) => (
-              <button
-                key={c.id}
-                onClick={() => updateGeneralSettings({ accentColor: c.id as GeneralSettings["accentColor"] })}
-                className={`w-7 h-7 rounded-full ${c.color} border-2 flex items-center justify-center transition-all ${accentColor === c.id ? "border-foreground scale-110 shadow-md" : "border-transparent hover:scale-105"
-                  }`}
-              >
-                {accentColor === c.id && (
-                  <Check className="text-white h-3.5 w-3.5 stroke-[3]" />
-                )}
-              </button>
-            ))}
-          </div>
+          <ColorSelector
+            label="Accent tint color"
+            value={accentColor}
+            onChange={(color) => updateGeneralSettings({ accentColor: color })}
+          />
         </div>
 
         {/* UI Typography */}

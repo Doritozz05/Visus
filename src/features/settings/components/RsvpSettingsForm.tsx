@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Zap } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
+import { ColorSelector } from "@/components/ui/ColorSelector";
 
 export function RsvpSettingsForm() {
   const { settings, updateRsvpSettings } = useSettings();
@@ -63,29 +64,11 @@ export function RsvpSettingsForm() {
 
         {/* Focus Point Colors */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Optimal recognition point (ORP) color</label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {[
-              { id: "orange", name: "Classic Orange", css: "bg-orange-400" },
-              { id: "amber", name: "Liquid Amber", css: "bg-amber-400" },
-              { id: "emerald", name: "Mint Emerald", css: "bg-emerald-400" },
-              { id: "violet", name: "Neon Violet", css: "bg-violet-400" },
-              { id: "indigo", name: "Cobalt Indigo", css: "bg-indigo-400" },
-              { id: "rose", name: "Luminous Rose", css: "bg-rose-400" },
-            ].map((oc) => (
-              <button
-                key={oc.id}
-                onClick={() => updateRsvpSettings({ orpColor: oc.id as any })}
-                className={`p-2 border rounded flex items-center justify-center gap-1.5 transition-all text-[10px] ${rsvp.orpColor === oc.id
-                    ? "border-primary bg-accent/40 text-primary font-semibold"
-                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                  }`}
-              >
-                <span className={`w-3 h-3 rounded-full ${oc.css} border border-border/20 inline-block`}></span>
-                <span className="capitalize text-[10px]">{oc.id}</span>
-              </button>
-            ))}
-          </div>
+          <ColorSelector
+            label="Optimal recognition point (ORP) color"
+            value={rsvp.orpColor}
+            onChange={(color) => updateRsvpSettings({ orpColor: color })}
+          />
         </div>
 
         {/* Toggle glowing ORP */}
@@ -136,27 +119,25 @@ export function RsvpSettingsForm() {
 
         {/* Unmarked Letter Color */}
         <div className="py-3 border-t border-border/10 transition-all duration-300">
-          <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold mb-3">Unmarked text color</label>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: "foreground", name: "Standard", desc: "Solid contrast" },
-              { id: "primary", name: "Accent", desc: "Brand theme" },
-              { id: "muted", name: "Dimmed", desc: "Subtle blend" },
-            ].map((col) => (
-              <button
-                key={col.id}
-                type="button"
-                onClick={() => updateRsvpSettings({ unmarkedColor: col.id as any })}
-                className={`p-2 border rounded text-center transition-all ${rsvp.unmarkedColor === col.id
-                    ? "border-primary bg-accent/40 text-primary font-bold"
-                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                  }`}
-              >
-                <span className="block text-[10px] font-semibold">{col.name}</span>
-                <span className="block text-[7px] opacity-60 font-mono tracking-wider">{col.desc}</span>
-              </button>
-            ))}
-          </div>
+          <ColorSelector
+            label="Unmarked text color"
+            value={rsvp.unmarkedColor}
+            onChange={(color) => updateRsvpSettings({ unmarkedColor: color })}
+            presets={[
+              { id: "foreground", hex: "var(--foreground)", name: "Standard" },
+              { id: "primary", hex: "var(--primary)", name: "Accent" },
+              { id: "muted", hex: "var(--muted-foreground)", name: "Dimmed" },
+              { id: "violet", hex: "#8b5cf6", name: "Violet" },
+              { id: "indigo", hex: "#6366f1", name: "Indigo" },
+              { id: "emerald", hex: "#10b981", name: "Emerald" },
+              { id: "amber", hex: "#f59e0b", name: "Amber" },
+              { id: "rose", hex: "#f43f5e", name: "Rose" },
+              { id: "blue", hex: "#3b82f6", name: "Blue" },
+              { id: "orange", hex: "#f97316", name: "Orange" },
+              { id: "periwinkle", hex: "#c0c1ff", name: "Periwinkle" },
+              { id: "white", hex: "#ffffff", name: "White" },
+            ]}
+          />
         </div>
 
       </div>

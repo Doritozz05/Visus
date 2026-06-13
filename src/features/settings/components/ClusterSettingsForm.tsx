@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { Columns } from "lucide-react";
+import { ColorSelector } from "@/components/ui/ColorSelector";
 
 export function ClusterSettingsForm() {
   const { settings, updateClusterSettings } = useSettings();
@@ -88,30 +89,12 @@ export function ClusterSettingsForm() {
 
         {/* Active Highlight Color Selection */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Active cluster color</label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {[
-              { id: "white", css: "bg-foreground" },
-              { id: "indigo", css: "bg-indigo-500" },
-              { id: "violet", css: "bg-violet-500" },
-              { id: "emerald", css: "bg-emerald-500" },
-              { id: "amber", css: "bg-amber-500" },
-              { id: "rose", css: "bg-rose-500" },
-              { id: "blue", css: "bg-blue-500" },
-            ].map((col) => (
-              <button
-                key={col.id}
-                onClick={() => updateClusterSettings({ activeColor: col.id as any })}
-                className={`p-1.5 border rounded flex items-center justify-center gap-1 transition-all text-[10px] capitalize ${cluster.activeColor === col.id
-                  ? "border-primary bg-accent/40 text-primary font-bold"
-                  : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                  }`}
-              >
-                <span className={`w-2.5 h-2.5 rounded-full ${col.css} inline-block border border-border/20`}></span>
-                {col.id}
-              </button>
-            ))}
-          </div>
+          <ColorSelector
+            label="Active cluster color"
+            value={cluster.activeColor}
+            onChange={(color) => updateClusterSettings({ activeColor: color })}
+            showWhitePreset={true}
+          />
         </div>
 
         {/* Inactive Line settings */}

@@ -3,6 +3,7 @@ import { DynamicCluster } from "@/core/algorithms/clusters";
 import { ClusterSettings } from "@/core/entities/settings";
 import { useReadingStore } from "../../stores/reading-store";
 import { SPEED_READER_FONT_CLASSES } from "../../utils/reader-fonts";
+import { hexToRgba } from "@/lib/color-utils";
 
 interface ClusterVisualBoxProps {
   clusterChunks: string[] | DynamicCluster[];
@@ -104,7 +105,8 @@ export function ClusterVisualBox({
     paddingBottom: `${140 - settings.fontSize / 2}px`,
   };
 
-  const activeColorClass = activeColors[settings.activeColor as keyof typeof activeColors] || activeColors.white;
+  const isPreset = settings.activeColor in activeColors;
+  const activeColorClass = isPreset ? activeColors[settings.activeColor as keyof typeof activeColors] : "";
   const fontFamilyClass = SPEED_READER_FONT_CLASSES[settings.fontFamily as keyof typeof SPEED_READER_FONT_CLASSES] || SPEED_READER_FONT_CLASSES.inter;
 
   const visibleChunks = React.useMemo(() => {
@@ -156,17 +158,52 @@ export function ClusterVisualBox({
           };
 
           let highlightClass = "";
+          let highlightStyle: React.CSSProperties = isActive ? activeStyle : {};
+
           if (isActive) {
             if (settings.highlightStyle === "spotlight") {
-              highlightClass = `${activeColorClass} ${glows[settings.glowEffect as keyof typeof glows] || ""}`;
+              const glowClass = isPreset ? (glows[settings.glowEffect as keyof typeof glows] || "") : "";
+              highlightClass = `${activeColorClass} ${glowClass}`;
+              if (!isPreset) {
+                highlightStyle = {
+                  ...highlightStyle,
+                  color: settings.activeColor,
+                  textShadow: settings.glowEffect !== "none"
+                    ? `0 0 12px ${hexToRgba(settings.activeColor, 0.55)}, 0 0 2px ${hexToRgba(settings.activeColor, 0.3)}`
+                    : undefined
+                };
+              }
             } else if (settings.highlightStyle === "capsule") {
               highlightClass = `${activeColorClass} bg-primary/10 px-2 py-0.5 rounded border border-primary/20 shadow-[0_0_15px_rgba(var(--primary),0.15)]`;
+              if (!isPreset) {
+                highlightStyle = {
+                  ...highlightStyle,
+                  color: settings.activeColor,
+                  backgroundColor: hexToRgba(settings.activeColor, 0.1),
+                  borderColor: hexToRgba(settings.activeColor, 0.2),
+                  borderWidth: "1px",
+                  borderStyle: "solid"
+                };
+              }
             } else if (settings.highlightStyle === "underline") {
               highlightClass = `${activeColorClass} border-b-2 border-primary px-0.5`;
+              if (!isPreset) {
+                highlightStyle = {
+                  ...highlightStyle,
+                  color: settings.activeColor,
+                  borderBottom: `2px solid ${settings.activeColor}`
+                };
+              }
             } else if (settings.highlightStyle === "bold-only") {
               highlightClass = "text-foreground font-extrabold";
             } else if (settings.highlightStyle === "color-only") {
               highlightClass = activeColorClass;
+              if (!isPreset) {
+                highlightStyle = {
+                  ...highlightStyle,
+                  color: settings.activeColor
+                };
+              }
             }
           } else {
             if (settings.highlightStyle === "capsule") {
@@ -184,7 +221,7 @@ export function ClusterVisualBox({
             <React.Fragment key={chunk.absoluteIndex}>
               <span
                 data-active={isActive}
-                style={isActive ? activeStyle : inactiveStyle}
+                style={isActive ? highlightStyle : inactiveStyle}
                 className={`inline-block whitespace-nowrap transition-all duration-150 ease-out mx-0.5 ${highlightClass}`}
               >
                 {chunk.text}

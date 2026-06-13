@@ -1,6 +1,6 @@
 export interface GeneralSettings {
-  theme: "dark-violet" | "light" | "matrix-green" | "sepia" | "nord";
-  accentColor: "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue";
+  theme: "dark-violet" | "light" | "sepia" | "nord";
+  accentColor: string; // "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue" or custom hex
   uiFont: "inter" | "roboto" | "outfit";
   glassmorphism: boolean;
   reducedMotion: boolean;
@@ -12,26 +12,27 @@ export interface GeneralSettings {
   readerWordsPerPage: number;  // Target words per page
   telemetryPreference: "cloud" | "anonymous" | "disabled";
   yearlyReadingGoal: number;   // Yearly reading target in books
+  savedColors?: string[];      // Custom saved color palette (hex codes)
 }
 
 export interface RsvpSettings {
   fontSize: number; // in px
   fontFamily: "inter" | "atkinson" | "dyslexic";
-  orpColor: "amber" | "orange" | "emerald" | "violet" | "indigo" | "rose";
+  orpColor: string; // "amber" | "orange" | "emerald" | "violet" | "indigo" | "rose" or custom hex
   orpGlow: boolean;
   showFocusGuides: boolean;
   unmarkedOpacity: number;
-  unmarkedColor: "foreground" | "primary" | "muted";
+  unmarkedColor: string; // "foreground" | "primary" | "muted" or custom color
 }
 
 export interface ClusterSettings {
   fontSize: number; // in px
   fontFamily: "inter" | "atkinson" | "dyslexic";
   highlightStyle: "spotlight" | "capsule" | "underline" | "bold-only" | "color-only";
-  activeColor: "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue" | "white";
+  activeColor: string; // "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue" | "white" or custom hex
   inactiveOpacity: number;
   blurAmount: string;
-  glowEffect: "indigo" | "amber" | "green" | "none";
+  glowEffect: string; // "indigo" | "amber" | "green" | "none" or custom hex / custom on/off
   algorithm: "dynamic" | "static-2" | "static-3";
 }
 
@@ -56,6 +57,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
     readerWordsPerPage: 300,
     telemetryPreference: "cloud",
     yearlyReadingGoal: 15,
+    savedColors: [],
   },
   rsvp: {
     fontSize: 48,
