@@ -20,6 +20,7 @@ import { Day1500Milestone } from "./Day1500Milestone";
 import { Day2000Milestone } from "./Day2000Milestone";
 import { Day3000Milestone } from "./Day3000Milestone";
 import { Day5000Milestone } from "./Day5000Milestone";
+import { Day7000Milestone } from "./Day7000Milestone";
 import { Day9999Milestone } from "./Day9999Milestone";
 
 export * from "./types";
@@ -44,6 +45,7 @@ export * from "./Day1500Milestone";
 export * from "./Day2000Milestone";
 export * from "./Day3000Milestone";
 export * from "./Day5000Milestone";
+export * from "./Day7000Milestone";
 export * from "./Day9999Milestone";
 
 export const STREAK_MILESTONES: StreakMilestone[] = [
@@ -68,6 +70,7 @@ export const STREAK_MILESTONES: StreakMilestone[] = [
   Day2000Milestone,
   Day3000Milestone,
   Day5000Milestone,
+  Day7000Milestone,
   Day9999Milestone,
 ];
 
