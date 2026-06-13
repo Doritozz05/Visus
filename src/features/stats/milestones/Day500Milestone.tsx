@@ -4,7 +4,7 @@ import { StreakMilestone } from "./types";
 
 export const Day500Milestone: StreakMilestone = {
   id: "day500",
-  isMatch: (s) => s >= 500,
+  isMatch: (s) => s >= 500 && s < 600,
   canvasWidth: 308,
   canvasHeight: 280,
   gap: 20,

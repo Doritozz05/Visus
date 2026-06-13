@@ -13,6 +13,14 @@ import { Day250Milestone } from "./Day250Milestone";
 import { Day300Milestone } from "./Day300Milestone";
 import { Day365Milestone } from "./Day365Milestone";
 import { Day500Milestone } from "./Day500Milestone";
+import { Day600Milestone } from "./Day600Milestone";
+import { Day730Milestone } from "./Day730Milestone";
+import { Day1000Milestone } from "./Day1000Milestone";
+import { Day1500Milestone } from "./Day1500Milestone";
+import { Day2000Milestone } from "./Day2000Milestone";
+import { Day3000Milestone } from "./Day3000Milestone";
+import { Day5000Milestone } from "./Day5000Milestone";
+import { Day9999Milestone } from "./Day9999Milestone";
 
 export * from "./types";
 export * from "./Day0Milestone";
@@ -29,6 +37,14 @@ export * from "./Day250Milestone";
 export * from "./Day300Milestone";
 export * from "./Day365Milestone";
 export * from "./Day500Milestone";
+export * from "./Day600Milestone";
+export * from "./Day730Milestone";
+export * from "./Day1000Milestone";
+export * from "./Day1500Milestone";
+export * from "./Day2000Milestone";
+export * from "./Day3000Milestone";
+export * from "./Day5000Milestone";
+export * from "./Day9999Milestone";
 
 export const STREAK_MILESTONES: StreakMilestone[] = [
   Day0Milestone,
@@ -45,6 +61,14 @@ export const STREAK_MILESTONES: StreakMilestone[] = [
   Day300Milestone,
   Day365Milestone,
   Day500Milestone,
+  Day600Milestone,
+  Day730Milestone,
+  Day1000Milestone,
+  Day1500Milestone,
+  Day2000Milestone,
+  Day3000Milestone,
+  Day5000Milestone,
+  Day9999Milestone,
 ];
 
 export const getMilestone = (streak: number): StreakMilestone => {

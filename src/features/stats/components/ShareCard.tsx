@@ -246,7 +246,7 @@ export function ShareCard({ summary }: ShareCardProps) {
             Test streak milestones
           </span>
           <div className="grid grid-cols-7 gap-1">
-            {[0, 1, 5, 15, 30, 50, 75, 100, 150, 200, 250, 300, 365, 500].map((val) => (
+            {[0, 1, 5, 15, 30, 50, 75, 100, 150, 200, 250, 300, 365, 500, 600, 730, 1000, 1500, 2000, 3000, 5000, 9999].map((val) => (
               <button
                 key={val}
                 onClick={() => setOverrideStreak(val)}
