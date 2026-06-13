@@ -22,7 +22,7 @@ import { useBookIngestion } from "@/features/reader/hooks/useBookIngestion";
 import { useReaderPlayback } from "@/features/reader/hooks/useReaderPlayback";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
-import { useTelemetryTracker } from "@/features/reader/hooks/useTelemetryTracker";
+import { TelemetryTrackerWrapper } from "@/features/reader/components/TelemetryTrackerWrapper";
 import { READER_FONT_CLASSES } from "@/features/reader/utils/reader-fonts";
 import { Quiz } from "@/core/algorithms/quiz-generator";
 import { toast } from "sonner";
@@ -134,24 +134,6 @@ export default function ReaderClient() {
     settings,
     wordsPerPage,
     isLoadingContent: isActuallyLoading,
-  });
-
-  // --- 2.1 TELEMETRY TRACKING ---
-  const wordIndex = useReadingStore((state) => state.wordIndex);
-  const isPlaying = useReadingStore((state) => state.isPlaying);
-  const wpm = useReadingStore((state) => state.wpm);
-
-  useTelemetryTracker({
-    activeBookId,
-    bookTitle: activeBook?.title || "",
-    mode,
-    isPlaying,
-    wordIndex,
-    activeChapterIndex,
-    allBookPages,
-    theme: settings.general.theme,
-    settings,
-    wpm,
   });
 
   // --- 3. EFFECTS ---
@@ -339,6 +321,13 @@ export default function ReaderClient() {
         stats={sessionStats}
         onNavigateToLibrary={() => router.push("/library")}
         onNavigateToDashboard={() => router.push("/dashboard")}
+      />
+
+      <TelemetryTrackerWrapper
+        activeBookId={activeBookId}
+        bookTitle={activeBook?.title || ""}
+        allBookPages={allBookPages}
+        settings={settings}
       />
     </div>
   );
