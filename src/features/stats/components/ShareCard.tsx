@@ -245,18 +245,18 @@ export function ShareCard({ summary }: ShareCardProps) {
           <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest block font-bold">
             Test streak milestones
           </span>
-          <div className="grid grid-cols-4 gap-1.5">
-            {[0, 1, 5, 15].map((val) => (
+          <div className="grid grid-cols-7 gap-1">
+            {[0, 1, 5, 15, 30, 50, 75, 100, 150, 200, 250, 300, 365, 500].map((val) => (
               <button
                 key={val}
                 onClick={() => setOverrideStreak(val)}
-                className={`py-1 rounded font-mono text-[9px] font-bold border transition-all ${
+                className={`py-1 rounded font-mono text-[8px] font-bold border transition-all ${
                   overrideStreak === val
                     ? "bg-primary text-primary-foreground border-primary shadow-[0_0_10px_rgba(var(--primary),0.2)]"
                     : "bg-background border-border/30 hover:bg-accent text-muted-foreground"
                 }`}
               >
-                Day {val}
+                D{val}
               </button>
             ))}
           </div>
