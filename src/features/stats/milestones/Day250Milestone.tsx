@@ -190,12 +190,12 @@ export const Day250Milestone: StreakMilestone = {
 
     // Wings
     ctx.strokeStyle = "#4f46e5"; ctx.lineWidth = 9; ctx.lineCap = "round";
-    ctx.beginPath(); ctx.moveTo(ox + 15, oy + 55); ctx.quadraticCurveTo(ox + 25, oy + 65, ox + 35, oy + 62); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(ox + 85, oy + 55); ctx.quadraticCurveTo(ox + 75, oy + 65, ox + 65, oy + 62); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox + 15, oy + 55); ctx.quadraticCurveTo(ox + 25, oy + 55, ox + 35, oy + 52); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox + 85, oy + 55); ctx.quadraticCurveTo(ox + 75, oy + 55, ox + 65, oy + 52); ctx.stroke();
 
     // Flask
     ctx.save();
-    ctx.translate(ox + 50, oy + 68);
+    ctx.translate(ox + 50, oy + 58);
     
     // Liquid
     ctx.fillStyle = "#22c55e";
@@ -220,10 +220,10 @@ export const Day250Milestone: StreakMilestone = {
 
     // Smoke
     ctx.strokeStyle = "#4ade80"; ctx.lineWidth = 4; ctx.lineCap = "round"; ctx.globalAlpha = 0.6;
-    ctx.beginPath(); ctx.moveTo(ox + 48, oy + 45); ctx.quadraticCurveTo(ox + 40, oy + 35, ox + 45, oy + 25); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox + 48, oy + 35); ctx.quadraticCurveTo(ox + 40, oy + 25, ox + 45, oy + 15); ctx.stroke();
     
     ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 3; ctx.globalAlpha = 0.5;
-    ctx.beginPath(); ctx.moveTo(ox + 52, oy + 48); ctx.quadraticCurveTo(ox + 60, oy + 35, ox + 55, oy + 20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox + 52, oy + 38); ctx.quadraticCurveTo(ox + 60, oy + 25, ox + 55, oy + 10); ctx.stroke();
     
     ctx.globalAlpha = 1.0;
     ctx.restore();
