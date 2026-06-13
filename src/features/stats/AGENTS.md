@@ -11,6 +11,7 @@ Achievements evaluation, stats export, local data compression, and custom SVG vi
 # Work Guidance
 - Avoid importing external charting libraries; write pure SVG components with built-in responsiveness.
 - Use Framer Motion for premium micro-animations in gamification and hover tooltips.
+- The social card (`ShareCard`) includes Visi the mascot, rendered via SVG (for live preview animations) and Canvas paths (for downloadable card consistency) across streak milestones (Day 0, 1, 5, 15).
 
 # Verification
 - Run Vitest suites for stats compression and achievement triggers: `npx vitest run`.

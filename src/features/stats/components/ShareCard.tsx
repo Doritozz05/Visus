@@ -7,7 +7,30 @@
 
 import * as React from "react";
 import { LibraryStatsSummary } from "@/core/entities/stats";
-import { Share2, Download, MessageSquarePlus, MessageCircle, Smartphone, Flame } from "lucide-react";
+import { Share2, Download, MessageSquarePlus, MessageCircle, Smartphone } from "lucide-react";
+import { getMilestone } from "../milestones";
+
+// Helper for safe canvas rounded rect drawing
+const drawRoundRect = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number
+) => {
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, w, h, r);
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+};
 
 interface ShareCardProps {
   summary: LibraryStatsSummary;
@@ -15,6 +38,9 @@ interface ShareCardProps {
 
 export function ShareCard({ summary }: ShareCardProps) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const [overrideStreak, setOverrideStreak] = React.useState<number | null>(null);
+
+  const displayedStreak = overrideStreak !== null ? overrideStreak : (summary.currentStreakDays || 0);
 
   const getThemeColor = (cssVarName: string, fallback: string): string => {
     if (typeof window === "undefined") return fallback;
@@ -47,11 +73,7 @@ export function ShareCard({ summary }: ShareCardProps) {
     ctx.strokeStyle = getThemeColor("--border", "rgba(255, 255, 255, 0.1)");
     ctx.lineWidth = 2;
     ctx.beginPath();
-    if (ctx.roundRect) {
-      ctx.roundRect(16, 16, w - 32, h - 32, 12);
-    } else {
-      ctx.rect(16, 16, w - 32, h - 32);
-    }
+    drawRoundRect(ctx, 16, 16, w - 32, h - 32, 12);
     ctx.stroke();
 
     // 3. Top left: VISUS // READING TELEMETRY
@@ -63,54 +85,31 @@ export function ShareCard({ summary }: ShareCardProps) {
     }
     ctx.fillText("VISUS // READING TELEMETRY", 40, 60);
 
-    // 4. Centerpiece: Streak Number and Flame side-by-side
+    // 4. Centerpiece: Streak Number and Flame / Mascot side-by-side
     ctx.font = "bold 96px sans-serif";
     if ("letterSpacing" in ctx) {
       (ctx as any).letterSpacing = "0px";
     }
-    const streakStr = String(summary.currentStreakDays || 0);
+
+    const streakStr = String(displayedStreak);
     const numWidth = ctx.measureText(streakStr).width;
-    const fw = 80; // Flame width
-    const fh = 90; // Flame height
-    const gap = 20;
-    const totalW = numWidth + gap + fw;
-    
-    const startX = 400 - totalW / 2;
     const centerY = 220; // vertical center of elements
+
+    const milestone = getMilestone(displayedStreak);
     
     // Draw Streak Number
+    const totalW = numWidth + (milestone.canvasWidth > 0 ? milestone.gap + milestone.canvasWidth : 0);
+    const startX = 400 - totalW / 2;
     ctx.fillStyle = getThemeColor("--foreground", "#ffffff");
     ctx.textAlign = "left";
-    ctx.fillText(streakStr, startX, centerY + 35); // Baseline at centerY + 35
+    ctx.fillText(streakStr, startX, centerY + 35);
 
-    // Draw Flame at startX + numWidth + gap using the exact Lucide Flame SVG path
-    const fx = startX + numWidth + gap;
-    const fy = centerY - 45; // Top at centerY - 45
-    
-    ctx.save();
-    ctx.translate(fx, fy);
-    ctx.scale(fw / 24, fh / 24);
-    
-    const flamePath = new Path2D(
-      "M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-    );
-    
-    // Add professional glow
-    ctx.shadowColor = "rgba(249, 115, 22, 0.4)";
-    ctx.shadowBlur = 25;
-    
-    // Fill path with transparent orange
-    ctx.fillStyle = "rgba(249, 115, 22, 0.15)";
-    ctx.fill(flamePath);
-    
-    // Stroke path with orange stroke
-    ctx.strokeStyle = "#f97316";
-    ctx.lineWidth = 2; // scaled with the context
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.stroke(flamePath);
-    
-    ctx.restore();
+    // Draw Milestone canvas graphics if applicable
+    if (milestone.canvasWidth > 0) {
+      const mx = startX + numWidth + milestone.gap;
+      const my = centerY - 45;
+      milestone.drawCanvas(ctx, mx, my, displayedStreak);
+    }
 
     // Centerpiece: Streak Label
     ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.5)");
@@ -119,7 +118,7 @@ export function ShareCard({ summary }: ShareCardProps) {
     if ("letterSpacing" in ctx) {
       (ctx as any).letterSpacing = "6px";
     }
-    const lblStr = (summary.currentStreakDays || 0) === 1 ? "DAY STREAK" : "DAYS STREAK";
+    const lblStr = displayedStreak === 1 ? "DAY STREAK" : "DAYS STREAK";
     ctx.fillText(lblStr, 400, centerY + 85);
 
     // 6. Bottom Left: WPM Metric
@@ -160,7 +159,7 @@ export function ShareCard({ summary }: ShareCardProps) {
     const canvas = drawCanvas();
     if (!canvas) return;
 
-    const text = `I'm reading at ${summary.averageWpm || 0} WPM with a ${summary.currentStreakDays || 0}-day streak on Visus! 🚀📚`;
+    const text = `I'm reading at ${summary.averageWpm || 0} WPM with a ${displayedStreak}-day streak on Visus! 🚀📚`;
 
     // Try Web Share API with image if supported
     if (navigator.share && navigator.canShare) {
@@ -170,14 +169,14 @@ export function ShareCard({ summary }: ShareCardProps) {
         try {
           if (navigator.canShare({ files: [file] })) {
             await navigator.share({
-              title: 'Visus Reading Stats',
+              title: "Visus reading stats",
               text,
               files: [file]
             });
             return;
           } else {
             // Fallback to text only share
-            await navigator.share({ title: 'Visus', text });
+            await navigator.share({ title: "Visus", text });
           }
         } catch (err) {
           console.warn("[ShareCard] Native share failed/cancelled:", err);
@@ -206,20 +205,22 @@ export function ShareCard({ summary }: ShareCardProps) {
   };
 
   const shareToX = () => {
-    const text = `I'm reading at ${summary.averageWpm || 0} WPM with a ${summary.currentStreakDays || 0}-day streak on Visus! 🚀📚`;
+    const text = `I'm reading at ${summary.averageWpm || 0} WPM with a ${displayedStreak}-day streak on Visus! 🚀📚`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   const shareToWhatsApp = () => {
-    const text = `I'm reading at ${summary.averageWpm || 0} WPM with a ${summary.currentStreakDays || 0}-day streak on Visus! 🚀📚`;
+    const text = `I'm reading at ${summary.averageWpm || 0} WPM with a ${displayedStreak}-day streak on Visus! 🚀📚`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
+
+  const milestone = getMilestone(displayedStreak);
 
   return (
     <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md liquid-glass">
       <div className="w-full border-b border-border/10 pb-2 mb-4 flex justify-between items-center">
         <div>
-          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Social Card</h3>
+          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Social card</h3>
           <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Share your milestones with your social network</p>
         </div>
         <Share2 className="w-4 h-4 text-primary shrink-0" />
@@ -236,14 +237,14 @@ export function ShareCard({ summary }: ShareCardProps) {
             <span className="text-[8px] font-mono text-muted-foreground tracking-wider uppercase">VISUS // READING TELEMETRY</span>
           </div>
 
-          {/* Centerpiece: Streak with professional orange fire */}
+          {/* Centerpiece: Streak with professional orange fire / Mascot */}
           <div className="flex flex-col items-center justify-center my-auto">
             <div className="flex items-center justify-center gap-2">
-              <span className="text-4xl font-extrabold text-foreground leading-none">{summary.currentStreakDays}</span>
-              <Flame className="w-8 h-8 text-orange-500 fill-orange-500/10 drop-shadow-[0_0_8px_rgba(249,115,22,0.4)] animate-pulse shrink-0" />
+              <span className="text-4xl font-extrabold text-foreground leading-none">{displayedStreak}</span>
+              {milestone.renderPreview(displayedStreak)}
             </div>
             <span className="text-[7px] font-mono text-muted-foreground uppercase tracking-widest mt-1.5">
-              {summary.currentStreakDays === 1 ? 'Day Streak' : 'Days Streak'}
+              {displayedStreak === 1 ? "Day streak" : "Days streak"}
             </span>
           </div>
 
@@ -255,7 +256,7 @@ export function ShareCard({ summary }: ShareCardProps) {
                 <span className="text-lg font-extrabold text-foreground leading-none">{summary.averageWpm}</span>
                 <span className="text-[8px] font-bold text-primary">WPM</span>
               </div>
-              <span className="text-[6px] font-mono text-muted-foreground uppercase tracking-wider">Average Speed</span>
+              <span className="text-[6px] font-mono text-muted-foreground uppercase tracking-wider">Average speed</span>
             </div>
 
             {/* Tagline */}
@@ -263,6 +264,36 @@ export function ShareCard({ summary }: ShareCardProps) {
               Perfect speed &amp; comprehension.
             </div>
           </div>
+        </div>
+
+        {/* Temporary testing milestone toolbar */}
+        <div className="w-full bg-accent/40 border border-border/20 rounded-lg p-2.5 flex flex-col gap-2 mt-1">
+          <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest block font-bold">
+            Test streak milestones
+          </span>
+          <div className="grid grid-cols-4 gap-1.5">
+            {[0, 1, 5, 15].map((val) => (
+              <button
+                key={val}
+                onClick={() => setOverrideStreak(val)}
+                className={`py-1 rounded font-mono text-[9px] font-bold border transition-all ${
+                  overrideStreak === val
+                    ? "bg-primary text-primary-foreground border-primary shadow-[0_0_10px_rgba(var(--primary),0.2)]"
+                    : "bg-background border-border/30 hover:bg-accent text-muted-foreground"
+                }`}
+              >
+                Day {val}
+              </button>
+            ))}
+          </div>
+          {overrideStreak !== null && (
+            <button
+              onClick={() => setOverrideStreak(null)}
+              className="w-full py-1 bg-background border border-destructive/20 hover:border-destructive/40 text-destructive text-[8px] font-mono uppercase font-bold rounded transition-all"
+            >
+              Reset to actual streak ({summary.currentStreakDays || 0})
+            </button>
+          )}
         </div>
 
         {/* Hidden Canvas for High-Res Generation */}
@@ -302,7 +333,7 @@ export function ShareCard({ summary }: ShareCardProps) {
           <button
             onClick={downloadImage}
             className="px-3 bg-card border border-border/40 hover:bg-accent rounded text-foreground transition-all flex items-center justify-center"
-            title="Download Image"
+            title="Download image"
           >
             <Download className="w-3.5 h-3.5" />
           </button>
