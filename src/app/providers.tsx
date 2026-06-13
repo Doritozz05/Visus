@@ -5,6 +5,7 @@ import { SettingsProvider, useSettings } from "@/features/settings/context/setti
 import { LibraryProvider } from "@/features/library/context/library-context";
 import { AuthProvider } from "@/features/auth/context/auth-context";
 import { Toaster } from "sonner";
+import { ContextMenuProvider } from "@/components/ui/ContextMenu";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
@@ -103,16 +104,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <AuthProvider>
       <SettingsProvider>
         <LibraryProvider>
-          <ThemeProviderHelper>
-            {children}
-            <Toaster 
-              position="bottom-right" 
-              richColors 
-              closeButton 
-              expand={true}
-              visibleToasts={5}
-            />
-          </ThemeProviderHelper>
+          <ContextMenuProvider>
+            <ThemeProviderHelper>
+              {children}
+              <Toaster 
+                position="bottom-right" 
+                richColors 
+                closeButton 
+                expand={true}
+                visibleToasts={5}
+              />
+            </ThemeProviderHelper>
+          </ContextMenuProvider>
         </LibraryProvider>
       </SettingsProvider>
     </AuthProvider>
