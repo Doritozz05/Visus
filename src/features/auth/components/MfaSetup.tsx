@@ -143,7 +143,7 @@ export function MfaSetup() {
         )}
         
         {!showPasswordConfirm ? (
-          <div className="glass-panel p-5 rounded-2xl border border-border/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="liquid-glass p-5 rounded-2xl border border-border/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +167,7 @@ export function MfaSetup() {
             </button>
           </div>
         ) : (
-          <div className="glass-panel p-6 rounded-2xl border border-destructive/30 bg-destructive/5 space-y-4 animate-in fade-in slide-in-from-bottom-2">
+          <div className="liquid-glass p-6 rounded-2xl border border-destructive/30 bg-destructive/5 space-y-4 animate-in fade-in slide-in-from-bottom-2">
             <h4 className="text-sm font-bold text-foreground">Confirm Password to Disable MFA</h4>
             <p className="text-xs text-muted-foreground">
               This is a sensitive action. Please enter your password to confirm.
@@ -235,7 +235,7 @@ export function MfaSetup() {
       )}
 
       {qrCodeData && (
-        <div className="glass-panel p-6 rounded-2xl border border-border/50 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="liquid-glass p-6 rounded-2xl border border-border/50 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-4">
               <div className="space-y-2">

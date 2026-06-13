@@ -61,7 +61,7 @@ export function BookCard({
 
   return (
     <div
-      className="bg-card border border-border/20 rounded-xl p-5 flex flex-col relative hover:border-primary/50 transition-all shadow-md glass-panel min-h-[200px]"
+      className="bg-card border border-border/20 rounded-xl p-5 flex flex-col relative hover:border-primary/50 transition-all shadow-md liquid-glass min-h-[200px]"
     >
       {/* Option Actions Row */}
       <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-20">

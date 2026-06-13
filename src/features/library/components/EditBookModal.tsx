@@ -55,7 +55,7 @@ export function EditBookModal({
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-[4px] transition-opacity"
       />
-      <div className="w-full max-w-md bg-card border border-border/30 rounded-2xl p-6 shadow-2xl relative z-10 glass-panel overflow-hidden animate-scale-up">
+      <div className="w-full max-w-md bg-card border border-border/30 rounded-2xl p-6 shadow-2xl relative z-10 liquid-glass overflow-hidden animate-scale-up">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
         
         {/* Header */}

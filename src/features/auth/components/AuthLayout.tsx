@@ -46,7 +46,7 @@ export function AuthLayout({ children, title, subtitle, showBackButton = true }:
           )}
         </div>
 
-        <div className="glass-panel rounded-2xl p-6 sm:p-8 shadow-2xl">
+        <div className="liquid-glass rounded-2xl p-6 sm:p-8 shadow-2xl">
           {children}
         </div>
       </div>

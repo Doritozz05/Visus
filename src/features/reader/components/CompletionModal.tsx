@@ -35,7 +35,7 @@ export function CompletionModal({
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity"
       />
-      <div className="w-full max-w-lg bg-card border border-border/30 rounded-2xl p-8 shadow-2xl relative z-10 glass-panel overflow-hidden animate-scale-up text-center flex flex-col items-center">
+      <div className="w-full max-w-lg bg-card border border-border/30 rounded-2xl p-8 shadow-2xl relative z-10 liquid-glass overflow-hidden animate-scale-up text-center flex flex-col items-center">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent opacity-50"></div>
         
         {/* Glowing Trophy Badge */}

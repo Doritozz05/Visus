@@ -166,21 +166,21 @@ body[data-accent="blue"] {
    CUSTOM UI UTILITIES & ANIMATIONS
    ========================================================================== */
 
-.glass-panel {
+.liquid-glass {
   background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   transition: background 0.3s ease, border 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 }
 
-.dark .glass-panel {
+.dark .liquid-glass {
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Toggle glassmorphism off if user disables it for performance */
-body[data-glass="disabled"] .glass-panel {
+body[data-glass="disabled"] .liquid-glass {
   background: hsl(var(--card));
   backdrop-filter: none;
   border: 1px solid hsl(var(--border));

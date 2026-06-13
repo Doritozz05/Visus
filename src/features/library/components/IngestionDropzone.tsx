@@ -22,7 +22,7 @@ export function IngestionDropzone({
   triggerFileBrowser,
 }: IngestionDropzoneProps) {
   return (
-    <div className="bg-card border border-border/20 rounded-xl p-6 flex flex-col flex-1 relative overflow-hidden group shadow-xl glass-panel min-h-[340px] lg:min-h-[400px]">
+    <div className="bg-card border border-border/20 rounded-xl p-6 flex flex-col flex-1 relative overflow-hidden group shadow-xl liquid-glass min-h-[340px] lg:min-h-[400px]">
       <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent opacity-50"></div>
       <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 relative z-10">Ingestion</h2>
       

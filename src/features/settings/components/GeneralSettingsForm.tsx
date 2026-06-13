@@ -21,7 +21,7 @@ export function GeneralSettingsForm() {
   return (
     <div className="space-y-6">
       {/* Visual Themes Module */}
-      <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
+      <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md liquid-glass">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <Palette className="text-primary h-5 w-5" />
           <h3 className="text-sm font-bold font-heading text-foreground">Themes</h3>
@@ -109,7 +109,7 @@ export function GeneralSettingsForm() {
       </div>
 
       {/* Behavioral & Advanced Configuration */}
-      <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
+      <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md liquid-glass">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <Settings2 className="text-primary h-5 w-5" />
           <h3 className="text-sm font-bold font-heading text-foreground">General features</h3>
@@ -121,8 +121,8 @@ export function GeneralSettingsForm() {
           {/* Glassmorphism */}
           <div className="flex items-center justify-between py-1">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Frosted glass panels</label>
-              <p className="text-[9px] text-muted-foreground mt-0.5">Enables premium frosted glass styles. Disable on slow hardware.</p>
+              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Liquid glass</label>
+              <p className="text-[9px] text-muted-foreground mt-0.5">Enables premium Apple-style glass effects. Disable on slow hardware.</p>
             </div>
             <button
               onClick={() => updateGeneralSettings({ glassmorphism: !glassmorphism })}

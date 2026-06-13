@@ -165,7 +165,7 @@ export function ShareCard({ summary }: ShareCardProps) {
   };
 
   return (
-    <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md glass-panel">
+    <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md liquid-glass">
       <div className="w-full border-b border-border/10 pb-2 mb-4 flex justify-between items-center">
         <div>
           <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Social Card</h3>

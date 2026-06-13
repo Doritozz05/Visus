@@ -61,7 +61,7 @@ export function AlertCard({
 
   return (
     <div className={cn(
-      "max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl glass-panel flex flex-col items-center justify-center gap-6",
+      "max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl liquid-glass flex flex-col items-center justify-center gap-6",
       styles.border,
       className
     )}>

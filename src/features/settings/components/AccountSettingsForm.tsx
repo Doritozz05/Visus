@@ -44,7 +44,7 @@ export function AccountSettingsForm() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Profile Card */}
-        <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel relative overflow-hidden flex flex-col h-full">
+        <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass relative overflow-hidden flex flex-col h-full">
           <div className="absolute right-0 top-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-12 translate-x-12 blur-2xl pointer-events-none" />
           
           <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
@@ -103,7 +103,7 @@ export function AccountSettingsForm() {
         </section>
 
         {/* Cloud Sync Card */}
-        <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel flex flex-col h-full">
+        <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass flex flex-col h-full">
           <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
             <RefreshCw className="text-primary h-5 w-5" />
             <h3 className="text-lg font-bold font-heading text-foreground">Storage Sync</h3>
@@ -162,7 +162,7 @@ export function AccountSettingsForm() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* MFA Section */}
-            <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel relative overflow-hidden md:col-span-2">
+            <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass relative overflow-hidden md:col-span-2">
               <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
                 <ShieldCheck className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-bold font-heading">Two-Factor Authentication</h3>
@@ -171,7 +171,7 @@ export function AccountSettingsForm() {
             </section>
 
             {/* Email Management */}
-            <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel">
+            <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass">
               <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
                 <Mail className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-bold font-heading">Email Address</h3>
@@ -180,7 +180,7 @@ export function AccountSettingsForm() {
             </section>
 
             {/* Password Management */}
-            <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel">
+            <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass">
               <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
                 <Lock className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-bold font-heading">Password</h3>

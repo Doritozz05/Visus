@@ -11,7 +11,7 @@ export function RsvpSettingsForm() {
   return (
     <div className="space-y-6">
       {/* RSVP Layout Controls */}
-      <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md glass-panel">
+      <div className="bg-card/50 border border-border/20 rounded-xl p-6 shadow-md liquid-glass">
         <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
           <Zap className="text-primary h-5 w-5 animate-pulse" />
           <h3 className="text-sm font-bold font-heading text-foreground">RSVP settings</h3>

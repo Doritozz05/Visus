@@ -23,7 +23,7 @@ export function ChapterCompletionCard({
   }, [completedChapter, onTakeQuiz]);
 
   return (
-    <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl glass-panel relative overflow-hidden flex flex-col items-center justify-center gap-6 transition-all duration-300">
+    <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl liquid-glass relative overflow-hidden flex flex-col items-center justify-center gap-6 transition-all duration-300">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
       
       <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-bounce relative z-10">

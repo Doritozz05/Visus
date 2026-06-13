@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function PrivacyPolicy() {
   return (
     <main className="flex min-h-screen flex-col items-center p-6 bg-background text-foreground selection:bg-primary/30 transition-all duration-300">
-      <div className="max-w-3xl w-full space-y-8 glass-panel p-8 md:p-12 rounded-2xl shadow-2xl relative overflow-hidden my-12">
+      <div className="max-w-3xl w-full space-y-8 liquid-glass p-8 md:p-12 rounded-2xl shadow-2xl relative overflow-hidden my-12">
         {/* Decorative backdrop elements */}
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />

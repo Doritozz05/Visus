@@ -63,7 +63,7 @@ export function RadarChart({ logs, books }: RadarChartProps) {
 
   if (!metrics) {
     return (
-      <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md glass-panel overflow-hidden">
+      <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md liquid-glass overflow-hidden">
         <div className="w-full border-b border-border/10 pb-2 mb-3">
           <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Reader Profile</h3>
           <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Balanced view of your skills</p>
@@ -109,7 +109,7 @@ export function RadarChart({ logs, books }: RadarChartProps) {
   }).join(" ");
 
   return (
-    <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col items-center justify-between h-full relative group hover:border-primary/40 transition-all shadow-md glass-panel">
+    <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col items-center justify-between h-full relative group hover:border-primary/40 transition-all shadow-md liquid-glass">
       <div className="w-full border-b border-border/10 pb-2 mb-3">
         <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Reader Profile</h3>
         <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Balanced view of your skills</p>

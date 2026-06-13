@@ -273,7 +273,7 @@ export default function LibraryDashboard() {
               {/* Combined Info Panel (Compact) */}
               <div className="flex flex-col gap-4">
                 {/* Cloud Storage Slots */}
-                <div className="bg-card rounded-xl border border-border/20 p-4 shadow-lg glass-panel relative overflow-hidden group shrink-0">
+                <div className="bg-card rounded-xl border border-border/20 p-4 shadow-lg liquid-glass relative overflow-hidden group shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
                   <div className="flex justify-between items-center mb-2 relative z-10">
                     <h2 className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Cloud Storage</h2>
@@ -288,7 +288,7 @@ export default function LibraryDashboard() {
                 </div>
 
                 {/* Dynamic Reading Stats (Compact) */}
-                <div className="bg-card rounded-xl border border-border/20 p-4 shadow-lg glass-panel relative overflow-hidden group shrink-0">
+                <div className="bg-card rounded-xl border border-border/20 p-4 shadow-lg liquid-glass relative overflow-hidden group shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
                   <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none">
                     <BookOpen className="w-16 h-16 text-foreground" />
@@ -349,7 +349,7 @@ export default function LibraryDashboard() {
             <div className="lg:col-span-8 flex flex-col gap-6">
               
               {/* Search, Filter Tabs & Add Button */}
-              <div className="flex flex-col sm:flex-row gap-4 items-center bg-card rounded-xl border border-border/20 p-2 shadow-xl glass-panel">
+              <div className="flex flex-col sm:flex-row gap-4 items-center bg-card rounded-xl border border-border/20 p-2 shadow-xl liquid-glass">
                 <div className="flex-1 flex items-center px-4 gap-2 w-full">
                   <Search className="text-muted-foreground w-4 h-4" />
                   <input 

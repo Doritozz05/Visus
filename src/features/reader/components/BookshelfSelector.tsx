@@ -31,7 +31,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
                 <div
                   key={book.id}
                   onClick={() => setActiveBookId(book.id)}
-                  className="bg-card border border-border/20 hover:border-primary/50 transition-all rounded-xl p-5 flex flex-col justify-between shadow-md cursor-pointer group glass-panel min-h-[190px]"
+                  className="bg-card border border-border/20 hover:border-primary/50 transition-all rounded-xl p-5 flex flex-col justify-between shadow-md cursor-pointer group liquid-glass min-h-[190px]"
                 >
                   <div className="flex gap-3.5 items-start">
                     <div className="w-12 h-16 rounded-lg border border-border/30 overflow-hidden shrink-0 relative shadow-inner bg-background">
@@ -59,7 +59,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
               ))}
             </div>
           ) : (
-            <div className="max-w-md mx-auto w-full border border-dashed border-border/30 rounded-2xl bg-card/40 glass-panel p-10 md:p-12 text-center min-h-[320px] flex flex-col items-center justify-center gap-5">
+            <div className="max-w-md mx-auto w-full border border-dashed border-border/30 rounded-2xl bg-card/40 liquid-glass p-10 md:p-12 text-center min-h-[320px] flex flex-col items-center justify-center gap-5">
               <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                 <BookOpen className="h-8 w-8" />
               </div>

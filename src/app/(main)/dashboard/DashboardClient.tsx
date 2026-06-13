@@ -143,7 +143,7 @@ export default function DashboardClient() {
       {/* Top Row: Core Metrics (Horizontal) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Card A: WPM */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between min-h-[140px]">
+          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <Gauge className="w-14 h-14 text-foreground" />
             </div>
@@ -161,7 +161,7 @@ export default function DashboardClient() {
           </div>
 
           {/* Card B: Racha */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between min-h-[140px]">
+          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
               <Flame className="w-14 h-14 text-foreground" />
             </div>
@@ -184,7 +184,7 @@ export default function DashboardClient() {
           </div>
 
           {/* Card C: Comprensión */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between min-h-[140px]">
+          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <Brain className="w-14 h-14 text-foreground" />
             </div>
@@ -203,7 +203,7 @@ export default function DashboardClient() {
           </div>
 
           {/* Card D: Books Read Progress */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md glass-panel flex flex-col justify-between min-h-[140px]">
+          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none">
               <BookOpen className="w-14 h-14 text-foreground" />
             </div>
@@ -308,7 +308,7 @@ export default function DashboardClient() {
         </div>
 
         {/* Box 9: Session Log Table & Export Actions */}
-        <div className="md:col-span-2 bg-card border border-border/20 rounded-xl p-5 shadow-md glass-panel flex flex-col justify-between">
+        <div className="md:col-span-2 bg-card border border-border/20 rounded-xl p-5 shadow-md liquid-glass flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between gap-2 mb-4 border-b border-border/20 pb-4">
               <div className="flex items-center gap-2">

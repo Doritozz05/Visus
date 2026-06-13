@@ -43,7 +43,7 @@ export function AccountSettingsClient() {
       <div className="space-y-8 pb-24">
         
         {/* Profile Overview */}
-        <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel flex flex-col md:flex-row gap-6 items-center">
+        <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass flex flex-col md:flex-row gap-6 items-center">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden shrink-0">
             {user?.avatarUrl ? (
               <Image
@@ -76,7 +76,7 @@ export function AccountSettingsClient() {
         <div className="grid grid-cols-1 gap-8">
           
           {/* Identity Management Section */}
-          <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel">
+          <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass">
             <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
               <Fingerprint className="text-primary h-5 w-5" />
               <h3 className="text-lg font-bold font-heading">Login Methods</h3>
@@ -85,7 +85,7 @@ export function AccountSettingsClient() {
           </section>
 
           {/* MFA Section */}
-          <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel relative overflow-hidden">
+          <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass relative overflow-hidden">
             <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
               <ShieldCheck className="text-primary h-5 w-5" />
               <h3 className="text-lg font-bold font-heading">Security (MFA)</h3>
@@ -94,7 +94,7 @@ export function AccountSettingsClient() {
           </section>
 
           {/* Email Management */}
-          <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel">
+          <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass">
             <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
               <Mail className="text-primary h-5 w-5" />
               <h3 className="text-lg font-bold font-heading">Email Address</h3>
@@ -103,7 +103,7 @@ export function AccountSettingsClient() {
           </section>
 
           {/* Password Management */}
-          <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md glass-panel">
+          <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass">
             <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
               <Lock className="text-primary h-5 w-5" />
               <h3 className="text-lg font-bold font-heading">Password</h3>
