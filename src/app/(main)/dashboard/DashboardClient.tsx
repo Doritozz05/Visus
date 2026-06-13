@@ -38,7 +38,7 @@ export default function DashboardClient() {
   const [logs, setLogs] = React.useState<ReadingSessionLog[]>([]);
   const [summary, setSummary] = React.useState<LibraryStatsSummary>({
     totalBooksRead: 0,
-    averageWpm: 450,
+    averageWpm: 0,
     currentStreakDays: 0,
     completionRatePercent: 0,
     totalReadingTimeMinutes: 0

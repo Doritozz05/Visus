@@ -36,7 +36,7 @@ export default function LibraryDashboard() {
   const { yearlyReadingGoal } = settings.general;
 
   const [summary, setSummary] = React.useState({
-    currentStreakDays: 12,
+    currentStreakDays: 0,
   });
 
   const userInitial = user?.email?.charAt(0).toUpperCase() || "V";
