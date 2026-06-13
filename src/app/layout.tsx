@@ -51,6 +51,26 @@ export const metadata: Metadata = {
   verification: {
     google: 'kQS_aofbtHE0ifRmQCFFVqQrcntk7oF-A2l6RVbk_eA',
   },
+  openGraph: {
+    type: "website",
+    siteName: "Visus",
+    title: "Visus - Advanced Speed Reading Platform",
+    description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Visus - Advanced Speed Reading Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Visus - Advanced Speed Reading Platform",
+    description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
+    images: ["/twitter-image"],
+  },
 };
 
 export default function RootLayout({
