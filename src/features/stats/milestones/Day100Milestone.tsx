@@ -56,9 +56,9 @@ export const Day100Milestone: StreakMilestone = {
         <circle cx="37" cy="42" r="5" fill="#1e1b4b" />
         <circle cx="63" cy="42" r="5" fill="#1e1b4b" />
         
-        {/* Confident Eyelids (lowered slightly from top) */}
-        <path d="M25,30 Q37,42 49,30 Z" fill="#4f46e5" />
-        <path d="M51,30 Q63,42 75,30 Z" fill="#4f46e5" />
+        {/* Confident Eyelids (extended upwards to prevent white pixel bleed) */}
+        <path d="M22,25 Q37,42 52,25 Z" fill="#4f46e5" />
+        <path d="M48,25 Q63,42 78,25 Z" fill="#4f46e5" />
 
         {/* Highlights */}
         <circle cx="39" cy="40" r="1.5" fill="#ffffff" />
@@ -151,8 +151,8 @@ export const Day100Milestone: StreakMilestone = {
 
     // Confident Eyelids
     ctx.fillStyle = "#4f46e5";
-    ctx.beginPath(); ctx.moveTo(ox+25, oy+30); ctx.quadraticCurveTo(ox+37, oy+42, ox+49, oy+30); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(ox+51, oy+30); ctx.quadraticCurveTo(ox+63, oy+42, ox+75, oy+30); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox+22, oy+25); ctx.quadraticCurveTo(ox+37, oy+42, ox+52, oy+25); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox+48, oy+25); ctx.quadraticCurveTo(ox+63, oy+42, ox+78, oy+25); ctx.fill();
 
     // Pupils
     ctx.fillStyle = "#1e1b4b";
