@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { BookOpen, Library, Upload } from "lucide-react";
+import { Library, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { VisiMascot } from "@/components/ui/VisiMascot";
 
 interface EmptyLibraryStateProps {
   localFileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -29,8 +30,8 @@ export function EmptyLibraryState({
 
       <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl liquid-glass relative overflow-hidden flex flex-col items-center justify-center gap-6">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
-        <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-pulse relative z-10">
-          <BookOpen className="h-8 w-8" />
+        <div className="relative z-10 flex flex-col items-center justify-center">
+          <VisiMascot variant="empty" size={100} className="-mb-2" />
         </div>
 
         <div className="relative z-10">

@@ -20,7 +20,7 @@ export function BookDetailsModal({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/70 backdrop-blur-[6px] transition-opacity duration-300"
+        className="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity duration-300"
       />
       <div className="w-full max-w-2xl bg-card border border-border/30 rounded-2xl shadow-2xl relative z-10 liquid-glass overflow-hidden animate-scale-up flex flex-col md:flex-row min-h-[420px] max-h-[90vh]">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none"></div>

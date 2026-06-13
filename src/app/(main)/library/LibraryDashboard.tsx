@@ -22,6 +22,7 @@ import { AddBookModal } from "@/features/library/components/AddBookModal";
 import { EditBookModal } from "@/features/library/components/EditBookModal";
 import { BookDetailsModal } from "@/features/library/components/BookDetailsModal";
 import { BookCard } from "@/features/library/components/BookCard";
+import { VisiMascot } from "@/components/ui/VisiMascot";
 
 // Extracted Hooks
 import { useBookIngestion } from "@/features/library/hooks/useBookIngestion";
@@ -493,7 +494,7 @@ export default function LibraryDashboard() {
                 <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pr-1 pb-48">
                   {filteredBooks.length === 0 ? (
                     <div className="border border-dashed border-border/40 rounded-xl flex flex-col items-center justify-center p-12 text-center bg-card/10 h-full min-h-[300px]">
-                      <Library className="w-10 h-10 text-muted-foreground/60 mb-3" />
+                      <VisiMascot variant="empty" size={90} className="mb-2" />
                       <p className="text-sm font-semibold text-muted-foreground">No books found</p>
                       <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs leading-relaxed">
                         Try adjusting your search criteria, switching tabs, or uploading a new file in the ingestion area.

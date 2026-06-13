@@ -154,7 +154,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
   };
 
   return (
-    <div className="bg-card border border-border/20 p-5 rounded-xl h-full flex flex-col justify-between group hover:border-primary/40 transition-all shadow-md liquid-glass">
+    <div className="bg-card border border-border/20 p-5 rounded-lg h-full flex flex-col justify-between group hover:border-primary/40 transition-all shadow-md liquid-glass">
       <div className="w-full border-b border-border/10 pb-2 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground font-bold">
@@ -303,7 +303,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
             onClick={() => setSelectedMascot(null)}
             className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity animate-in fade-in duration-300"
           />
-          <div className="w-full max-w-sm bg-card border border-border/30 rounded-2xl p-6 shadow-2xl relative z-10 liquid-glass overflow-hidden animate-in zoom-in-95 duration-300 text-center flex flex-col items-center">
+          <div className="w-full max-w-sm bg-card border border-border/30 rounded-[calc(var(--radius)*1.3)] p-6 shadow-2xl relative z-10 liquid-glass overflow-hidden animate-in zoom-in-95 duration-300 text-center flex flex-col items-center">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent opacity-50"></div>
             
             {/* Mascot Preview inside modal */}
