@@ -28,7 +28,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
       <div className="p-4 border border-border/30 bg-accent/5 rounded-2xl">
         <div className="flex items-center justify-between mb-2 pb-2 border-b border-border/20">
           <div className="flex flex-col">
-            <span className="text-xs font-bold">Decoupled Sidebar Styles</span>
+            <span className="text-xs font-bold">Decoupled sidebar styles</span>
             <span className="text-[9px] text-muted-foreground">Override background and text colors specifically for the sidebar panel</span>
           </div>
           <input
@@ -46,7 +46,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-scale-up">
             {/* Sidebar background */}
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Sidebar Background</span>
+              <span className="text-[11px] font-bold">Sidebar background</span>
               <input
                 type="color"
                 value={resolveColor(themeState.sidebarBackground || themeState.cardBackground)}
@@ -56,7 +56,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
             </div>
             {/* Sidebar foreground */}
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Sidebar Text Color</span>
+              <span className="text-[11px] font-bold">Sidebar text color</span>
               <input
                 type="color"
                 value={resolveColor(themeState.sidebarForeground || themeState.cardForeground)}
@@ -66,7 +66,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
             </div>
             {/* Sidebar Border */}
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Sidebar Line Border</span>
+              <span className="text-[11px] font-bold">Sidebar line border</span>
               <input
                 type="color"
                 value={resolveColor(themeState.sidebarBorder || themeState.border)}
@@ -76,7 +76,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
             </div>
             {/* Sidebar Active Background */}
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Active Item Tag Background</span>
+              <span className="text-[11px] font-bold">Active item tag background</span>
               <input
                 type="color"
                 value={resolveColor(themeState.sidebarActiveBackground || themeState.accent)}
@@ -86,7 +86,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
             </div>
             {/* Sidebar Active Foreground */}
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Active Item Text Color</span>
+              <span className="text-[11px] font-bold">Active item text color</span>
               <input
                 type="color"
                 value={resolveColor(themeState.sidebarActiveForeground || themeState.accentForeground)}
@@ -102,7 +102,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
       <div className="p-4 border border-border/30 bg-accent/5 rounded-2xl">
         <div className="flex items-center justify-between mb-2 pb-2 border-b border-border/20">
           <div className="flex flex-col">
-            <span className="text-xs font-bold">Decoupled Reader Room Styles</span>
+            <span className="text-xs font-bold">Decoupled reader room styles</span>
             <span className="text-[9px] text-muted-foreground">Apply custom parchment/screen backgrounds specifically inside the reading canvas</span>
           </div>
           <input
@@ -120,7 +120,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-scale-up">
             {/* Reader background */}
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Reading Page Background</span>
+              <span className="text-[11px] font-bold">Reading page background</span>
               <input
                 type="color"
                 value={resolveColor(themeState.readerBackground || themeState.background)}
@@ -130,7 +130,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
             </div>
             {/* Reader foreground */}
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Reading Text Color</span>
+              <span className="text-[11px] font-bold">Reading text color</span>
               <input
                 type="color"
                 value={resolveColor(themeState.readerForeground || themeState.foreground)}
@@ -140,7 +140,7 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
             </div>
             {/* Reader border */}
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Reading Canvas Border</span>
+              <span className="text-[11px] font-bold">Reading canvas border</span>
               <input
                 type="color"
                 value={resolveColor(themeState.readerBorder || themeState.border)}

@@ -24,15 +24,15 @@ export function BaseColorsTab({ themeState, setThemeState }: BaseColorsTabProps)
   };
 
   const colorFields = [
-    { label: "App Background", key: "background" as const },
-    { label: "Primary Text", key: "foreground" as const },
-    { label: "Card Background", key: "cardBackground" as const },
-    { label: "Card Text", key: "cardForeground" as const },
+    { label: "App background", key: "background" as const },
+    { label: "Primary text", key: "foreground" as const },
+    { label: "Card background", key: "cardBackground" as const },
+    { label: "Card text", key: "cardForeground" as const },
     { label: "Borders & Lines", key: "border" as const },
-    { label: "Accent Highlight", key: "accent" as const },
-    { label: "Accent Button Text", key: "accentForeground" as const },
-    { label: "Muted Background", key: "muted" as const },
-    { label: "Muted Text", key: "mutedForeground" as const },
+    { label: "Accent highlight", key: "accent" as const },
+    { label: "Accent button text", key: "accentForeground" as const },
+    { label: "Muted background", key: "muted" as const },
+    { label: "Muted text", key: "mutedForeground" as const },
   ];
 
   return (
@@ -49,14 +49,14 @@ export function BaseColorsTab({ themeState, setThemeState }: BaseColorsTabProps)
             onClick={() => setThemeState((prev) => ({ ...prev, isDark: false }))}
             className={`flex-1 py-2 rounded-xl border text-[11px] font-bold transition-all ${!themeState.isDark ? "border-primary bg-primary/10 text-primary" : "border-border/30 bg-card/40 hover:border-border/60"}`}
           >
-            ☀️ Light-mode Base
+            Light-mode
           </button>
           <button
             type="button"
             onClick={() => setThemeState((prev) => ({ ...prev, isDark: true }))}
             className={`flex-1 py-2 rounded-xl border text-[11px] font-bold transition-all ${themeState.isDark ? "border-primary bg-primary/10 text-primary" : "border-border/30 bg-card/40 hover:border-border/60"}`}
           >
-            🌙 Dark-mode Base
+            Dark-mode
           </button>
         </div>
         <p className="text-[9px] text-muted-foreground mt-1.5 leading-normal">
@@ -66,7 +66,7 @@ export function BaseColorsTab({ themeState, setThemeState }: BaseColorsTabProps)
 
       {/* Base Colors Grid */}
       <div>
-        <h3 className="text-xs font-bold font-heading mb-3 pb-1.5 border-b border-border/30">Base Colors</h3>
+        <h3 className="text-xs font-bold font-heading mb-3 pb-1.5 border-b border-border/30">Base colors</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {colorFields.map((field) => {
             const hexVal = themeState[field.key] as string;
@@ -87,28 +87,28 @@ export function BaseColorsTab({ themeState, setThemeState }: BaseColorsTabProps)
           })}
         </div>
         <p className="text-[9px] text-muted-foreground mt-2 leading-normal">
-          <strong>Muted Colors:</strong> Used for badges, tags, subtle card backgrounds, helper texts, metadata, and placeholder elements throughout the library and shelves.
+          <strong>Muted colors:</strong> Used for badges, tags, subtle card backgrounds, helper texts, metadata, and placeholder elements throughout the library and shelves.
         </p>
       </div>
 
       {/* Fonts */}
       <div>
-        <h3 className="text-xs font-bold font-heading mb-3 pb-1.5 border-b border-border/30">System Typography</h3>
+        <h3 className="text-xs font-bold font-heading mb-3 pb-1.5 border-b border-border/30">System typography</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">User Interface UI font</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">User interface UI font</label>
             <FancyDropdown
               ariaLabel="System UI font family"
               value={themeState.uiFont || ""}
-              placeholder="Default (Inherit Settings)"
+              placeholder="Default (inherit settings)"
               menuZIndex={150}
               onChange={handleFontChange}
               options={[
-                { value: "", label: "Default (Inherit Settings)", description: "Inherits the global configuration font" },
+                { value: "", label: "Default (inherit settings)", description: "Inherits the global configuration font" },
                 { value: "inter", label: "Inter", description: "Sleek and clean neo-grotesque sans-serif" },
                 { value: "outfit", label: "Outfit", description: "Modern, warm geometric design" },
                 { value: "roboto", label: "Hanken Grotesk", description: "Sophisticated grotesque typeface" },
-                { value: "system-ui", label: "System Default", description: "Default operating system font stack" },
+                { value: "system-ui", label: "System default", description: "Default operating system font stack" },
               ]}
             />
           </div>

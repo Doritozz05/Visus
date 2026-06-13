@@ -46,10 +46,10 @@ export function BackgroundEffectsTab({
       {/* Gradient Config */}
       {themeState.bgType === "gradient" && (
         <div className="space-y-4 border border-border/30 p-4 bg-accent/5 rounded-2xl animate-scale-up">
-          <span className="block text-xs font-bold mb-2">Configure Gradient</span>
+          <span className="block text-xs font-bold mb-2">Configure gradient</span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Start Gradient Color</span>
+              <span className="text-[11px] font-bold">Start gradient color</span>
               <input
                 type="color"
                 value={themeState.bgGradientStart || "#ffffff"}
@@ -58,7 +58,7 @@ export function BackgroundEffectsTab({
               />
             </div>
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">End Gradient Color</span>
+              <span className="text-[11px] font-bold">End gradient color</span>
               <input
                 type="color"
                 value={themeState.bgGradientEnd || "#eaeaea"}
@@ -69,7 +69,7 @@ export function BackgroundEffectsTab({
           </div>
           <div>
             <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5">
-              <span>Gradient Angle</span>
+              <span>Gradient angle</span>
               <span>{themeState.bgGradientAngle ?? 135}°</span>
             </div>
             <input
@@ -87,11 +87,11 @@ export function BackgroundEffectsTab({
       {/* Image Config */}
       {themeState.bgType === "image" && (
         <div className="space-y-4 border border-border/30 p-4 bg-accent/5 rounded-2xl animate-scale-up">
-          <span className="block text-xs font-bold mb-2">Configure Background Image</span>
-          
+          <span className="block text-xs font-bold mb-2">Configure background image</span>
+
           {/* URL Input */}
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1.5">Web Image URL</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1.5">Web image URL</label>
             <input
               type="text"
               value={themeState.bgImageUrl || ""}
@@ -103,7 +103,7 @@ export function BackgroundEffectsTab({
 
           {/* Local Image Uploader */}
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1.5">Or Upload Local Image (Compressed on-the-fly)</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1.5">Or upload local image (compressed on-the-fly)</label>
             <div className="flex flex-col gap-2">
               <label className="flex flex-col items-center justify-center border border-dashed border-border/40 bg-card/60 hover:bg-accent/15 cursor-pointer p-4 rounded-xl text-center transition-colors">
                 <Upload className="h-5 w-5 text-muted-foreground mb-1.5" />
@@ -128,7 +128,7 @@ export function BackgroundEffectsTab({
                   }}
                   className="w-full py-1.5 px-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <Trash2 className="h-3.5 w-3.5" /> Clear Background Image
+                  <Trash2 className="h-3.5 w-3.5" /> Clear background image
                 </button>
               )}
             </div>
@@ -142,7 +142,7 @@ export function BackgroundEffectsTab({
             {/* Opacity */}
             <div>
               <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5">
-                <span>Image Opacity</span>
+                <span>Image opacity</span>
                 <span>{Math.round((themeState.bgImageOpacity ?? 1) * 100)}%</span>
               </div>
               <input
@@ -158,7 +158,7 @@ export function BackgroundEffectsTab({
             {/* Blur */}
             <div>
               <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5">
-                <span>Image Blur</span>
+                <span>Image blur</span>
                 <span>{themeState.bgImageBlur ?? 0}px</span>
               </div>
               <input
@@ -178,7 +178,7 @@ export function BackgroundEffectsTab({
             {/* Color */}
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
               <div className="flex flex-col">
-                <span className="text-[11px] font-bold">Overlay Tint</span>
+                <span className="text-[11px] font-bold">Overlay tint</span>
                 <span className="text-[8px] text-muted-foreground">Add color contrast overlay</span>
               </div>
               <input
@@ -214,9 +214,9 @@ export function BackgroundEffectsTab({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Radius selector */}
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Border Radius (Corners)</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Border radius (corners)</label>
             <FancyDropdown
-              ariaLabel="Border Radius (Corners)"
+              ariaLabel="Border radius (corners)"
               value={themeState.cardRadius || "12px"}
               placeholder="Standard 12px"
               menuZIndex={150}
@@ -234,9 +234,9 @@ export function BackgroundEffectsTab({
 
           {/* Shadow Selector */}
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Box Shadow (Card Depth)</label>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Box shadow (card depth)</label>
             <FancyDropdown
-              ariaLabel="Box Shadow (Card Depth)"
+              ariaLabel="Box shadow (card depth)"
               value={themeState.cardShadow || "none"}
               placeholder="Flat (None)"
               menuZIndex={150}
@@ -258,14 +258,14 @@ export function BackgroundEffectsTab({
       <div className="p-4 border border-border/30 bg-accent/5 rounded-2xl">
         <div className="flex items-center justify-between mb-4 pb-2 border-b border-border/20">
           <div className="flex flex-col">
-            <span className="text-xs font-bold">Dynamic Glassmorphism Controls</span>
+            <span className="text-xs font-bold">Liquid glass</span>
             <span className="text-[9px] text-muted-foreground">Adjust transparency backdrop filters globally on cards</span>
           </div>
           <input
             type="checkbox"
             checked={themeState.glassmorphism?.enabled || false}
-            onChange={(e) => setThemeState(prev => ({ 
-              ...prev, 
+            onChange={(e) => setThemeState(prev => ({
+              ...prev,
               glassmorphism: {
                 enabled: e.target.checked,
                 blur: prev.glassmorphism?.blur ?? 12,
@@ -283,7 +283,7 @@ export function BackgroundEffectsTab({
               {/* Opacity */}
               <div>
                 <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5">
-                  <span>Glass Transparency</span>
+                  <span>Glass transparency</span>
                   <span>{Math.round((themeState.glassmorphism?.opacity ?? 0.45) * 100)}%</span>
                 </div>
                 <input
@@ -292,9 +292,9 @@ export function BackgroundEffectsTab({
                   max="0.95"
                   step="0.05"
                   value={themeState.glassmorphism?.opacity ?? 0.45}
-                  onChange={(e) => setThemeState(prev => ({ 
-                    ...prev, 
-                    glassmorphism: { ...prev.glassmorphism!, opacity: parseFloat(e.target.value) } 
+                  onChange={(e) => setThemeState(prev => ({
+                    ...prev,
+                    glassmorphism: { ...prev.glassmorphism!, opacity: parseFloat(e.target.value) }
                   }))}
                   className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
                 />
@@ -302,7 +302,7 @@ export function BackgroundEffectsTab({
               {/* Blur */}
               <div>
                 <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5">
-                  <span>Backdrop Blur strength</span>
+                  <span>Backdrop blur strength</span>
                   <span>{themeState.glassmorphism?.blur ?? 12}px</span>
                 </div>
                 <input
@@ -311,9 +311,9 @@ export function BackgroundEffectsTab({
                   max="24"
                   step="1"
                   value={themeState.glassmorphism?.blur ?? 12}
-                  onChange={(e) => setThemeState(prev => ({ 
-                    ...prev, 
-                    glassmorphism: { ...prev.glassmorphism!, blur: parseInt(e.target.value) } 
+                  onChange={(e) => setThemeState(prev => ({
+                    ...prev,
+                    glassmorphism: { ...prev.glassmorphism!, blur: parseInt(e.target.value) }
                   }))}
                   className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
                 />
@@ -321,7 +321,7 @@ export function BackgroundEffectsTab({
               {/* Border opacity */}
               <div>
                 <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5">
-                  <span>Border Visibility</span>
+                  <span>Border visibility</span>
                   <span>{Math.round((themeState.glassmorphism?.borderOpacity ?? 0.1) * 100)}%</span>
                 </div>
                 <input
@@ -330,9 +330,9 @@ export function BackgroundEffectsTab({
                   max="0.8"
                   step="0.02"
                   value={themeState.glassmorphism?.borderOpacity ?? 0.1}
-                  onChange={(e) => setThemeState(prev => ({ 
-                    ...prev, 
-                    glassmorphism: { ...prev.glassmorphism!, borderOpacity: parseFloat(e.target.value) } 
+                  onChange={(e) => setThemeState(prev => ({
+                    ...prev,
+                    glassmorphism: { ...prev.glassmorphism!, borderOpacity: parseFloat(e.target.value) }
                   }))}
                   className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
                 />

@@ -3,7 +3,7 @@ import { resolveColor } from "@/lib/color-utils";
 
 export const DEFAULT_NEW_THEME = (id: string): CustomTheme => ({
   id,
-  name: "My Custom Theme",
+  name: "My custom theme",
   isDark: false,
   background: "#f3f4f6",
   foreground: "#1f2937",
@@ -40,7 +40,7 @@ export const getFontFamilyStyle = (font?: string) => {
 
 export const PRESETS_TEMPLATES = [
   {
-    name: "Light Minimal",
+    name: "Light minimal",
     isDark: false,
     background: "#f1f3f6",
     foreground: "#111827",
@@ -55,7 +55,7 @@ export const PRESETS_TEMPLATES = [
     cardShadow: "sm"
   },
   {
-    name: "Dark Violet",
+    name: "Dark violet",
     isDark: true,
     background: "#0b1326",
     foreground: "#dae2fd",
@@ -70,7 +70,7 @@ export const PRESETS_TEMPLATES = [
     cardShadow: "glow"
   },
   {
-    name: "Nord Arctic",
+    name: "Nord arctic",
     isDark: true,
     background: "#2e3440",
     foreground: "#d8dee9",
@@ -85,7 +85,7 @@ export const PRESETS_TEMPLATES = [
     cardShadow: "none"
   },
   {
-    name: "Warm Sepia",
+    name: "Warm sepia",
     isDark: false,
     background: "#f4ecd8",
     foreground: "#5b4636",

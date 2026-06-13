@@ -79,6 +79,8 @@ Default section order:
 
 When the user requests a durable behavior change, record it here or in the relevant child AGENTS.md
 
+- **Casing rule**: Always use sentence casing (e.g., "First word capitalized, then lowercase") for user interface labels, headings, and text instead of Title Case (except for words separated by `&` e.g., "Save & Apply" or acronyms e.g., "UI", "CSS", "JSON", "URL").
+
 ## Child DOX Index
 
 - [src/app/AGENTS.md](src/app/AGENTS.md)

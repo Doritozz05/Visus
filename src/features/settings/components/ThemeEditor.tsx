@@ -119,7 +119,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
 
   const handleSave = () => {
     if (!themeState.name.trim()) {
-      themeState.name = "My Custom Theme";
+      themeState.name = "My custom theme";
     }
     onSave(themeState);
   };

@@ -56,7 +56,7 @@ export function ThemePreviewSandbox({
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-            <Eye className="w-3.5 h-3.5 text-primary" /> Live Preview sandbox
+            <Eye className="w-3.5 h-3.5 text-primary" /> Live preview sandbox
           </span>
           <div className="flex bg-card border border-border/30 rounded-lg p-0.5 text-[10px]">
             <button
@@ -172,7 +172,7 @@ export function ThemePreviewSandbox({
                 }}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <div className="font-bold">Interactive Card Component</div>
+                  <div className="font-bold">Interactive card component</div>
                   <span 
                     className="px-1.5 py-0.5 rounded text-[7px] font-bold font-mono uppercase border"
                     style={{
@@ -181,7 +181,7 @@ export function ThemePreviewSandbox({
                       borderColor: themeState.border
                     }}
                   >
-                    Muted Tag
+                    Muted tag
                   </span>
                 </div>
                 <div className="text-[9px] mb-2" style={{ color: themeState.mutedForeground }}>
@@ -195,7 +195,7 @@ export function ThemePreviewSandbox({
                       color: themeState.accentForeground
                     }}
                   >
-                    Action Button
+                    Action button
                   </button>
                   <span className="text-[7.5px] font-mono" style={{ color: themeState.mutedForeground }}>
                     Radius: {themeState.cardRadius || "12px"}

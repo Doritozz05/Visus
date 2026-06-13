@@ -30,7 +30,7 @@ export function AdvancedCssTab({
       {/* Advanced CSS Injection */}
       <div>
         <h3 className="text-xs font-bold font-heading mb-1.5 flex items-center gap-1.5">
-          Custom CSS playground <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[8px] uppercase font-mono border border-amber-500/20">Developer Mode</span>
+          Custom CSS playground <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[8px] uppercase font-mono border border-amber-500/20">Developer mode</span>
         </h3>
         <p className="text-[10px] text-muted-foreground mb-3">
           Write raw CSS declarations. Targets classes: <code>aside</code> (sidebar), <code>.liquid-glass</code> (cards), <code>.reader-columns-canvas</code> (reader text).
@@ -45,11 +45,11 @@ export function AdvancedCssTab({
 
       {/* Import / Export JSON Block */}
       <div className="border-t border-border/20 pt-6">
-        <h3 className="text-xs font-bold font-heading mb-3">Import / Export Theme</h3>
+        <h3 className="text-xs font-bold font-heading mb-3">Import / export theme</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Share Output */}
           <div className="space-y-3 p-4 border border-border/30 bg-accent/5 rounded-2xl">
-            <span className="block text-[11px] font-bold">Share Theme File</span>
+            <span className="block text-[11px] font-bold">Share theme file</span>
             <p className="text-[9px] text-muted-foreground">Export your theme settings configuration to share with other users or backup offline.</p>
             <div className="flex gap-2">
               <button
@@ -65,7 +65,7 @@ export function AdvancedCssTab({
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5 text-primary" />
-                    Copy Config
+                    Copy config
                   </>
                 )}
               </button>
@@ -82,7 +82,7 @@ export function AdvancedCssTab({
 
           {/* Import Area */}
           <div className="space-y-3 p-4 border border-border/30 bg-accent/5 rounded-2xl">
-            <span className="block text-[11px] font-bold">Import Custom Theme</span>
+            <span className="block text-[11px] font-bold">Import custom theme</span>
             <textarea
               value={importJson}
               onChange={(e) => setImportJson(e.target.value)}
@@ -95,7 +95,7 @@ export function AdvancedCssTab({
               disabled={!importJson.trim()}
               className="w-full py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-[10px] font-bold font-mono uppercase tracking-wider transition-all"
             >
-              Load JSON Theme
+              Load JSON theme
             </button>
             {importError && (
               <p className="text-[9px] text-destructive font-mono mt-1">{importError}</p>
@@ -108,7 +108,7 @@ export function AdvancedCssTab({
       <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 rounded-xl flex gap-3 text-[10px] leading-relaxed">
         <ShieldAlert className="w-5 h-5 shrink-0 text-amber-500" />
         <div>
-          <span className="font-bold block mb-0.5">Offline Storage Warning</span>
+          <span className="font-bold block mb-0.5">Offline storage warning</span>
           Custom backgrounds utilizing local image uploads convert to base64 which occupies storage space. We recommend uploading optimized images (under 250KB) to prevent exceeding browser storage quotas.
         </div>
       </div>

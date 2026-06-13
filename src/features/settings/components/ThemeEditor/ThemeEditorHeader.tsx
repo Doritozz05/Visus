@@ -19,7 +19,7 @@ export function ThemeEditorHeader({
           <Palette className="h-5 w-5" />
         </div>
         <div className="flex flex-col md:flex-row md:items-center gap-2">
-          <h2 className="text-base font-extrabold font-heading text-foreground">Theme Designer</h2>
+          <h2 className="text-base font-extrabold font-heading text-foreground">Theme designer</h2>
           <input
             type="text"
             value={themeName}

@@ -65,12 +65,12 @@ describe("ThemeEditor Component", () => {
     );
 
     // Verify Title and name input
-    expect(screen.getByText("Theme Designer")).toBeTruthy();
+    expect(screen.getByText("Theme designer")).toBeTruthy();
     const nameInput = screen.getByPlaceholderText("Theme name...") as HTMLInputElement;
     expect(nameInput.value).toBe("Aesthetic Crimson");
 
     // Verify save button and cancel button are rendered
-    expect(screen.getAllByText("Save & Apply Theme").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Save & Apply theme").length).toBeGreaterThan(0);
     expect(screen.getByText("Cancel")).toBeTruthy();
   });
 
@@ -108,7 +108,7 @@ describe("ThemeEditor Component", () => {
     fireEvent.click(componentTabBtn);
 
     // Now components tab is active. We should find Sidebar override controls
-    expect(screen.getByText("Decoupled Sidebar Styles")).toBeTruthy();
+    expect(screen.getByText("Decoupled sidebar styles")).toBeTruthy();
   });
 
   it("should call onSave with correct theme state when clicking save", () => {
@@ -121,7 +121,7 @@ describe("ThemeEditor Component", () => {
       })
     );
 
-    const saveBtn = screen.getAllByText("Save & Apply Theme")[0];
+    const saveBtn = screen.getAllByText("Save & Apply theme")[0];
     fireEvent.click(saveBtn);
     expect(mockOnSave).toHaveBeenCalledTimes(1);
     expect(mockOnSave).toHaveBeenCalledWith(
