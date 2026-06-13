@@ -15,7 +15,8 @@ export const Day30Milestone: StreakMilestone = {
       xmlns="http://www.w3.org/2000/svg"
     >
       <motion.g
-        animate={{ y: [0, -2, 0] }}
+        style={{ scale: 0.8, transformOrigin: "center center" }}
+        animate={{ y: [-13, -16, -13] }}
         transition={{
           repeat: Infinity,
           duration: 2.5,
@@ -74,7 +75,6 @@ export const Day30Milestone: StreakMilestone = {
 
         {/* Beak — slightly open, happy */}
         <polygon points="47,49 53,49 50,54" fill="#f97316" />
-        <line x1="48" y1="52" x2="52" y2="52" stroke="#ea580c" strokeWidth="0.8" />
 
         {/* Wings: holding the book */}
         <path
@@ -112,7 +112,7 @@ export const Day30Milestone: StreakMilestone = {
         {/* Floating paper confetti bits */}
         <motion.rect
           x="22"
-          y="50"
+          y="15"
           width="4"
           height="3"
           rx="0.5"
@@ -122,7 +122,7 @@ export const Day30Milestone: StreakMilestone = {
         />
         <motion.rect
           x="78"
-          y="46"
+          y="10"
           width="3"
           height="4"
           rx="0.5"
@@ -132,7 +132,7 @@ export const Day30Milestone: StreakMilestone = {
         />
         <motion.rect
           x="14"
-          y="40"
+          y="5"
           width="3"
           height="2.5"
           rx="0.5"
@@ -142,7 +142,7 @@ export const Day30Milestone: StreakMilestone = {
         />
         <motion.rect
           x="86"
-          y="54"
+          y="20"
           width="3.5"
           height="2.5"
           rx="0.5"
@@ -152,7 +152,7 @@ export const Day30Milestone: StreakMilestone = {
         />
 
         {/* Flame sitting on the book like a reading lamp */}
-        <g transform="translate(42, 42)">
+        <g transform="translate(38, 60)">
           <motion.path
             d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
             fill="#f97316"
@@ -183,6 +183,10 @@ export const Day30Milestone: StreakMilestone = {
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(2.8, 2.8);
+
+    // Apply global 0.8 scale to fit accessories
+    ctx.translate(11, 10);
+    ctx.scale(0.8, 0.8);
 
     const ox = 0;
     const oy = 0;
@@ -259,13 +263,6 @@ export const Day30Milestone: StreakMilestone = {
     ctx.lineTo(ox + 50, oy + 54);
     ctx.closePath();
     ctx.fill();
-
-    ctx.strokeStyle = "#ea580c";
-    ctx.lineWidth = 0.8;
-    ctx.beginPath();
-    ctx.moveTo(ox + 48, oy + 52);
-    ctx.lineTo(ox + 52, oy + 52);
-    ctx.stroke();
 
     // Draw Wings (holding book)
     ctx.strokeStyle = "#4f46e5";
@@ -358,7 +355,7 @@ export const Day30Milestone: StreakMilestone = {
 
     // Flame on book
     ctx.save();
-    ctx.translate(ox + 42, oy + 42);
+    ctx.translate(ox + 38, oy + 60);
     ctx.scale(0.85, 0.85);
     ctx.shadowColor = "rgba(249, 115, 22, 0.7)";
     ctx.shadowBlur = 10;
