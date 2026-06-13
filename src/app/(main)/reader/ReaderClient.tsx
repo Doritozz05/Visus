@@ -28,6 +28,34 @@ import { Quiz } from "@/core/algorithms/quiz-generator";
 import { toast } from "sonner";
 import { PomodoroTimer } from "@/features/stats/components/PomodoroTimer";
 import { Eye } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const headerVariants = {
+  hidden: { opacity: 0, y: -30 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { type: "spring", stiffness: 240, damping: 24 } 
+  }
+};
+
+const playerVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { type: "spring", stiffness: 240, damping: 24 } 
+  }
+};
+
+const canvasVariants = {
+  hidden: { opacity: 0, scale: 0.98 },
+  visible: { 
+    opacity: 1, 
+    scale: 1, 
+    transition: { type: "spring", stiffness: 200, damping: 25, delay: 0.05 } 
+  }
+};
 
 export default function ReaderClient() {
   const router = useRouter();
@@ -225,9 +253,14 @@ export default function ReaderClient() {
 
       {!isFocusMode && <MobileReaderNav onOpenSettings={openQuickSettings} />}
 
-      <main className={`flex-1 flex flex-col items-center justify-between relative w-full p-6 pt-4 pb-8 overflow-hidden overscroll-none transition-all duration-300 ${
-        isFocusMode ? "h-screen" : "h-[calc(100vh-80px)] md:h-screen"
-      }`}>
+      <motion.main 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className={`flex-1 flex flex-col items-center justify-between relative w-full p-6 pt-4 pb-8 overflow-hidden overscroll-none transition-all duration-300 ${
+          isFocusMode ? "h-screen" : "h-[calc(100vh-80px)] md:h-screen"
+        }`}
+      >
         <ReaderHeader
           activeBook={activeBook}
           setActiveChapterIndex={handleChapterChange}
@@ -280,7 +313,7 @@ export default function ReaderClient() {
             allBookPages={allBookPages}
           />
         )}
-      </main>
+      </motion.main>
 
       {/* Pomodoro Timer - Rendered constantly to keep timer running, toggled via CSS */}
       <div 

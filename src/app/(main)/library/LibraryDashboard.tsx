@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Eraser, Search, Plus, Library, Flame, Pencil, BookOpen, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { StatsService } from "@/core/services/stats-service";
@@ -27,6 +28,33 @@ import { useBookIngestion } from "@/features/library/hooks/useBookIngestion";
 import { useAddBookForm } from "@/features/library/hooks/useAddBookForm";
 import { useEditBookForm } from "@/features/library/hooks/useEditBookForm";
 import { useCloudSync } from "@/features/library/hooks/useCloudSync";
+
+const headerVariants = {
+  hidden: { opacity: 0, y: -8 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.3, ease: "easeOut" } 
+  }
+};
+
+const leftColumnVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.35, ease: "easeOut", delay: 0.05 } 
+  }
+};
+
+const rightColumnVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.35, ease: "easeOut", delay: 0.1 } 
+  }
+};
 
 export default function LibraryDashboard() {
   const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, setActiveBookId, isHydrated } = useLibrary();
@@ -235,7 +263,12 @@ export default function LibraryDashboard() {
       />
 
       <div className="p-6 md:p-10 flex-1 max-w-5xl mx-auto w-full h-[calc(100vh-64px)] md:h-screen overflow-hidden flex flex-col">
-        <header className="border-b border-border/20 pb-4 mb-6 flex flex-col md:flex-row justify-between items-end gap-4 shrink-0">
+        <motion.header 
+          variants={headerVariants}
+          initial="hidden"
+          animate="visible"
+          className="border-b border-border/20 pb-4 mb-6 flex flex-col md:flex-row justify-between items-end gap-4 shrink-0"
+        >
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-xs font-mono uppercase tracking-widest text-primary">Digital assets</h2>
@@ -272,13 +305,18 @@ export default function LibraryDashboard() {
               <ChevronRight className="w-3 h-3 text-muted-foreground group-hover/header:text-primary transition-all group-hover/header:translate-x-0.5" />
             </Link>
           </div>
-        </header>
+        </motion.header>
 
           {/* Bento Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-4">
             
             {/* Left Column: Ingestion Zone & Progress Stats */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
+            <motion.div 
+              variants={leftColumnVariants}
+              initial="hidden"
+              animate="visible"
+              className="lg:col-span-4 flex flex-col gap-6"
+            >
               
               {/* Drag & Drop Upload Panel */}
               <IngestionDropzone
@@ -363,10 +401,15 @@ export default function LibraryDashboard() {
                 </div>
               </div>
 
-            </div>
+            </motion.div>
 
             {/* Right Column: Search, Filters & Book List */}
-            <div className="lg:col-span-8 flex flex-col gap-6">
+            <motion.div 
+              variants={rightColumnVariants}
+              initial="hidden"
+              animate="visible"
+              className="lg:col-span-8 flex flex-col gap-6"
+            >
               
               {/* Search, Filter Tabs & Add Button */}
               <div className="flex flex-col sm:flex-row gap-4 items-center bg-card rounded-xl border border-border/20 p-2 shadow-xl liquid-glass">
@@ -479,7 +522,7 @@ export default function LibraryDashboard() {
                 </div>
               </div>
 
-            </div>
+            </motion.div>
 
           </div>
         </div>

@@ -48,7 +48,7 @@ export default function DashboardClient() {
     const completedBooksCount = books.filter((b) => b.status === "completed").length;
     const sessionLogs = await StatsService.getSessionLogs();
     const statsSummary = await StatsService.getStatsSummary(completedBooksCount);
-    
+
     // Sort logs descending by date
     const sortedLogs = [...sessionLogs].sort(
       (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
@@ -112,7 +112,7 @@ export default function DashboardClient() {
     );
   }
 
-  const userId = user?.id || "local-user";
+  const userId = user?.id || "local";
 
   return (
     <div className="p-4 md:p-8 pb-24 md:pb-12 max-w-7xl mx-auto w-full transition-all duration-300">
@@ -133,7 +133,7 @@ export default function DashboardClient() {
           <div className="text-right">
             <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Status</p>
             <p className="text-sm font-semibold text-primary flex items-center justify-end gap-1">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse inline-block"></span> 
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse inline-block"></span>
               OPTIMAL
             </p>
           </div>
@@ -142,130 +142,129 @@ export default function DashboardClient() {
 
       {/* Top Row: Core Metrics (Horizontal) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {/* Card A: WPM */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Gauge className="w-14 h-14 text-foreground" />
-            </div>
-            <div>
-              <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Average Speed</h3>
-              <div className="flex items-baseline gap-1 mt-2">
-                <span className="text-4xl font-extrabold font-heading text-foreground">{summary.averageWpm}</span>
-                <span className="text-xs font-mono text-primary uppercase font-bold">WPM</span>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-emerald-500 dark:text-emerald-400">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>Total time: {summary.totalReadingTimeMinutes} mins</span>
+        {/* Card A: WPM */}
+        <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Gauge className="w-14 h-14 text-foreground" />
+          </div>
+          <div>
+            <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Average Speed</h3>
+            <div className="flex items-baseline gap-1 mt-2">
+              <span className="text-4xl font-extrabold font-heading text-foreground">{summary.averageWpm}</span>
+              <span className="text-xs font-mono text-primary uppercase font-bold">WPM</span>
             </div>
           </div>
+          <div className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-emerald-500 dark:text-emerald-400">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>Total time: {summary.totalReadingTimeMinutes} mins</span>
+          </div>
+        </div>
 
-          {/* Card B: Racha */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
-            <div className={`absolute top-0 right-0 p-4 transition-all duration-300 pointer-events-none ${
-              summary.currentStreakDays > 0 
-                ? "text-orange-500 opacity-80 animate-pulse" 
-                : "text-foreground opacity-5 group-hover:opacity-10"
+        {/* Card B: Racha */}
+        <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
+          <div className={`absolute top-0 right-0 p-4 transition-all duration-300 pointer-events-none ${summary.currentStreakDays > 0
+              ? "text-orange-500 opacity-80 animate-pulse"
+              : "text-foreground opacity-5 group-hover:opacity-10"
             }`}>
-              <Flame className="w-14 h-14" />
+            <Flame className="w-14 h-14" />
+          </div>
+
+          <div>
+            <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Active Streak</h3>
+            <div className="flex items-baseline gap-1 mt-2">
+              <span className="text-4xl font-extrabold font-heading text-foreground">{summary.currentStreakDays}</span>
+              <span className="text-xs font-mono text-muted-foreground uppercase">{summary.currentStreakDays === 1 ? 'Day' : 'Days'}</span>
+            </div>
+          </div>
+
+          <div
+            className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary transition-colors cursor-help w-fit"
+            title="Streak Shields: Protects your streak if you miss a day. Earned every 30 days of reading."
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Streak Shields: <span className="font-bold text-foreground group-hover:text-primary">{Math.min(3, Math.floor((summary.currentStreakDays || 0) / 30))}/3</span></span>
+          </div>
+        </div>
+
+        {/* Card C: Comprensión */}
+        <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Brain className="w-14 h-14 text-foreground" />
+          </div>
+          <div>
+            <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Reading Retention</h3>
+            <div className="flex items-baseline gap-1 mt-2">
+              <span className="text-4xl font-extrabold font-heading text-foreground">
+                {averageAccuracy !== null ? `${averageAccuracy}%` : "-"}
+              </span>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
+            <CheckCircle className="w-3.5 h-3.5" />
+            <span>Self-assessment quizzes</span>
+          </div>
+        </div>
+
+        {/* Card D: Books Read Progress */}
+        <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none">
+            <BookOpen className="w-14 h-14 text-foreground" />
+          </div>
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Yearly Goal</h3>
+                <button
+                  onClick={() => setIsEditingGoal(!isEditingGoal)}
+                  className="p-1 hover:bg-accent rounded-md transition-colors text-muted-foreground hover:text-primary"
+                  title="Edit yearly goal"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+              </div>
             </div>
 
-            <div>
-              <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Active Streak</h3>
+            {isEditingGoal ? (
+              <div className="flex items-center gap-2 mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                <input
+                  type="number"
+                  min="1"
+                  max="999"
+                  value={tempGoal}
+                  onChange={(e) => setTempGoal(parseInt(e.target.value) || 1)}
+                  className="w-16 bg-background border border-border/50 rounded px-2 py-1 text-xl font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
+                  autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && handleUpdateGoal()}
+                />
+                <button
+                  onClick={handleUpdateGoal}
+                  className="bg-primary text-primary-foreground px-2 py-1 rounded text-[10px] font-mono font-bold hover:brightness-110 transition-all"
+                >
+                  SAVE
+                </button>
+              </div>
+            ) : (
               <div className="flex items-baseline gap-1 mt-2">
-                <span className="text-4xl font-extrabold font-heading text-foreground">{summary.currentStreakDays}</span>
-                <span className="text-xs font-mono text-muted-foreground uppercase">{summary.currentStreakDays === 1 ? 'Day' : 'Days'}</span>
+                <span className="text-4xl font-extrabold font-heading text-foreground">{summary.totalBooksRead}</span>
+                <span className="text-xs text-muted-foreground/80 font-normal">/ {yearlyReadingGoal}</span>
               </div>
-            </div>
-
-            <div 
-              className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary transition-colors cursor-help w-fit"
-              title="Streak Shields: Protects your streak if you miss a day. Earned every 30 days of reading."
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Streak Shields: <span className="font-bold text-foreground group-hover:text-primary">{Math.min(3, Math.floor((summary.currentStreakDays || 0) / 30))}/3</span></span>
-            </div>
+            )}
           </div>
 
-          {/* Card C: Comprensión */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Brain className="w-14 h-14 text-foreground" />
-            </div>
-            <div>
-              <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Reading Retention</h3>
-              <div className="flex items-baseline gap-1 mt-2">
-                <span className="text-4xl font-extrabold font-heading text-foreground">
-                  {averageAccuracy !== null ? `${averageAccuracy}%` : "-"}
-                </span>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
-              <CheckCircle className="w-3.5 h-3.5" />
-              <span>Self-assessment quizzes</span>
+          <div className="relative z-10 mt-auto">
+            <div className="w-full bg-accent h-1.5 rounded-full overflow-hidden border border-border/10">
+              <div
+                className="bg-gradient-to-r from-primary to-emerald-500 h-full rounded-full transition-all duration-500 group-hover:brightness-110"
+                style={{ width: `${goalProgressPercentage}%` }}
+              ></div>
             </div>
           </div>
-
-          {/* Card D: Books Read Progress */}
-          <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none">
-              <BookOpen className="w-14 h-14 text-foreground" />
-            </div>
-            <div className="relative z-10">
-              <div className="flex justify-between items-center mb-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Yearly Goal</h3>
-                  <button 
-                    onClick={() => setIsEditingGoal(!isEditingGoal)}
-                    className="p-1 hover:bg-accent rounded-md transition-colors text-muted-foreground hover:text-primary"
-                    title="Edit yearly goal"
-                  >
-                    <Pencil className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-
-              {isEditingGoal ? (
-                <div className="flex items-center gap-2 mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                  <input
-                    type="number"
-                    min="1"
-                    max="999"
-                    value={tempGoal}
-                    onChange={(e) => setTempGoal(parseInt(e.target.value) || 1)}
-                    className="w-16 bg-background border border-border/50 rounded px-2 py-1 text-xl font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
-                    autoFocus
-                    onKeyDown={(e) => e.key === 'Enter' && handleUpdateGoal()}
-                  />
-                  <button 
-                    onClick={handleUpdateGoal}
-                    className="bg-primary text-primary-foreground px-2 py-1 rounded text-[10px] font-mono font-bold hover:brightness-110 transition-all"
-                  >
-                    SAVE
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-4xl font-extrabold font-heading text-foreground">{summary.totalBooksRead}</span>
-                  <span className="text-xs text-muted-foreground/80 font-normal">/ {yearlyReadingGoal}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="relative z-10 mt-auto">
-              <div className="w-full bg-accent h-1.5 rounded-full overflow-hidden border border-border/10">
-                <div 
-                  className="bg-gradient-to-r from-primary to-emerald-500 h-full rounded-full transition-all duration-500 group-hover:brightness-110" 
-                  style={{ width: `${goalProgressPercentage}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
+        </div>
       </div>
 
       {/* Main Bento Box Grid (Visuals) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-        
+
         {/* Box 1: Radar Chart */}
         <div className="lg:col-span-5 h-full">
           <RadarChart logs={logs} books={books} />
@@ -381,8 +380,8 @@ export default function DashboardClient() {
                           {log.speedWpm} WPM
                         </td>
                         <td className="py-3 font-mono text-[10px] text-muted-foreground">
-                          {log.durationSeconds >= 60 
-                            ? `${Math.floor(log.durationSeconds / 60)}m ${log.durationSeconds % 60}s` 
+                          {log.durationSeconds >= 60
+                            ? `${Math.floor(log.durationSeconds / 60)}m ${log.durationSeconds % 60}s`
                             : `${log.durationSeconds}s`
                           }
                         </td>
