@@ -14,7 +14,16 @@ export const Day50Milestone: StreakMilestone = {
       className="w-full h-full drop-shadow-[0_4px_12px_rgba(79,70,229,0.15)]"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Blue fire aura — pulsing glow behind body */}
+      <motion.g
+        style={{ scale: 0.8, transformOrigin: "center center" }}
+        animate={{ y: [-2, -3, -2] }}
+        transition={{
+          repeat: Infinity,
+          duration: 2.0,
+          ease: "easeInOut",
+        }}
+      >
+        {/* Blue fire aura — pulsing glow behind body */}
       <motion.circle
         cx="50"
         cy="55"
@@ -107,42 +116,58 @@ export const Day50Milestone: StreakMilestone = {
         <circle cx="63" cy="42" r="12" fill="#ffffff" />
 
         {/* Spiral pupils — left eye */}
-        <motion.path
-          d="M37,42 m0,-2 a2,2 0 1,1 0,4 a3,3 0 1,0 0,-6 a4.5,4.5 0 1,1 0,9 a6,6 0 1,0 0,-12"
-          fill="none"
-          stroke="#1e1b4b"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-          animate={{ rotate: [0, 360] }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.5,
-            ease: "linear",
-          }}
+        <motion.g
           style={{ transformOrigin: "37px 42px" }}
-        />
-        {/* Spiral pupils — right eye */}
-        <motion.path
-          d="M63,42 m0,-2 a2,2 0 1,1 0,4 a3,3 0 1,0 0,-6 a4.5,4.5 0 1,1 0,9 a6,6 0 1,0 0,-12"
-          fill="none"
-          stroke="#1e1b4b"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-          animate={{ rotate: [0, 360] }}
+          animate={{ rotate: 360 }}
           transition={{
             repeat: Infinity,
-            duration: 1.5,
+            duration: 1.0,
             ease: "linear",
           }}
-          style={{ transformOrigin: "63px 42px" }}
-        />
+        >
+          <path
+            d="M37,34 A8,8 0 0,1 45,42"
+            fill="none"
+            stroke="#1e1b4b"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M37,50 A8,8 0 0,1 29,42"
+            fill="none"
+            stroke="#1e1b4b"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+        </motion.g>
 
-        {/* Highlights */}
-        <circle cx="39" cy="40" r="1.5" fill="#ffffff" />
-        <circle cx="65" cy="40" r="1.5" fill="#ffffff" />
+        {/* Spiral pupils — right eye */}
+        <motion.g
+          style={{ transformOrigin: "63px 42px" }}
+          animate={{ rotate: -360 }}
+          transition={{
+            repeat: Infinity,
+            duration: 0.8,
+            ease: "linear",
+          }}
+        >
+          <path
+            d="M63,34 A8,8 0 0,1 71,42"
+            fill="none"
+            stroke="#1e1b4b"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M63,50 A8,8 0 0,1 55,42"
+            fill="none"
+            stroke="#1e1b4b"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+        </motion.g>
 
         {/* Beak — wide open */}
-        <polygon points="46,49 54,49 50,48" fill="#f97316" />
         <polygon points="46,51 54,51 50,58" fill="#f97316" />
 
         {/* Blue flame above head */}
@@ -215,12 +240,17 @@ export const Day50Milestone: StreakMilestone = {
           transition={{ repeat: Infinity, duration: 0.9, delay: 0.4 }}
         />
       </motion.g>
-    </svg>
-  ),
+    </motion.g>
+  </svg>
+),
   drawCanvas: (ctx, x, y) => {
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(2.8, 2.8);
+
+    // Apply global 0.8 scale to match SVG wrapper
+    ctx.translate(11, 10);
+    ctx.scale(0.8, 0.8);
 
     const ox = 0;
     const oy = 0;
@@ -317,44 +347,23 @@ export const Day50Milestone: StreakMilestone = {
     ctx.arc(ox + 63, oy + 42, 12, 0, Math.PI * 2);
     ctx.fill();
 
-    // Spiral pupils — left eye (concentric arcs)
+    // Spiral pupils — left eye (concentric circles for static clean look)
     ctx.strokeStyle = "#1e1b4b";
-    ctx.lineWidth = 1.2;
+    ctx.lineWidth = 1.8;
     ctx.lineCap = "round";
 
-    ctx.beginPath();
-    ctx.arc(ox + 37, oy + 42, 2, 0, Math.PI);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(ox + 37, oy + 42, 3, Math.PI, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(ox + 37, oy + 42, 4.5, 0, Math.PI);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(ox + 37, oy + 42, 6, Math.PI, Math.PI * 2);
-    ctx.stroke();
+    [2.5, 5, 7.5].forEach(radius => {
+      ctx.beginPath();
+      ctx.arc(ox + 37, oy + 42, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    });
 
-    // Spiral pupils — right eye (concentric arcs)
-    ctx.beginPath();
-    ctx.arc(ox + 63, oy + 42, 2, 0, Math.PI);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(ox + 63, oy + 42, 3, Math.PI, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(ox + 63, oy + 42, 4.5, 0, Math.PI);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(ox + 63, oy + 42, 6, Math.PI, Math.PI * 2);
-    ctx.stroke();
-
-    // Highlights
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(ox + 39, oy + 40, 1.5, 0, Math.PI * 2);
-    ctx.arc(ox + 65, oy + 40, 1.5, 0, Math.PI * 2);
-    ctx.fill();
+    // Spiral pupils — right eye
+    [2.5, 5, 7.5].forEach(radius => {
+      ctx.beginPath();
+      ctx.arc(ox + 63, oy + 42, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    });
 
     // Beak — wide open (upper and lower)
     ctx.fillStyle = "#f97316";
