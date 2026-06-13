@@ -1,14 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { Palette, CheckCircle, Settings2, Edit, Trash2, Plus } from "lucide-react";
+import { Palette, CheckCircle, Settings2, Edit, Trash2, Plus, Copy, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/features/settings/context/settings-context";
 import type { GeneralSettings, CustomTheme } from "@/core/entities/settings";
 import { ColorSelector } from "@/components/ui/ColorSelector";
+import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
+import { PRESETS_TEMPLATES } from "./ThemeEditor/utils";
 
 export function GeneralSettingsForm() {
   const router = useRouter();
+  const { showMenu } = useContextMenu();
   const { settings, updateGeneralSettings } = useSettings();
   const {
     theme,
@@ -32,13 +35,104 @@ export function GeneralSettingsForm() {
     });
   };
 
-  const handleEditTheme = (t: CustomTheme, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleEditTheme = (t: CustomTheme, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     router.push(`/settings/theme?id=${t.id}`);
+  };
+
+  const handleDuplicateTheme = (t: CustomTheme, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const newId = `theme-custom-${Date.now()}`;
+    const newTheme = {
+      ...t,
+      id: newId,
+      name: `${t.name} (Copy)`
+    };
+    updateGeneralSettings({
+      customThemes: [...customThemes, newTheme]
+    });
   };
 
   const handleCreateTheme = () => {
     router.push("/settings/theme?id=new");
+  };
+
+  const onThemeContextMenu = (e: React.MouseEvent, t: CustomTheme | { id: string, name: string, isPreset: boolean }) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const items: ContextMenuItem[] = [];
+
+    if ('isPreset' in t && t.isPreset) {
+      // Predefined theme items
+      items.push(
+        {
+          id: "activate",
+          label: "Establecer como activo",
+          icon: <Check className="w-4 h-4" />,
+          onClick: () => updateGeneralSettings({ theme: t.id as any }),
+          disabled: theme === t.id
+        },
+        {
+          id: "duplicate",
+          label: "Duplicar para editar",
+          icon: <Copy className="w-4 h-4" />,
+          onClick: () => {
+            const preset = PRESETS_TEMPLATES.find(p => p.name.toLowerCase().includes(t.name.toLowerCase().split(' ')[0].toLowerCase()));
+            if (preset) {
+              const newId = `theme-custom-${Date.now()}`;
+              const newTheme: CustomTheme = {
+                ...preset,
+                id: newId,
+                name: `${t.name} Custom`,
+                overrideSidebar: false,
+                overrideReader: false,
+                bgType: "solid",
+                cardBorder: (preset as any).cardBorder || preset.border
+              };
+              updateGeneralSettings({
+                customThemes: [...customThemes, newTheme],
+                theme: newId
+              });
+            }
+          }
+        }
+      );
+    } else {
+      // Custom theme items
+      const customT = t as CustomTheme;
+      items.push(
+        {
+          id: "activate",
+          label: "Establecer como activo",
+          icon: <Check className="w-4 h-4" />,
+          onClick: () => updateGeneralSettings({ theme: customT.id }),
+          disabled: theme === customT.id
+        },
+        {
+          id: "edit",
+          label: "Editar tema",
+          icon: <Edit className="w-4 h-4" />,
+          onClick: () => handleEditTheme(customT)
+        },
+        {
+          id: "duplicate",
+          label: "Duplicar tema",
+          icon: <Copy className="w-4 h-4" />,
+          onClick: () => handleDuplicateTheme(customT)
+        },
+        { id: "divider-1", label: "", divider: true },
+        {
+          id: "delete",
+          label: "Eliminar tema",
+          icon: <Trash2 className="w-4 h-4" />,
+          tone: "danger",
+          onClick: () => handleDeleteTheme(customT.id)
+        }
+      );
+    }
+
+    showMenu(e, items);
   };
 
   return (
@@ -63,6 +157,7 @@ export function GeneralSettingsForm() {
               <button
                 key={t.id}
                 onClick={() => updateGeneralSettings({ theme: t.id as GeneralSettings["theme"] })}
+                onContextMenu={(e) => onThemeContextMenu(e, { ...t, isPreset: true })}
                 className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between ${theme === t.id
                   ? "border-primary bg-accent/65"
                   : "border-border/30 bg-card hover:border-border/60"
@@ -84,6 +179,7 @@ export function GeneralSettingsForm() {
               <div
                 key={t.id}
                 onClick={() => updateGeneralSettings({ theme: t.id })}
+                onContextMenu={(e) => onThemeContextMenu(e, t)}
                 className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer group ${theme === t.id
                   ? "border-primary bg-accent/65"
                   : "border-border/30 bg-card hover:border-border/60"

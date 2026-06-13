@@ -42,6 +42,8 @@ describe("useTelemetryTracker hook", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   it("should register visibilitychange and window interactions on mount", () => {

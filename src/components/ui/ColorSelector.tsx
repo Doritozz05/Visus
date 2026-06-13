@@ -1,21 +1,37 @@
 "use client";
 
 import * as React from "react";
-import { Check, Plus, X, Pipette, ChevronDown } from "lucide-react";
+import { Check, Plus, X, Pipette, ChevronDown, RotateCcw } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
-import { COLOR_PRESETS, resolveColor } from "@/lib/color-utils";
+import { COLOR_PRESETS, resolveColor, hexToHsl } from "@/lib/color-utils";
 
 export interface ColorSelectorProps {
   value: string;
   onChange: (color: string) => void;
+  onChangeComplete?: (color: string) => void;
+  initialValue?: string;
   label?: string;
   showWhitePreset?: boolean;
   presets?: Array<{ id: string; hex: string; name?: string }>;
 }
 
+// Helper to convert HSL to Hex
+function hslToHex(h: number, s: number, l: number): string {
+  l /= 100;
+  const a = s * Math.min(l, 1 - l) / 100;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
 export function ColorSelector({
   value,
   onChange,
+  onChangeComplete,
+  initialValue,
   label,
   showWhitePreset = false,
   presets,
@@ -23,11 +39,26 @@ export function ColorSelector({
   const { settings, updateGeneralSettings } = useSettings();
   const [isOpen, setIsOpen] = React.useState(false);
   const [hexInput, setHexInput] = React.useState("");
+  
+  // Track internal HSL to avoid rounding drift during slider interaction
+  const [internalHsl, setInternalHsl] = React.useState<{h: number, s: number, l: number} | null>(null);
+  const isInteracting = React.useRef(false);
+
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const savedColors = settings.general.savedColors || [];
   const resolvedHex = resolveColor(value);
+
+  // Derive HSL for sliders
+  const { h, s, l } = React.useMemo(() => {
+    if (internalHsl) return internalHsl;
+    try {
+      return hexToHsl(resolvedHex);
+    } catch (e) {
+      return { h: 0, s: 0, l: 100 };
+    }
+  }, [resolvedHex, internalHsl]);
 
   // Sync state with value prop
   React.useEffect(() => {
@@ -54,7 +85,34 @@ export function ColorSelector({
     // Validate hex format: # followed by 3 or 6 hex digits
     if (/^#[0-9A-Fa-f]{6}$/.test(val) || /^#[0-9A-Fa-f]{3}$/.test(val)) {
       onChange(val);
+      onChangeComplete?.(val);
     }
+  };
+
+  const handleHslSliderChange = (type: 'h' | 's' | 'l', newVal: number) => {
+    const nextHsl = {
+      h: type === 'h' ? newVal : h,
+      s: type === 's' ? newVal : s,
+      l: type === 'l' ? newVal : l
+    };
+    
+    setInternalHsl(nextHsl);
+    const newHex = hslToHex(nextHsl.h, nextHsl.s, nextHsl.l);
+    onChange(newHex);
+  };
+
+  const handleInteractionStart = () => {
+    isInteracting.current = true;
+  };
+
+  const handleInteractionEnd = () => {
+    if (!isInteracting.current) return;
+    isInteracting.current = false;
+    
+    // When interaction ends, push to history and clear internal HSL cache
+    const currentHex = hslToHex(h, s, l);
+    onChangeComplete?.(currentHex);
+    setInternalHsl(null);
   };
 
   const triggerNativePicker = () => {
@@ -66,6 +124,7 @@ export function ColorSelector({
   const handleNativePickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     onChange(val);
+    onChangeComplete?.(val);
   };
 
   const saveCurrentColor = () => {
@@ -80,6 +139,13 @@ export function ColorSelector({
     e.stopPropagation(); // Prevent choosing the color when deleting
     const updated = savedColors.filter((c) => c.toLowerCase() !== colorToRemove.toLowerCase());
     updateGeneralSettings({ savedColors: updated });
+  };
+
+  const revertToInitial = () => {
+    const resetColor = initialValue || value;
+    onChange(resetColor);
+    onChangeComplete?.(resetColor);
+    setInternalHsl(null);
   };
 
   // Build the list of preset items
@@ -129,9 +195,80 @@ export function ColorSelector({
 
       {/* Dropdown Panel - Solid Opaque bg-card for readability */}
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-2 p-4 bg-card border border-border/40 rounded-xl shadow-2xl z-50 animate-slide-in-top flex flex-col gap-4">
+        <div 
+          className="absolute left-0 right-0 mt-2 p-4 bg-card border border-border/40 rounded-xl shadow-2xl z-50 animate-slide-in-top flex flex-col gap-4"
+          onMouseUp={handleInteractionEnd}
+          onMouseLeave={handleInteractionEnd}
+          onTouchEnd={handleInteractionEnd}
+        >
           
-          {/* Custom Color Range Picker & Input */}
+          {/* Custom HSL Sliders */}
+          <div className="space-y-3 p-3 bg-accent/5 rounded-xl border border-border/20">
+            {/* Hue Slider */}
+            <div>
+              <div className="flex justify-between text-[8px] font-mono uppercase text-muted-foreground mb-1">
+                <span>Hue</span>
+                <span>{h}°</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="360"
+                value={h}
+                onMouseDown={handleInteractionStart}
+                onTouchStart={handleInteractionStart}
+                onChange={(e) => handleHslSliderChange('h', parseInt(e.target.value))}
+                className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                style={{
+                  background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
+                }}
+              />
+            </div>
+
+            {/* Saturation Slider */}
+            <div>
+              <div className="flex justify-between text-[8px] font-mono uppercase text-muted-foreground mb-1">
+                <span>Saturation</span>
+                <span>{s}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={s}
+                onMouseDown={handleInteractionStart}
+                onTouchStart={handleInteractionStart}
+                onChange={(e) => handleHslSliderChange('s', parseInt(e.target.value))}
+                className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, ${hslToHex(h, 0, l)}, ${hslToHex(h, 100, l)})`
+                }}
+              />
+            </div>
+
+            {/* Lightness Slider */}
+            <div>
+              <div className="flex justify-between text-[8px] font-mono uppercase text-muted-foreground mb-1">
+                <span>Lightness</span>
+                <span>{l}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={l}
+                onMouseDown={handleInteractionStart}
+                onTouchStart={handleInteractionStart}
+                onChange={(e) => handleHslSliderChange('l', parseInt(e.target.value))}
+                className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, #000000, ${hslToHex(h, s, 50)}, #ffffff)`
+                }}
+              />
+            </div>
+          </div>
+
+          {/* HEX Input & Controls */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <input
@@ -143,6 +280,18 @@ export function ColorSelector({
               />
             </div>
             
+            {/* Revert Button */}
+            {(initialValue ? value !== initialValue : false) && (
+              <button
+                type="button"
+                onClick={revertToInitial}
+                title="Revert to initial color"
+                className="p-2 border border-border/30 hover:border-primary hover:text-primary rounded-lg transition-colors bg-accent/20 shrink-0 text-muted-foreground flex items-center justify-center"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            )}
+
             {/* Hidden Input Color Picker */}
             <input
               type="color"
@@ -181,7 +330,10 @@ export function ColorSelector({
                 <button
                   key={preset.id}
                   type="button"
-                  onClick={() => onChange(preset.id)}
+                  onClick={() => {
+                    onChange(preset.id);
+                    onChangeComplete?.(preset.id);
+                  }}
                   style={{ backgroundColor: preset.hex }}
                   className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
                     isActivePreset(preset.id, preset.hex)
@@ -207,7 +359,10 @@ export function ColorSelector({
                   <div key={color} className="relative group/color">
                     <button
                       type="button"
-                      onClick={() => onChange(color)}
+                      onClick={() => {
+                        onChange(color);
+                        onChangeComplete?.(color);
+                      }}
                       style={{ backgroundColor: color }}
                       className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
                         isActiveSaved(color)

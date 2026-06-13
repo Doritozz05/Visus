@@ -31,11 +31,84 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
     return DEFAULT_NEW_THEME(randId);
   });
   
+  // Capture initial state for reset functionality
+  const [initialTheme] = React.useState({ ...themeState });
+
+  // History management
+  const [history, setHistory] = React.useState<CustomTheme[]>([themeState]);
+  const [historyIndex, setHistoryIndex] = React.useState(0);
+  const isInternalUpdate = React.useRef(false);
+
   const [previewDevice, setPreviewDevice] = React.useState<"desktop" | "mobile">("desktop");
   const [imageError, setImageError] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
   const [importJson, setImportJson] = React.useState("");
   const [importError, setImportError] = React.useState<string | null>(null);
+
+  // Function to push to history (debounced or on important changes)
+  const pushToHistory = (newState: CustomTheme) => {
+    if (isInternalUpdate.current) return;
+    
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newState);
+    
+    // Limit history size to 5 as requested
+    if (newHistory.length > 5) {
+      newHistory.shift();
+    }
+    
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
+
+  const undo = React.useCallback(() => {
+    if (historyIndex > 0) {
+      isInternalUpdate.current = true;
+      const prevIndex = historyIndex - 1;
+      const prevState = history[prevIndex];
+      setThemeState(prevState);
+      setHistoryIndex(prevIndex);
+      setTimeout(() => { isInternalUpdate.current = false; }, 0);
+    }
+  }, [history, historyIndex]);
+
+  const redo = React.useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      isInternalUpdate.current = true;
+      const nextIndex = historyIndex + 1;
+      const nextState = history[nextIndex];
+      setThemeState(nextState);
+      setHistoryIndex(nextIndex);
+      setTimeout(() => { isInternalUpdate.current = false; }, 0);
+    }
+  }, [history, historyIndex]);
+
+  // Keyboard shortcuts
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        if (e.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        redo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [historyIndex, history, undo, redo]);
+
+  // Wrap setThemeState to track history
+  const updateThemeState = (updater: CustomTheme | ((prev: CustomTheme) => CustomTheme), push: boolean = true) => {
+    setThemeState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      if (push) pushToHistory(next);
+      return next;
+    });
+  };
 
   // Resize and compress image helper
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +123,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
     setImageError(null);
     try {
       const base64Str = await compressImage(file);
-      setThemeState(prev => ({
+      updateThemeState(prev => ({
         ...prev,
         bgType: "image",
         bgImageUrl: base64Str
@@ -61,7 +134,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
   };
 
   const applyPresetTemplate = (preset: any) => {
-    setThemeState(prev => ({
+    updateThemeState(prev => ({
       ...prev,
       isDark: preset.isDark,
       background: preset.background,
@@ -110,7 +183,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
         ...parsed,
         id: themeState.id // keep current ID to save over
       };
-      setThemeState(importedTheme);
+      updateThemeState(importedTheme);
       setImportJson("");
     } catch (err) {
       setImportError("Invalid JSON structure. Please check the syntax.");
@@ -134,7 +207,11 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
     <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-[100] flex flex-col font-sans animate-fade-in">
       <ThemeEditorHeader
         themeName={themeState.name}
-        setThemeName={(name) => setThemeState(prev => ({ ...prev, name }))}
+        setThemeName={(name) => updateThemeState(prev => ({ ...prev, name }))}
+        onUndo={undo}
+        onRedo={redo}
+        canUndo={historyIndex > 0}
+        canRedo={historyIndex < history.length - 1}
         onClose={onClose}
       />
 
@@ -178,21 +255,23 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
             {activeTab === "colors" && (
               <BaseColorsTab
                 themeState={themeState}
-                setThemeState={setThemeState}
+                setThemeState={updateThemeState}
+                initialTheme={initialTheme}
               />
             )}
 
             {activeTab === "components" && (
               <DecoupledSectionsTab
                 themeState={themeState}
-                setThemeState={setThemeState}
+                setThemeState={updateThemeState}
               />
             )}
 
             {activeTab === "background" && (
               <BackgroundEffectsTab
                 themeState={themeState}
-                setThemeState={setThemeState}
+                setThemeState={updateThemeState}
+                initialTheme={initialTheme}
                 imageError={imageError}
                 handleImageUpload={handleImageUpload}
               />
@@ -201,7 +280,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
             {activeTab === "advanced" && (
               <AdvancedCssTab
                 themeState={themeState}
-                setThemeState={setThemeState}
+                setThemeState={updateThemeState}
                 copied={copied}
                 handleCopyJson={handleCopyJson}
                 handleExportFile={handleExportFile}

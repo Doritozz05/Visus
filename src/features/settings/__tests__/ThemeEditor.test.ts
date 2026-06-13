@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import React from "react";
 import { ThemeEditor } from "../components/ThemeEditor";
+import { SettingsProvider } from "../context/settings-context";
 
 // Mock the FancyDropdown to simplify rendering
 vi.mock("@/components/ui/FancyDropdown", () => ({
@@ -27,6 +28,12 @@ describe("ThemeEditor Component", () => {
   const mockOnSave = vi.fn();
   const mockOnDelete = vi.fn();
   const mockOnClose = vi.fn();
+
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      React.createElement(SettingsProvider, null, ui)
+    );
+  };
 
   const mockTheme = {
     id: "theme-custom-123",
@@ -55,7 +62,7 @@ describe("ThemeEditor Component", () => {
   });
 
   it("should render the theme editor title and initial tab elements", () => {
-    render(
+    renderWithProvider(
       React.createElement(ThemeEditor, {
         themeToEdit: mockTheme,
         onSave: mockOnSave,
@@ -75,7 +82,7 @@ describe("ThemeEditor Component", () => {
   });
 
   it("should allow changing the theme name", () => {
-    render(
+    renderWithProvider(
       React.createElement(ThemeEditor, {
         themeToEdit: mockTheme,
         onSave: mockOnSave,
@@ -90,7 +97,7 @@ describe("ThemeEditor Component", () => {
   });
 
   it("should support tab switching", () => {
-    render(
+    renderWithProvider(
       React.createElement(ThemeEditor, {
         themeToEdit: mockTheme,
         onSave: mockOnSave,
@@ -112,7 +119,7 @@ describe("ThemeEditor Component", () => {
   });
 
   it("should call onSave with correct theme state when clicking save", () => {
-    render(
+    renderWithProvider(
       React.createElement(ThemeEditor, {
         themeToEdit: mockTheme,
         onSave: mockOnSave,

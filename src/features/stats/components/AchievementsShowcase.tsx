@@ -125,7 +125,7 @@ export function AchievementsShowcase({ userId }: AchievementsShowcaseProps) {
               {/* Badge Icon - Slightly smaller */}
               <div className={`relative w-10 h-10 rounded-full bg-background/50 border border-border/20 flex items-center justify-center shadow-inner mb-2 ${isUnlocked ? 'animate-achievement-shine' : ''}`}>
                 {isUnlocked ? (
-                  React.cloneElement(style.icon as React.ReactElement, { className: "w-5 h-5" })
+                  React.cloneElement(style.icon as React.ReactElement<any>, { className: "w-5 h-5" })
                 ) : (
                   <Lock className="w-3.5 h-3.5 text-muted-foreground" />
                 )}

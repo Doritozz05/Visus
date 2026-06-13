@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { StatsService } from "../stats-service";
 import { ReadingSessionLog, ReadingMode } from "../../entities/stats";
 import { dbService } from "../db-service";
@@ -13,9 +13,32 @@ vi.mock("../db-service", () => ({
 
 describe("StatsService", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Simulate browser environment for window-checked methods
-    global.window = {} as Window & typeof globalThis;
+    vi.resetAllMocks();
+    
+    // Use stubGlobal to avoid read-only property errors and preserve jsdom environment
+    vi.stubGlobal("crypto", {
+      randomUUID: () => "test-uuid"
+    });
+
+    // Mock localStorage if not fully supported in the test environment
+    const storage: Record<string, string> = {};
+    vi.stubGlobal("localStorage", {
+      getItem: vi.fn((key) => storage[key] || null),
+      setItem: vi.fn((key, value) => { storage[key] = value; }),
+      removeItem: vi.fn((key) => { delete storage[key]; }),
+      clear: vi.fn(() => { Object.keys(storage).forEach(key => delete storage[key]); }),
+      length: 0,
+      key: vi.fn(),
+    });
+
+    // Ensure window.dispatchEvent is a mock if we want to track it
+    if (typeof window !== "undefined") {
+      vi.spyOn(window, "dispatchEvent").mockImplementation(() => true);
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   describe("getSessionLogs", () => {
@@ -28,26 +51,31 @@ describe("StatsService", () => {
       expect(dbService.getAllLogs).toHaveBeenCalled();
     });
 
-    it("should return empty array on error", async () => {
+    it("should return empty array on error and log a warning", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
       vi.mocked(dbService.getAllLogs).mockRejectedValue(new Error("DB Error"));
+      
       const logs = await StatsService.getSessionLogs();
+      
       expect(logs).toEqual([]);
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Could not retrieve reading logs from IndexedDB:"), expect.any(Error));
+      warnSpy.mockRestore();
     });
 
     it("should return empty array if window is undefined", async () => {
-      const originalWindow = global.window;
-      // @ts-expect-error - The operand of a 'delete' operator must be optional, but we need to delete it to simulate a non-browser environment
-      delete global.window;
+      vi.stubGlobal("window", undefined);
       
       const logs = await StatsService.getSessionLogs();
       expect(logs).toEqual([]);
-      
-      global.window = originalWindow;
     });
   });
 
   describe("recordSession", () => {
     it("should create a new log and save it", async () => {
+      // Suppress logs from secondary services called during recordSession
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      vi.spyOn(console, "log").mockImplementation(() => {});
+      
       const sessionData = {
         bookId: "book-1",
         bookTitle: "Title",
@@ -59,10 +87,11 @@ describe("StatsService", () => {
 
       const log = await StatsService.recordSession(sessionData);
 
-      expect(log.id).toContain("log-");
+      expect(log.id).toBe("log-test-uuid");
       expect(log.completedAt).toBeDefined();
       expect(log.speedWpm).toBe(600);
       expect(dbService.saveLog).toHaveBeenCalledWith(log);
+      expect(window.dispatchEvent).toHaveBeenCalledWith(expect.any(CustomEvent));
     });
   });
 

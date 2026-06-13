@@ -15,6 +15,7 @@ vi.mock("@/core/services/db-service", () => {
 describe("compressOlderLogs", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(console, "log").mockImplementation(() => {});
   });
 
   it("should do nothing if log count is <= 50", async () => {

@@ -1,19 +1,20 @@
 import * as React from "react";
 import type { CustomTheme } from "@/core/entities/settings";
-import { resolveColor } from "@/lib/color-utils";
+import { ColorSelector } from "@/components/ui/ColorSelector";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
 
 interface BaseColorsTabProps {
   themeState: CustomTheme;
-  setThemeState: React.Dispatch<React.SetStateAction<CustomTheme>>;
+  setThemeState: (updater: CustomTheme | ((prev: CustomTheme) => CustomTheme), push?: boolean) => void;
+  initialTheme: CustomTheme;
 }
 
-export function BaseColorsTab({ themeState, setThemeState }: BaseColorsTabProps) {
-  const handleColorChange = (key: keyof CustomTheme, value: string) => {
+export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseColorsTabProps) {
+  const handleColorChange = (key: keyof CustomTheme, value: string, push: boolean = false) => {
     setThemeState((prev) => ({
       ...prev,
       [key]: value,
-    }));
+    }), push);
   };
 
   const handleFontChange = (val: string) => {
@@ -71,16 +72,13 @@ export function BaseColorsTab({ themeState, setThemeState }: BaseColorsTabProps)
           {colorFields.map((field) => {
             const hexVal = themeState[field.key] as string;
             return (
-              <div key={field.key} className="flex items-center justify-between p-2.5 bg-accent/15 border border-border/30 rounded-xl">
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-bold">{field.label}</span>
-                  <span className="text-[9px] text-muted-foreground font-mono uppercase">{hexVal}</span>
-                </div>
-                <input
-                  type="color"
-                  value={resolveColor(hexVal)}
-                  onChange={(e) => handleColorChange(field.key, e.target.value)}
-                  className="w-8 h-8 rounded border border-border/50 cursor-pointer overflow-hidden bg-transparent shrink-0"
+              <div key={field.key} className="flex flex-col gap-2 p-3 bg-accent/15 border border-border/30 rounded-xl">
+                <span className="text-[11px] font-bold">{field.label}</span>
+                <ColorSelector
+                  value={hexVal}
+                  initialValue={initialTheme[field.key] as string}
+                  onChange={(color) => handleColorChange(field.key, color, false)}
+                  onChangeComplete={(color) => handleColorChange(field.key, color, true)}
                 />
               </div>
             );

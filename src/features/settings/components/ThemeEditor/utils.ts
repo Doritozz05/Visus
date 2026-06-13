@@ -25,6 +25,13 @@ export const DEFAULT_NEW_THEME = (id: string): CustomTheme => ({
     blur: 12,
     opacity: 0.45,
     borderOpacity: 0.1
+  },
+  glowSettings: {
+    enabled: false,
+    color: "#8b5cf6",
+    brightness: 0.15,
+    spread: 0,
+    blur: 15
   }
 });
 
@@ -47,6 +54,7 @@ export const PRESETS_TEMPLATES = [
     border: "#e5e7eb",
     cardBackground: "#ffffff",
     cardForeground: "#111827",
+    cardBorder: "#e5e7eb",
     accent: "#6366f1",
     accentForeground: "#ffffff",
     muted: "#f9fafb",
@@ -62,6 +70,7 @@ export const PRESETS_TEMPLATES = [
     border: "#464554",
     cardBackground: "#171f33",
     cardForeground: "#dae2fd",
+    cardBorder: "#464554",
     accent: "#c0c1ff",
     accentForeground: "#0b1326",
     muted: "#222a3d",
@@ -77,6 +86,7 @@ export const PRESETS_TEMPLATES = [
     border: "#4c566a",
     cardBackground: "#3b4252",
     cardForeground: "#d8dee9",
+    cardBorder: "#4c566a",
     accent: "#88c0d0",
     accentForeground: "#2e3440",
     muted: "#434c5e",
@@ -92,6 +102,7 @@ export const PRESETS_TEMPLATES = [
     border: "#e4dcd3",
     cardBackground: "#faf6eb",
     cardForeground: "#5b4636",
+    cardBorder: "#e4dcd3",
     accent: "#b45309",
     accentForeground: "#ffffff",
     muted: "#eae1cb",

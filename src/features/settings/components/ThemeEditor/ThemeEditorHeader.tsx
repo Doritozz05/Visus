@@ -1,15 +1,23 @@
 import * as React from "react";
-import { Palette, X } from "lucide-react";
+import { Palette, X, Undo2, Redo2 } from "lucide-react";
 
 interface ThemeEditorHeaderProps {
   themeName: string;
   setThemeName: (name: string) => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
   onClose: () => void;
 }
 
 export function ThemeEditorHeader({
   themeName,
   setThemeName,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
   onClose,
 }: ThemeEditorHeaderProps) {
   return (
@@ -27,6 +35,27 @@ export function ThemeEditorHeader({
             placeholder="Theme name..."
             className="bg-accent/40 border border-border/30 focus:border-primary/50 focus:outline-none rounded-lg px-2.5 py-1 text-xs font-bold font-heading text-foreground"
           />
+        </div>
+
+        {/* History Controls */}
+        <div className="h-8 w-px bg-border/30 mx-2 hidden md:block" />
+        <div className="flex items-center gap-1.5 bg-accent/10 p-1 rounded-lg border border-border/20">
+          <button
+            onClick={onUndo}
+            disabled={!canUndo}
+            title="Undo (Ctrl+Z)"
+            className={`p-1.5 rounded-md transition-all ${canUndo ? "hover:bg-card hover:text-primary text-foreground shadow-sm" : "text-muted-foreground/30 cursor-not-allowed"}`}
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={onRedo}
+            disabled={!canRedo}
+            title="Redo (Ctrl+Y)"
+            className={`p-1.5 rounded-md transition-all ${canRedo ? "hover:bg-card hover:text-primary text-foreground shadow-sm" : "text-muted-foreground/30 cursor-not-allowed"}`}
+          >
+            <Redo2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
       <button

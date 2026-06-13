@@ -1,12 +1,14 @@
 import * as React from "react";
-import { Upload, Trash2 } from "lucide-react";
+import { Upload, Trash2, Sparkles } from "lucide-react";
 import type { CustomTheme } from "@/core/entities/settings";
 import { resolveColor } from "@/lib/color-utils";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
+import { ColorSelector } from "@/components/ui/ColorSelector";
 
 interface BackgroundEffectsTabProps {
   themeState: CustomTheme;
-  setThemeState: React.Dispatch<React.SetStateAction<CustomTheme>>;
+  setThemeState: (updater: CustomTheme | ((prev: CustomTheme) => CustomTheme), push?: boolean) => void;
+  initialTheme: CustomTheme;
   imageError: string | null;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
 }
@@ -14,9 +16,26 @@ interface BackgroundEffectsTabProps {
 export function BackgroundEffectsTab({
   themeState,
   setThemeState,
+  initialTheme,
   imageError,
   handleImageUpload,
 }: BackgroundEffectsTabProps) {
+  const updateGlow = (updates: Partial<NonNullable<CustomTheme['glowSettings']>>, push: boolean = false) => {
+    setThemeState(prev => ({
+      ...prev,
+      glowSettings: {
+        ...(prev.glowSettings || {
+          enabled: true,
+          color: prev.accent,
+          brightness: 0.15,
+          spread: 0,
+          blur: 15
+        }),
+        ...updates
+      }
+    }), push);
+  };
+
   return (
     <div className="space-y-6">
       {/* Background Type */}
@@ -50,20 +69,20 @@ export function BackgroundEffectsTab({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Start gradient color</span>
-              <input
-                type="color"
+              <ColorSelector
                 value={themeState.bgGradientStart || "#ffffff"}
-                onChange={(e) => setThemeState(prev => ({ ...prev, bgGradientStart: e.target.value }))}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+                initialValue={initialTheme.bgGradientStart || "#ffffff"}
+                onChange={(color) => setThemeState(prev => ({ ...prev, bgGradientStart: color }), false)}
+                onChangeComplete={(color) => setThemeState(prev => ({ ...prev, bgGradientStart: color }), true)}
               />
             </div>
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">End gradient color</span>
-              <input
-                type="color"
+              <ColorSelector
                 value={themeState.bgGradientEnd || "#eaeaea"}
-                onChange={(e) => setThemeState(prev => ({ ...prev, bgGradientEnd: e.target.value }))}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+                initialValue={initialTheme.bgGradientEnd || "#eaeaea"}
+                onChange={(color) => setThemeState(prev => ({ ...prev, bgGradientEnd: color }), false)}
+                onChangeComplete={(color) => setThemeState(prev => ({ ...prev, bgGradientEnd: color }), true)}
               />
             </div>
           </div>
@@ -77,7 +96,8 @@ export function BackgroundEffectsTab({
               min="0"
               max="360"
               value={themeState.bgGradientAngle ?? 135}
-              onChange={(e) => setThemeState(prev => ({ ...prev, bgGradientAngle: parseInt(e.target.value) }))}
+              onChange={(e) => setThemeState(prev => ({ ...prev, bgGradientAngle: parseInt(e.target.value) }), false)}
+              onMouseUp={() => setThemeState(prev => ({ ...prev }), true)}
               className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
             />
           </div>
@@ -176,16 +196,11 @@ export function BackgroundEffectsTab({
           {/* Overlay Tint Color & Opacity */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border/20 pt-4">
             {/* Color */}
-            <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
-              <div className="flex flex-col">
-                <span className="text-[11px] font-bold">Overlay tint</span>
-                <span className="text-[8px] text-muted-foreground">Add color contrast overlay</span>
-              </div>
-              <input
-                type="color"
+            <div className="flex flex-col gap-2">
+              <span className="text-[11px] font-bold">Overlay tint</span>
+              <ColorSelector
                 value={themeState.bgImageOverlay || "#000000"}
-                onChange={(e) => setThemeState(prev => ({ ...prev, bgImageOverlay: e.target.value }))}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+                onChange={(color) => setThemeState(prev => ({ ...prev, bgImageOverlay: color }))}
               />
             </div>
             {/* Overlay Opacity */}
@@ -240,7 +255,19 @@ export function BackgroundEffectsTab({
               value={themeState.cardShadow || "none"}
               placeholder="Flat (None)"
               menuZIndex={150}
-              onChange={(val) => setThemeState(prev => ({ ...prev, cardShadow: val as any }))}
+              onChange={(val) => {
+                setThemeState(prev => ({
+                  ...prev,
+                  cardShadow: val as any,
+                  glowSettings: val === 'glow' ? (prev.glowSettings || {
+                    enabled: true,
+                    color: prev.accent,
+                    brightness: 0.15,
+                    spread: 0,
+                    blur: 15
+                  }) : prev.glowSettings
+                }));
+              }}
               options={[
                 { value: "none", label: "Flat (None)", description: "No elevation shadow outline" },
                 { value: "sm", label: "Subtle shadow (sm)", description: "Thin, clean card bottom edge shadow" },
@@ -252,6 +279,84 @@ export function BackgroundEffectsTab({
             />
           </div>
         </div>
+
+        {/* Individual Glow Settings */}
+        {themeState.cardShadow === 'glow' && (
+          <div className="mt-4 p-4 border border-border/30 bg-primary/5 rounded-2xl animate-scale-up space-y-4">
+            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/20">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-xs font-bold">Glow Configuration</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-mono uppercase text-muted-foreground">Glow color</span>
+                <ColorSelector
+                  value={themeState.glowSettings?.color || themeState.accent}
+                  initialValue={initialTheme.glowSettings?.color || initialTheme.accent}
+                  onChange={(color) => updateGlow({ color }, false)}
+                  onChangeComplete={(color) => updateGlow({ color }, true)}
+                />
+              </div>
+
+              <div className="space-y-4">
+                {/* Brightness */}
+                <div>
+                  <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5">
+                    <span>Glow brightness</span>
+                    <span>{Math.round((themeState.glowSettings?.brightness ?? 0.15) * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={themeState.glowSettings?.brightness ?? 0.15}
+                    onChange={(e) => updateGlow({ brightness: parseFloat(e.target.value) }, false)}
+                    onMouseUp={() => setThemeState(prev => ({ ...prev }), true)}
+                    className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+
+                {/* Blur */}
+                <div>
+                  <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5">
+                    <span>Glow thickness (blur)</span>
+                    <span>{themeState.glowSettings?.blur ?? 15}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="50"
+                    step="1"
+                    value={themeState.glowSettings?.blur ?? 15}
+                    onChange={(e) => updateGlow({ blur: parseInt(e.target.value) }, false)}
+                    onMouseUp={() => setThemeState(prev => ({ ...prev }), true)}
+                    className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+
+                {/* Spread */}
+                <div>
+                  <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5">
+                    <span>Glow spread</span>
+                    <span>{themeState.glowSettings?.spread ?? 0}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-20"
+                    max="20"
+                    step="1"
+                    value={themeState.glowSettings?.spread ?? 0}
+                    onChange={(e) => updateGlow({ spread: parseInt(e.target.value) }, false)}
+                    onMouseUp={() => setThemeState(prev => ({ ...prev }), true)}
+                    className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Glassmorphism Configuration */}
@@ -295,7 +400,8 @@ export function BackgroundEffectsTab({
                   onChange={(e) => setThemeState(prev => ({
                     ...prev,
                     glassmorphism: { ...prev.glassmorphism!, opacity: parseFloat(e.target.value) }
-                  }))}
+                  }), false)}
+                  onMouseUp={() => setThemeState(prev => ({ ...prev }), true)}
                   className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
                 />
               </div>
@@ -314,7 +420,8 @@ export function BackgroundEffectsTab({
                   onChange={(e) => setThemeState(prev => ({
                     ...prev,
                     glassmorphism: { ...prev.glassmorphism!, blur: parseInt(e.target.value) }
-                  }))}
+                  }), false)}
+                  onMouseUp={() => setThemeState(prev => ({ ...prev }), true)}
                   className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
                 />
               </div>
@@ -333,7 +440,8 @@ export function BackgroundEffectsTab({
                   onChange={(e) => setThemeState(prev => ({
                     ...prev,
                     glassmorphism: { ...prev.glassmorphism!, borderOpacity: parseFloat(e.target.value) }
-                  }))}
+                  }), false)}
+                  onMouseUp={() => setThemeState(prev => ({ ...prev }), true)}
                   className="w-full h-1.5 bg-accent/35 rounded-lg appearance-none cursor-pointer accent-primary"
                 />
               </div>

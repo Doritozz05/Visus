@@ -7,6 +7,7 @@ import { AuthProvider } from "@/features/auth/context/auth-context";
 import { Toaster } from "sonner";
 import { ContextMenuProvider } from "@/components/ui/ContextMenu";
 import { hexToHsl, resolveColor } from "@/lib/color-utils";
+import type { CustomTheme } from "@/core/entities/settings";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
@@ -42,13 +43,19 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       }
     };
 
-    const getShadowValue = (style: string | undefined): string => {
+    const getShadowValue = (style: string | undefined, glowSettings?: CustomTheme['glowSettings']): string => {
+      if (style === "glow") {
+        if (glowSettings && glowSettings.enabled) {
+          const color = toRgbString(glowSettings.color);
+          return `0 0 ${glowSettings.blur}px ${glowSettings.spread}px rgba(${color}, ${glowSettings.brightness})`;
+        }
+        return "0 0 15px var(--primary-shadow, rgba(99, 102, 241, 0.15))";
+      }
       switch (style) {
         case "none": return "none";
         case "sm": return "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
         case "md": return "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
         case "lg": return "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
-        case "glow": return "0 0 15px var(--primary-shadow, rgba(99, 102, 241, 0.15))";
         case "retro": return "4px 4px 0px 0px hsl(var(--border))";
         default: return "none";
       }
@@ -116,7 +123,7 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       }
 
       root.style.setProperty("--radius", customTheme.cardRadius || "0.75rem");
-      root.style.setProperty("--card-shadow", getShadowValue(customTheme.cardShadow));
+      root.style.setProperty("--card-shadow", getShadowValue(customTheme.cardShadow, customTheme.glowSettings));
       root.style.setProperty("--primary-shadow", `rgba(${toRgbString(customTheme.accent)}, 0.25)`);
 
       // Glassmorphism

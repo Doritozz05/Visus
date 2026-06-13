@@ -32,12 +32,20 @@ export function ThemePreviewSandbox({
 
   const cardRadius = themeState.cardRadius || "12px";
   const getShadowStyle = (shadow: string | undefined) => {
+    if (shadow === "glow") {
+      if (themeState.glowSettings && themeState.glowSettings.enabled) {
+        // Boost opacity for better visibility. Brightness 0.15 becomes ~0.45 opacity.
+        const opacity = Math.min(1, (themeState.glowSettings.brightness || 0.15) * 3);
+        const alphaHex = Math.round(opacity * 255).toString(16).padStart(2, '0');
+        return `0 0 ${themeState.glowSettings.blur}px ${themeState.glowSettings.spread}px ${themeState.glowSettings.color}${alphaHex}`;
+      }
+      return `0 0 15px ${themeState.accent}66`;
+    }
     switch (shadow) {
       case "none": return "none";
       case "sm": return "0 1px 2px rgba(0,0,0,0.05)";
       case "md": return "0 4px 6px rgba(0,0,0,0.08)";
       case "lg": return "0 10px 15px rgba(0,0,0,0.1)";
-      case "glow": return `0 0 12px ${themeState.accent}40`;
       case "retro": return `4px 4px 0px ${themeState.border}`;
       default: return "none";
     }

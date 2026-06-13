@@ -1,10 +1,10 @@
 import * as React from "react";
 import type { CustomTheme } from "@/core/entities/settings";
-import { resolveColor } from "@/lib/color-utils";
+import { ColorSelector } from "@/components/ui/ColorSelector";
 
 interface DecoupledSectionsTabProps {
   themeState: CustomTheme;
-  setThemeState: React.Dispatch<React.SetStateAction<CustomTheme>>;
+  setThemeState: (updater: CustomTheme | ((prev: CustomTheme) => CustomTheme), push?: boolean) => void;
 }
 
 export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSectionsTabProps) {
@@ -45,53 +45,43 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
         {themeState.overrideSidebar && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-scale-up">
             {/* Sidebar background */}
-            <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
+            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Sidebar background</span>
-              <input
-                type="color"
-                value={resolveColor(themeState.sidebarBackground || themeState.cardBackground)}
-                onChange={(e) => handleColorChange("sidebarBackground", e.target.value)}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+              <ColorSelector
+                value={themeState.sidebarBackground || themeState.cardBackground}
+                onChange={(color) => handleColorChange("sidebarBackground", color)}
               />
             </div>
             {/* Sidebar foreground */}
-            <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
+            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Sidebar text color</span>
-              <input
-                type="color"
-                value={resolveColor(themeState.sidebarForeground || themeState.cardForeground)}
-                onChange={(e) => handleColorChange("sidebarForeground", e.target.value)}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+              <ColorSelector
+                value={themeState.sidebarForeground || themeState.cardForeground}
+                onChange={(color) => handleColorChange("sidebarForeground", color)}
               />
             </div>
             {/* Sidebar Border */}
-            <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
+            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Sidebar line border</span>
-              <input
-                type="color"
-                value={resolveColor(themeState.sidebarBorder || themeState.border)}
-                onChange={(e) => handleColorChange("sidebarBorder", e.target.value)}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+              <ColorSelector
+                value={themeState.sidebarBorder || themeState.border}
+                onChange={(color) => handleColorChange("sidebarBorder", color)}
               />
             </div>
             {/* Sidebar Active Background */}
-            <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
+            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Active item tag background</span>
-              <input
-                type="color"
-                value={resolveColor(themeState.sidebarActiveBackground || themeState.accent)}
-                onChange={(e) => handleColorChange("sidebarActiveBackground", e.target.value)}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+              <ColorSelector
+                value={themeState.sidebarActiveBackground || themeState.accent}
+                onChange={(color) => handleColorChange("sidebarActiveBackground", color)}
               />
             </div>
             {/* Sidebar Active Foreground */}
-            <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
+            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Active item text color</span>
-              <input
-                type="color"
-                value={resolveColor(themeState.sidebarActiveForeground || themeState.accentForeground)}
-                onChange={(e) => handleColorChange("sidebarActiveForeground", e.target.value)}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+              <ColorSelector
+                value={themeState.sidebarActiveForeground || themeState.accentForeground}
+                onChange={(color) => handleColorChange("sidebarActiveForeground", color)}
               />
             </div>
           </div>
@@ -119,33 +109,27 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
         {themeState.overrideReader && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-scale-up">
             {/* Reader background */}
-            <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
+            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Reading page background</span>
-              <input
-                type="color"
-                value={resolveColor(themeState.readerBackground || themeState.background)}
-                onChange={(e) => handleColorChange("readerBackground", e.target.value)}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+              <ColorSelector
+                value={themeState.readerBackground || themeState.background}
+                onChange={(color) => handleColorChange("readerBackground", color)}
               />
             </div>
             {/* Reader foreground */}
-            <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
+            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Reading text color</span>
-              <input
-                type="color"
-                value={resolveColor(themeState.readerForeground || themeState.foreground)}
-                onChange={(e) => handleColorChange("readerForeground", e.target.value)}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+              <ColorSelector
+                value={themeState.readerForeground || themeState.foreground}
+                onChange={(color) => handleColorChange("readerForeground", color)}
               />
             </div>
             {/* Reader border */}
-            <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
+            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Reading canvas border</span>
-              <input
-                type="color"
-                value={resolveColor(themeState.readerBorder || themeState.border)}
-                onChange={(e) => handleColorChange("readerBorder", e.target.value)}
-                className="w-8 h-8 rounded border shrink-0 bg-transparent cursor-pointer"
+              <ColorSelector
+                value={themeState.readerBorder || themeState.border}
+                onChange={(color) => handleColorChange("readerBorder", color)}
               />
             </div>
           </div>

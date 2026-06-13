@@ -55,6 +55,13 @@ export interface CustomTheme {
     opacity: number;
     borderOpacity: number;
   };
+  glowSettings?: {
+    enabled: boolean;
+    color: string;
+    brightness: number; // 0 to 1
+    spread: number;
+    blur: number;
+  };
   customCss?: string;
 }
 
