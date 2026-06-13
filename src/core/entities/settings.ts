@@ -1,5 +1,65 @@
+export interface CustomTheme {
+  id: string; // unique ID, e.g. "theme-custom-171829472"
+  name: string;
+  isDark: boolean;
+  
+  // Custom Typography
+  uiFont?: "inter" | "roboto" | "outfit" | "system-ui";
+  readerFont?: "serif" | "inter" | "atkinson" | "dyslexic" | "sans-serif";
+
+  // Core HSL Color Set (HEX strings)
+  background: string;
+  foreground: string;
+  border: string;
+  muted: string;
+  mutedForeground: string;
+  accent: string;
+  accentForeground: string;
+
+  // Panel & Card Override Styles
+  cardBackground: string;
+  cardForeground: string;
+  cardBorder: string;
+  cardRadius?: "0px" | "4px" | "8px" | "12px" | "16px" | "24px" | string;
+  cardShadow?: "none" | "sm" | "md" | "lg" | "glow" | "retro" | string;
+
+  // Sidebar Override Toggle & Colors
+  overrideSidebar: boolean;
+  sidebarBackground?: string;
+  sidebarForeground?: string;
+  sidebarBorder?: string;
+  sidebarActiveBackground?: string;
+  sidebarActiveForeground?: string;
+
+  // Reader Room Override Toggle & Colors
+  overrideReader: boolean;
+  readerBackground?: string;
+  readerForeground?: string;
+  readerBorder?: string;
+
+  // Background Options (Solid, Gradient, Image)
+  bgType: "solid" | "gradient" | "image";
+  bgGradientStart?: string;
+  bgGradientEnd?: string;
+  bgGradientAngle?: number;
+  bgImageUrl?: string; // Base64 compressed image or web URL
+  bgImageBlur?: number;
+  bgImageOpacity?: number;
+  bgImageOverlay?: string;
+  bgImageOverlayOpacity?: number;
+
+  // Materials & Effects
+  glassmorphism?: {
+    enabled: boolean;
+    blur: number;
+    opacity: number;
+    borderOpacity: number;
+  };
+  customCss?: string;
+}
+
 export interface GeneralSettings {
-  theme: "dark-violet" | "light" | "sepia" | "nord";
+  theme: "dark-violet" | "light" | "sepia" | "nord" | string;
   accentColor: string; // "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue" or custom hex
   uiFont: "inter" | "roboto" | "outfit";
   glassmorphism: boolean;
@@ -13,6 +73,7 @@ export interface GeneralSettings {
   telemetryPreference: "cloud" | "anonymous" | "disabled";
   yearlyReadingGoal: number;   // Yearly reading target in books
   savedColors?: string[];      // Custom saved color palette (hex codes)
+  customThemes?: CustomTheme[]; // Collection of user created themes
 }
 
 export interface RsvpSettings {
@@ -58,6 +119,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
     telemetryPreference: "cloud",
     yearlyReadingGoal: 15,
     savedColors: [],
+    customThemes: [],
   },
   rsvp: {
     fontSize: 48,

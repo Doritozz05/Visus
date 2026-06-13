@@ -33,6 +33,19 @@
     --ring: 243 75% 59%;
     
     --radius: 0.75rem;
+
+    /* Decoupled custom theme variables fallbacks */
+    --sidebar-background: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-border: var(--border);
+    --sidebar-active-background: var(--primary);
+    --sidebar-active-foreground: var(--primary-foreground);
+
+    --reader-background: var(--background);
+    --reader-foreground: var(--foreground);
+    --reader-border: var(--border);
+
+    --card-shadow: none;
   }
 
   html, body {
@@ -391,6 +404,71 @@ body[data-glass="disabled"] .liquid-glass {
 .reader-columns-canvas li {
   margin-bottom: 0.5rem;
   line-height: 1.75;
+}
+
+/* ==========================================================================
+   DYNAMIC CUSTOM THEME ENGINE SUPPORT
+   ========================================================================== */
+
+/* Fullpage background image layer */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -10;
+  background-image: var(--bg-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(var(--bg-image-blur, 0px));
+  opacity: var(--bg-image-opacity, 1);
+  pointer-events: none;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Background image overlay tint layer */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -9;
+  background: var(--bg-image-overlay, transparent);
+  pointer-events: none;
+  transition: background 0.3s ease;
+}
+
+/* Dynamic radius mapping */
+.rounded-xl {
+  border-radius: var(--radius, 0.75rem) !important;
+}
+.rounded-2xl {
+  border-radius: calc(var(--radius, 0.75rem) * 1.33) !important;
+}
+.rounded-lg {
+  border-radius: calc(var(--radius, 0.75rem) * 0.8) !important;
+}
+
+/* Dynamic shadows */
+.liquid-glass, .bg-card, [class*="bg-card/"] {
+  box-shadow: var(--card-shadow, none) !important;
+}
+
+/* Dynamic glassmorphism overrides for custom themes */
+.theme-custom .liquid-glass {
+  background: var(--glass-bg, rgba(255, 255, 255, 0.45)) !important;
+  backdrop-filter: var(--glass-blur, blur(12px)) !important;
+  border: var(--glass-border, 1px solid rgba(255, 255, 255, 0.25)) !important;
+}
+.theme-custom.dark .liquid-glass {
+  background: var(--glass-bg, rgba(15, 23, 42, 0.45)) !important;
+  backdrop-filter: var(--glass-blur, blur(12px)) !important;
+  border: var(--glass-border, 1px solid rgba(255, 255, 255, 0.05)) !important;
 }
 
 

@@ -29,6 +29,7 @@ interface FancyDropdownProps {
   searchPlaceholder?: string;
   searchInputClassName?: string;
   keepSelectedVisibleWhenFiltered?: boolean;
+  menuZIndex?: number;
 }
 
 export function FancyDropdown({
@@ -47,6 +48,7 @@ export function FancyDropdown({
   searchPlaceholder = "Search...",
   searchInputClassName,
   keepSelectedVisibleWhenFiltered = true,
+  menuZIndex = 60,
 }: FancyDropdownProps) {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -87,10 +89,10 @@ export function FancyDropdown({
       top,
       left,
       width,
-      zIndex: 60,
+      zIndex: menuZIndex,
     });
     setIsMenuPositioned(true);
-  }, [align]);
+  }, [align, menuZIndex]);
 
   React.useLayoutEffect(() => {
     if (!isOpen) return;
@@ -151,7 +153,11 @@ export function FancyDropdown({
       {isOpen && typeof document !== "undefined"
         ? createPortal(
             <>
-              <div className="fixed inset-0 z-50 bg-transparent" onClick={() => setIsOpen(false)} />
+              <div 
+                className="fixed inset-0 bg-transparent" 
+                style={{ zIndex: menuZIndex - 1 }}
+                onClick={() => setIsOpen(false)} 
+              />
               <div
                 ref={menuRef}
                 role="listbox"

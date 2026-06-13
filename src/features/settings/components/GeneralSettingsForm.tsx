@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Palette, CheckCircle, Settings2 } from "lucide-react";
+import { Palette, CheckCircle, Settings2, Edit, Trash2, Plus } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
-import type { GeneralSettings } from "@/core/entities/settings";
+import type { GeneralSettings, CustomTheme } from "@/core/entities/settings";
 import { ColorSelector } from "@/components/ui/ColorSelector";
+import { ThemeEditor } from "./ThemeEditor";
 
 export function GeneralSettingsForm() {
   const { settings, updateGeneralSettings } = useSettings();
@@ -16,8 +17,51 @@ export function GeneralSettingsForm() {
     reducedMotion,
     soundEffects,
     readingTimerReminder,
-    yearlyReadingGoal
+    yearlyReadingGoal,
+    customThemes = []
   } = settings.general;
+
+  const [isEditorOpen, setIsEditorOpen] = React.useState(false);
+  const [themeToEdit, setThemeToEdit] = React.useState<CustomTheme | null>(null);
+
+  const handleSaveTheme = (newTheme: CustomTheme) => {
+    const exists = customThemes.some((t) => t.id === newTheme.id);
+    let updatedThemes: CustomTheme[];
+    if (exists) {
+      updatedThemes = customThemes.map((t) => (t.id === newTheme.id ? newTheme : t));
+    } else {
+      updatedThemes = [...customThemes, newTheme];
+    }
+    updateGeneralSettings({
+      customThemes: updatedThemes,
+      theme: newTheme.id
+    });
+    setIsEditorOpen(false);
+    setThemeToEdit(null);
+  };
+
+  const handleDeleteTheme = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation(); // prevent setting it as active
+    const updatedThemes = customThemes.filter((t) => t.id !== id);
+    const fallbackTheme = theme === id ? "light" : theme;
+    updateGeneralSettings({
+      customThemes: updatedThemes,
+      theme: fallbackTheme
+    });
+    setIsEditorOpen(false);
+    setThemeToEdit(null);
+  };
+
+  const handleEditTheme = (t: CustomTheme, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setThemeToEdit(t);
+    setIsEditorOpen(true);
+  };
+
+  const handleCreateTheme = () => {
+    setThemeToEdit(null);
+    setIsEditorOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -56,6 +100,70 @@ export function GeneralSettingsForm() {
                 </div>
               </button>
             ))}
+
+            {/* Custom themes list */}
+            {customThemes.map((t) => (
+              <div
+                key={t.id}
+                onClick={() => updateGeneralSettings({ theme: t.id })}
+                className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer group ${theme === t.id
+                  ? "border-primary bg-accent/65"
+                  : "border-border/30 bg-card hover:border-border/60"
+                  }`}
+              >
+                <div className="flex items-center justify-between mb-2 w-full">
+                  <span className="text-[11px] font-bold truncate pr-6">{t.name}</span>
+                  <div className="flex items-center gap-1">
+                    {theme === t.id ? (
+                      <CheckCircle className="text-primary h-3.5 w-3.5 shrink-0" />
+                    ) : (
+                      <div className="flex opacity-0 group-hover:opacity-100 transition-all gap-1.5">
+                        <button
+                          onClick={(e) => handleEditTheme(t, e)}
+                          title="Edit Theme"
+                          className="p-0.5 hover:text-primary transition-colors text-muted-foreground"
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteTheme(t.id, e)}
+                          title="Delete Theme"
+                          className="p-0.5 hover:text-destructive transition-colors text-muted-foreground"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-1.5 items-center w-full justify-between">
+                  <div className="flex gap-1.5 items-center">
+                    <div 
+                      className="w-4 h-4 rounded-full border border-border/40 shrink-0 shadow-inner" 
+                      style={{ backgroundColor: t.background }} 
+                    />
+                    <span className="text-[8px] text-muted-foreground leading-tight truncate">Custom Theme</span>
+                  </div>
+                  {theme === t.id && (
+                    <button
+                      onClick={(e) => handleEditTheme(t, e)}
+                      className="text-[8px] font-mono uppercase tracking-wider text-primary hover:underline font-bold"
+                    >
+                      Configure
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Create theme button */}
+            <button
+              onClick={handleCreateTheme}
+              className="p-2.5 border border-dashed border-border/40 hover:border-primary/50 bg-card/20 hover:bg-accent/10 rounded-lg text-center flex flex-col items-center justify-center transition-all min-h-[58px]"
+            >
+              <Plus className="h-4.5 w-4.5 text-muted-foreground mb-1" />
+              <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Create Theme</span>
+            </button>
           </div>
         </div>
 
@@ -174,6 +282,18 @@ export function GeneralSettingsForm() {
 
         </div>
       </div>
+
+      {isEditorOpen && (
+        <ThemeEditor
+          themeToEdit={themeToEdit}
+          onSave={handleSaveTheme}
+          onDelete={(id) => handleDeleteTheme(id)}
+          onClose={() => {
+            setIsEditorOpen(false);
+            setThemeToEdit(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -211,7 +211,7 @@ export default function ReaderClient() {
   }
 
   return (
-    <div className="h-screen overflow-hidden overscroll-none flex flex-col items-center justify-between relative transition-all duration-300">
+    <div className="h-screen overflow-hidden overscroll-none flex flex-col items-center justify-between relative transition-all duration-300 bg-[hsl(var(--reader-background))] text-[hsl(var(--reader-foreground))]">
       {/* Focus Mode Exit Button */}
       {isFocusMode && (
         <button

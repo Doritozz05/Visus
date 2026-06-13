@@ -10,7 +10,7 @@ import { hexToHsl, resolveColor } from "@/lib/color-utils";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
-  const { theme, accentColor, uiFont, reducedMotion, glassmorphism } = settings.general;
+  const { theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes = [] } = settings.general;
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -18,8 +18,43 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     const body = document.body;
 
-    // 1. Theme handler
-    // Remove any existing theme- classes
+    const toHslString = (hex: string) => {
+      try {
+        return hexToHsl(hex).stringVal;
+      } catch (e) {
+        return "0 0% 100%";
+      }
+    };
+
+    const toRgbString = (hex: string) => {
+      try {
+        const resolved = resolveColor(hex);
+        let cleaned = resolved.replace("#", "").trim();
+        if (cleaned.length === 3) {
+          cleaned = cleaned[0] + cleaned[0] + cleaned[1] + cleaned[1] + cleaned[2] + cleaned[2];
+        }
+        const r = parseInt(cleaned.substring(0, 2), 16);
+        const g = parseInt(cleaned.substring(2, 4), 16);
+        const b = parseInt(cleaned.substring(4, 6), 16);
+        return `${r}, ${g}, ${b}`;
+      } catch (e) {
+        return "255, 255, 255";
+      }
+    };
+
+    const getShadowValue = (style: string | undefined): string => {
+      switch (style) {
+        case "none": return "none";
+        case "sm": return "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
+        case "md": return "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+        case "lg": return "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
+        case "glow": return "0 0 15px var(--primary-shadow, rgba(99, 102, 241, 0.15))";
+        case "retro": return "4px 4px 0px 0px hsl(var(--border))";
+        default: return "none";
+      }
+    };
+
+    // Clean up dynamic classes and custom style tags
     const classesToRemove: string[] = [];
     root.classList.forEach((className) => {
       if (className.startsWith("theme-")) {
@@ -27,41 +62,159 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       }
     });
     classesToRemove.forEach((c) => root.classList.remove(c));
+    
+    // Clear previous custom styles
+    const prevStyleTag = document.getElementById("visus-custom-theme-css");
+    if (prevStyleTag) prevStyleTag.remove();
 
-    // Add new theme class
-    root.classList.add(`theme-${theme}`);
+    const customTheme = customThemes.find((t) => t.id === theme);
 
-    // Toggle classic Tailwind dark utilities
-    if (theme === "dark-violet" || theme === "nord") {
-      root.classList.add("dark");
+    if (customTheme) {
+      root.classList.add("theme-custom");
+      root.classList.add(`theme-${theme}`);
+
+      if (customTheme.isDark) {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+
+      root.style.setProperty("--background", toHslString(customTheme.background));
+      root.style.setProperty("--foreground", toHslString(customTheme.foreground));
+      root.style.setProperty("--border", toHslString(customTheme.border));
+      root.style.setProperty("--card", toHslString(customTheme.cardBackground));
+      root.style.setProperty("--card-foreground", toHslString(customTheme.cardForeground));
+      root.style.setProperty("--primary", toHslString(customTheme.accent));
+      root.style.setProperty("--primary-foreground", toHslString(customTheme.accentForeground));
+      root.style.setProperty("--muted", toHslString(customTheme.muted));
+      root.style.setProperty("--muted-foreground", toHslString(customTheme.mutedForeground));
+
+      // Sidebar overrides
+      if (customTheme.overrideSidebar) {
+        root.style.setProperty("--sidebar-background", toHslString(customTheme.sidebarBackground || customTheme.cardBackground));
+        root.style.setProperty("--sidebar-foreground", toHslString(customTheme.sidebarForeground || customTheme.cardForeground));
+        root.style.setProperty("--sidebar-border", toHslString(customTheme.sidebarBorder || customTheme.border));
+        root.style.setProperty("--sidebar-active-background", toHslString(customTheme.sidebarActiveBackground || customTheme.accent));
+        root.style.setProperty("--sidebar-active-foreground", toHslString(customTheme.sidebarActiveForeground || customTheme.accentForeground));
+      } else {
+        root.style.setProperty("--sidebar-background", toHslString(customTheme.cardBackground));
+        root.style.setProperty("--sidebar-foreground", toHslString(customTheme.cardForeground));
+        root.style.setProperty("--sidebar-border", toHslString(customTheme.border));
+        root.style.setProperty("--sidebar-active-background", toHslString(customTheme.accent));
+        root.style.setProperty("--sidebar-active-foreground", toHslString(customTheme.accentForeground));
+      }
+
+      // Reader overrides
+      if (customTheme.overrideReader) {
+        root.style.setProperty("--reader-background", toHslString(customTheme.readerBackground || customTheme.background));
+        root.style.setProperty("--reader-foreground", toHslString(customTheme.readerForeground || customTheme.foreground));
+        root.style.setProperty("--reader-border", toHslString(customTheme.readerBorder || customTheme.border));
+      } else {
+        root.style.setProperty("--reader-background", toHslString(customTheme.background));
+        root.style.setProperty("--reader-foreground", toHslString(customTheme.foreground));
+        root.style.setProperty("--reader-border", toHslString(customTheme.border));
+      }
+
+      root.style.setProperty("--radius", customTheme.cardRadius || "0.75rem");
+      root.style.setProperty("--card-shadow", getShadowValue(customTheme.cardShadow));
+      root.style.setProperty("--primary-shadow", `rgba(${toRgbString(customTheme.accent)}, 0.25)`);
+
+      // Glassmorphism
+      if (customTheme.glassmorphism?.enabled) {
+        const bgRgb = toRgbString(customTheme.cardBackground);
+        const borderRgb = toRgbString(customTheme.border);
+        root.style.setProperty("--glass-bg", `rgba(${bgRgb}, ${customTheme.glassmorphism.opacity})`);
+        root.style.setProperty("--glass-blur", `blur(${customTheme.glassmorphism.blur}px)`);
+        root.style.setProperty("--glass-border", `1px solid rgba(${borderRgb}, ${customTheme.glassmorphism.borderOpacity})`);
+      } else {
+        root.style.removeProperty("--glass-bg");
+        root.style.removeProperty("--glass-blur");
+        root.style.removeProperty("--glass-border");
+      }
+
+      // Background graphics engine
+      if (customTheme.bgType === "image" && customTheme.bgImageUrl) {
+        root.style.setProperty("--bg-image", `url(${customTheme.bgImageUrl})`);
+        root.style.setProperty("--bg-image-opacity", (customTheme.bgImageOpacity ?? 1).toString());
+        root.style.setProperty("--bg-image-blur", `${customTheme.bgImageBlur ?? 0}px`);
+        if (customTheme.bgImageOverlay) {
+          const overlayRgb = toRgbString(customTheme.bgImageOverlay);
+          root.style.setProperty("--bg-image-overlay", `rgba(${overlayRgb}, ${customTheme.bgImageOverlayOpacity ?? 0})`);
+        } else {
+          root.style.setProperty("--bg-image-overlay", "transparent");
+        }
+      } else if (customTheme.bgType === "gradient" && customTheme.bgGradientStart && customTheme.bgGradientEnd) {
+        const angle = customTheme.bgGradientAngle ?? 135;
+        root.style.setProperty("--bg-image", `linear-gradient(${angle}deg, ${customTheme.bgGradientStart}, ${customTheme.bgGradientEnd})`);
+        root.style.setProperty("--bg-image-opacity", "1");
+        root.style.setProperty("--bg-image-blur", "0px");
+        root.style.setProperty("--bg-image-overlay", "transparent");
+      } else {
+        root.style.removeProperty("--bg-image");
+        root.style.removeProperty("--bg-image-opacity");
+        root.style.removeProperty("--bg-image-blur");
+        root.style.removeProperty("--bg-image-overlay");
+      }
+
+      body.setAttribute("data-accent", "custom");
+      body.setAttribute("data-ui-font", customTheme.uiFont || uiFont);
+      body.setAttribute("data-glass", customTheme.glassmorphism?.enabled ? "enabled" : "disabled");
+
+      if (customTheme.uiFont === "system-ui") {
+        root.style.setProperty("--font-sans", "system-ui, -apple-system, sans-serif");
+      } else {
+        root.style.removeProperty("--font-sans");
+      }
+
+      // Injects user CSS custom stylesheet if present
+      if (customTheme.customCss) {
+        const style = document.createElement("style");
+        style.id = "visus-custom-theme-css";
+        style.appendChild(document.createTextNode(customTheme.customCss));
+        document.head.appendChild(style);
+      }
     } else {
-      root.classList.remove("dark");
+      root.classList.remove("theme-custom");
+      root.classList.add(`theme-${theme}`);
+
+      if (theme === "dark-violet" || theme === "nord") {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+
+      const propertiesToClear = [
+        "--background", "--foreground", "--border", "--card", "--card-foreground",
+        "--primary", "--primary-foreground", "--muted", "--muted-foreground",
+        "--sidebar-background", "--sidebar-foreground", "--sidebar-border", "--sidebar-active-background", "--sidebar-active-foreground",
+        "--reader-background", "--reader-foreground", "--reader-border",
+        "--radius", "--card-shadow", "--primary-shadow",
+        "--glass-bg", "--glass-blur", "--glass-border",
+        "--bg-image", "--bg-image-opacity", "--bg-image-blur", "--bg-image-overlay"
+      ];
+      propertiesToClear.forEach((p) => root.style.removeProperty(p));
+
+      body.setAttribute("data-accent", accentColor);
+      body.setAttribute("data-ui-font", uiFont);
+      body.setAttribute("data-glass", glassmorphism ? "enabled" : "disabled");
+
+      try {
+        const hex = resolveColor(accentColor);
+        const { stringVal } = hexToHsl(hex);
+        root.style.setProperty("--primary", stringVal);
+        root.style.setProperty("--ring", stringVal);
+      } catch (err) {
+        root.style.removeProperty("--primary");
+        root.style.removeProperty("--ring");
+      }
     }
 
-    // 2. Set dynamic theme attributes on body for target styling
-    body.setAttribute("data-accent", accentColor);
-    body.setAttribute("data-ui-font", uiFont);
-    body.setAttribute("data-glass", glassmorphism ? "enabled" : "disabled");
-
-    // Dynamic HSL injection for all accent colors (presets and custom hexes)
-    try {
-      const hex = resolveColor(accentColor);
-      const { stringVal } = hexToHsl(hex);
-      root.style.setProperty("--primary", stringVal);
-      root.style.setProperty("--ring", stringVal);
-    } catch (err) {
-      console.warn("Failed to apply dynamic accent color:", err);
-      root.style.removeProperty("--primary");
-      root.style.removeProperty("--ring");
-    }
-
-    // 3. Motion preferences
     if (reducedMotion) {
       root.classList.add("reduced-motion");
     } else {
       root.classList.remove("reduced-motion");
     }
-  }, [theme, accentColor, uiFont, reducedMotion, glassmorphism]);
+  }, [theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes]);
 
   return <>{children}</>;
 }
