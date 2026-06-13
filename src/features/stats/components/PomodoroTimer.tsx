@@ -6,7 +6,7 @@
 "use client";
 
 import * as React from "react";
-import { Play, Pause, RotateCcw, Timer, Award, FastForward } from "lucide-react";
+import { Play, Pause, RotateCcw, Timer, Award, FastForward, Trophy, Crown, Medal } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,8 +32,8 @@ export const PomodoroTimer = React.memo(function PomodoroTimer() {
       });
 
       if (nextCycles === 4) {
-        toast.success("🏆 Pomodoro Master! You completed 4 focus cycles today.", {
-          icon: "👑",
+        toast.success("Pomodoro Master! You completed 4 focus cycles today.", {
+          icon: <Crown className="w-4 h-4 text-indigo-500 animate-achievement-shine" />,
           duration: 10000,
         });
       }
@@ -41,7 +41,8 @@ export const PomodoroTimer = React.memo(function PomodoroTimer() {
       setMode("break");
       setTimeLeft(5 * 60);
     } else {
-      toast.success("💪 Break over! Time to dive back into reading.", {
+      toast.success("Break over! Time to dive back into reading.", {
+        icon: <Trophy className="w-4 h-4 text-yellow-500" />,
         duration: 8000,
       });
       setMode("focus");
@@ -93,8 +94,17 @@ export const PomodoroTimer = React.memo(function PomodoroTimer() {
           <Timer className="w-4 h-4 text-primary" />
           <span>Pomodoro</span>
         </div>
-        <div className="flex items-center gap-1 text-[10px] font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-          <Award className="w-3.5 h-3.5" />
+        <div className={`flex items-center gap-1 text-[10px] font-mono bg-primary/10 px-2 py-0.5 rounded-full transition-all ${
+          completedCycles >= 4 ? 'text-indigo-500 bg-indigo-500/10 shadow-[0_0_8px_rgba(99,102,241,0.3)] animate-achievement-shine' :
+          completedCycles >= 3 ? 'text-yellow-500 bg-yellow-500/10' :
+          completedCycles >= 2 ? 'text-slate-400 bg-slate-400/10' :
+          completedCycles >= 1 ? 'text-amber-600 bg-amber-600/10' :
+          'text-primary'
+        }`}>
+          {completedCycles >= 4 ? <Crown className="w-3.5 h-3.5" /> : 
+           completedCycles >= 3 ? <Trophy className="w-3.5 h-3.5" /> : 
+           completedCycles >= 2 ? <Medal className="w-3.5 h-3.5" /> : 
+           <Award className="w-3.5 h-3.5" />}
           <span>{completedCycles} {completedCycles === 1 ? 'Cycle' : 'Cycles'}</span>
         </div>
       </div>

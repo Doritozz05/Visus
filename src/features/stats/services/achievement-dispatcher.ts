@@ -7,6 +7,7 @@ import { dbService } from "@/core/services/db-service";
 import { ReadingSessionLog } from "@/core/entities/stats";
 import { toast } from "sonner";
 import * as React from "react";
+import { Award, Medal, Trophy, Crown, Timer } from "lucide-react";
 
 export interface Achievement {
   id: string;
@@ -268,42 +269,53 @@ export class AchievementDispatcher {
   }
 
   private static triggerToast(achievement: Achievement) {
-    const tierColors = {
-      bronze: "text-amber-600 dark:text-amber-500",
-      silver: "text-slate-500 dark:text-slate-400",
-      gold: "text-yellow-600 dark:text-yellow-500",
-      platinum: "text-indigo-500 dark:text-cyan-400"
+    const tierStyles = {
+      bronze: {
+        color: "text-amber-600 dark:text-amber-500",
+        bg: "bg-amber-500/10",
+        icon: React.createElement(Award, { className: "w-6 h-6 animate-achievement-shine" })
+      },
+      silver: {
+        color: "text-slate-500 dark:text-slate-400",
+        bg: "bg-slate-400/10",
+        icon: React.createElement(Medal, { className: "w-6 h-6 animate-achievement-shine" })
+      },
+      gold: {
+        color: "text-yellow-600 dark:text-yellow-500",
+        bg: "bg-yellow-500/10",
+        icon: React.createElement(Trophy, { className: "w-6 h-6 animate-achievement-shine" })
+      },
+      platinum: {
+        color: "text-indigo-500 dark:text-cyan-400",
+        bg: "bg-indigo-500/10",
+        icon: React.createElement(Crown, { className: "w-6 h-6 animate-achievement-shine" })
+      }
     };
 
-    const tierBadges = {
-      bronze: "🥉",
-      silver: "🥈",
-      gold: "🥇",
-      platinum: "👑"
-    };
+    const style = tierStyles[achievement.tier];
 
     toast.custom((t) => {
       return React.createElement(
         "div",
         {
-          className: `w-full max-w-sm bg-card border border-border p-4 rounded-xl shadow-lg flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300 relative overflow-hidden backdrop-blur-md`
+          className: `w-full max-w-sm bg-card border border-border p-4 rounded-xl shadow-lg flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300 relative overflow-hidden backdrop-blur-md shine-overlay`
         },
         React.createElement("div", {
-          className: "absolute inset-0 bg-primary/5 pointer-events-none mix-blend-overlay"
+          className: `absolute inset-0 ${style.bg} pointer-events-none mix-blend-overlay`
         }),
         React.createElement(
           "div",
           {
-            className: `w-12 h-12 bg-muted/50 border border-border/50 rounded-full flex items-center justify-center text-2xl shadow-inner shrink-0 ${tierColors[achievement.tier]}`
+            className: `w-12 h-12 bg-muted/50 border border-border/50 rounded-full flex items-center justify-center shadow-inner shrink-0 ${style.color}`
           },
-          tierBadges[achievement.tier]
+          style.icon
         ),
         React.createElement(
           "div",
-          { className: "flex-1" },
+          { className: "flex-1 z-10" },
           React.createElement(
             "p",
-            { className: `text-[10px] font-mono uppercase tracking-widest font-bold ${tierColors[achievement.tier]}` },
+            { className: `text-[10px] font-mono uppercase tracking-widest font-bold ${style.color}` },
             `Achievement Unlocked! (${achievement.tier})`
           ),
           React.createElement(
@@ -321,7 +333,7 @@ export class AchievementDispatcher {
           "button",
           {
             onClick: () => toast.dismiss(t),
-            className: "text-muted-foreground hover:text-foreground text-lg shrink-0 self-start p-1 transition-colors"
+            className: "text-muted-foreground hover:text-foreground text-lg shrink-0 self-start p-1 transition-colors z-10"
           },
           "×"
         )

@@ -8,7 +8,7 @@
 import * as React from "react";
 import { dbService } from "@/core/services/db-service";
 import { MASTER_ACHIEVEMENTS, Achievement } from "../services/achievement-dispatcher";
-import { Award, Lock, ShieldAlert } from "lucide-react";
+import { Award, Lock, Trophy, Medal, Crown } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 interface AchievementsShowcaseProps {
@@ -70,77 +70,85 @@ export function AchievementsShowcase({ userId }: AchievementsShowcaseProps) {
     return <LoadingSpinner message="Loading achievements..." className="min-h-[150px] p-0" />;
   }
 
-  const tierGlow = {
-    bronze: "shadow-[0_0_10px_rgba(217,119,6,0.15)] border-amber-500/20 bg-amber-500/5",
-    silver: "shadow-[0_0_10px_rgba(148,163,184,0.15)] border-slate-400/20 bg-slate-400/5",
-    gold: "shadow-[0_0_10px_rgba(234,179,8,0.2)] border-yellow-500/30 bg-yellow-500/5",
-    platinum: "shadow-[0_0_15px_rgba(6,182,212,0.25)] border-cyan-400/40 bg-cyan-500/5"
-  };
-
-  const badgeIcon = {
-    bronze: "🥉",
-    silver: "🥈",
-    gold: "🥇",
-    platinum: "👑"
-  };
-
-  const badgeText = {
-    bronze: "Bronze",
-    silver: "Silver",
-    gold: "Gold",
-    platinum: "Platinum"
+  const tierStyles = {
+    bronze: {
+      glow: "shadow-[0_0_15px_rgba(217,119,6,0.2)] border-amber-500/30 bg-amber-500/5",
+      icon: <Award className="w-6 h-6 text-amber-600" />,
+      textColor: "text-amber-700 dark:text-amber-500"
+    },
+    silver: {
+      glow: "shadow-[0_0_15px_rgba(148,163,184,0.2)] border-slate-400/30 bg-slate-400/5",
+      icon: <Medal className="w-6 h-6 text-slate-400" />,
+      textColor: "text-slate-600 dark:text-slate-300"
+    },
+    gold: {
+      glow: "shadow-[0_0_20px_rgba(234,179,8,0.25)] border-yellow-500/40 bg-yellow-500/5",
+      icon: <Trophy className="w-6 h-6 text-yellow-500" />,
+      textColor: "text-yellow-700 dark:text-yellow-400"
+    },
+    platinum: {
+      glow: "shadow-[0_0_25px_rgba(99,102,241,0.3)] border-indigo-400/50 bg-indigo-500/5",
+      icon: <Crown className="w-6 h-6 text-indigo-400" />,
+      textColor: "text-indigo-600 dark:text-indigo-300"
+    }
   };
 
   return (
     <div className="bg-card border border-border/20 p-5 rounded-xl h-full flex flex-col justify-between group hover:border-primary/40 transition-all shadow-md liquid-glass">
       <div className="w-full border-b border-border/10 pb-2 mb-4 flex justify-between items-center">
         <div>
-          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Achievements & Milestones</h3>
+          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground font-bold">Achievements & Milestones</h3>
           <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Unlocked goals and reading consistency progress</p>
         </div>
         <Award className="w-4 h-4 text-primary shrink-0" />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 overflow-y-auto custom-scrollbar max-h-[320px] pr-1 py-1">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 overflow-y-auto custom-scrollbar max-h-[380px] px-4 py-4 -mx-2">
         {achievements.map((ach) => {
           const isUnlocked = !!ach.unlockedAt;
+          const style = tierStyles[ach.tier];
           
           return (
             <div
               key={ach.id}
-              className={`border rounded-lg p-3 flex flex-col items-center justify-between text-center transition-all ${
+              className={`border rounded-lg p-2.5 flex flex-col items-center justify-between text-center transition-all relative group/item ${
                 isUnlocked
-                  ? `${tierGlow[ach.tier]} border-primary/30 hover:border-primary/60 hover:scale-[1.02] cursor-default`
+                  ? `${style.glow} border-primary/30 hover:border-primary/60 hover:scale-[1.05] cursor-default`
                   : "bg-background/25 border-border/10 opacity-60 filter grayscale"
               }`}
             >
-              {/* Badge Icon */}
-              <div className="relative w-11 h-11 rounded-full bg-background/50 border border-border/20 flex items-center justify-center text-xl shadow-inner mb-2">
+              {/* Shine Overlay wrapper to avoid clipping external shadows */}
+              {isUnlocked && (
+                <div className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none shine-overlay opacity-30" />
+              )}
+
+              {/* Badge Icon - Slightly smaller */}
+              <div className={`relative w-10 h-10 rounded-full bg-background/50 border border-border/20 flex items-center justify-center shadow-inner mb-2 ${isUnlocked ? 'animate-achievement-shine' : ''}`}>
                 {isUnlocked ? (
-                  badgeIcon[ach.tier]
+                  React.cloneElement(style.icon as React.ReactElement, { className: "w-5 h-5" })
                 ) : (
-                  <Lock className="w-4 h-4 text-muted-foreground" />
+                  <Lock className="w-3.5 h-3.5 text-muted-foreground" />
                 )}
               </div>
 
-              {/* Title & Desc */}
-              <div className="min-w-0">
-                <h4 className="text-[11px] font-bold text-foreground truncate">{ach.title}</h4>
-                <p className="text-[9px] text-muted-foreground mt-1 leading-tight line-clamp-2">{ach.description}</p>
+              {/* Title & Desc - Tighter layout */}
+              <div className="min-w-0 relative z-10">
+                <h4 className={`text-[10px] font-bold truncate ${isUnlocked ? style.textColor : 'text-foreground'}`}>{ach.title}</h4>
+                <p className="text-[8px] text-muted-foreground mt-0.5 leading-tight line-clamp-2 font-medium">{ach.description}</p>
               </div>
 
-              {/* Progress */}
-              <div className="w-full mt-3">
-                <div className="flex justify-between items-center text-[8px] font-mono text-muted-foreground mb-1">
-                  <span>Progress</span>
-                  <span>
-                    {isUnlocked ? "Completed" : `${Math.min(ach.progress.current, ach.progress.target)}/${ach.progress.target}`}
+              {/* Progress - Smaller */}
+              <div className="w-full mt-2 relative z-10">
+                <div className="flex justify-between items-center text-[7px] font-mono text-muted-foreground mb-1">
+                  <span className="opacity-70">Progress</span>
+                  <span className="font-bold">
+                    {isUnlocked ? "Done" : `${Math.min(ach.progress.current, ach.progress.target)}/${ach.progress.target}`}
                   </span>
                 </div>
-                <div className="w-full bg-accent h-1 rounded-full overflow-hidden">
+                <div className="w-full bg-accent h-0.5 rounded-full overflow-hidden border border-border/5">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      isUnlocked ? "bg-primary" : "bg-muted-foreground/40"
+                    className={`h-full rounded-full transition-all duration-700 ${
+                      isUnlocked ? "bg-primary shadow-[0_0_8px_rgba(var(--primary),0.4)]" : "bg-muted-foreground/40"
                     }`}
                     style={{
                       width: `${Math.min(100, (ach.progress.current / ach.progress.target) * 100)}%`
