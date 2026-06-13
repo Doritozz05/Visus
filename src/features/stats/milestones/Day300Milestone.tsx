@@ -15,8 +15,8 @@ export const Day300Milestone: StreakMilestone = {
       xmlns="http://www.w3.org/2000/svg"
     >
       <motion.g
-        style={{ scale: 0.8, transformOrigin: "center center" }}
-        animate={{ y: [0, -3, 0], rotate: [-1, 1, -1] }}
+        style={{ scale: 0.7, transformOrigin: "center center" }}
+        animate={{ y: [-8, -11, -8], rotate: [-1, 1, -1] }}
         transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
       >
         {/* Background Lightning */}
@@ -69,7 +69,7 @@ export const Day300Milestone: StreakMilestone = {
         <path d="M85,55 Q100,50 85,75" fill="none" stroke="#1e293b" strokeWidth="10" strokeLinecap="round" />
 
         {/* Electric Guitar */}
-        <g transform="translate(20, 45) rotate(30)">
+        <g transform="translate(0, 65) rotate(-30)">
           {/* Guitar Neck */}
           <rect x="40" y="25" width="40" height="4" fill="#8b5cf6" />
           {/* Headstock */}
@@ -103,8 +103,8 @@ export const Day300Milestone: StreakMilestone = {
     ctx.translate(x, y);
     ctx.scale(2.8, 2.8);
 
-    ctx.translate(11, 10);
-    ctx.scale(0.8, 0.8);
+    ctx.translate(16, 5);
+    ctx.scale(0.7, 0.7);
 
     const ox = 0;
     const oy = 0;
@@ -167,7 +167,7 @@ export const Day300Milestone: StreakMilestone = {
     ctx.beginPath(); ctx.moveTo(ox+85, oy+55); ctx.quadraticCurveTo(ox+100, oy+50, ox+85, oy+75); ctx.stroke();
 
     // Electric Guitar
-    ctx.save(); ctx.translate(ox+20, oy+45); ctx.rotate(30 * Math.PI / 180);
+    ctx.save(); ctx.translate(ox+0, oy+65); ctx.rotate(-30 * Math.PI / 180);
     // Neck
     ctx.fillStyle = "#8b5cf6"; ctx.fillRect(40, 25, 40, 4);
     // Headstock
