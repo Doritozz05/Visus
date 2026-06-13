@@ -19,6 +19,7 @@ export interface ReadingState {
   chapterWordCounts: number[];
   allBookPages: BookVisualPage[];
   isCompletionModalOpen: boolean;
+  isFocusMode: boolean;
   sessionStats: {
     speedWpm: number;
     durationSeconds: number;
@@ -36,6 +37,7 @@ export interface ReadingState {
   setCompletedChapter: (completedChapter: string | null) => void;
   setAllBookPages: (pages: BookVisualPage[]) => void;
   setIsCompletionModalOpen: (isOpen: boolean) => void;
+  setIsFocusMode: (isFocus: boolean) => void;
   setSessionStats: (stats: { speedWpm: number; durationSeconds: number; accuracy: number | null; wordsCount: number; } | null) => void;
   initBook: (
     bookId: string,
@@ -86,6 +88,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   chapterWordCounts: [],
   allBookPages: [],
   isCompletionModalOpen: false,
+  isFocusMode: false,
   sessionStats: null,
 
   setWordIndex: (wordIndex) =>
@@ -117,6 +120,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   setCompletedChapter: (completedChapter) => set({ completedChapter }),
   setAllBookPages: (allBookPages) => set({ allBookPages }),
   setIsCompletionModalOpen: (isCompletionModalOpen) => set({ isCompletionModalOpen }),
+  setIsFocusMode: (isFocusMode) => set({ isFocusMode }),
   setSessionStats: (sessionStats) => set({ sessionStats }),
 
   initBook: (bookId, chapterIndex, wordIndex, wpm, mode, chapters) =>
@@ -144,6 +148,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
         chapterWordCounts,
         allBookPages: [],
         isCompletionModalOpen: false,
+        isFocusMode: false,
         sessionStats: null,
       };
     }),

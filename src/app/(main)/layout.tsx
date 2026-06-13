@@ -5,10 +5,12 @@ import { usePathname } from "next/navigation";
 import { Flame } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/features/auth/context/auth-context";
+import { useReadingStore } from "@/features/reader/stores/reading-store";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user } = useAuth();
+  const isFocusMode = useReadingStore((state) => state.isFocusMode);
 
   // Determine if we need the default mobile header or a specialized one
   const isReader = pathname.startsWith("/reader");
@@ -17,7 +19,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300">
-      <Sidebar activePath={pathname} />
+      <div className={`transition-all duration-300 ${isReader && isFocusMode ? 'w-0 overflow-hidden opacity-0 translate-x-[-100%]' : ''}`}>
+        <Sidebar activePath={pathname} />
+      </div>
 
       {/* Standard Mobile Nav (for Library, Dashboard, Settings) */}
       {!isReader && (
@@ -37,7 +41,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       )}
 
       {/* Content Wrapper */}
-      <div className={`flex-1 flex flex-col md:ml-64 ${isReader ? "h-screen overflow-hidden overscroll-none" : "min-h-screen"}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isReader ? "h-screen overflow-hidden overscroll-none" : "min-h-screen"} ${!isFocusMode && isReader ? "md:ml-64" : ""}`}>
         {children}
       </div>
     </div>

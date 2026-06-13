@@ -115,6 +115,46 @@ html.theme-matrix-green {
   --ring: 142 71% 45%;
 }
 
+html.theme-sepia {
+  --background: 42 54% 90%; /* warm parchment */
+  --foreground: 26 26% 28%; /* deep coffee text */
+  --card: 42 54% 94%;
+  --card-foreground: 26 26% 28%;
+  --popover: 42 54% 94%;
+  --popover-foreground: 26 26% 28%;
+  --primary: 26 50% 45%; /* warm brown accent */
+  --primary-foreground: 42 54% 98%;
+  --secondary: 42 30% 85%;
+  --secondary-foreground: 26 26% 28%;
+  --muted: 42 30% 85%;
+  --muted-foreground: 26 26% 40%;
+  --accent: 42 30% 85%;
+  --accent-foreground: 26 50% 45%;
+  --border: 42 30% 80%;
+  --input: 42 30% 80%;
+  --ring: 26 50% 45%;
+}
+
+html.theme-nord {
+  --background: 220 16% 22%; /* nord0 polar night */
+  --foreground: 218 27% 92%; /* nord6 snow storm */
+  --card: 220 16% 26%; /* nord1 */
+  --card-foreground: 218 27% 92%;
+  --popover: 220 16% 26%;
+  --popover-foreground: 218 27% 92%;
+  --primary: 193 43% 67%; /* nord8 frost */
+  --primary-foreground: 220 16% 22%;
+  --secondary: 220 16% 32%; /* nord2 */
+  --secondary-foreground: 218 27% 92%;
+  --muted: 220 16% 32%;
+  --muted-foreground: 218 15% 75%; /* nord4 */
+  --accent: 220 16% 32%;
+  --accent-foreground: 193 43% 67%;
+  --border: 220 16% 36%; /* nord3 */
+  --input: 220 16% 36%;
+  --ring: 193 43% 67%;
+}
+
 /* ==========================================================================
    DYNAMIC FONTS & DYNAMIC ACCENT COLORS
    ========================================================================== */

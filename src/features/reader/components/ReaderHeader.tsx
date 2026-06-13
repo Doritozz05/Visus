@@ -4,7 +4,18 @@ import * as React from "react";
 import { Book, Bookmark } from "@/core/entities/book";
 import { TableOfContents } from "./TableOfContents";
 import { useReadingStore } from "../stores/reading-store";
-import { ArrowLeft, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Settings } from "lucide-react";
+import { 
+  ArrowLeft, 
+  ChevronLeft, 
+  ChevronRight, 
+  ChevronUp, 
+  ChevronDown, 
+  Settings,
+  Maximize,
+  Minimize,
+  Eye,
+  EyeOff
+} from "lucide-react";
 
 interface ChapterItem {
   title: string;
@@ -47,11 +58,32 @@ export function ReaderHeader({
 }: ReaderHeaderProps) {
   const chapterBtnRef = React.useRef<HTMLButtonElement>(null);
   const [anchorPos, setAnchorPos] = React.useState<{ x: number; y: number } | null>(null);
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
 
   // Subscribe atomically to Zustand store properties
   const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
   const progressPercentage = useReadingStore((state) => state.progressPercentage);
   const mode = useReadingStore((state) => state.mode);
+  const isFocusMode = useReadingStore((state) => state.isFocusMode);
+  const setIsFocusMode = useReadingStore((state) => state.setIsFocusMode);
+
+  React.useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   const currentChapter = React.useMemo(() => {
     const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
@@ -67,7 +99,7 @@ export function ReaderHeader({
   };
 
   return (
-    <div className="w-full grid grid-cols-3 items-center px-6 md:px-8 z-30 border-b border-border/10 pb-4 gap-4 bg-background/95 backdrop-blur-sm">
+    <div className={`w-full grid grid-cols-3 items-center px-6 md:px-8 z-30 border-b border-border/10 pb-4 gap-4 bg-background/95 backdrop-blur-sm transition-all duration-300 ${isFocusMode ? 'opacity-0 h-0 overflow-hidden py-0 border-0 pointer-events-none' : 'opacity-100'}`}>
       {/* Left: Back to Bookshelf */}
       <div className="flex items-center justify-start gap-2 min-w-0">
         <button
@@ -136,6 +168,24 @@ export function ReaderHeader({
 
       {/* Right: Mode selector & Settings */}
       <div className="flex items-center justify-end gap-3 min-w-0">
+        {/* Fullscreen Toggle */}
+        <button
+          onClick={toggleFullscreen}
+          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
+          title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+        >
+          {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+        </button>
+
+        {/* Focus Mode Toggle */}
+        <button
+          onClick={() => setIsFocusMode(true)}
+          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
+          title="Enter Focus Mode"
+        >
+          <EyeOff className="w-4 h-4" />
+        </button>
+
         {/* Triple Mode Switcher */}
         <div className="hidden md:flex bg-card border border-border/30 p-1 rounded-lg flex items-center shadow-sm">
           <button

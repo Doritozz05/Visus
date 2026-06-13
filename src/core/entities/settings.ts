@@ -1,5 +1,5 @@
 export interface GeneralSettings {
-  theme: "dark-violet" | "light" | "matrix-green";
+  theme: "dark-violet" | "light" | "matrix-green" | "sepia" | "nord";
   accentColor: "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue";
   uiFont: "inter" | "roboto" | "outfit";
   glassmorphism: boolean;

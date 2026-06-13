@@ -30,7 +30,7 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     root.classList.add(`theme-${theme}`);
 
     // Toggle classic Tailwind dark utilities
-    if (theme === "dark-violet" || theme === "matrix-green") {
+    if (theme === "dark-violet" || theme === "matrix-green" || theme === "nord") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");

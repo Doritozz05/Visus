@@ -27,6 +27,7 @@ import { READER_FONT_CLASSES } from "@/features/reader/utils/reader-fonts";
 import { Quiz } from "@/core/algorithms/quiz-generator";
 import { toast } from "sonner";
 import { PomodoroTimer } from "@/features/stats/components/PomodoroTimer";
+import { Eye } from "lucide-react";
 
 export default function ReaderClient() {
   const router = useRouter();
@@ -52,6 +53,8 @@ export default function ReaderClient() {
   const setIsPlaying = useReadingStore((state) => state.setIsPlaying);
   const isCompletionModalOpen = useReadingStore((state) => state.isCompletionModalOpen);
   const setIsCompletionModalOpen = useReadingStore((state) => state.setIsCompletionModalOpen);
+  const isFocusMode = useReadingStore((state) => state.isFocusMode);
+  const setIsFocusMode = useReadingStore((state) => state.setIsFocusMode);
   const sessionStats = useReadingStore((state) => state.sessionStats);
 
   // --- 2. CUSTOM HOOKS ---
@@ -209,6 +212,17 @@ export default function ReaderClient() {
 
   return (
     <div className="h-screen overflow-hidden overscroll-none flex flex-col items-center justify-between relative transition-all duration-300">
+      {/* Focus Mode Exit Button */}
+      {isFocusMode && (
+        <button
+          onClick={() => setIsFocusMode(false)}
+          className="fixed top-6 right-6 z-[60] flex items-center justify-center w-10 h-10 rounded-full border border-border/40 bg-card/80 backdrop-blur-md text-muted-foreground hover:text-primary transition-all shadow-lg hover:scale-110"
+          title="Exit Focus Mode"
+        >
+          <Eye className="w-5 h-5" />
+        </button>
+      )}
+
       <MobileReaderNav onOpenSettings={openQuickSettings} />
 
       <main className="flex-1 flex flex-col items-center justify-between relative w-full h-[calc(100vh-80px)] md:h-screen p-6 pt-4 pb-8 overflow-hidden overscroll-none">

@@ -34,6 +34,8 @@ export function GeneralSettingsForm() {
             {[
               { id: "dark-violet", name: "Dark Violet", desc: "Original Clinical Navy", preview: "bg-[#0b1326]" },
               { id: "light", name: "Claro Paper", desc: "Warm Minimal Light", preview: "bg-[#f1f3f6]" },
+              { id: "sepia", name: "Sepia Warm", desc: "Parchment Reading", preview: "bg-[#f4ecd8]" },
+              { id: "nord", name: "Nord Arctic", desc: "Snowy Blue Cold", preview: "bg-[#2e3440]" },
               { id: "matrix-green", name: "Matrix OLED", desc: "Pure Black & Neon Green", preview: "bg-[#000000]" },
             ].map((t) => (
               <button
