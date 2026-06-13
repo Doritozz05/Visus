@@ -134,7 +134,7 @@ export function WpmChart({ logs }: WpmChartProps) {
 
   if (!activeLog) {
     return (
-      <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md liquid-glass overflow-hidden">
+      <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md liquid-glass">
         <div className="w-full border-b border-border/10 pb-2 mb-3">
           <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Speed Fluctuation</h3>
           <p className="text-[10px] font-mono text-muted-foreground mt-0.5">WPM dynamics in session</p>
@@ -148,7 +148,7 @@ export function WpmChart({ logs }: WpmChartProps) {
   }
 
   return (
-    <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md liquid-glass overflow-hidden">
+    <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md liquid-glass">
       <div className="w-full border-b border-border/10 pb-2 mb-3 flex justify-between items-center">
         <div>
           <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Speed Fluctuation</h3>
@@ -162,7 +162,7 @@ export function WpmChart({ logs }: WpmChartProps) {
         )}
       </div>
 
-      <div className="relative w-full overflow-x-auto overflow-y-hidden custom-scrollbar flex justify-center py-2 min-h-[160px]">
+      <div className="relative w-full overflow-x-auto custom-scrollbar flex justify-center pt-10 pb-2 min-h-[160px]">
         <svg
           width={width}
           height={height}
@@ -170,6 +170,7 @@ export function WpmChart({ logs }: WpmChartProps) {
           onMouseMove={handleMouseMove}
           onMouseLeave={() => setHoveredPoint(null)}
         >
+          {/* ... existing SVG content ... */}
           {/* Gradients definitions */}
           <defs>
             <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
@@ -285,10 +286,10 @@ export function WpmChart({ logs }: WpmChartProps) {
         {/* Floating Tooltip */}
         {hoveredPoint && (
           <div
-            className="absolute bg-popover/90 text-popover-foreground border border-border/40 text-[9px] font-mono px-2 py-1.5 rounded shadow-xl pointer-events-none backdrop-blur-sm z-30"
+            className="absolute bg-popover/90 text-popover-foreground border border-border/40 text-[9px] font-mono px-2 py-1.5 rounded shadow-xl pointer-events-none backdrop-blur-sm z-50"
             style={{
               left: `${hoveredPoint.x}px`,
-              top: `${hoveredPoint.y - 35}px`,
+              top: `${hoveredPoint.y + 40 - 35}px`,
               transform: "translateX(-50%)"
             }}
           >

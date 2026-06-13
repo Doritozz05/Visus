@@ -27,7 +27,7 @@ export function useReaderStateSync({
 
     const book = activeBook;
     if (!book || !activeBookId) {
-      useReadingStore.getState().initBook("", 0, 0, 600, "normal", []);
+      useReadingStore.getState().initBook("", 0, 0, 250, "normal", []);
       initializedBookIdRef.current = null;
       return;
     }
@@ -78,7 +78,7 @@ export function useReaderStateSync({
         book.id,
         restoredChapterIdx,
         restoredWordIdx,
-        600,
+        250,
         "normal",
         chaptersData
       );
@@ -116,7 +116,7 @@ export function useReaderStateSync({
     return () => {
       initializedBookIdRef.current = null;
       useReadingStore.getState().setIsPlaying(false);
-      useReadingStore.getState().initBook("", 0, 0, 600, "normal", []);
+      useReadingStore.getState().initBook("", 0, 0, 250, "normal", []);
     };
   }, [activeBookId]);
 

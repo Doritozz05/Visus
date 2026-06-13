@@ -80,7 +80,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   activeChapterIndex: 0,
   activeBookId: null,
   isPlaying: false,
-  wpm: 600,
+  wpm: 250,
   mode: "normal",
   completedChapter: null,
   progressPercentage: 0,

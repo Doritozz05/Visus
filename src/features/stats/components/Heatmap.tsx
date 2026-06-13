@@ -115,13 +115,13 @@ export function Heatmap({ logs }: HeatmapProps) {
   };
 
   return (
-    <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md liquid-glass overflow-hidden">
+    <div className="bg-card border border-border/20 p-5 rounded-xl flex flex-col justify-between h-full group hover:border-primary/40 transition-all shadow-md liquid-glass">
       <div className="w-full border-b border-border/10 pb-2 mb-4">
         <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Daily Consistency</h3>
         <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Minutes read each day over the past year</p>
       </div>
 
-      <div ref={scrollContainerRef} className="relative w-full overflow-x-auto overflow-y-hidden custom-scrollbar flex justify-start py-2 min-h-[120px]">
+      <div ref={scrollContainerRef} className="relative w-full overflow-x-auto custom-scrollbar flex justify-start pt-10 pb-2 min-h-[140px]">
         <svg width={width} height={height} className="overflow-visible select-none shrink-0 pr-4">
           {/* Month labels */}
           {monthLabels.map((lbl, idx) => (
@@ -168,11 +168,13 @@ export function Heatmap({ logs }: HeatmapProps) {
                     if (container) {
                       const rawX = rect.left - container.left + boxSize / 2;
                       const clampedX = Math.min(Math.max(rawX, 60), width - 60);
+                      // Adjust Y by adding the container's top padding (40px from pt-10) 
+                      // and then subtracting the desired offset (40px)
                       setHoveredDay({
                         date: formatDate(day.date),
                         minutes: Math.round(day.minutes * 10) / 10,
                         x: clampedX,
-                        y: rect.top - container.top - 40
+                        y: (rect.top - container.top) + 40 - 40
                       });
                     }
                   }}
@@ -186,7 +188,7 @@ export function Heatmap({ logs }: HeatmapProps) {
           {/* Floating Tooltip */}
         {hoveredDay && (
           <div
-            className="absolute bg-popover/90 text-popover-foreground border border-border/40 text-[9px] font-mono px-2 py-1.5 rounded shadow-xl pointer-events-none backdrop-blur-sm z-30 flex flex-col items-center"
+            className="absolute bg-popover/90 text-popover-foreground border border-border/40 text-[9px] font-mono px-2 py-1.5 rounded shadow-xl pointer-events-none backdrop-blur-sm z-50 flex flex-col items-center"
             style={{
               left: `${hoveredDay.x}px`,
               top: `${hoveredDay.y}px`,
