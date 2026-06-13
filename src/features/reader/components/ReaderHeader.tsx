@@ -14,7 +14,8 @@ import {
   Maximize,
   Minimize,
   Eye,
-  EyeOff
+  EyeOff,
+  Timer
 } from "lucide-react";
 
 interface ChapterItem {
@@ -239,7 +240,7 @@ export function ReaderHeader({
           }`}
           title="Toggle Pomodoro Timer"
         >
-          <span className="text-base">🍅</span>
+          <Timer className="w-4 h-4" />
         </button>
 
         {/* Quick Settings Trigger (Desktop) */}

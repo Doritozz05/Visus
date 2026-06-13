@@ -26,7 +26,8 @@ export const PomodoroTimer = React.memo(function PomodoroTimer() {
       const nextCycles = completedCycles + 1;
       setCompletedCycles(nextCycles);
       
-      toast.success("🍅 Pomodoro session completed! Take a 5-minute break.", {
+      toast.success("Pomodoro session completed! Take a 5-minute break.", {
+        icon: <Timer className="w-4 h-4 text-primary" />,
         duration: 8000,
       });
 
