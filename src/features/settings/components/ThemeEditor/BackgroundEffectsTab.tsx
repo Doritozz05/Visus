@@ -25,13 +25,13 @@ export function BackgroundEffectsTab({
       ...prev,
       glowSettings: {
         ...(prev.glowSettings || {
-          enabled: true,
           color: prev.accent,
           brightness: 0.15,
           spread: 0,
           blur: 15
         }),
-        ...updates
+        ...updates,
+        enabled: true // Always ensure enabled when updating
       }
     }), push);
   };
@@ -259,13 +259,17 @@ export function BackgroundEffectsTab({
                 setThemeState(prev => ({
                   ...prev,
                   cardShadow: val as any,
-                  glowSettings: val === 'glow' ? (prev.glowSettings || {
-                    enabled: true,
-                    color: prev.accent,
-                    brightness: 0.15,
-                    spread: 0,
-                    blur: 15
-                  }) : prev.glowSettings
+                  glowSettings: val === 'glow' 
+                    ? {
+                        ...(prev.glowSettings || {
+                          color: prev.accent,
+                          brightness: 0.15,
+                          spread: 0,
+                          blur: 15
+                        }),
+                        enabled: true
+                      }
+                    : prev.glowSettings
                 }));
               }}
               options={[

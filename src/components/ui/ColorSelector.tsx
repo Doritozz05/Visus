@@ -109,11 +109,21 @@ export function ColorSelector({
     if (!isInteracting.current) return;
     isInteracting.current = false;
     
-    // When interaction ends, push to history and clear internal HSL cache
+    // When interaction ends, push to history
     const currentHex = hslToHex(h, s, l);
     onChangeComplete?.(currentHex);
-    setInternalHsl(null);
+    // REMOVED: setInternalHsl(null); - Keep internal HSL to prevent hue loss at extremes
   };
+
+  // Sync internal HSL when external value changes to something different
+  React.useEffect(() => {
+    if (internalHsl) {
+      const currentInternalHex = hslToHex(internalHsl.h, internalHsl.s, internalHsl.l);
+      if (resolvedHex.toLowerCase() !== currentInternalHex.toLowerCase()) {
+        setInternalHsl(null);
+      }
+    }
+  }, [resolvedHex, internalHsl]);
 
   const triggerNativePicker = () => {
     if (fileInputRef.current) {

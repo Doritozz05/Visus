@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Eye } from "lucide-react";
 import type { CustomTheme } from "@/core/entities/settings";
-import { resolveColor } from "@/lib/color-utils";
+import { resolveColor, hexToRgba } from "@/lib/color-utils";
 import { getFontFamilyStyle, hexToRgb, PRESETS_TEMPLATES } from "./utils";
 
 interface ThemePreviewSandboxProps {
@@ -19,16 +19,16 @@ export function ThemePreviewSandbox({
 }: ThemePreviewSandboxProps) {
   // Build values for sandbox render
   const previewBg = themeState.bgType === "gradient" 
-    ? `linear-gradient(${themeState.bgGradientAngle ?? 135}deg, ${themeState.bgGradientStart ?? "#ffffff"}, ${themeState.bgGradientEnd ?? "#eaeaea"})`
+    ? `linear-gradient(${themeState.bgGradientAngle ?? 135}deg, ${resolveColor(themeState.bgGradientStart || "#ffffff")}, ${resolveColor(themeState.bgGradientEnd || "#eaeaea")})`
     : themeState.bgType === "image" && themeState.bgImageUrl
       ? `url(${themeState.bgImageUrl})`
-      : themeState.background;
+      : resolveColor(themeState.background);
 
-  const sidebarBg = themeState.overrideSidebar ? (themeState.sidebarBackground || themeState.cardBackground) : themeState.cardBackground;
-  const sidebarFg = themeState.overrideSidebar ? (themeState.sidebarForeground || themeState.cardForeground) : themeState.cardForeground;
-  const sidebarBorder = themeState.overrideSidebar ? (themeState.sidebarBorder || themeState.border) : themeState.border;
-  const sidebarActiveBg = themeState.overrideSidebar ? (themeState.sidebarActiveBackground || themeState.accent) : themeState.accent;
-  const sidebarActiveFg = themeState.overrideSidebar ? (themeState.sidebarActiveForeground || themeState.accentForeground) : themeState.accentForeground;
+  const sidebarBg = resolveColor(themeState.overrideSidebar ? (themeState.sidebarBackground || themeState.cardBackground) : themeState.cardBackground);
+  const sidebarFg = resolveColor(themeState.overrideSidebar ? (themeState.sidebarForeground || themeState.cardForeground) : themeState.cardForeground);
+  const sidebarBorder = resolveColor(themeState.overrideSidebar ? (themeState.sidebarBorder || themeState.border) : themeState.border);
+  const sidebarActiveBg = resolveColor(themeState.overrideSidebar ? (themeState.sidebarActiveBackground || themeState.accent) : themeState.accent);
+  const sidebarActiveFg = resolveColor(themeState.overrideSidebar ? (themeState.sidebarActiveForeground || themeState.accentForeground) : themeState.accentForeground);
 
   const cardRadius = themeState.cardRadius || "12px";
   const getShadowStyle = (shadow: string | undefined) => {
@@ -36,17 +36,17 @@ export function ThemePreviewSandbox({
       if (themeState.glowSettings && themeState.glowSettings.enabled) {
         // Boost opacity for better visibility. Brightness 0.15 becomes ~0.45 opacity.
         const opacity = Math.min(1, (themeState.glowSettings.brightness || 0.15) * 3);
-        const alphaHex = Math.round(opacity * 255).toString(16).padStart(2, '0');
-        return `0 0 ${themeState.glowSettings.blur}px ${themeState.glowSettings.spread}px ${themeState.glowSettings.color}${alphaHex}`;
+        const glowColor = hexToRgba(themeState.glowSettings.color || themeState.accent, opacity);
+        return `0 0 ${themeState.glowSettings.blur}px ${themeState.glowSettings.spread}px ${glowColor}`;
       }
-      return `0 0 15px ${themeState.accent}66`;
+      return `0 0 15px ${hexToRgba(themeState.accent, 0.4)}`;
     }
     switch (shadow) {
       case "none": return "none";
       case "sm": return "0 1px 2px rgba(0,0,0,0.05)";
       case "md": return "0 4px 6px rgba(0,0,0,0.08)";
       case "lg": return "0 10px 15px rgba(0,0,0,0.1)";
-      case "retro": return `4px 4px 0px ${themeState.border}`;
+      case "retro": return `4px 4px 0px ${resolveColor(themeState.border)}`;
       default: return "none";
     }
   };
