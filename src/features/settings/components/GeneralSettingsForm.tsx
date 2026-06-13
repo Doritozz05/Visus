@@ -218,9 +218,9 @@ export function GeneralSettingsForm() {
                 </div>
                 <div className="flex gap-1.5 items-center w-full justify-between">
                   <div className="flex gap-1.5 items-center">
-                    <div 
-                      className="w-4 h-4 rounded-full border border-border/40 shrink-0 shadow-inner" 
-                      style={{ backgroundColor: t.background }} 
+                    <div
+                      className="w-4 h-4 rounded-full border border-border/40 shrink-0 shadow-inner"
+                      style={{ backgroundColor: t.background }}
                     />
                     <span className="text-[8px] text-muted-foreground leading-tight truncate">Custom Theme</span>
                   </div>
@@ -287,7 +287,7 @@ export function GeneralSettingsForm() {
           <div className="flex items-center justify-between py-1">
             <div>
               <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Liquid glass</label>
-              <p className="text-[9px] text-muted-foreground mt-0.5">Enables premium Apple-style glass effects. Disable on slow hardware.</p>
+              <p className="text-[9px] text-muted-foreground mt-0.5">Enables glass effects. Disable on slow hardware.</p>
             </div>
             <button
               onClick={() => updateGeneralSettings({ glassmorphism: !glassmorphism })}
