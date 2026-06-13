@@ -117,11 +117,11 @@ export const Day15Milestone: StreakMilestone = {
           stroke="#4f46e5"
           strokeWidth="9"
           strokeLinecap="round"
-          animate={{ rotate: [0, -12, 0, 12, 0] }}
-          transition={{ 
-            repeat: Infinity, 
-            duration: 1.2, 
-            ease: "linear" 
+          animate={{ rotate: [0, -20, 0, 10, 0] }}
+          transition={{
+            repeat: Infinity,
+            duration: 1.2,
+            ease: "linear"
           }}
           style={{ transformOrigin: "15px 55px" }}
         />
@@ -136,25 +136,26 @@ export const Day15Milestone: StreakMilestone = {
         />
 
         {/* Day 15 Juggled Flame floating above wing */}
-        <motion.path
-          d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-          fill="#f97316"
-          stroke="#fdba74"
-          strokeWidth="0.5"
-          className="origin-bottom"
-          transform="translate(86, 26) scale(0.7)"
-          animate={{
-            y: [0, -6, 0],
-            scale: [0.7, 0.75, 0.68, 0.7],
-            rotate: [0, 4, -4, 0],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.0,
-            ease: "easeInOut",
-          }}
-          style={{ filter: "drop-shadow(0 0 6px rgba(249,115,22,0.85))" }}
-        />
+        <g transform="translate(86, 26)">
+          <motion.path
+            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+            fill="#f97316"
+            stroke="#fdba74"
+            strokeWidth="0.5"
+            className="origin-bottom"
+            animate={{
+              y: [0, -6, 0],
+              scale: [0.7, 0.75, 0.68, 0.7],
+              rotate: [0, 4, -4, 0],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.0,
+              ease: "easeInOut",
+            }}
+            style={{ filter: "drop-shadow(0 0 6px rgba(249,115,22,0.85))" }}
+          />
+        </g>
 
         {/* Sparkles around floating flame */}
         <motion.circle
