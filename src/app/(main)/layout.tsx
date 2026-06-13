@@ -14,17 +14,21 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   // Determine if we need the default mobile header or a specialized one
   const isReader = pathname.startsWith("/reader");
+  const isThemeDesigner = pathname.startsWith("/settings/theme");
 
   const userInitial = user?.email?.charAt(0).toUpperCase() || "V";
 
+  const hideSidebar = (isReader && isFocusMode) || isThemeDesigner;
+  const hideMobileNav = isReader || isThemeDesigner;
+
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300">
-      <div className={`transition-all duration-300 ${isReader && isFocusMode ? 'w-0 overflow-hidden opacity-0 translate-x-[-100%]' : ''}`}>
+      <div className={`transition-all duration-300 ${hideSidebar ? 'w-0 overflow-hidden opacity-0 translate-x-[-100%]' : ''}`}>
         <Sidebar activePath={pathname} />
       </div>
 
       {/* Standard Mobile Nav (for Library, Dashboard, Settings) */}
-      {!isReader && (
+      {!hideMobileNav && (
         <nav className="md:hidden bg-card border-b border-border/50 flex justify-between items-center w-full px-6 py-4 z-50 sticky top-0 transition-all duration-300">
           <div className="text-xl font-bold tracking-tight text-foreground">Visus</div>
           <div className="flex items-center gap-4">
@@ -41,7 +45,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       )}
 
       {/* Content Wrapper */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isReader ? "h-screen overflow-hidden overscroll-none" : "min-h-screen"} ${!isFocusMode && isReader ? "md:ml-64" : ""}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isReader || isThemeDesigner ? "h-screen overflow-hidden overscroll-none" : "min-h-screen"} ${!isFocusMode && isReader ? "md:ml-64" : ""}`}>
         {children}
       </div>
     </div>

@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { Palette, CheckCircle, Settings2, Edit, Trash2, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useSettings } from "@/features/settings/context/settings-context";
 import type { GeneralSettings, CustomTheme } from "@/core/entities/settings";
 import { ColorSelector } from "@/components/ui/ColorSelector";
-import { ThemeEditor } from "./ThemeEditor";
 
 export function GeneralSettingsForm() {
+  const router = useRouter();
   const { settings, updateGeneralSettings } = useSettings();
   const {
     theme,
@@ -21,25 +22,6 @@ export function GeneralSettingsForm() {
     customThemes = []
   } = settings.general;
 
-  const [isEditorOpen, setIsEditorOpen] = React.useState(false);
-  const [themeToEdit, setThemeToEdit] = React.useState<CustomTheme | null>(null);
-
-  const handleSaveTheme = (newTheme: CustomTheme) => {
-    const exists = customThemes.some((t) => t.id === newTheme.id);
-    let updatedThemes: CustomTheme[];
-    if (exists) {
-      updatedThemes = customThemes.map((t) => (t.id === newTheme.id ? newTheme : t));
-    } else {
-      updatedThemes = [...customThemes, newTheme];
-    }
-    updateGeneralSettings({
-      customThemes: updatedThemes,
-      theme: newTheme.id
-    });
-    setIsEditorOpen(false);
-    setThemeToEdit(null);
-  };
-
   const handleDeleteTheme = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation(); // prevent setting it as active
     const updatedThemes = customThemes.filter((t) => t.id !== id);
@@ -48,19 +30,15 @@ export function GeneralSettingsForm() {
       customThemes: updatedThemes,
       theme: fallbackTheme
     });
-    setIsEditorOpen(false);
-    setThemeToEdit(null);
   };
 
   const handleEditTheme = (t: CustomTheme, e: React.MouseEvent) => {
     e.stopPropagation();
-    setThemeToEdit(t);
-    setIsEditorOpen(true);
+    router.push(`/settings/theme?id=${t.id}`);
   };
 
   const handleCreateTheme = () => {
-    setThemeToEdit(null);
-    setIsEditorOpen(true);
+    router.push("/settings/theme?id=new");
   };
 
   return (
@@ -283,17 +261,6 @@ export function GeneralSettingsForm() {
         </div>
       </div>
 
-      {isEditorOpen && (
-        <ThemeEditor
-          themeToEdit={themeToEdit}
-          onSave={handleSaveTheme}
-          onDelete={(id) => handleDeleteTheme(id)}
-          onClose={() => {
-            setIsEditorOpen(false);
-            setThemeToEdit(null);
-          }}
-        />
-      )}
     </div>
   );
 }

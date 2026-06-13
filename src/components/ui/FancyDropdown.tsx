@@ -58,6 +58,7 @@ export function FancyDropdown({
   const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>({});
   const [isMenuPositioned, setIsMenuPositioned] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [maxOptionsHeight, setMaxOptionsHeight] = React.useState<number>(288);
 
   const selectedOption = options.find((option) => option.value === value);
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
@@ -80,19 +81,37 @@ export function FancyDropdown({
     const rect = triggerEl.getBoundingClientRect();
     const width = rect.width;
     const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
     const desiredLeft = align === "end" ? rect.right - width : rect.left;
     const left = Math.max(8, Math.min(desiredLeft, viewportWidth - width - 8));
-    const top = rect.bottom + 8;
 
-    setMenuStyle({
+    const spaceBelow = viewportHeight - rect.bottom - 16;
+    const spaceAbove = rect.top - 16;
+    const preferAbove = spaceBelow < 280 && spaceAbove > spaceBelow;
+
+    const searchHeight = searchable ? 58 : 0;
+    const computedMaxHeight = preferAbove
+      ? Math.min(288, Math.max(80, spaceAbove - searchHeight - 24))
+      : Math.min(288, Math.max(80, spaceBelow - searchHeight - 24));
+
+    setMaxOptionsHeight(computedMaxHeight);
+
+    const style: React.CSSProperties = {
       position: "fixed",
-      top,
       left,
       width,
       zIndex: menuZIndex,
-    });
+    };
+
+    if (preferAbove) {
+      style.bottom = viewportHeight - rect.top + 8;
+    } else {
+      style.top = rect.bottom + 8;
+    }
+
+    setMenuStyle(style);
     setIsMenuPositioned(true);
-  }, [align, menuZIndex]);
+  }, [align, menuZIndex, searchable]);
 
   React.useLayoutEffect(() => {
     if (!isOpen) return;
@@ -188,8 +207,11 @@ export function FancyDropdown({
                   </div>
                 )}
                 <div
-                  className={`overflow-y-auto ${maxMenuHeightClassName} p-1.5 scrollbar-none`}
-                  style={{ visibility: isMenuPositioned ? "visible" : "hidden" }}
+                  className="overflow-y-auto p-1.5"
+                  style={{
+                    maxHeight: `${maxOptionsHeight}px`,
+                    visibility: isMenuPositioned ? "visible" : "hidden",
+                  }}
                 >
                   {filteredOptions.length === 0 ? (
                     <div className="px-3 py-6 text-center text-xs text-muted-foreground">

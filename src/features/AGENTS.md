@@ -18,4 +18,5 @@ None.
 - [auth/AGENTS.md](auth/AGENTS.md)
 - [library/AGENTS.md](library/AGENTS.md)
 - [reader/AGENTS.md](reader/AGENTS.md)
+- [settings/AGENTS.md](settings/AGENTS.md)
 - [stats/AGENTS.md](stats/AGENTS.md)
