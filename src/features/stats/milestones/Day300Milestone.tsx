@@ -15,22 +15,27 @@ export const Day300Milestone: StreakMilestone = {
       xmlns="http://www.w3.org/2000/svg"
     >
       <motion.g
-        animate={{ y: [0, -1.5, 0, -1, 0] }}
-        transition={{
-          repeat: Infinity,
-          duration: 1.0,
-          ease: "easeInOut",
-        }}
+        style={{ scale: 0.8, transformOrigin: "center center" }}
+        animate={{ y: [0, -3, 0], rotate: [-1, 1, -1] }}
+        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
       >
-        {/* Lightning bolt behind Visi */}
-        <motion.polygon
-          points="52,0 42,22 50,22 38,42 48,42 32,62 60,34 50,34 62,14 52,14"
-          fill="#fbbf24"
-          opacity={0.85}
-          animate={{ opacity: [0.6, 1, 0.6] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          style={{ filter: "drop-shadow(0 0 4px rgba(251,191,36,0.6))" }}
+        {/* Background Lightning */}
+        <motion.path
+          d="M20,10 L30,40 L10,50 L40,90"
+          fill="none" stroke="#fde047" strokeWidth="2"
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{ repeat: Infinity, duration: 0.8, repeatDelay: 1 }}
         />
+        <motion.path
+          d="M90,10 L80,40 L100,50 L70,90"
+          fill="none" stroke="#fde047" strokeWidth="2"
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{ repeat: Infinity, duration: 0.8, repeatDelay: 1.5 }}
+        />
+
+        {/* Rocker Spiky Hair */}
+        <path d="M35,25 L30,5 L45,20 L50,0 L55,20 L70,5 L65,25 Z" fill="#1e1b4b" />
+        <path d="M40,25 L35,10 L45,20 L50,5 L55,20 L65,10 L60,25 Z" fill="#4f46e5" />
 
         {/* Ears */}
         <polygon points="20,35 50,35 25,18" fill="#4f46e5" />
@@ -40,186 +45,56 @@ export const Day300Milestone: StreakMilestone = {
         <ellipse cx="32" cy="86" rx="6" ry="4" fill="#f97316" />
         <ellipse cx="68" cy="86" rx="6" ry="4" fill="#f97316" />
 
-        {/* Body */}
+        {/* Body (Leather Jacket style over base) */}
         <rect x="15" y="22" width="70" height="65" rx="30" fill="#4f46e5" />
-
+        {/* Leather jacket */}
+        <path d="M15,40 L35,87 A30,30 0 0,0 85,87 L85,40 Q50,60 15,40 Z" fill="#1e293b" />
+        
         {/* Belly */}
         <ellipse cx="50" cy="62" rx="22" ry="18" fill="#c7d2fe" />
 
-        {/* Eyes Outer White */}
-        <circle cx="37" cy="42" r="12" fill="#ffffff" />
-        <circle cx="63" cy="42" r="12" fill="#ffffff" />
+        {/* Star Sunglasses */}
+        {/* Left Star */}
+        <path d="M37,32 L40,38 L47,38 L41,42 L43,49 L37,45 L31,49 L33,42 L27,38 L34,38 Z" fill="#ef4444" stroke="#fca5a5" strokeWidth="1" />
+        {/* Right Star */}
+        <path d="M63,32 L66,38 L73,38 L67,42 L69,49 L63,45 L57,49 L59,42 L53,38 L60,38 Z" fill="#ef4444" stroke="#fca5a5" strokeWidth="1" />
+        {/* Glasses Bridge */}
+        <line x1="47" y1="41" x2="53" y2="41" stroke="#fca5a5" strokeWidth="2" />
 
-        {/* Pupils — confident, slightly narrowed */}
-        <motion.circle
-          cx="37"
-          cy="42"
-          r="5"
-          fill="#1e1b4b"
-          animate={{ scaleY: [0.85, 0.85, 0.1, 0.85] }}
-          transition={{
-            repeat: Infinity,
-            duration: 3.5,
-            repeatDelay: 2,
-          }}
-        />
-        <motion.circle
-          cx="63"
-          cy="42"
-          r="5"
-          fill="#1e1b4b"
-          animate={{ scaleY: [0.85, 0.85, 0.1, 0.85] }}
-          transition={{
-            repeat: Infinity,
-            duration: 3.5,
-            repeatDelay: 2,
-          }}
-        />
-
-        {/* Highlights */}
-        <circle cx="39" cy="40" r="1.5" fill="#ffffff" />
-        <circle cx="65" cy="40" r="1.5" fill="#ffffff" />
-
-        {/* Star sunglasses — left star */}
-        <polygon
-          points="37,34 39,38 43,38 40,41 41,45 37,43 33,45 34,41 31,38 35,38"
-          fill="#eab308"
-          opacity={0.92}
-          style={{ filter: "drop-shadow(0 0 2px rgba(234,179,8,0.5))" }}
-        />
-        {/* Star sunglasses — right star */}
-        <polygon
-          points="63,34 65,38 69,38 66,41 67,45 63,43 59,45 60,41 57,38 61,38"
-          fill="#eab308"
-          opacity={0.92}
-          style={{ filter: "drop-shadow(0 0 2px rgba(234,179,8,0.5))" }}
-        />
-        {/* Sunglasses bridge */}
-        <line x1="41" y1="38" x2="59" y2="38" stroke="#eab308" strokeWidth="1.5" />
-        {/* Glare on stars */}
-        <circle cx="35" cy="37" r="0.8" fill="#ffffff" opacity={0.7} />
-        <circle cx="61" cy="37" r="0.8" fill="#ffffff" opacity={0.7} />
-
-        {/* Beak — confident smirk (asymmetric) */}
+        {/* Beak */}
         <polygon points="47,49 53,49 50,55" fill="#f97316" />
-        <path
-          d="M48,53 Q50,56 54,52"
-          fill="none"
-          stroke="#ea580c"
-          strokeWidth="0.8"
-          strokeLinecap="round"
-        />
 
-        {/* Left wing — rock horns pose (fork shape pointing up) */}
-        <motion.g
-          animate={{ rotate: [0, -8, 0, 5, 0] }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.0,
-            ease: "easeInOut",
-          }}
-          style={{ transformOrigin: "15px 55px" }}
-        >
-          <path
-            d="M15,55 Q6,40 2,24"
-            fill="none"
-            stroke="#4f46e5"
-            strokeWidth="9"
-            strokeLinecap="round"
-          />
-          {/* Fork prongs */}
-          <path
-            d="M2,24 Q0,18 -2,12"
-            fill="none"
-            stroke="#4f46e5"
-            strokeWidth="5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M2,24 Q6,18 8,12"
-            fill="none"
-            stroke="#4f46e5"
-            strokeWidth="5"
-            strokeLinecap="round"
-          />
-        </motion.g>
+        {/* Wings playing guitar */}
+        <path d="M15,55 Q5,50 15,70" fill="none" stroke="#1e293b" strokeWidth="10" strokeLinecap="round" />
+        <path d="M85,55 Q100,50 85,75" fill="none" stroke="#1e293b" strokeWidth="10" strokeLinecap="round" />
 
-        {/* Right wing — holding guitar */}
-        <path
-          d="M85,55 Q92,50 95,44"
-          fill="none"
-          stroke="#4f46e5"
-          strokeWidth="9"
-          strokeLinecap="round"
-        />
-
-        {/* Electric guitar — flame-filled body at right side */}
-        <g transform="translate(88, 38)">
-          {/* Guitar neck */}
-          <rect x="4" y="-18" width="3" height="20" rx="1" fill="#92400e" />
-          {/* Guitar headstock */}
-          <rect x="2.5" y="-22" width="6" height="5" rx="1.5" fill="#78350f" />
-          {/* Tuning pegs */}
-          <circle cx="3.5" cy="-20" r="0.8" fill="#d4d4d8" />
-          <circle cx="7.5" cy="-20" r="0.8" fill="#d4d4d8" />
-          <circle cx="3.5" cy="-18" r="0.8" fill="#d4d4d8" />
-          <circle cx="7.5" cy="-18" r="0.8" fill="#d4d4d8" />
-          {/* Guitar body — flame shape */}
-          <motion.path
-            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-            fill="#f97316"
-            stroke="#fdba74"
-            strokeWidth="0.5"
-            animate={{
-              scale: [1, 1.06, 0.96, 1],
-              rotate: [0, 2, -2, 0],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 1.2,
-              ease: "easeInOut",
-            }}
-            style={{
-              filter: "drop-shadow(0 0 6px rgba(249,115,22,0.8))",
-              transformOrigin: "12px 14px",
-            }}
-          />
-          {/* Guitar strings on body */}
-          <line x1="5" y1="-2" x2="5" y2="8" stroke="#fef3c7" strokeWidth="0.3" opacity={0.6} />
-          <line x1="6" y1="-2" x2="6" y2="8" stroke="#fef3c7" strokeWidth="0.3" opacity={0.6} />
+        {/* Electric Guitar */}
+        <g transform="translate(20, 45) rotate(30)">
+          {/* Guitar Neck */}
+          <rect x="40" y="25" width="40" height="4" fill="#8b5cf6" />
+          {/* Headstock */}
+          <polygon points="80,24 85,22 85,30 80,28 Z" fill="#1e1b4b" />
+          {/* Guitar Body (V-Shape) */}
+          <path d="M20,15 L45,25 L45,29 L20,39 L35,27 Z" fill="#ef4444" stroke="#b91c1c" strokeWidth="1" />
+          {/* Soundhole/Pickups */}
+          <circle cx="35" cy="27" r="2" fill="#1e1b4b" />
+          {/* Strings */}
+          <line x1="35" y1="26" x2="80" y2="26" stroke="#f8fafc" strokeWidth="0.5" />
+          <line x1="35" y1="28" x2="80" y2="28" stroke="#f8fafc" strokeWidth="0.5" />
         </g>
 
-        {/* Musical notes floating above */}
-        <motion.text
-          x="18"
-          y="16"
-          fontSize="8"
-          fill="#f97316"
-          animate={{ y: [16, 10, 16], opacity: [0.5, 1, 0.5] }}
-          transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-        >
-          ♪
-        </motion.text>
-        <motion.text
-          x="72"
-          y="12"
-          fontSize="7"
-          fill="#eab308"
-          animate={{ y: [12, 6, 12], opacity: [0.4, 1, 0.4] }}
-          transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut", delay: 0.6 }}
-        >
-          ♫
-        </motion.text>
-        <motion.text
-          x="28"
-          y="8"
-          fontSize="6"
-          fill="#fbbf24"
-          animate={{ y: [8, 3, 8], opacity: [0.3, 0.9, 0.3] }}
-          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut", delay: 1.2 }}
-        >
-          ♪
-        </motion.text>
+        {/* Music Notes / Energy */}
+        <motion.path
+          d="M10,30 Q5,20 15,15 A5,5 0 0,0 20,20"
+          fill="none" stroke="#38bdf8" strokeWidth="2"
+          animate={{ y: [0, -10], opacity: [0, 1, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        />
+        <motion.circle
+          cx="15" cy="15" r="2" fill="#38bdf8"
+          animate={{ y: [0, -10], opacity: [0, 1, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        />
       </motion.g>
     </svg>
   ),
@@ -228,247 +103,91 @@ export const Day300Milestone: StreakMilestone = {
     ctx.translate(x, y);
     ctx.scale(2.8, 2.8);
 
+    ctx.translate(11, 10);
+    ctx.scale(0.8, 0.8);
+
     const ox = 0;
     const oy = 0;
 
-    // Lightning bolt behind Visi
-    ctx.fillStyle = "rgba(251, 191, 36, 0.85)";
-    ctx.beginPath();
-    ctx.moveTo(ox + 52, oy + 0);
-    ctx.lineTo(ox + 42, oy + 22);
-    ctx.lineTo(ox + 50, oy + 22);
-    ctx.lineTo(ox + 38, oy + 42);
-    ctx.lineTo(ox + 48, oy + 42);
-    ctx.lineTo(ox + 32, oy + 62);
-    ctx.lineTo(ox + 60, oy + 34);
-    ctx.lineTo(ox + 50, oy + 34);
-    ctx.lineTo(ox + 62, oy + 14);
-    ctx.lineTo(ox + 52, oy + 14);
-    ctx.closePath();
-    ctx.fill();
+    // Background Lightning
+    ctx.strokeStyle = "#fde047"; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.moveTo(ox+20, oy+10); ctx.lineTo(ox+30, oy+40); ctx.lineTo(ox+10, oy+50); ctx.lineTo(ox+40, oy+90); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox+90, oy+10); ctx.lineTo(ox+80, oy+40); ctx.lineTo(ox+100, oy+50); ctx.lineTo(ox+70, oy+90); ctx.stroke();
+    ctx.globalAlpha = 1.0;
+
+    // Spiky Hair
+    ctx.fillStyle = "#1e1b4b";
+    ctx.beginPath(); ctx.moveTo(ox+35, oy+25); ctx.lineTo(ox+30, oy+5); ctx.lineTo(ox+45, oy+20); ctx.lineTo(ox+50, oy+0); ctx.lineTo(ox+55, oy+20); ctx.lineTo(ox+70, oy+5); ctx.lineTo(ox+65, oy+25); ctx.fill();
+    ctx.fillStyle = "#4f46e5";
+    ctx.beginPath(); ctx.moveTo(ox+40, oy+25); ctx.lineTo(ox+35, oy+10); ctx.lineTo(ox+45, oy+20); ctx.lineTo(ox+50, oy+5); ctx.lineTo(ox+55, oy+20); ctx.lineTo(ox+65, oy+10); ctx.lineTo(ox+60, oy+25); ctx.fill();
 
     // Ears
     ctx.fillStyle = "#4f46e5";
-    ctx.beginPath();
-    ctx.moveTo(ox + 20, oy + 35);
-    ctx.lineTo(ox + 50, oy + 35);
-    ctx.lineTo(ox + 25, oy + 18);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(ox + 50, oy + 35);
-    ctx.lineTo(ox + 80, oy + 35);
-    ctx.lineTo(ox + 75, oy + 18);
-    ctx.closePath();
-    ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox + 20, oy + 35); ctx.lineTo(ox + 50, oy + 35); ctx.lineTo(ox + 25, oy + 18); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox + 50, oy + 35); ctx.lineTo(ox + 80, oy + 35); ctx.lineTo(ox + 75, oy + 18); ctx.fill();
 
     // Feet
     ctx.fillStyle = "#f97316";
-    ctx.beginPath();
-    ctx.ellipse(ox + 32, oy + 86, 6, 4, 0, 0, Math.PI * 2);
-    ctx.ellipse(ox + 68, oy + 86, 6, 4, 0, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ox + 32, oy + 86, 6, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ox + 68, oy + 86, 6, 4, 0, 0, Math.PI * 2); ctx.fill();
 
     // Body
     ctx.fillStyle = "#4f46e5";
     ctx.beginPath();
-    if (ctx.roundRect) {
-      ctx.roundRect(ox + 15, oy + 22, 70, 65, 30);
-    } else {
-      ctx.rect(ox + 15, oy + 22, 70, 65);
-    }
+    if (ctx.roundRect) ctx.roundRect(ox + 15, oy + 22, 70, 65, 30);
+    else ctx.rect(ox + 15, oy + 22, 70, 65);
     ctx.fill();
+
+    // Leather Jacket
+    ctx.fillStyle = "#1e293b";
+    ctx.beginPath(); ctx.moveTo(ox+15, oy+40); ctx.lineTo(ox+35, oy+87); ctx.arcTo(ox+50, oy+87, ox+85, oy+87, 30); ctx.lineTo(ox+85, oy+40); ctx.quadraticCurveTo(ox+50, oy+60, ox+15, oy+40); ctx.fill();
 
     // Belly
     ctx.fillStyle = "#c7d2fe";
-    ctx.beginPath();
-    ctx.ellipse(ox + 50, oy + 62, 22, 18, 0, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ox + 50, oy + 62, 22, 18, 0, 0, Math.PI * 2); ctx.fill();
 
-    // Eyes
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(ox + 37, oy + 42, 12, 0, Math.PI * 2);
-    ctx.arc(ox + 63, oy + 42, 12, 0, Math.PI * 2);
-    ctx.fill();
+    // Star Sunglasses
+    ctx.fillStyle = "#ef4444"; ctx.strokeStyle = "#fca5a5"; ctx.lineWidth = 1;
+    // Left Star
+    ctx.beginPath(); ctx.moveTo(ox+37, oy+32); ctx.lineTo(ox+40, oy+38); ctx.lineTo(ox+47, oy+38); ctx.lineTo(ox+41, oy+42); ctx.lineTo(ox+43, oy+49); ctx.lineTo(ox+37, oy+45); ctx.lineTo(ox+31, oy+49); ctx.lineTo(ox+33, oy+42); ctx.lineTo(ox+27, oy+38); ctx.lineTo(ox+34, oy+38); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Right Star
+    ctx.beginPath(); ctx.moveTo(ox+63, oy+32); ctx.lineTo(ox+66, oy+38); ctx.lineTo(ox+73, oy+38); ctx.lineTo(ox+67, oy+42); ctx.lineTo(ox+69, oy+49); ctx.lineTo(ox+63, oy+45); ctx.lineTo(ox+57, oy+49); ctx.lineTo(ox+59, oy+42); ctx.lineTo(ox+53, oy+38); ctx.lineTo(ox+60, oy+38); ctx.closePath(); ctx.fill(); ctx.stroke();
+    
+    // Glasses Bridge
+    ctx.strokeStyle = "#fca5a5"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(ox+47, oy+41); ctx.lineTo(ox+53, oy+41); ctx.stroke();
 
-    // Pupils — confident, slightly squished
-    ctx.fillStyle = "#1e1b4b";
-    ctx.beginPath();
-    ctx.save();
-    ctx.translate(ox + 37, oy + 42);
-    ctx.scale(1, 0.85);
-    ctx.arc(0, 0, 5, 0, Math.PI * 2);
-    ctx.restore();
-    ctx.save();
-    ctx.translate(ox + 63, oy + 42);
-    ctx.scale(1, 0.85);
-    ctx.arc(0, 0, 5, 0, Math.PI * 2);
-    ctx.restore();
-    ctx.fill();
-
-    // Highlights
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(ox + 39, oy + 40, 1.5, 0, Math.PI * 2);
-    ctx.arc(ox + 65, oy + 40, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Star sunglasses — helper to draw a 5-point star
-    const drawStar = (cx: number, cy: number, outerR: number, innerR: number) => {
-      ctx.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const r = i % 2 === 0 ? outerR : innerR;
-        const angle = (Math.PI / 5) * i - Math.PI / 2;
-        const sx = cx + r * Math.cos(angle);
-        const sy = cy + r * Math.sin(angle);
-        if (i === 0) ctx.moveTo(sx, sy);
-        else ctx.lineTo(sx, sy);
-      }
-      ctx.closePath();
-    };
-
-    // Left star
-    ctx.fillStyle = "#eab308";
-    drawStar(ox + 37, oy + 40, 7, 3.5);
-    ctx.fill();
-
-    // Right star
-    drawStar(ox + 63, oy + 40, 7, 3.5);
-    ctx.fill();
-
-    // Bridge
-    ctx.strokeStyle = "#eab308";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(ox + 41, oy + 38);
-    ctx.lineTo(ox + 59, oy + 38);
-    ctx.stroke();
-
-    // Glare on stars
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-    ctx.beginPath();
-    ctx.arc(ox + 35, oy + 37, 0.8, 0, Math.PI * 2);
-    ctx.arc(ox + 61, oy + 37, 0.8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Beak — confident smirk
+    // Beak
     ctx.fillStyle = "#f97316";
-    ctx.beginPath();
-    ctx.moveTo(ox + 47, oy + 49);
-    ctx.lineTo(ox + 53, oy + 49);
-    ctx.lineTo(ox + 50, oy + 55);
-    ctx.closePath();
-    ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox + 47, oy + 49); ctx.lineTo(ox + 53, oy + 49); ctx.lineTo(ox + 50, oy + 55); ctx.fill();
 
-    ctx.strokeStyle = "#ea580c";
-    ctx.lineWidth = 0.8;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(ox + 48, oy + 53);
-    ctx.quadraticCurveTo(ox + 50, oy + 56, ox + 54, oy + 52);
-    ctx.stroke();
+    // Wings (Leather sleeves)
+    ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 10; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(ox+15, oy+55); ctx.quadraticCurveTo(ox+5, oy+50, ox+15, oy+70); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox+85, oy+55); ctx.quadraticCurveTo(ox+100, oy+50, ox+85, oy+75); ctx.stroke();
 
-    // Left wing — rock horns
-    ctx.strokeStyle = "#4f46e5";
-    ctx.lineWidth = 9;
-    ctx.lineCap = "round";
-
-    ctx.beginPath();
-    ctx.moveTo(ox + 15, oy + 55);
-    ctx.quadraticCurveTo(ox + 6, oy + 40, ox + 2, oy + 24);
-    ctx.stroke();
-
-    // Fork prongs
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(ox + 2, oy + 24);
-    ctx.quadraticCurveTo(ox + 0, oy + 18, ox - 2, oy + 12);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(ox + 2, oy + 24);
-    ctx.quadraticCurveTo(ox + 6, oy + 18, ox + 8, oy + 12);
-    ctx.stroke();
-
-    // Right wing — holding guitar
-    ctx.lineWidth = 9;
-    ctx.beginPath();
-    ctx.moveTo(ox + 85, oy + 55);
-    ctx.quadraticCurveTo(ox + 92, oy + 50, ox + 95, oy + 44);
-    ctx.stroke();
-
-    // Electric guitar at right side
-    ctx.save();
-    ctx.translate(ox + 88, oy + 38);
-
-    // Guitar neck
-    ctx.fillStyle = "#92400e";
-    ctx.beginPath();
-    if (ctx.roundRect) {
-      ctx.roundRect(4, -18, 3, 20, 1);
-    } else {
-      ctx.rect(4, -18, 3, 20);
-    }
-    ctx.fill();
-
-    // Guitar headstock
-    ctx.fillStyle = "#78350f";
-    ctx.beginPath();
-    if (ctx.roundRect) {
-      ctx.roundRect(2.5, -22, 6, 5, 1.5);
-    } else {
-      ctx.rect(2.5, -22, 6, 5);
-    }
-    ctx.fill();
-
-    // Tuning pegs
-    ctx.fillStyle = "#d4d4d8";
-    ctx.beginPath();
-    ctx.arc(3.5, -20, 0.8, 0, Math.PI * 2);
-    ctx.arc(7.5, -20, 0.8, 0, Math.PI * 2);
-    ctx.arc(3.5, -18, 0.8, 0, Math.PI * 2);
-    ctx.arc(7.5, -18, 0.8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Guitar body — flame shape
-    ctx.shadowColor = "rgba(249, 115, 22, 0.8)";
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = "#f97316";
-    const flamePath = new Path2D(
-      "M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-    );
-    ctx.fill(flamePath);
-    ctx.strokeStyle = "#fdba74";
-    ctx.lineWidth = 0.5;
-    ctx.stroke(flamePath);
-    ctx.shadowBlur = 0;
-
-    // Guitar strings on body
-    ctx.strokeStyle = "rgba(254, 243, 199, 0.6)";
-    ctx.lineWidth = 0.3;
-    ctx.beginPath();
-    ctx.moveTo(5, -2);
-    ctx.lineTo(5, 8);
-    ctx.moveTo(6, -2);
-    ctx.lineTo(6, 8);
-    ctx.stroke();
-
+    // Electric Guitar
+    ctx.save(); ctx.translate(ox+20, oy+45); ctx.rotate(30 * Math.PI / 180);
+    // Neck
+    ctx.fillStyle = "#8b5cf6"; ctx.fillRect(40, 25, 40, 4);
+    // Headstock
+    ctx.fillStyle = "#1e1b4b"; ctx.beginPath(); ctx.moveTo(80,24); ctx.lineTo(85,22); ctx.lineTo(85,30); ctx.lineTo(80,28); ctx.fill();
+    // Body (V-shape)
+    ctx.fillStyle = "#ef4444"; ctx.strokeStyle = "#b91c1c"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(20,15); ctx.lineTo(45,25); ctx.lineTo(45,29); ctx.lineTo(20,39); ctx.lineTo(35,27); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Pickups
+    ctx.fillStyle = "#1e1b4b"; ctx.beginPath(); ctx.arc(35, 27, 2, 0, Math.PI*2); ctx.fill();
+    // Strings
+    ctx.strokeStyle = "#f8fafc"; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(35, 26); ctx.lineTo(80, 26); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(35, 28); ctx.lineTo(80, 28); ctx.stroke();
     ctx.restore();
 
-    // Musical notes
-    ctx.font = "8px serif";
-    ctx.fillStyle = "#f97316";
-    ctx.fillText("♪", ox + 18, oy + 16);
-
-    ctx.font = "7px serif";
-    ctx.fillStyle = "#eab308";
-    ctx.fillText("♫", ox + 72, oy + 12);
-
-    ctx.font = "6px serif";
-    ctx.fillStyle = "#fbbf24";
-    ctx.fillText("♪", ox + 28, oy + 8);
+    // Music Notes (Static)
+    ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2; ctx.globalAlpha = 0.6;
+    ctx.beginPath(); ctx.moveTo(ox+10, oy+25); ctx.quadraticCurveTo(ox+5, oy+15, ox+15, oy+10); ctx.arc(ox+15, oy+15, 5, -Math.PI/2, Math.PI, true); ctx.stroke();
+    ctx.fillStyle = "#38bdf8"; ctx.beginPath(); ctx.arc(ox+15, oy+10, 2, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1.0;
 
     ctx.restore();
   },
