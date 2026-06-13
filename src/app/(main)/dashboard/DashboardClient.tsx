@@ -166,26 +166,20 @@ export default function DashboardClient() {
               <Flame className="w-14 h-14 text-foreground" />
             </div>
 
-            <div 
-              className="absolute right-4 bottom-4 flex items-center gap-1 bg-accent/80 px-2 py-1 rounded-md text-muted-foreground hover:text-primary transition-colors cursor-help z-20 shadow-sm"
-              title="Streak Shields: Protects your streak if you miss a day"
-            >
-              <span className="text-[10px] font-mono font-bold">{Math.min(3, Math.floor((summary.currentStreakDays || 0) / 30))}/3</span>
-              <ShieldCheck className="w-3.5 h-3.5" />
-            </div>
-
-            <div className="relative z-10 pointer-events-none">
+            <div>
               <h3 className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Active Streak</h3>
               <div className="flex items-baseline gap-1 mt-2">
                 <span className="text-4xl font-extrabold font-heading text-foreground">{summary.currentStreakDays}</span>
                 <span className="text-xs font-mono text-muted-foreground uppercase">{summary.currentStreakDays === 1 ? 'Day' : 'Days'}</span>
               </div>
             </div>
-            <div className="mt-3 w-full bg-accent h-1 rounded-full overflow-hidden relative z-10">
-              <div 
-                className="bg-primary h-full rounded-full transition-all duration-500" 
-                style={{ width: `${Math.min(100, summary.currentStreakDays * 10)}%` }}
-              ></div>
+
+            <div 
+              className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary transition-colors cursor-help w-fit"
+              title="Streak Shields: Protects your streak if you miss a day. Earned every 30 days of reading."
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Streak Shields: <span className="font-bold text-foreground group-hover:text-primary">{Math.min(3, Math.floor((summary.currentStreakDays || 0) / 30))}/3</span></span>
             </div>
           </div>
 
