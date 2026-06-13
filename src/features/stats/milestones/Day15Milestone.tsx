@@ -10,7 +10,7 @@ export const Day15Milestone: StreakMilestone = {
   gap: 20,
   renderPreview: () => (
     <svg
-      viewBox="0 0 110 100"
+      viewBox="-5 0 110 100"
       className="w-full h-full drop-shadow-[0_4px_12px_rgba(79,70,229,0.15)]"
       xmlns="http://www.w3.org/2000/svg"
     >

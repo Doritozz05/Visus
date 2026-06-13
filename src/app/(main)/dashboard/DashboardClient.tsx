@@ -294,7 +294,7 @@ export default function DashboardClient() {
         {/* ROW 3 */}
         {/* Box 6: Achievements showcase */}
         <div className="md:col-span-2 h-full">
-          <AchievementsShowcase userId={userId} />
+          <AchievementsShowcase userId={userId} currentStreak={summary.currentStreakDays} />
         </div>
 
         {/* Box 7: Predictive Widget */}

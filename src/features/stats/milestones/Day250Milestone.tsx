@@ -10,7 +10,7 @@ export const Day250Milestone: StreakMilestone = {
   gap: 20,
   renderPreview: () => (
     <svg
-      viewBox="0 0 110 100"
+      viewBox="-5 0 110 100"
       className="w-full h-full drop-shadow-[0_4px_12px_rgba(79,70,229,0.15)]"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -60,11 +60,11 @@ export const Day250Milestone: StreakMilestone = {
         <polygon points="47,49 53,49 50,55" fill="#f97316" />
 
         {/* Wings holding the flask carefully */}
-        <path d="M15,55 Q25,65 35,62" fill="none" stroke="#4f46e5" strokeWidth="9" strokeLinecap="round" />
-        <path d="M85,55 Q75,65 65,62" fill="none" stroke="#4f46e5" strokeWidth="9" strokeLinecap="round" />
+        <path d="M15,55 Q25,55 35,52" fill="none" stroke="#4f46e5" strokeWidth="9" strokeLinecap="round" />
+        <path d="M85,55 Q75,55 65,52" fill="none" stroke="#4f46e5" strokeWidth="9" strokeLinecap="round" />
 
         {/* Erlenmeyer Flask */}
-        <g transform="translate(50, 68)">
+        <g transform="translate(50, 58)">
           <motion.path 
             d="M-4,-15 L4,-15 L6,-5 L15,10 A4,4 0 0,1 11,15 L-11,15 A4,4 0 0,1 -15,10 L-6,-5 Z" 
             fill="rgba(255,255,255,0.2)" 
@@ -121,7 +121,7 @@ export const Day250Milestone: StreakMilestone = {
     ctx.translate(x, y);
     ctx.scale(2.8, 2.8);
 
-    ctx.translate(11, 10);
+    ctx.translate(18.75, 10);
     ctx.scale(0.8, 0.8);
 
     const ox = 0;

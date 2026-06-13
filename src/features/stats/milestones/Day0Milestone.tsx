@@ -10,7 +10,7 @@ export const Day0Milestone: StreakMilestone = {
   gap: 20,
   renderPreview: () => (
     <svg
-      viewBox="0 0 110 100"
+      viewBox="-5 0 110 100"
       className="w-full h-full drop-shadow-[0_4px_12px_rgba(0,0,0,0.15)] grayscale"
       xmlns="http://www.w3.org/2000/svg"
       style={{ opacity: 0.8 }}
@@ -89,7 +89,7 @@ export const Day0Milestone: StreakMilestone = {
     // Apply global grayscale filter for the canvas
     ctx.filter = "grayscale(100%) opacity(80%)";
 
-    ctx.translate(11, 10);
+    ctx.translate(18.75, 10);
     ctx.scale(0.8, 0.8);
 
     const ox = 0;
