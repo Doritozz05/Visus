@@ -223,9 +223,11 @@ export default function ReaderClient() {
         </button>
       )}
 
-      <MobileReaderNav onOpenSettings={openQuickSettings} />
+      {!isFocusMode && <MobileReaderNav onOpenSettings={openQuickSettings} />}
 
-      <main className="flex-1 flex flex-col items-center justify-between relative w-full h-[calc(100vh-80px)] md:h-screen p-6 pt-4 pb-8 overflow-hidden overscroll-none">
+      <main className={`flex-1 flex flex-col items-center justify-between relative w-full p-6 pt-4 pb-8 overflow-hidden overscroll-none transition-all duration-300 ${
+        isFocusMode ? "h-screen" : "h-[calc(100vh-80px)] md:h-screen"
+      }`}>
         <ReaderHeader
           activeBook={activeBook}
           setActiveChapterIndex={handleChapterChange}

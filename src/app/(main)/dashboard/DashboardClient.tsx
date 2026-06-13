@@ -162,8 +162,12 @@ export default function DashboardClient() {
 
           {/* Card B: Racha */}
           <div className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-              <Flame className="w-14 h-14 text-foreground" />
+            <div className={`absolute top-0 right-0 p-4 transition-all duration-300 pointer-events-none ${
+              summary.currentStreakDays > 0 
+                ? "text-orange-500 opacity-80 animate-pulse" 
+                : "text-foreground opacity-5 group-hover:opacity-10"
+            }`}>
+              <Flame className="w-14 h-14" />
             </div>
 
             <div>

@@ -50,7 +50,13 @@ export function ReaderPlayer({
   const isFocusMode = useReadingStore((state) => state.isFocusMode);
 
   return (
-    <div className={`w-full max-w-2xl mt-auto mb-4 flex flex-col sm:flex-row items-center justify-between gap-6 bg-card/60 backdrop-blur-xl p-4 md:p-6 rounded-xl border border-border/20 shadow-xl z-20 liquid-glass transition-all duration-300 ${isFocusMode ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100'}`}>
+    <div className={`w-full max-w-2xl mt-auto mb-4 flex flex-col sm:flex-row items-center justify-between gap-6 bg-card/60 backdrop-blur-xl p-4 md:p-6 rounded-xl border border-border/20 shadow-xl z-20 liquid-glass transition-all duration-300 ${
+      isFocusMode 
+        ? isPlaying 
+          ? 'opacity-0 translate-y-4 hover:opacity-100 hover:translate-y-0' 
+          : 'opacity-100 translate-y-0' 
+        : 'opacity-100 translate-y-0'
+    }`}>
       {/* Playback Toggles */}
       <div className="flex items-center justify-center gap-6">
         {isNormalMode ? (

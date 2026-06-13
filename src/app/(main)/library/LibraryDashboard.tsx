@@ -54,7 +54,19 @@ export default function LibraryDashboard() {
       const statsSummary = await StatsService.getStatsSummary(completedBooksCount);
       setSummary({ currentStreakDays: statsSummary.currentStreakDays });
     };
-    if (isHydrated) fetchStats();
+
+    if (isHydrated) {
+      fetchStats();
+    }
+
+    const handleStatsUpdated = () => {
+      if (isHydrated) fetchStats();
+    };
+
+    window.addEventListener("stats-updated", handleStatsUpdated);
+    return () => {
+      window.removeEventListener("stats-updated", handleStatsUpdated);
+    };
   }, [books, isHydrated]);
 
   // State controls for UI
@@ -238,8 +250,16 @@ export default function LibraryDashboard() {
               className="flex items-center gap-4 bg-accent/30 px-4 py-1.5 rounded-xl border border-border/10 shadow-sm backdrop-blur-sm hover:bg-accent/50 hover:border-primary/30 transition-all group/header"
             >
               <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-                <Flame className="text-primary w-4 h-4 animate-pulse" />
-                <span className="font-bold text-foreground text-[11px] group-hover/header:text-primary transition-colors">{summary.currentStreakDays} day streak</span>
+                <Flame 
+                  className={`w-4 h-4 transition-colors duration-300 ${
+                    summary.currentStreakDays > 0 
+                      ? "text-orange-500 animate-pulse" 
+                      : "text-muted-foreground/40"
+                  }`} 
+                />
+                <span className="font-bold text-foreground text-[11px] transition-colors duration-300">
+                  {summary.currentStreakDays} day streak
+                </span>
               </div>
               <div className="h-4 w-px bg-border/30"></div>
               <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shadow-lg ring-2 ring-background overflow-hidden group-hover/header:ring-primary/50 transition-all">
