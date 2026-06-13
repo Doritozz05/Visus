@@ -16,7 +16,7 @@ export default function NotFound() {
         <div className="relative z-10 space-y-2">
           <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">404 - Page Missing</h1>
           <p className="text-sm text-muted-foreground font-sans leading-relaxed max-w-xs mx-auto">
-            Visi dropped the books! We can't seem to find the page you are looking for. It might have been moved or deleted.
+            Visi dropped the books! We can&apos;t seem to find the page you are looking for. It might have been moved or deleted.
           </p>
         </div>
 
