@@ -5,8 +5,8 @@ import { StreakMilestone } from "./types";
 export const Day5Milestone: StreakMilestone = {
   id: "day5",
   isMatch: (s) => s >= 5 && s < 15,
-  canvasWidth: 110,
-  canvasHeight: 100,
+  canvasWidth: 308,
+  canvasHeight: 280,
   gap: 20,
   renderPreview: () => (
     <svg
@@ -140,13 +140,8 @@ export const Day5Milestone: StreakMilestone = {
   ),
   drawCanvas: (ctx, x, y) => {
     ctx.save();
-
-    // Scale down and center mascot
-    const scale = 0.8;
-    const dx = (110 - 110 * scale) / 2;
-    const dy = (100 - 100 * scale) / 2;
-    ctx.translate(x + dx, y + dy);
-    ctx.scale(scale, scale);
+    ctx.translate(x, y);
+    ctx.scale(2.8, 2.8);
 
     // Use local coordinates (origin at translated x, y)
     const ox = 0;

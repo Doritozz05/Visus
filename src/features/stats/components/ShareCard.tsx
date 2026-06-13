@@ -76,7 +76,7 @@ export function ShareCard({ summary }: ShareCardProps) {
     drawRoundRect(ctx, 16, 16, w - 32, h - 32, 12);
     ctx.stroke();
 
-    // 3. Top left: VISUS // READING TELEMETRY
+    // 3. Header: VISUS // READING TELEMETRY (Left) + Metrics (Right)
     ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.5)");
     ctx.font = "20px monospace";
     ctx.textAlign = "left";
@@ -85,72 +85,52 @@ export function ShareCard({ summary }: ShareCardProps) {
     }
     ctx.fillText("VISUS // READING TELEMETRY", 40, 60);
 
-    // 4. Centerpiece: Streak Number and Flame / Mascot side-by-side
-    ctx.font = "bold 96px sans-serif";
+    // Metrics in top right
     if ("letterSpacing" in ctx) {
       (ctx as any).letterSpacing = "0px";
     }
+    ctx.textAlign = "right";
 
-    const streakStr = String(displayedStreak);
-    const numWidth = ctx.measureText(streakStr).width;
-    const centerY = 220; // vertical center of elements
+    // WPM
+    const wpmVal = String(summary.averageWpm || 0);
+    ctx.fillStyle = getThemeColor("--foreground", "#ffffff");
+    ctx.font = "bold 26px sans-serif";
+    ctx.fillText(wpmVal, 760, 60);
+    const wpmW = ctx.measureText(wpmVal).width;
 
+    ctx.fillStyle = getThemeColor("--primary", "#6366f1");
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText("WPM", 760 - wpmW - 5, 60);
+    const wpmLblW = ctx.measureText("WPM").width;
+
+    // Divider
+    const dividerX = 760 - wpmW - wpmLblW - 25;
+    ctx.strokeStyle = getThemeColor("--border", "rgba(255, 255, 255, 0.1)");
+    ctx.beginPath();
+    ctx.moveTo(dividerX, 42);
+    ctx.lineTo(dividerX, 68);
+    ctx.stroke();
+
+    // DAY
+    const dayVal = String(displayedStreak);
+    ctx.fillStyle = getThemeColor("--foreground", "#ffffff");
+    ctx.font = "bold 26px sans-serif";
+    ctx.fillText(dayVal, dividerX - 15, 60);
+    const dayW = ctx.measureText(dayVal).width;
+
+    ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.5)");
+    ctx.font = "bold 14px monospace";
+    ctx.fillText("DAY", dividerX - 15 - dayW - 8, 60);
+
+    // 4. Centerpiece: Mascot only (Centered)
+    const centerY = 240; // Shifted down slightly since label is gone
     const milestone = getMilestone(displayedStreak);
     
-    // Draw Streak Number
-    const totalW = numWidth + (milestone.canvasWidth > 0 ? milestone.gap + milestone.canvasWidth : 0);
-    const startX = 400 - totalW / 2;
-    ctx.fillStyle = getThemeColor("--foreground", "#ffffff");
-    ctx.textAlign = "left";
-    ctx.fillText(streakStr, startX, centerY + 35);
-
-    // Draw Milestone canvas graphics if applicable
     if (milestone.canvasWidth > 0) {
-      const mx = startX + numWidth + milestone.gap;
-      const my = centerY - 45;
+      const mx = 400 - milestone.canvasWidth / 2;
+      const my = centerY - milestone.canvasHeight / 2;
       milestone.drawCanvas(ctx, mx, my, displayedStreak);
     }
-
-    // Centerpiece: Streak Label
-    ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.5)");
-    ctx.font = "bold 16px monospace";
-    ctx.textAlign = "center";
-    if ("letterSpacing" in ctx) {
-      (ctx as any).letterSpacing = "6px";
-    }
-    const lblStr = displayedStreak === 1 ? "DAY STREAK" : "DAYS STREAK";
-    ctx.fillText(lblStr, 400, centerY + 85);
-
-    // 6. Bottom Left: WPM Metric
-    ctx.textAlign = "left";
-    if ("letterSpacing" in ctx) {
-      (ctx as any).letterSpacing = "0px";
-    }
-    ctx.fillStyle = getThemeColor("--foreground", "#ffffff");
-    ctx.font = "bold 44px sans-serif";
-    const wpmStr = String(summary.averageWpm || 0);
-    ctx.fillText(wpmStr, 45, 390);
-
-    const wpmWidth = ctx.measureText(wpmStr).width;
-    ctx.fillStyle = getThemeColor("--primary", "#6366f1");
-    ctx.font = "bold 18px sans-serif";
-    ctx.fillText("WPM", 45 + wpmWidth + 8, 390);
-
-    ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.5)");
-    ctx.font = "14px monospace";
-    if ("letterSpacing" in ctx) {
-      (ctx as any).letterSpacing = "2px";
-    }
-    ctx.fillText("AVERAGE SPEED", 45, 415);
-
-    // 7. Bottom Right: Tagline
-    ctx.textAlign = "right";
-    if ("letterSpacing" in ctx) {
-      (ctx as any).letterSpacing = "0px";
-    }
-    ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.4)");
-    ctx.font = "italic 16px sans-serif";
-    ctx.fillText("Perfect speed & comprehension.", 755, 415);
 
     return canvas;
   };
@@ -195,7 +175,7 @@ export function ShareCard({ summary }: ShareCardProps) {
       const dataUrl = canvas.toDataURL("image/png");
       const downloadAnchor = document.createElement("a");
       downloadAnchor.setAttribute("href", dataUrl);
-      downloadAnchor.setAttribute("download", `visus_stats_${summary.averageWpm}_wpm.png`);
+      downloadAnchor.setAttribute("download", `visus_streak_${displayedStreak}_days.png`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -235,34 +215,28 @@ export function ShareCard({ summary }: ShareCardProps) {
           {/* Header */}
           <div className="flex justify-between items-center w-full">
             <span className="text-[8px] font-mono text-muted-foreground tracking-wider uppercase">VISUS // READING TELEMETRY</span>
-          </div>
-
-          {/* Centerpiece: Streak with professional orange fire / Mascot */}
-          <div className="flex flex-col items-center justify-center my-auto">
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-4xl font-extrabold text-foreground leading-none">{displayedStreak}</span>
-              {milestone.renderPreview(displayedStreak)}
-            </div>
-            <span className="text-[7px] font-mono text-muted-foreground uppercase tracking-widest mt-1.5">
-              {displayedStreak === 1 ? "Day streak" : "Days streak"}
-            </span>
-          </div>
-
-          {/* Footer */}
-          <div className="flex justify-between items-end w-full">
-            {/* Speed WPM */}
-            <div className="flex flex-col">
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-lg font-extrabold text-foreground leading-none">{summary.averageWpm}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-baseline gap-1">
+                <span className="text-[10px] font-mono text-muted-foreground uppercase">Day</span>
+                <span className="text-xs font-bold text-foreground">{displayedStreak}</span>
+              </div>
+              <div className="w-px h-2 bg-border/40" />
+              <div className="flex items-baseline gap-1">
+                <span className="text-xs font-bold text-foreground">{summary.averageWpm}</span>
                 <span className="text-[8px] font-bold text-primary">WPM</span>
               </div>
-              <span className="text-[6px] font-mono text-muted-foreground uppercase tracking-wider">Average speed</span>
             </div>
+          </div>
 
-            {/* Tagline */}
-            <div className="text-[8px] font-sans text-muted-foreground/60 italic">
-              Perfect speed &amp; comprehension.
+          {/* Centerpiece: Mascot only */}
+          <div className="flex flex-col items-center justify-center my-auto">
+            <div className="flex items-center justify-center">
+              {milestone.renderPreview(displayedStreak)}
             </div>
+          </div>
+
+          {/* Footer: Empty or minimal */}
+          <div className="flex justify-between items-end w-full h-4">
           </div>
         </div>
 

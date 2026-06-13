@@ -5,8 +5,8 @@ import { StreakMilestone } from "./types";
 export const Day15Milestone: StreakMilestone = {
   id: "day15",
   isMatch: (s) => s >= 15,
-  canvasWidth: 110,
-  canvasHeight: 100,
+  canvasWidth: 308,
+  canvasHeight: 280,
   gap: 20,
   renderPreview: () => (
     <svg
@@ -193,13 +193,8 @@ export const Day15Milestone: StreakMilestone = {
   ),
   drawCanvas: (ctx, x, y) => {
     ctx.save();
-
-    // Scale down and center mascot
-    const scale = 0.8;
-    const dx = (110 - 110 * scale) / 2;
-    const dy = (100 - 100 * scale) / 2;
-    ctx.translate(x + dx, y + dy);
-    ctx.scale(scale, scale);
+    ctx.translate(x, y);
+    ctx.scale(2.8, 2.8);
 
     // Use local coordinates (origin at translated x, y)
     const ox = 0;
@@ -208,16 +203,16 @@ export const Day15Milestone: StreakMilestone = {
     // Draw Ears
     ctx.fillStyle = "#4f46e5";
     ctx.beginPath();
-    ctx.moveTo(ox + 20, oy + 25);
-    ctx.lineTo(ox + 35, oy + 25);
-    ctx.lineTo(ox + 25, oy + 12);
+    ctx.moveTo(ox + 20, oy + 35);
+    ctx.lineTo(ox + 50, oy + 35);
+    ctx.lineTo(ox + 25, oy + 18);
     ctx.closePath();
     ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(ox + 65, oy + 25);
-    ctx.lineTo(ox + 80, oy + 25);
-    ctx.lineTo(ox + 75, oy + 12);
+    ctx.moveTo(ox + 50, oy + 35);
+    ctx.lineTo(ox + 80, oy + 35);
+    ctx.lineTo(ox + 75, oy + 18);
     ctx.closePath();
     ctx.fill();
 
@@ -364,13 +359,13 @@ export const Day15Milestone: StreakMilestone = {
     ctx.scale(0.7, 0.7);
     ctx.shadowColor = "rgba(249, 115, 22, 0.85)";
     ctx.shadowBlur = 10;
-    ctx.fillStyle = "rgba(249, 115, 22, 0.2)";
+    ctx.fillStyle = "#f97316";
     const flamePath = new Path2D(
       "M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
     );
     ctx.fill(flamePath);
-    ctx.strokeStyle = "#f97316";
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "#fdba74";
+    ctx.lineWidth = 0.5;
     ctx.stroke(flamePath);
     ctx.restore();
 
