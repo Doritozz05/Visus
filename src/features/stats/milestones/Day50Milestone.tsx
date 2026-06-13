@@ -168,6 +168,7 @@ export const Day50Milestone: StreakMilestone = {
         </motion.g>
 
         {/* Beak — wide open */}
+        <polygon points="46,48 54,48 50,44" fill="#f97316" />
         <polygon points="46,51 54,51 50,58" fill="#f97316" />
 
         {/* Blue flame above head */}
@@ -347,38 +348,35 @@ export const Day50Milestone: StreakMilestone = {
     ctx.arc(ox + 63, oy + 42, 12, 0, Math.PI * 2);
     ctx.fill();
 
-    // Spiral pupils — left eye (concentric circles for static clean look)
+    // Spiral pupils — left eye (Static hypnotic style)
     ctx.strokeStyle = "#1e1b4b";
-    ctx.lineWidth = 1.8;
+    ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
 
-    [2.5, 5, 7.5].forEach(radius => {
-      ctx.beginPath();
-      ctx.arc(ox + 37, oy + 42, radius, 0, Math.PI * 2);
-      ctx.stroke();
-    });
+    // Three arcs to capture the 'motion' in static
+    ctx.beginPath(); ctx.arc(ox + 37, oy + 42, 8, -Math.PI / 2, 0); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ox + 37, oy + 42, 8, Math.PI / 6, Math.PI / 6 + Math.PI / 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ox + 37, oy + 42, 8, Math.PI, Math.PI + Math.PI / 2); ctx.stroke();
 
     // Spiral pupils — right eye
-    [2.5, 5, 7.5].forEach(radius => {
-      ctx.beginPath();
-      ctx.arc(ox + 63, oy + 42, radius, 0, Math.PI * 2);
-      ctx.stroke();
-    });
+    ctx.beginPath(); ctx.arc(ox + 63, oy + 42, 8, -Math.PI / 2, 0); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ox + 63, oy + 42, 8, Math.PI / 6, Math.PI / 6 + Math.PI / 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ox + 63, oy + 42, 8, Math.PI, Math.PI + Math.PI / 2); ctx.stroke();
 
-    // Beak — wide open (upper and lower)
+    // Beak — wide open (upper and lower triangles)
     ctx.fillStyle = "#f97316";
+    // Upper beak
     ctx.beginPath();
-    ctx.moveTo(ox + 46, oy + 49);
-    ctx.lineTo(ox + 54, oy + 49);
-    ctx.lineTo(ox + 50, oy + 48);
-    ctx.closePath();
+    ctx.moveTo(ox + 46, oy + 48);
+    ctx.lineTo(ox + 54, oy + 48);
+    ctx.lineTo(ox + 50, oy + 44);
     ctx.fill();
 
+    // Lower beak
     ctx.beginPath();
     ctx.moveTo(ox + 46, oy + 51);
     ctx.lineTo(ox + 54, oy + 51);
     ctx.lineTo(ox + 50, oy + 58);
-    ctx.closePath();
     ctx.fill();
 
     // Blue flame above head
