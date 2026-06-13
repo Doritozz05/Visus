@@ -15,16 +15,16 @@ export const Day15Milestone: StreakMilestone = {
       xmlns="http://www.w3.org/2000/svg"
     >
       <motion.g
-        animate={{ y: [0, -5, 0] }}
+        animate={{ y: [8, 3, 8] }}
         transition={{
           repeat: Infinity,
           duration: 1.2,
-          ease: "easeInOut",
+          ease: "linear",
         }}
       >
         {/* Ears */}
-        <polygon points="20,25 35,25 25,12" fill="#4f46e5" />
-        <polygon points="65,25 80,25 75,12" fill="#4f46e5" />
+        <polygon points="20,35 50,35 25,18" fill="#4f46e5" />
+        <polygon points="50,35 80,35 75,18" fill="#4f46e5" />
 
         {/* Feet */}
         <ellipse cx="32" cy="86" rx="6" ry="4" fill="#f97316" />
@@ -117,8 +117,12 @@ export const Day15Milestone: StreakMilestone = {
           stroke="#4f46e5"
           strokeWidth="9"
           strokeLinecap="round"
-          animate={{ rotate: [0, -12, 12, 0] }}
-          transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
+          animate={{ rotate: [0, -12, 0, 12, 0] }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 1.2, 
+            ease: "linear" 
+          }}
           style={{ transformOrigin: "15px 55px" }}
         />
 
