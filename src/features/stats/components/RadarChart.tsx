@@ -115,7 +115,7 @@ export function RadarChart({ logs, books }: RadarChartProps) {
         <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Balanced view of your skills</p>
       </div>
 
-      <div className="relative w-full flex justify-center items-center py-2">
+      <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="overflow-visible">
           {/* Concentric grid lines */}
           {gridPolygons.map((points, idx) => (
@@ -203,17 +203,34 @@ export function RadarChart({ logs, books }: RadarChartProps) {
           {/* Hover interactive nodes */}
           {metrics.map((m, i) => {
             const { x, y } = getCoordinates(i, m.value);
+            const isHovered = hoveredMetric?.name === m.name;
+            
             return (
-              <circle
-                key={i}
-                cx={x}
-                cy={y}
-                r="5"
-                className="fill-primary stroke-background cursor-pointer hover:scale-150 hover:fill-foreground transition-all"
-                strokeWidth="1.5"
-                onMouseEnter={() => setHoveredMetric({ name: m.name, value: m.label, x, y })}
-                onMouseLeave={() => setHoveredMetric(null)}
-              />
+              <g key={i} className="cursor-pointer">
+                {/* Invisible hit area for better UX and stability */}
+                <circle
+                  cx={x}
+                  cy={y}
+                  r="12"
+                  fill="transparent"
+                  onMouseEnter={() => setHoveredMetric({ name: m.name, value: m.label, x, y })}
+                  onMouseLeave={() => setHoveredMetric(null)}
+                />
+                {/* Visual point */}
+                <circle
+                  cx={x}
+                  cy={y}
+                  r="5"
+                  className={`transition-all duration-300 pointer-events-none fill-primary stroke-background ${
+                    isHovered ? "scale-150 brightness-110" : ""
+                  }`}
+                  strokeWidth="1.5"
+                  style={{ 
+                    transformOrigin: "center",
+                    transformBox: "fill-box"
+                  }}
+                />
+              </g>
             );
           })}
         </svg>
