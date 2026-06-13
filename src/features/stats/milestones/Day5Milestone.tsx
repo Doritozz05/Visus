@@ -23,8 +23,8 @@ export const Day5Milestone: StreakMilestone = {
         }}
       >
         {/* Ears */}
-        <polygon points="20,25 35,25 25,12" fill="#4f46e5" />
-        <polygon points="65,25 80,25 75,12" fill="#4f46e5" />
+        <polygon points="20,35 50,35 25,18" fill="#4f46e5" />
+        <polygon points="50,35 80,35 75,18" fill="#4f46e5" />
 
         {/* Feet */}
         <ellipse cx="32" cy="86" rx="6" ry="4" fill="#f97316" />
@@ -71,7 +71,7 @@ export const Day5Milestone: StreakMilestone = {
         <circle cx="65" cy="40" r="1.5" fill="#ffffff" />
 
         {/* Beak */}
-        <polygon points="47,48 53,48 50,55" fill="#f97316" />
+        <polygon points="47,49 53,49 50,55" fill="#f97316" />
 
         {/* Day 5 Glasses */}
         <circle
@@ -137,7 +137,7 @@ export const Day5Milestone: StreakMilestone = {
   ),
   drawCanvas: (ctx, x, y) => {
     ctx.save();
-    
+
     // Scale down and center mascot
     const scale = 0.8;
     const dx = (110 - 110 * scale) / 2;
