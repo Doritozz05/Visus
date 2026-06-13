@@ -115,15 +115,15 @@ export function VisiMascot({ variant = "default", className = "", size = 120 }: 
               <motion.g
                 animate={{ rotate: [-5, 5, -5] }}
                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                style={{ transformOrigin: "85px 65px" }}
+                style={{ transformOrigin: "88px 65px" }}
               >
                 {/* Arm/Wing */}
-                <path d="M75,55 Q95,60 85,75" fill="none" stroke="#4f46e5" strokeWidth="8" strokeLinecap="round" />
+                <path d="M78,55 Q98,60 88,75" fill="none" stroke="#4f46e5" strokeWidth="8" strokeLinecap="round" />
                 {/* Handle */}
-                <line x1="85" y1="75" x2="95" y2="85" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
+                <line x1="88" y1="75" x2="98" y2="85" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
                 {/* Glass */}
-                <circle cx="98" cy="88" r="8" fill="#e0f2fe" opacity="0.6" stroke="#cbd5e1" strokeWidth="2" />
-                <line x1="94" y1="84" x2="96" y2="86" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="101" cy="88" r="8" fill="#e0f2fe" opacity="0.6" stroke="#cbd5e1" strokeWidth="2" />
+                <line x1="97" y1="84" x2="99" y2="86" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
               </motion.g>
 
               {/* Left Wing */}
