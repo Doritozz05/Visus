@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { Check, Plus, X, Pipette, ChevronDown, RotateCcw } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { COLOR_PRESETS, resolveColor, hexToHsl } from "@/lib/color-utils";
@@ -13,16 +14,17 @@ export interface ColorSelectorProps {
   label?: string;
   showWhitePreset?: boolean;
   presets?: Array<{ id: string; hex: string; name?: string }>;
+  menuZIndex?: number;
 }
 
 // Helper to convert HSL to Hex
 function hslToHex(h: number, s: number, l: number): string {
   l /= 100;
-  const a = s * Math.min(l, 1 - l) / 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
   const f = (n: number) => {
     const k = (n + h / 30) % 12;
     const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * color).toString(16).padStart(2, '0');
+    return Math.round(255 * color).toString(16).padStart(2, "0");
   };
   return `#${f(0)}${f(8)}${f(4)}`;
 }
@@ -35,6 +37,7 @@ export function ColorSelector({
   label,
   showWhitePreset = false,
   presets,
+  menuZIndex = 160,
 }: ColorSelectorProps) {
   const { settings, updateGeneralSettings } = useSettings();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -44,8 +47,13 @@ export function ColorSelector({
   const [internalHsl, setInternalHsl] = React.useState<{h: number, s: number, l: number} | null>(null);
   const isInteracting = React.useRef(false);
 
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>({});
+  const [isMenuPositioned, setIsMenuPositioned] = React.useState(false);
 
   const savedColors = settings.general.savedColors || [];
   const resolvedHex = resolveColor(value);
@@ -65,18 +73,59 @@ export function ColorSelector({
     setHexInput(resolvedHex);
   }, [resolvedHex]);
 
-  // Close dropdown on click outside
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+  const updateMenuPosition = React.useCallback(() => {
+    const triggerEl = triggerRef.current;
+    if (!triggerEl) return;
+
+    const rect = triggerEl.getBoundingClientRect();
+    const width = rect.width;
+    const viewportHeight = window.innerHeight;
+
+    const spaceBelow = viewportHeight - rect.bottom - 16;
+    const spaceAbove = rect.top - 16;
+    const preferAbove = spaceBelow < 400 && spaceAbove > spaceBelow;
+
+    const style: React.CSSProperties = {
+      position: "fixed",
+      left: rect.left,
+      width,
+      zIndex: menuZIndex,
     };
-  }, []);
+
+    if (preferAbove) {
+      style.bottom = viewportHeight - rect.top + 8;
+    } else {
+      style.top = rect.bottom + 8;
+    }
+
+    setMenuStyle(style);
+    setIsMenuPositioned(true);
+  }, [menuZIndex]);
+
+  React.useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    setIsMenuPositioned(false);
+    updateMenuPosition();
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (containerRef.current?.contains(target) || dropdownRef.current?.contains(target)) return;
+      setIsOpen(false);
+    };
+
+    const handleResizeOrScroll = () => updateMenuPosition();
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("resize", handleResizeOrScroll);
+    window.addEventListener("scroll", handleResizeOrScroll, true);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("resize", handleResizeOrScroll);
+      window.removeEventListener("scroll", handleResizeOrScroll, true);
+    };
+  }, [isOpen, updateMenuPosition]);
 
   const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -112,7 +161,6 @@ export function ColorSelector({
     // When interaction ends, push to history
     const currentHex = hslToHex(h, s, l);
     onChangeComplete?.(currentHex);
-    // REMOVED: setInternalHsl(null); - Keep internal HSL to prevent hue loss at extremes
   };
 
   // Sync internal HSL when external value changes to something different
@@ -174,7 +222,7 @@ export function ColorSelector({
   };
 
   return (
-    <div className="relative w-full" ref={dropdownRef}>
+    <div className="relative w-full" ref={containerRef}>
       {label && (
         <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">
           {label}
@@ -183,6 +231,7 @@ export function ColorSelector({
 
       {/* Main Trigger Button */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-2.5 bg-card/40 border border-border/30 hover:border-border/60 hover:bg-accent/10 rounded-xl transition-all font-mono text-xs text-left"
@@ -204,9 +253,14 @@ export function ColorSelector({
       </button>
 
       {/* Dropdown Panel - Solid Opaque bg-card for readability */}
-      {isOpen && (
+      {isOpen && typeof document !== "undefined" && createPortal(
         <div 
-          className="absolute left-0 right-0 mt-2 p-4 bg-card border border-border/40 rounded-xl shadow-2xl z-50 animate-slide-in-top flex flex-col gap-4"
+          ref={dropdownRef}
+          style={{
+            ...menuStyle,
+            visibility: isMenuPositioned ? "visible" : "hidden",
+          }}
+          className="p-4 bg-card border border-border/40 rounded-xl shadow-2xl animate-slide-in-top flex flex-col gap-4"
           onMouseUp={handleInteractionEnd}
           onMouseLeave={handleInteractionEnd}
           onTouchEnd={handleInteractionEnd}
@@ -399,7 +453,8 @@ export function ColorSelector({
             </div>
           )}
 
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
