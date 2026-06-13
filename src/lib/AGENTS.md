@@ -15,3 +15,4 @@ None.
 
 # Child DOX Index
 - [parser/AGENTS.md](parser/AGENTS.md)
+- [services/AGENTS.md](services/AGENTS.md)

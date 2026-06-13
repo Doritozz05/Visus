@@ -84,7 +84,9 @@ When the user requests a durable behavior change, record it here or in the relev
 ## Child DOX Index
 
 - [src/app/AGENTS.md](src/app/AGENTS.md)
+- [src/components/AGENTS.md](src/components/AGENTS.md)
 - [src/core/AGENTS.md](src/core/AGENTS.md)
 - [src/features/AGENTS.md](src/features/AGENTS.md)
 - [src/lib/AGENTS.md](src/lib/AGENTS.md)
 - [supabase/AGENTS.md](supabase/AGENTS.md)
+- [tests/AGENTS.md](tests/AGENTS.md)

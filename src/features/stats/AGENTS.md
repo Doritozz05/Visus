@@ -14,3 +14,6 @@ Achievements evaluation, stats export, local data compression, and custom SVG vi
 
 # Verification
 - Run Vitest suites for stats compression and achievement triggers: `npx vitest run`.
+
+# Child DOX Index
+None.
