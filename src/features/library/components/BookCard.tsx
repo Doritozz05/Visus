@@ -61,7 +61,7 @@ export function BookCard({
 
   return (
     <div
-      className="bg-card border border-border/20 rounded-xl p-5 flex flex-col relative hover:border-primary/50 transition-all shadow-md liquid-glass min-h-[200px]"
+      className="bg-card border border-border/20 rounded-xl p-5 flex flex-col relative hover:border-primary/50 transition-all shadow-md liquid-glass h-[235px]"
     >
       {/* Option Actions Row */}
       <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-20">
@@ -231,7 +231,7 @@ export function BookCard({
       </div>
 
       {/* Footer Area: Fixed Position Actions & Progress */}
-      <div className="mt-auto pt-4 border-t border-border/5 flex flex-col items-center gap-4">
+      <div className="mt-auto pt-4 border-t border-border/5 flex flex-col items-center gap-3">
         {book.format !== "PHYSICAL" && (
           <button
             onClick={() => onRead(book.id)}

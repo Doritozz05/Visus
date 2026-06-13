@@ -19,8 +19,6 @@ export function GeneralSettingsForm() {
     uiFont,
     glassmorphism,
     reducedMotion,
-    soundEffects,
-    readingTimerReminder,
     yearlyReadingGoal,
     customThemes = []
   } = settings.general;
@@ -311,46 +309,7 @@ export function GeneralSettingsForm() {
             </button>
           </div>
 
-          {/* Sound Effects */}
-          <div className="flex items-center justify-between py-1 border-t border-border/10 pt-3">
-            <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Sound feedbacks</label>
-              <p className="text-[9px] text-muted-foreground mt-0.5">Subtle clicks on pacing ticks and chimes on completing sessions.</p>
-            </div>
-            <button
-              onClick={() => updateGeneralSettings({ soundEffects: !soundEffects })}
-              className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${soundEffects ? "bg-primary" : "bg-accent"}`}
-            >
-              <div className={`w-4 h-4 rounded-full bg-background transition-transform duration-300 ${soundEffects ? "translate-x-5" : "translate-x-0"}`} />
-            </button>
-          </div>
 
-          {/* Cognitive rest alerts */}
-          <div className="py-2 border-t border-border/10 pt-3 flex flex-col justify-between gap-2.5">
-            <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Cognitive rest alerts</label>
-              <p className="text-[9px] text-muted-foreground mt-0.5">Rest prompts after prolonged speed training sessions.</p>
-            </div>
-            <div className="flex items-center gap-1.5">
-              {[
-                { val: 0, label: "Off" },
-                { val: 10, label: "10m" },
-                { val: 20, label: "20m" },
-                { val: 30, label: "30m" },
-              ].map((o) => (
-                <button
-                  key={o.val}
-                  onClick={() => updateGeneralSettings({ readingTimerReminder: o.val })}
-                  className={`flex-1 py-1.5 text-[9px] font-mono border rounded transition-all ${readingTimerReminder === o.val
-                    ? "bg-primary text-primary-foreground font-bold border-primary"
-                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                    }`}
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
-          </div>
 
         </div>
       </div>

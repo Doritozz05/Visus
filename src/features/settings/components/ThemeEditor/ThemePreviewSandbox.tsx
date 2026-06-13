@@ -23,7 +23,6 @@ export function ThemePreviewSandbox({
   const [readerMode, setReaderMode] = React.useState<"rsvp" | "cluster">("rsvp");
   const [currentWordIdx, setCurrentWordIdx] = React.useState(0);
   const [selectedBook, setSelectedBook] = React.useState<number | null>(null);
-  const [mockSound, setMockSound] = React.useState(true);
   const [mockSync, setMockSync] = React.useState(false);
   const [streakActive, setStreakActive] = React.useState(true);
 
@@ -383,29 +382,7 @@ export function ThemePreviewSandbox({
                 App preferences
               </div>
 
-              {/* Sound Effects toggle */}
-              <div className="flex items-center justify-between select-none">
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-bold" style={{ color: themeState.cardForeground }}>Sound effects</span>
-                  <span className="text-[7px] text-muted-foreground leading-tight">Audio feedback on sessions</span>
-                </div>
-                <button
-                  onClick={() => setMockSound(!mockSound)}
-                  className="w-7 h-4 rounded-full p-0.5 transition-all duration-300 relative border"
-                  style={{
-                    backgroundColor: mockSound ? themeState.accent : "transparent",
-                    borderColor: mockSound ? themeState.accent : themeState.border
-                  }}
-                >
-                  <div 
-                    className="w-2.5 h-2.5 rounded-full shadow-sm transition-all duration-300"
-                    style={{
-                      backgroundColor: mockSound ? themeState.accentForeground : themeState.mutedForeground,
-                      transform: mockSound ? "translateX(12px)" : "translateX(0px)"
-                    }}
-                  />
-                </button>
-              </div>
+
 
               {/* Auto sync toggle */}
               <div className="flex items-center justify-between select-none">

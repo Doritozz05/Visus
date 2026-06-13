@@ -2,13 +2,13 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { 
-  ChevronRight, 
-  RotateCcw, 
-  ArrowLeft, 
-  ArrowRight, 
-  Home, 
-  Library, 
+import {
+  ChevronRight,
+  RotateCcw,
+  ArrowLeft,
+  ArrowRight,
+  Home,
+  Library,
   Settings,
   Copy,
   ExternalLink,
@@ -76,21 +76,21 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
         label: "Atrás",
         icon: <ArrowLeft className="w-4 h-4" />,
         onClick: () => window.history.back(),
-        shortcut: "Alt+←",
+        shortcut: "Alt + ←",
       },
       {
         id: "forward",
         label: "Adelante",
         icon: <ArrowRight className="w-4 h-4" />,
         onClick: () => window.history.forward(),
-        shortcut: "Alt+→",
+        shortcut: "Alt + →",
       },
       {
         id: "reload",
         label: "Recargar",
         icon: <RotateCcw className="w-4 h-4" />,
         onClick: () => window.location.reload(),
-        shortcut: "Ctrl+R",
+        shortcut: "Ctrl + R",
       },
       { id: "divider-1", label: "", divider: true },
       {
@@ -117,16 +117,16 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
     ];
 
     if (isReader) {
-        items.push(
-            { id: "divider-reader", label: "", divider: true },
-            {
-                id: "exit-reader",
-                label: "Salir del Lector",
-                icon: <ExternalLink className="w-4 h-4" />,
-                onClick: () => router.push("/library"),
-                tone: "danger",
-            }
-        );
+      items.push(
+        { id: "divider-reader", label: "", divider: true },
+        {
+          id: "exit-reader",
+          label: "Salir del Lector",
+          icon: <ExternalLink className="w-4 h-4" />,
+          onClick: () => router.push("/library"),
+          tone: "danger",
+        }
+      );
     }
 
     // Add Copy if text is selected
@@ -161,7 +161,7 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
   const showMenu = React.useCallback(
     (event: MouseEvent | React.MouseEvent, customItems?: ContextMenuItem[]) => {
       event.preventDefault();
-      
+
       const x = event.clientX;
       const y = event.clientY;
 
@@ -207,11 +207,11 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
     <ContextMenuContext.Provider value={{ showMenu, hideMenu }}>
       {children}
       {state.isOpen && (
-        <ContextMenuUI 
-          x={state.x} 
-          y={state.y} 
-          items={state.items} 
-          onClose={hideMenu} 
+        <ContextMenuUI
+          x={state.x}
+          y={state.y}
+          items={state.items}
+          onClose={hideMenu}
         />
       )}
     </ContextMenuContext.Provider>
@@ -277,8 +277,8 @@ function ContextMenuUI({ x, y, items, onClose }: ContextMenuUIProps) {
                 }}
                 className={`
                   group flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition-all
-                  ${item.tone === "danger" 
-                    ? "text-rose-500 hover:bg-rose-500/10" 
+                  ${item.tone === "danger"
+                    ? "text-rose-500 hover:bg-rose-500/10"
                     : "text-foreground hover:bg-accent/80"}
                   ${item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-default"}
                 `}

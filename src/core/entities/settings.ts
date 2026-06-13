@@ -81,8 +81,6 @@ export interface GeneralSettings {
   uiFont: "inter" | "roboto" | "outfit";
   glassmorphism: boolean;
   reducedMotion: boolean;
-  soundEffects: boolean;
-  readingTimerReminder: number; // in minutes, 0 = disabled
   autoSync: boolean;
   readerFontSize: number;      // Font size in px
   readerFontFamily: "inter" | "atkinson" | "dyslexic" | "serif";
@@ -127,8 +125,6 @@ export const DEFAULT_SETTINGS: SettingsState = {
     uiFont: "inter",
     glassmorphism: false,
     reducedMotion: false,
-    soundEffects: false,
-    readingTimerReminder: 0,
     autoSync: true,
     readerFontSize: 16,
     readerFontFamily: "serif",

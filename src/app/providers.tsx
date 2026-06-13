@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import { ContextMenuProvider } from "@/components/ui/ContextMenu";
 import { hexToHsl, resolveColor } from "@/lib/color-utils";
 import type { CustomTheme } from "@/core/entities/settings";
+import { MotionConfig } from "framer-motion";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
@@ -236,7 +237,11 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     }
   }, [theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes]);
 
-  return <>{children}</>;
+  return (
+    <MotionConfig reducedMotion={reducedMotion ? "always" : "never"}>
+      {children}
+    </MotionConfig>
+  );
 }
 
 /**

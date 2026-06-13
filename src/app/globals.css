@@ -404,12 +404,17 @@ body[data-glass="disabled"] .liquid-glass {
 }
 
 /* Global motion-reduction overrides */
+.reduced-motion,
 .reduced-motion *,
 .reduced-motion::before,
 .reduced-motion::after {
-  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-duration: 0s !important;
   animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition: none !important;
+  animation: none !important;
   scroll-behavior: auto !important;
 }
 
