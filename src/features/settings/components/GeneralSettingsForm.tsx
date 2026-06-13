@@ -90,34 +90,29 @@ export function GeneralSettingsForm() {
                   }`}
               >
                 <div className="flex items-center justify-between mb-2 w-full">
-                  <span className="text-[11px] font-bold truncate pr-6">{t.name}</span>
-                  <div className="flex items-center gap-1">
-                    {theme === t.id ? (
-                      <button
-                        onClick={(e) => handleDeleteTheme(t.id, e)}
-                        title="Delete Theme"
-                        className="p-0.5 hover:text-destructive transition-colors text-muted-foreground shrink-0 relative z-10"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    ) : (
-                      <div className="flex opacity-0 group-hover:opacity-100 transition-all gap-1.5">
-                        <button
-                          onClick={(e) => handleEditTheme(t, e)}
-                          title="Edit Theme"
-                          className="p-0.5 hover:text-primary transition-colors text-muted-foreground"
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteTheme(t.id, e)}
-                          title="Delete Theme"
-                          className="p-0.5 hover:text-destructive transition-colors text-muted-foreground"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    )}
+                  <span className="text-[11px] font-bold truncate pr-14">{t.name}</span>
+                  <div className={`flex items-center gap-1.5 transition-all relative z-10 ${theme === t.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                    <button
+                      onClick={(e) => handleDeleteTheme(t.id, e)}
+                      title="Delete Theme"
+                      className="p-0.5 hover:text-destructive transition-colors text-muted-foreground"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => handleEditTheme(t, e)}
+                      title="Edit Theme"
+                      className="p-0.5 hover:text-primary transition-colors text-muted-foreground"
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </button>
+                    <div className="w-4 h-4 flex items-center justify-center">
+                      {theme === t.id ? (
+                        <CheckCircle className="text-primary h-3.5 w-3.5" />
+                      ) : (
+                        <div className="w-3.5 h-3.5 rounded-full border border-border/40" />
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-1.5 items-center w-full justify-between">
@@ -128,14 +123,6 @@ export function GeneralSettingsForm() {
                     />
                     <span className="text-[8px] text-muted-foreground leading-tight truncate">Custom Theme</span>
                   </div>
-                  {theme === t.id && (
-                    <button
-                      onClick={(e) => handleEditTheme(t, e)}
-                      className="text-[8px] font-mono uppercase tracking-wider text-primary hover:underline font-bold"
-                    >
-                      Configure
-                    </button>
-                  )}
                 </div>
               </div>
             ))}
