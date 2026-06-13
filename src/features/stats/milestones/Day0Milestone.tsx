@@ -17,7 +17,7 @@ export const Day0Milestone: StreakMilestone = {
     >
       <motion.g
         style={{ scale: 0.8, transformOrigin: "center center" }}
-        animate={{ y: [0, 2, 0] }}
+        animate={{ x: [-2, 2, -2] }}
         transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
       >
         {/* Sad Rain Cloud */}
