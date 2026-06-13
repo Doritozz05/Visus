@@ -40,9 +40,18 @@ export function prepareChapterHtml(chapter: ChapterHtmlData): string {
           const child = children[i] as HTMLElement;
           const tagName = child.tagName.toLowerCase();
           const text = child.textContent?.trim() || "";
-          const isMedia = child.querySelector("img, image, svg, iframe") || tagName === "img";
-          
-          if (!text && !isMedia && (tagName === "p" || tagName === "div" || tagName === "br" || tagName === "span" || tagName === "section")) {
+          const isMedia =
+            child.querySelector("img, image, svg, iframe") || tagName === "img";
+
+          if (
+            !text &&
+            !isMedia &&
+            (tagName === "p" ||
+              tagName === "div" ||
+              tagName === "br" ||
+              tagName === "span" ||
+              tagName === "section")
+          ) {
             child.remove();
             modified = true;
           } else {
@@ -64,7 +73,20 @@ export function prepareChapterHtml(chapter: ChapterHtmlData): string {
     console.warn("Failed to sanitize/trim trailing empty tags:", e);
   }
 
-  finalHtml = DOMPurify.sanitize(finalHtml);
+  // Apply strict defense-in-depth sanitization config to prevent SSRF and phishing attacks.
+  // We forbid tags and attributes that default settings may allow to render.
+  // Note: 'iframe' is intentionally omitted from FORBID_TAGS to allow embedded media (e.g. YouTube).
+  finalHtml = DOMPurify.sanitize(finalHtml, {
+    FORBID_TAGS: [
+      "object",
+      "embed",
+      "form",
+      "input",
+      "button",
+      "script",
+    ],
+    FORBID_ATTR: ["action", "method", "srcdoc"],
+  });
 
   const tagged = tagHtmlBlocksWithWordIndices(finalHtml);
   return tagged.html;
