@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import { LibraryStatsSummary } from "@/core/entities/stats";
-import { Share2, Download, MessageSquarePlus, MessageCircle, Smartphone } from "lucide-react";
+import { Share2, Download, MessageSquarePlus, MessageCircle, Smartphone, Flame } from "lucide-react";
 
 interface ShareCardProps {
   summary: LibraryStatsSummary;
@@ -15,6 +15,14 @@ interface ShareCardProps {
 
 export function ShareCard({ summary }: ShareCardProps) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+
+  const getThemeColor = (cssVarName: string, fallback: string): string => {
+    if (typeof window === "undefined") return fallback;
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(cssVarName).trim();
+    if (!raw) return fallback;
+    if (raw.startsWith("#") || raw.startsWith("rgb") || raw.startsWith("hsl")) return raw;
+    return `hsl(${raw.split(/\s+/).join(", ")})`;
+  };
 
   const drawCanvas = () => {
     const canvas = canvasRef.current;
@@ -26,81 +34,124 @@ export function ShareCard({ summary }: ShareCardProps) {
     const w = canvas.width;
     const h = canvas.height;
 
-    // 1. Draw premium background gradient (matches web preview)
+    // 1. Draw theme-based background gradient
+    const cardColor = getThemeColor("--card", "#171f33");
+    const bgColor = getThemeColor("--background", "#0b1326");
     const bgGrad = ctx.createLinearGradient(0, 0, w, h);
-    bgGrad.addColorStop(0, "#0f0c20");
-    bgGrad.addColorStop(1, "#25123e");
+    bgGrad.addColorStop(0, cardColor);
+    bgGrad.addColorStop(1, bgColor);
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
 
-    // 2. Draw aesthetic grid mesh (subtle)
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
-    ctx.lineWidth = 1;
-    const gridGap = 40;
-    for (let x = 0; x < w; x += gridGap) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, h);
-      ctx.stroke();
+    // 2. Draw border
+    ctx.strokeStyle = getThemeColor("--border", "rgba(255, 255, 255, 0.1)");
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(16, 16, w - 32, h - 32, 12);
+    } else {
+      ctx.rect(16, 16, w - 32, h - 32);
     }
-    for (let y = 0; y < h; y += gridGap) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(w, y);
-      ctx.stroke();
-    }
+    ctx.stroke();
 
     // 3. Top left: VISUS // READING TELEMETRY
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.5)");
     ctx.font = "20px monospace";
-    if ('letterSpacing' in ctx) {
+    ctx.textAlign = "left";
+    if ("letterSpacing" in ctx) {
       (ctx as any).letterSpacing = "4px";
     }
     ctx.fillText("VISUS // READING TELEMETRY", 40, 60);
 
-    // 4. Large metric card: Speed
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "900 130px sans-serif";
-    const wpmStr = String(summary.averageWpm || 0);
-    ctx.fillText(wpmStr, 35, 230);
-    
-    const wpmWidth = ctx.measureText(wpmStr).width;
-    ctx.fillStyle = "hsl(243, 75%, 65%)"; // Primary color approximate
-    ctx.font = "bold 32px sans-serif";
-    ctx.fillText("WPM", 35 + wpmWidth + 15, 230);
-
-    // Average Speed Label
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-    if ('letterSpacing' in ctx) {
-      (ctx as any).letterSpacing = "2px";
-    }
-    ctx.font = "20px monospace";
-    ctx.fillText("AVERAGE SPEED", 45, 280);
-
-    // Reset letter spacing
-    if ('letterSpacing' in ctx) {
+    // 4. Centerpiece: Streak Number and Flame side-by-side
+    ctx.font = "bold 96px sans-serif";
+    if ("letterSpacing" in ctx) {
       (ctx as any).letterSpacing = "0px";
     }
-
-    // 5. Bottom left: Tagline
-    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-    ctx.font = "italic 24px sans-serif";
-    ctx.fillText("Perfect speed & comprehension.", 40, 410);
-
-    // 6. Bottom right: Streak
-    const streakDays = summary.currentStreakDays || 0;
-    const streakStr = `${streakDays} ${streakDays === 1 ? 'Day' : 'Days'}`;
+    const streakStr = String(summary.currentStreakDays || 0);
+    const numWidth = ctx.measureText(streakStr).width;
+    const fw = 80; // Flame width
+    const fh = 90; // Flame height
+    const gap = 20;
+    const totalW = numWidth + gap + fw;
     
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 42px sans-serif";
-    const streakWidth = ctx.measureText(streakStr).width;
-    ctx.fillText(streakStr, w - streakWidth - 40, 375);
+    const startX = 400 - totalW / 2;
+    const centerY = 220; // vertical center of elements
+    
+    // Draw Streak Number
+    ctx.fillStyle = getThemeColor("--foreground", "#ffffff");
+    ctx.textAlign = "left";
+    ctx.fillText(streakStr, startX, centerY + 35); // Baseline at centerY + 35
 
-    const lblStr = "CURRENT STREAK";
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.font = "20px monospace";
-    const lblWidth = ctx.measureText(lblStr).width;
-    ctx.fillText(lblStr, w - lblWidth - 40, 410);
+    // Draw Flame at startX + numWidth + gap using the exact Lucide Flame SVG path
+    const fx = startX + numWidth + gap;
+    const fy = centerY - 45; // Top at centerY - 45
+    
+    ctx.save();
+    ctx.translate(fx, fy);
+    ctx.scale(fw / 24, fh / 24);
+    
+    const flamePath = new Path2D(
+      "M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+    );
+    
+    // Add professional glow
+    ctx.shadowColor = "rgba(249, 115, 22, 0.4)";
+    ctx.shadowBlur = 25;
+    
+    // Fill path with transparent orange
+    ctx.fillStyle = "rgba(249, 115, 22, 0.15)";
+    ctx.fill(flamePath);
+    
+    // Stroke path with orange stroke
+    ctx.strokeStyle = "#f97316";
+    ctx.lineWidth = 2; // scaled with the context
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.stroke(flamePath);
+    
+    ctx.restore();
+
+    // Centerpiece: Streak Label
+    ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.5)");
+    ctx.font = "bold 16px monospace";
+    ctx.textAlign = "center";
+    if ("letterSpacing" in ctx) {
+      (ctx as any).letterSpacing = "6px";
+    }
+    const lblStr = (summary.currentStreakDays || 0) === 1 ? "DAY STREAK" : "DAYS STREAK";
+    ctx.fillText(lblStr, 400, centerY + 85);
+
+    // 6. Bottom Left: WPM Metric
+    ctx.textAlign = "left";
+    if ("letterSpacing" in ctx) {
+      (ctx as any).letterSpacing = "0px";
+    }
+    ctx.fillStyle = getThemeColor("--foreground", "#ffffff");
+    ctx.font = "bold 44px sans-serif";
+    const wpmStr = String(summary.averageWpm || 0);
+    ctx.fillText(wpmStr, 45, 390);
+
+    const wpmWidth = ctx.measureText(wpmStr).width;
+    ctx.fillStyle = getThemeColor("--primary", "#6366f1");
+    ctx.font = "bold 18px sans-serif";
+    ctx.fillText("WPM", 45 + wpmWidth + 8, 390);
+
+    ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.5)");
+    ctx.font = "14px monospace";
+    if ("letterSpacing" in ctx) {
+      (ctx as any).letterSpacing = "2px";
+    }
+    ctx.fillText("AVERAGE SPEED", 45, 415);
+
+    // 7. Bottom Right: Tagline
+    ctx.textAlign = "right";
+    if ("letterSpacing" in ctx) {
+      (ctx as any).letterSpacing = "0px";
+    }
+    ctx.fillStyle = getThemeColor("--muted-foreground", "rgba(255, 255, 255, 0.4)");
+    ctx.font = "italic 16px sans-serif";
+    ctx.fillText("Perfect speed & comprehension.", 755, 415);
 
     return canvas;
   };
@@ -176,24 +227,40 @@ export function ShareCard({ summary }: ShareCardProps) {
 
       <div className="flex-1 flex flex-col items-center justify-center gap-5 my-2">
         {/* Sleek Preview card */}
-        <div className="w-full bg-gradient-to-br from-[#0f0c20] to-[#25123e] border border-white/10 rounded-lg p-4 relative overflow-hidden aspect-[16/9] flex flex-col justify-between shadow-xl">
-          <div className="absolute inset-0 bg-white/5 pointer-events-none mix-blend-overlay"></div>
-          <div>
-            <span className="text-[8px] font-mono text-white/50 tracking-wider">VISUS // READING TELEMETRY</span>
-            <div className="flex items-baseline gap-1 mt-4">
-              <span className="text-4xl font-extrabold text-white leading-none">{summary.averageWpm}</span>
-              <span className="text-[10px] font-bold text-primary">WPM</span>
-            </div>
-            <span className="text-[8px] font-mono text-white/70 uppercase">Average Speed</span>
+        <div className="w-full bg-gradient-to-br from-card to-background border border-border/40 rounded-lg p-4 relative overflow-hidden aspect-[16/9] flex flex-col justify-between shadow-xl">
+          {/* Subtle overlay reflection */}
+          <div className="absolute inset-0 bg-foreground/[0.02] pointer-events-none mix-blend-overlay"></div>
+          
+          {/* Header */}
+          <div className="flex justify-between items-center w-full">
+            <span className="text-[8px] font-mono text-muted-foreground tracking-wider uppercase">VISUS // READING TELEMETRY</span>
           </div>
 
-          <div className="flex justify-between items-end">
-            <div className="text-[8px] font-sans text-white/40 italic">
-              Perfect speed &amp; comprehension.
+          {/* Centerpiece: Streak with professional orange fire */}
+          <div className="flex flex-col items-center justify-center my-auto">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-4xl font-extrabold text-foreground leading-none">{summary.currentStreakDays}</span>
+              <Flame className="w-8 h-8 text-orange-500 fill-orange-500/10 drop-shadow-[0_0_8px_rgba(249,115,22,0.4)] animate-pulse shrink-0" />
             </div>
-            <div className="text-right">
-              <span className="text-sm font-bold text-white block">{summary.currentStreakDays} {summary.currentStreakDays === 1 ? 'Day' : 'Days'}</span>
-              <span className="text-[7px] font-mono text-white/50 block">CURRENT STREAK</span>
+            <span className="text-[7px] font-mono text-muted-foreground uppercase tracking-widest mt-1.5">
+              {summary.currentStreakDays === 1 ? 'Day Streak' : 'Days Streak'}
+            </span>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-between items-end w-full">
+            {/* Speed WPM */}
+            <div className="flex flex-col">
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-lg font-extrabold text-foreground leading-none">{summary.averageWpm}</span>
+                <span className="text-[8px] font-bold text-primary">WPM</span>
+              </div>
+              <span className="text-[6px] font-mono text-muted-foreground uppercase tracking-wider">Average Speed</span>
+            </div>
+
+            {/* Tagline */}
+            <div className="text-[8px] font-sans text-muted-foreground/60 italic">
+              Perfect speed &amp; comprehension.
             </div>
           </div>
         </div>
