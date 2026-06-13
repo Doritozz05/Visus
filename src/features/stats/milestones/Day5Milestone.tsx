@@ -114,24 +114,27 @@ export const Day5Milestone: StreakMilestone = {
         />
 
         {/* Fire held on chest between wings */}
-        <motion.path
-          d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
-          fill="#f97316"
-          stroke="#fdba74"
-          strokeWidth="0.5"
-          className="origin-bottom"
-          transform="translate(38.75, 46) scale(0.75)"
-          animate={{
-            scale: [0.75, 0.8, 0.72, 0.75],
-            rotate: [0, 2, -2, 0],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.5,
-            ease: "easeInOut",
-          }}
-          style={{ filter: "drop-shadow(0 0 5px rgba(249,115,22,0.7))" }}
-        />
+        <g transform="translate(38, 42)">
+          <motion.path
+            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+            fill="#f97316"
+            stroke="#fdba74"
+            strokeWidth="0.5"
+            style={{
+              filter: "drop-shadow(0 0 8px rgba(249,115,22,0.8))",
+              transformOrigin: "12px 18px"
+            }}
+            animate={{
+              scale: [1.1, 1.15, 1.05, 1.1],
+              rotate: [0, 2, -2, 0],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.5,
+              ease: "easeInOut",
+            }}
+          />
+        </g>
       </motion.g>
     </svg>
   ),
@@ -152,16 +155,16 @@ export const Day5Milestone: StreakMilestone = {
     // Draw Ears
     ctx.fillStyle = "#4f46e5";
     ctx.beginPath();
-    ctx.moveTo(ox + 20, oy + 25);
-    ctx.lineTo(ox + 35, oy + 25);
-    ctx.lineTo(ox + 25, oy + 12);
+    ctx.moveTo(ox + 20, oy + 35);
+    ctx.lineTo(ox + 50, oy + 35);
+    ctx.lineTo(ox + 25, oy + 18);
     ctx.closePath();
     ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(ox + 65, oy + 25);
-    ctx.lineTo(ox + 80, oy + 25);
-    ctx.lineTo(ox + 75, oy + 12);
+    ctx.moveTo(ox + 50, oy + 35);
+    ctx.lineTo(ox + 80, oy + 35);
+    ctx.lineTo(ox + 75, oy + 18);
     ctx.closePath();
     ctx.fill();
 
@@ -229,8 +232,8 @@ export const Day5Milestone: StreakMilestone = {
     // Draw Beak
     ctx.fillStyle = "#f97316";
     ctx.beginPath();
-    ctx.moveTo(ox + 47, oy + 48);
-    ctx.lineTo(ox + 53, oy + 48);
+    ctx.moveTo(ox + 47, oy + 49);
+    ctx.lineTo(ox + 53, oy + 49);
     ctx.lineTo(ox + 50, oy + 55);
     ctx.closePath();
     ctx.fill();
@@ -251,17 +254,17 @@ export const Day5Milestone: StreakMilestone = {
 
     // Draw Flame on chest
     ctx.save();
-    ctx.translate(ox + 38.75, oy + 46);
-    ctx.scale(0.75, 0.75);
+    ctx.translate(ox + 38, oy + 42);
+    ctx.scale(1.1, 1.1);
     ctx.shadowColor = "rgba(249, 115, 22, 0.8)";
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = "rgba(249, 115, 22, 0.2)";
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = "#f97316";
     const flamePath = new Path2D(
       "M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
     );
     ctx.fill(flamePath);
-    ctx.strokeStyle = "#f97316";
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "#fdba74";
+    ctx.lineWidth = 0.5;
     ctx.stroke(flamePath);
     ctx.restore();
 
