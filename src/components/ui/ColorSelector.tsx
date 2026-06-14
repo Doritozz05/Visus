@@ -183,7 +183,13 @@ export function ColorSelector({
   }, [isOpen, updateMenuPosition]);
 
   const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
+    let val = e.target.value;
+
+    // Auto-correct: prepend # if missing
+    if (val && !val.startsWith("#")) {
+      val = `#${val}`;
+    }
+
     setHexInput(val);
     
     // Validate hex format: # followed by 3 or 6 hex digits
