@@ -99,8 +99,8 @@ export function Sidebar({ activePath }: SidebarProps) {
                   href={item.path}
                   className={`flex items-center gap-3 px-6 py-3 transition-all font-sans text-xs uppercase tracking-wider group relative ${
                     isActive
-                      ? "text-[hsl(var(--sidebar-active-foreground))] bg-[hsl(var(--sidebar-active-background)/0.15)]"
-                      : "text-[hsl(var(--sidebar-foreground)/0.7)] hover:text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-active-background)/0.1)]"
+                      ? "text-[hsl(var(--sidebar-active-background))] bg-[hsl(var(--sidebar-active-background)/0.12)]"
+                      : "text-[hsl(var(--sidebar-foreground)/0.65)] hover:text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-active-background)/0.08)]"
                   }`}
                 >
                   {/* Active Indicator */}
@@ -116,9 +116,7 @@ export function Sidebar({ activePath }: SidebarProps) {
                     variants={iconVariants(item.hoverAnim)}
                   >
                     <Icon
-                      className={`w-5 h-5 transition-colors ${
-                        isActive ? "text-[hsl(var(--sidebar-active-background))]" : "group-hover:text-[hsl(var(--sidebar-active-background))]"
-                      }`}
+                      className="w-5 h-5 transition-colors"
                     />
                   </motion.div>
                   <span className="relative z-10 font-bold">{item.name}</span>
