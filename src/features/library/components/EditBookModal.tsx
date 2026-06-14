@@ -3,6 +3,7 @@
 import * as React from "react";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { Pencil, X } from "lucide-react";
+import { FormField } from "@/components/ui/FormField";
 
 interface EditBookModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ interface EditBookModalProps {
   setEditProgress: (val: number) => void;
   formatOptions: { value: string; label: string }[];
   statusOptions: { value: string; label: string }[];
+  titleError?: string;
 }
 
 export function EditBookModal({
@@ -46,6 +48,7 @@ export function EditBookModal({
   setEditProgress,
   formatOptions,
   statusOptions,
+  titleError,
 }: EditBookModalProps) {
   if (!isOpen) return null;
 
@@ -73,21 +76,18 @@ export function EditBookModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="space-y-4 relative z-10">
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Title</label>
+        <form onSubmit={onSubmit} noValidate className="space-y-4 relative z-10">
+          <FormField label="Title" required error={titleError}>
             <input 
               type="text" 
-              required
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
               className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
               placeholder="Title"
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Author</label>
+          <FormField label="Author">
             <input 
               type="text" 
               value={editAuthor}
@@ -95,11 +95,10 @@ export function EditBookModal({
               className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
               placeholder="Author"
             />
-          </div>
+          </FormField>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Format</label>
+            <FormField label="Format">
               <FancyDropdown
                 value={editFormat}
                 onChange={(nextValue) => setEditFormat(nextValue as any)}
@@ -109,9 +108,8 @@ export function EditBookModal({
                 triggerClassName="flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-background/50 px-3 text-left text-xs font-mono text-foreground shadow-sm transition-all hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 options={formatOptions}
               />
-            </div>
-            <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Status</label>
+            </FormField>
+            <FormField label="Status">
               <FancyDropdown
                 value={editStatus}
                 onChange={(nextValue) => setEditStatus(nextValue as any)}
@@ -121,13 +119,12 @@ export function EditBookModal({
                 triggerClassName="flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-background/50 px-3 text-left text-xs font-mono text-foreground shadow-sm transition-all hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 options={statusOptions}
               />
-            </div>
+            </FormField>
           </div>
 
           {editFormat === "PHYSICAL" ? (
             <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Current Page</label>
+              <FormField label="Current Page" className="flex-1">
                 <input 
                   type="number" 
                   min="0"
@@ -136,9 +133,8 @@ export function EditBookModal({
                   className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
                   placeholder="e.g., 45"
                 />
-              </div>
-              <div className="flex-1">
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Total Pages</label>
+              </FormField>
+              <FormField label="Total Pages" className="flex-1">
                 <input 
                   type="number" 
                   min="1"
@@ -147,7 +143,7 @@ export function EditBookModal({
                   className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
                   placeholder="e.g., 300"
                 />
-              </div>
+              </FormField>
             </div>
           ) : (
             <div>

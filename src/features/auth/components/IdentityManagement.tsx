@@ -6,10 +6,12 @@ import { UserIdentity } from "@/core/services/interfaces";
 import { toast } from "sonner";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 import { Mail, Globe, Trash2, Link as LinkIcon } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export function IdentityManagement() {
   const [identities, setIdentities] = useState<UserIdentity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [unlinkConfirm, setUnlinkConfirm] = useState<{ id: string, provider: string } | null>(null);
 
   useEffect(() => {
     loadIdentities();
@@ -22,6 +24,7 @@ export function IdentityManagement() {
       setIdentities(data);
     } catch (err) {
       console.error("Failed to load identities", err);
+      toast.error("Failed to load account connections");
     } finally {
       setIsLoading(false);
     }
@@ -41,13 +44,7 @@ export function IdentityManagement() {
       return;
     }
 
-    try {
-      await authService.unlinkIdentity(identityId);
-      toast.success(`${provider} unlinked successfully`);
-      loadIdentities();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to unlink identity");
-    }
+    setUnlinkConfirm({ id: identityId, provider });
   };
 
   if (isLoading) {
@@ -108,6 +105,26 @@ export function IdentityManagement() {
           * You must have at least one identity linked to access your account. Link another method before unlinking the current one.
         </p>
       )}
+
+      {/* Unlink Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={!!unlinkConfirm}
+        onClose={() => setUnlinkConfirm(null)}
+        onConfirm={async () => {
+          if (!unlinkConfirm) return;
+          try {
+            await authService.unlinkIdentity(unlinkConfirm.id);
+            toast.success(`${unlinkConfirm.provider} unlinked successfully`);
+            loadIdentities();
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to unlink identity");
+          }
+        }}
+        title={`Remove ${unlinkConfirm?.provider} connection?`}
+        description="You will no longer be able to sign in using this method. Make sure you have another way to access your account."
+        confirmLabel="Remove"
+        variant="danger"
+      />
     </div>
   );
 }

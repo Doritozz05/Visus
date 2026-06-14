@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { BookOpen, X } from "lucide-react";
+import { FormField } from "@/components/ui/FormField";
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface AddBookModalProps {
   setNewCurrentPage: (val: number | "") => void;
   newTotalPages: number | "";
   setNewTotalPages: (val: number | "") => void;
+  titleError?: string;
 }
 
 export function AddBookModal({
@@ -37,6 +39,7 @@ export function AddBookModal({
   setNewCurrentPage,
   newTotalPages,
   setNewTotalPages,
+  titleError,
 }: AddBookModalProps) {
   if (!isOpen) return null;
 
@@ -64,21 +67,18 @@ export function AddBookModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="space-y-4 relative z-10">
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Title</label>
+        <form onSubmit={onSubmit} noValidate className="space-y-4 relative z-10">
+          <FormField label="Title" required error={titleError}>
             <input 
               type="text" 
-              required
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
               placeholder="e.g., Moby Dick"
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Author</label>
+          <FormField label="Author">
             <input 
               type="text" 
               value={newAuthor}
@@ -86,10 +86,9 @@ export function AddBookModal({
               className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
               placeholder="e.g., Herman Melville"
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Cover image URL (optional)</label>
+          <FormField label="Cover image URL (optional)">
             <input 
               type="text" 
               value={newCoverUrl}
@@ -97,10 +96,9 @@ export function AddBookModal({
               className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
               placeholder="https://example.com/cover.jpg"
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Tags (comma separated)</label>
+          <FormField label="Tags (comma separated)">
             <input 
               type="text" 
               value={newTags}
@@ -108,11 +106,10 @@ export function AddBookModal({
               className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
               placeholder="Fiction, Classic, Adventure"
             />
-          </div>
+          </FormField>
 
           <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Current Page</label>
+            <FormField label="Current Page" className="flex-1">
               <input 
                 type="number" 
                 min="0"
@@ -121,9 +118,8 @@ export function AddBookModal({
                 className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
                 placeholder="e.g., 45"
               />
-            </div>
-            <div className="flex-1">
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Total Pages</label>
+            </FormField>
+            <FormField label="Total Pages" className="flex-1">
               <input 
                 type="number" 
                 min="1"
@@ -132,7 +128,7 @@ export function AddBookModal({
                 className="w-full px-4 py-2 border border-border/40 rounded-lg bg-background/50 focus:outline-none focus:border-primary/80 text-sm h-10 transition-colors"
                 placeholder="e.g., 300"
               />
-            </div>
+            </FormField>
           </div>
 
           <div className="pt-4 flex gap-3">

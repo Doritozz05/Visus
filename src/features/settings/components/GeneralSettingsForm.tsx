@@ -10,6 +10,8 @@ import { ColorSelector } from "@/components/ui/ColorSelector";
 import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
 import { DEFAULT_NEW_THEME, deepCloneTheme } from "./ThemeEditor/utils";
 import { FontSelector } from "@/components/ui/FontSelector";
+import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export function GeneralSettingsForm() {
   const router = useRouter();
@@ -20,6 +22,7 @@ export function GeneralSettingsForm() {
     customFonts, 
     refreshCustomFonts 
   } = useSettings();
+  const [themeToDelete, setThemeToDelete] = React.useState<{ id: string, name: string } | null>(null);
   const {
     theme,
     accentColor,
@@ -34,12 +37,11 @@ export function GeneralSettingsForm() {
 
   const handleDeleteTheme = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation(); // prevent setting it as active
-    const updatedThemes = customThemes.filter((t) => t.id !== id);
-    const fallbackTheme = theme === id ? "light" : theme;
-    updateGeneralSettings({
-      customThemes: updatedThemes,
-      theme: fallbackTheme
-    });
+    
+    const themeObj = customThemes.find(t => t.id === id);
+    if (themeObj) {
+      setThemeToDelete({ id, name: themeObj.name });
+    }
   };
 
   const handleEditTheme = (t: CustomTheme, e?: React.MouseEvent) => {
@@ -311,6 +313,26 @@ export function GeneralSettingsForm() {
           </div>
         </div>
       </div>
+
+      {/* Theme Deletion Confirmation */}
+      <ConfirmDialog
+        isOpen={!!themeToDelete}
+        onClose={() => setThemeToDelete(null)}
+        onConfirm={() => {
+          if (!themeToDelete) return;
+          const updatedThemes = customThemes.filter((t) => t.id !== themeToDelete.id);
+          const fallbackTheme = theme === themeToDelete.id ? "light" : theme;
+          updateGeneralSettings({
+            customThemes: updatedThemes,
+            theme: fallbackTheme
+          });
+          toast.success(`Theme "${themeToDelete.name}" deleted.`);
+        }}
+        title={`Delete theme "${themeToDelete?.name}"?`}
+        description="This will permanently remove this custom theme and all its styles. This action cannot be undone."
+        confirmLabel="Delete Theme"
+        variant="danger"
+      />
     </div>
   );
 }

@@ -164,6 +164,7 @@ export default function LibraryDashboard() {
     setNewCurrentPage,
     newTotalPages,
     setNewTotalPages,
+    titleError,
     handleAddSubmit
   } = useAddBookForm(addBook);
 
@@ -186,6 +187,7 @@ export default function LibraryDashboard() {
     setEditProgress,
     formatOptions,
     statusOptions,
+    titleError: editTitleError,
     handleEditSubmit,
     openEditModal
   } = useEditBookForm(updateBook);
@@ -545,6 +547,7 @@ export default function LibraryDashboard() {
         setNewCurrentPage={setNewCurrentPage}
         newTotalPages={newTotalPages}
         setNewTotalPages={setNewTotalPages}
+        titleError={titleError}
       />
 
       {/* --- EDIT BOOK DIALOG MODAL --- */}
@@ -568,6 +571,7 @@ export default function LibraryDashboard() {
         setEditProgress={setEditProgress}
         formatOptions={formatOptions}
         statusOptions={statusOptions}
+        titleError={editTitleError}
       />
 
       {/* --- PREMIUM BOOK DETAILS MODAL OVERLAY --- */}

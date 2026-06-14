@@ -4,25 +4,34 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { authService } from "@/core/config/services";
 import { GoogleSignInButton } from "./GoogleSignInButton";
+import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { FormField } from "@/components/ui/FormField";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [highlightGoogle, setHighlightGoogle] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setSuccess(false);
     setHighlightGoogle(false);
 
+    if (!email || !password || !confirmPassword) {
+      toast.error("Required fields", {
+        description: "Please fill in all the registration fields.",
+      });
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Validation error", {
+        description: "Passwords do not match.",
+      });
       return;
     }
 
@@ -34,10 +43,14 @@ export function RegisterForm() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "";
       if (message.includes("already registered") || message.includes("already exists")) {
-        setError("An account with this email already exists. Try signing in with Google.");
+        toast.error("Account exists", {
+          description: "An account with this email already exists. Try signing in with Google.",
+        });
         setHighlightGoogle(true);
       } else {
-        setError(err instanceof Error && err.message ? err.message : "Error creating account.");
+        toast.error("Registration failed", {
+          description: err instanceof Error && err.message ? err.message : "Error creating account.",
+        });
       }
       setIsLoading(false);
     }
@@ -93,52 +106,36 @@ export function RegisterForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
-            {error}
-          </div>
-        )}
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground" htmlFor="email">
-            Email address
-          </label>
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        <FormField label="Email address" id="email">
           <input
             id="email"
             type="email"
-            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             placeholder="you@email.com"
           />
-        </div>
+        </FormField>
 
         <div className="space-y-4">
-          <div className="space-y-2">
+          <FormField label="Password" id="password">
             <PasswordInput
               id="password"
-              label="Password"
-              required
-              minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Min 6 chars"
             />
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
+          <FormField label="Confirm Password" id="confirm-password">
             <PasswordInput
               id="confirm-password"
-              label="Confirm Password"
-              required
-              minLength={6}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Repeat password"
             />
-          </div>
+          </FormField>
         </div>
 
         <button

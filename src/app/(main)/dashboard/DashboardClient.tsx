@@ -14,6 +14,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ReadingSessionLog, LibraryStatsSummary } from "@/core/entities/stats";
 import { Flame, Gauge, TrendingUp, Brain, CheckCircle, BarChart, Download, Trash2, ShieldCheck, BookOpen, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 // Custom premium visual components
 import { RadarChart } from "@/features/stats/components/RadarChart";
@@ -34,6 +35,7 @@ export default function DashboardClient() {
   const { user } = useAuth();
   const [isHydrated, setIsHydrated] = React.useState(false);
   const [isEditingGoal, setIsEditingGoal] = React.useState(false);
+  const [showResetConfirm, setShowResetConfirm] = React.useState(false);
   const [tempGoal, setTempGoal] = React.useState(yearlyReadingGoal);
   const [logs, setLogs] = React.useState<ReadingSessionLog[]>([]);
   const [summary, setSummary] = React.useState<LibraryStatsSummary>({
@@ -97,11 +99,7 @@ export default function DashboardClient() {
   };
 
   const handleResetStats = async () => {
-    if (window.confirm("Are you sure you want to reset all your stats history? This action is irreversible.")) {
-      await StatsService.resetStats();
-      toast.success("Telemetry history successfully reset.");
-      fetchStats();
-    }
+    setShowResetConfirm(true);
   };
 
   if (!isHydrated) {
@@ -397,6 +395,21 @@ export default function DashboardClient() {
           </div>
         </div>
       </div>
+
+      {/* Telemetry Reset Confirmation */}
+      <ConfirmDialog
+        isOpen={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={async () => {
+          await StatsService.resetStats();
+          toast.success("Telemetry history successfully reset.");
+          fetchStats();
+        }}
+        title="Reset all telemetry?"
+        description="This will permanently delete your entire reading history and achievements. This action is irreversible."
+        confirmLabel="Reset Everything"
+        variant="danger"
+      />
     </div>
   );
 }

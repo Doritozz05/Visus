@@ -2,16 +2,16 @@
 
 import React, { useState } from "react";
 import { authService } from "@/core/config/services";
+import { FormField } from "@/components/ui/FormField";
+import { toast } from "sonner";
 
 export function ResetPasswordForm() {
   const [email, setEmail] = useState("");
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setSuccess(false);
     setIsLoading(true);
 
@@ -25,7 +25,7 @@ export function ResetPasswordForm() {
       if (message.includes("User not found") || message.includes("not registered")) {
         setSuccess(true);
       } else {
-        setError(err instanceof Error && err.message ? err.message : "Failed to send recovery email.");
+        toast.error(err instanceof Error && err.message ? err.message : "Failed to send recovery email.");
       }
     } finally {
       setIsLoading(false);
@@ -50,16 +50,7 @@ export function ResetPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
-          {error}
-        </div>
-      )}
-      
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground" htmlFor="email">
-          Email address
-        </label>
+      <FormField label="Email address" id="email">
         <input
           id="email"
           type="email"
@@ -69,7 +60,7 @@ export function ResetPasswordForm() {
           className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
           placeholder="your@email.com"
         />
-      </div>
+      </FormField>
 
       <button
         type="submit"

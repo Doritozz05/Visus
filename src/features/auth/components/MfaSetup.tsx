@@ -17,7 +17,6 @@ export function MfaSetup() {
   const [verificationCode, setVerificationCode] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Robust check: Does the user have an email/password identity?
   const hasPassword = user?.hasPassword === true;
@@ -41,11 +40,10 @@ export function MfaSetup() {
   const startEnrollment = async () => {
     try {
       setIsEnrolling(true);
-      setError(null);
       const data = await authService.enrollMFA();
       setQrCodeData(data);
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Could not start MFA setup.");
+      toast.error(err instanceof Error && err.message ? err.message : "Could not start MFA setup.");
     } finally {
       setIsEnrolling(false);
     }
@@ -55,13 +53,13 @@ export function MfaSetup() {
     if (!qrCodeData || !verificationCode) return;
     try {
       setIsEnrolling(true);
-      setError(null);
       await authService.verifyMFA(qrCodeData.id, verificationCode);
       setQrCodeData(null);
       setVerificationCode("");
       await checkStatus(); // Refresh status to show the enabled UI
+      toast.success("MFA has been enabled and verified.");
     } catch (err) {
-      setError("Incorrect code. Please try again.");
+      toast.error("Incorrect code. Please try again.");
     } finally {
       setIsEnrolling(false);
     }
@@ -72,12 +70,11 @@ export function MfaSetup() {
     
     try {
       setIsUnenrolling(true);
-      setError(null);
 
       // 1. Re-authenticate ONLY if user has a password identity
       if (hasPassword) {
         if (!confirmPassword) {
-          setError("Password is required to disable MFA.");
+          toast.error("Password is required to disable MFA.");
           setIsUnenrolling(false);
           return;
         }
@@ -92,7 +89,6 @@ export function MfaSetup() {
       toast.success("MFA has been disabled");
     } catch (err) {
       const message = err instanceof Error && err.message ? err.message : "Could not disable MFA.";
-      setError(message);
       toast.error("Failed to disable MFA", { description: message });
     } finally {
       setIsUnenrolling(false);
@@ -106,7 +102,7 @@ export function MfaSetup() {
     try {
       const { currentLevel } = await authService.getAALStatus();
       if (currentLevel !== 'aal2') {
-        setError("For security, you must verify your MFA code before disabling it. Please log out and log in again.");
+        toast.error("For security, you must verify your MFA code before disabling it. Please log out and log in again.");
         return;
       }
     } catch (err) {
@@ -136,12 +132,6 @@ export function MfaSetup() {
   if (mfaStatus.enabled) {
     return (
       <div className="space-y-4">
-        {error && (
-          <div className="p-3 text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-xl mb-4">
-            {error}
-          </div>
-        )}
-        
         {!showPasswordConfirm ? (
           <div className="liquid-glass p-5 rounded-2xl border border-border/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
@@ -194,7 +184,6 @@ export function MfaSetup() {
                 onClick={() => {
                   setShowPasswordConfirm(false);
                   setConfirmPassword("");
-                  setError(null);
                 }}
                 className="px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
               >
@@ -227,12 +216,6 @@ export function MfaSetup() {
           </button>
         )}
       </div>
-
-      {error && (
-        <div className="p-3 text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-xl">
-          {error}
-        </div>
-      )}
 
       {qrCodeData && (
         <div className="liquid-glass p-6 rounded-2xl border border-border/50 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">

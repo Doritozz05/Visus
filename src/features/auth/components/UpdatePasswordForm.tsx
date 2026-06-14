@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { authService } from "@/core/config/services";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { FormField } from "@/components/ui/FormField";
+import { toast } from "sonner";
 
 export function UpdatePasswordForm({ 
   disabled, 
@@ -17,21 +19,17 @@ export function UpdatePasswordForm({
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
     if (requireCurrentPassword && !currentPassword) {
-      setError("Current password is required.");
+      toast.error("Current password is required.");
       return;
     }
 
@@ -43,7 +41,8 @@ export function UpdatePasswordForm({
       }
 
       await authService.updatePassword(newPassword);
-      setSuccess(true);
+      toast.success("Password updated successfully. You will be redirected to login.");
+      
       setNewPassword("");
       setConfirmPassword("");
       setCurrentPassword("");
@@ -53,7 +52,7 @@ export function UpdatePasswordForm({
       
       if (onSuccess) onSuccess();
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Could not update password.");
+      toast.error(err instanceof Error && err.message ? err.message : "Could not update password.");
     } finally {
       setIsLoading(false);
     }
@@ -72,49 +71,41 @@ export function UpdatePasswordForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="p-3 text-[10px] font-mono uppercase tracking-wider text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="p-3 text-[10px] font-mono uppercase tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-          Password updated successfully. You will be redirected to login.
-        </div>
-      )}
-
       <div className="grid grid-cols-1 gap-4">
         {requireCurrentPassword && (
+          <FormField label="Current Password" id="current-password">
+            <PasswordInput
+              id="current-password"
+              required
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="text-sm font-mono border-border/50 rounded-lg focus:ring-1 focus:border-primary"
+              placeholder="••••••••"
+            />
+          </FormField>
+        )}
+
+        <FormField label="New Password" id="new-password">
           <PasswordInput
-            id="current-password"
-            label="Current Password"
+            id="new-password"
             required
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
             className="text-sm font-mono border-border/50 rounded-lg focus:ring-1 focus:border-primary"
             placeholder="••••••••"
           />
-        )}
+        </FormField>
 
-        <PasswordInput
-          id="new-password"
-          label="New Password"
-          required
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          className="text-sm font-mono border-border/50 rounded-lg focus:ring-1 focus:border-primary"
-          placeholder="••••••••"
-        />
-
-        <PasswordInput
-          id="confirm-password"
-          label="Confirm New Password"
-          required
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="text-sm font-mono border-border/50 rounded-lg focus:ring-1 focus:border-primary"
-          placeholder="••••••••"
-        />
+        <FormField label="Confirm New Password" id="confirm-password">
+          <PasswordInput
+            id="confirm-password"
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="text-sm font-mono border-border/50 rounded-lg focus:ring-1 focus:border-primary"
+            placeholder="••••••••"
+          />
+        </FormField>
       </div>
 
       <button

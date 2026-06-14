@@ -14,6 +14,7 @@ export function useEditBookForm(
   const [editStatus, setEditStatus] = React.useState<"active" | "completed" | "archived">("active");
   const [editCurrentPage, setEditCurrentPage] = React.useState<number | "">("");
   const [editTotalPages, setEditTotalPages] = React.useState<number | "">("");
+  const [titleError, setTitleError] = React.useState<string | undefined>(undefined);
 
   const formatOptions = [
     { value: "EPUB", label: "EPUB" },
@@ -30,7 +31,12 @@ export function useEditBookForm(
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingBookId || !editTitle.trim()) return;
+    if (!editingBookId) return;
+
+    if (!editTitle.trim()) {
+      setTitleError("Title cannot be empty.");
+      return;
+    }
 
     const updates: Partial<Book> = {
       title: editTitle.trim(),
@@ -55,6 +61,7 @@ export function useEditBookForm(
 
     setIsEditModalOpen(false);
     setEditingBookId(null);
+    setTitleError(undefined);
   };
 
   const openEditModal = (book: Book) => {
@@ -66,14 +73,20 @@ export function useEditBookForm(
     setEditStatus(book.status);
     setEditCurrentPage(book.currentPage ?? "");
     setEditTotalPages(book.totalPages ?? "");
+    setTitleError(undefined);
     setIsEditModalOpen(true);
+  };
+
+  const updateTitle = (val: string) => {
+    setEditTitle(val);
+    if (val.trim()) setTitleError(undefined);
   };
 
   return {
     isEditModalOpen,
     setIsEditModalOpen,
     editTitle,
-    setEditTitle,
+    setEditTitle: updateTitle,
     editAuthor,
     setEditAuthor,
     editFormat,
@@ -88,6 +101,7 @@ export function useEditBookForm(
     setEditProgress,
     formatOptions,
     statusOptions,
+    titleError,
     handleEditSubmit,
     openEditModal
   };

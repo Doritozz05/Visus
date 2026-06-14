@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface ThemeEditorFooterProps {
   themeName: string;
@@ -16,24 +18,23 @@ export function ThemeEditorFooter({
   onCancel,
   onDelete,
 }: ThemeEditorFooterProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+
   return (
     <footer className="border-t border-border/30 p-4 bg-accent/5 flex justify-between items-center shrink-0">
       <div>
         {isEditing && onDelete && (
           <button
             type="button"
-            onClick={() => {
-              if (window.confirm(`Are you sure you want to permanently delete the theme "${themeName}"?`)) {
-                onDelete();
-              }
-            }}
+            onClick={() => setShowDeleteConfirm(true)}
             className="py-2.5 px-4 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
           >
             <Trash2 className="w-4 h-4" /> Delete theme
           </button>
         )}
       </div>
-      <div className="flex gap-3.5">
+
+      <div className="flex gap-3">
         <button
           type="button"
           onClick={onCancel}
@@ -49,6 +50,19 @@ export function ThemeEditorFooter({
           Save & Apply theme
         </button>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          if (onDelete) onDelete();
+        }}
+        title={`Delete theme "${themeName}"?`}
+        description="This will permanently remove this custom theme. This action cannot be undone."
+        confirmLabel="Delete Theme"
+        variant="danger"
+      />
     </footer>
   );
 }

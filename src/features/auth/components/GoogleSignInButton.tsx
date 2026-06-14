@@ -1,18 +1,23 @@
 import React, { useState } from "react";
 import { authService } from "@/core/config/services";
+import { toast } from "sonner";
 
 export function GoogleSignInButton() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       await authService.signInWithGoogle();
-    } catch (error) {
-      console.error("Google sign in failed:", error);
+    } catch (err) {
+      console.error("Failed to sign in with Google", err);
+      toast.error("Google sign in failed", {
+        description: err instanceof Error && err.message ? err.message : "Could not connect to Google."
+      });
       setIsLoading(false);
     }
   };
+
 
   return (
     <button

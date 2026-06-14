@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Book, Trash2, MoreVertical, Info, BookOpen, CheckCircle, Pencil, Archive, FolderPlus, Cloud, CloudOff, RefreshCw } from "lucide-react";
 import { Book as BookEntity } from "@/core/entities/book";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface BookCardProps {
   book: BookEntity;
@@ -34,6 +35,7 @@ export function BookCard({
   isSyncing = false,
 }: BookCardProps) {
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (activeDropdownId !== book.id) return;
@@ -69,13 +71,7 @@ export function BookCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            toast.warning(`Delete "${book.title}"?`, {
-              description: "This will remove the book and its progress forever.",
-              action: {
-                label: "Delete",
-                onClick: () => onDelete(book.id),
-              },
-            });
+            setShowDeleteConfirm(true);
           }}
           className="w-7 h-7 rounded-full hover:bg-rose-500/10 flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-all animate-fade-in"
           title="Delete book"
@@ -256,6 +252,20 @@ export function BookCard({
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          onDelete(book.id);
+          toast.success(`"${book.title}" deleted.`);
+        }}
+        title="Delete volume?"
+        description={`This will permanently remove "${book.title}" and its reading progress from your local library.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

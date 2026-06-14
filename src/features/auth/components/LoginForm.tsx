@@ -8,6 +8,7 @@ import { GoogleSignInButton } from "./GoogleSignInButton";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { FormField } from "@/components/ui/FormField";
 
 interface LoginFormProps {
   onMfaStateChange?: (isMfa: boolean) => void;
@@ -20,7 +21,6 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
   const [password, setPassword] = useState("");
   const [mfaCode, setMfaCode] = useState("");
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -59,7 +59,14 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    
+    if (!email || !password) {
+      toast.error("Required fields", {
+        description: "Please enter your email and password.",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -85,7 +92,9 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
         window.location.href = "/library";
       }
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : "Error signing in.");
+      toast.error("Sign in failed", {
+        description: err instanceof Error && err.message ? err.message : "Error signing in.",
+      });
       setIsLoading(false);
     }
   };
@@ -100,17 +109,12 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
-              {error}
-            </div>
-          )}
-
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <FormField
+            label="Verification Code"
+          >
             <input
               type="text"
-              required
               maxLength={6}
               value={mfaCode}
               onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ""))}
@@ -118,7 +122,7 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
               placeholder="000000"
               autoFocus
             />
-          </div>
+          </FormField>
 
           <button
             type="submit"
@@ -137,9 +141,10 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
                 await authService.logout();
                 setMfaFactorId(null);
                 setMfaCode("");
-                setError(null);
               } catch (err) {
-                setError("Error cancelling login.");
+                toast.error("Action failed", {
+                  description: "Error cancelling login.",
+                });
               } finally {
                 setIsLoading(false);
               }
@@ -166,45 +171,34 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
-            {error}
-          </div>
-        )}
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground" htmlFor="email">
-            Email address
-          </label>
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        <FormField label="Email address" id="email">
           <input
             id="email"
             type="email"
-            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             placeholder="you@email.com"
           />
-        </div>
+        </FormField>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-foreground" htmlFor="password">
-              Password
-            </label>
-            <Link href="/reset-password" className="text-xs font-medium text-primary hover:underline">
-              Forgot your password?
-            </Link>
-          </div>
+        <FormField 
+          label="Password" 
+          id="password"
+          hint={
+            <Link href="/reset-password" onClick={(e) => e.stopPropagation()} className="text-primary hover:underline float-right">
+              Forgot?
+            </Link> as any
+          }
+        >
           <PasswordInput
             id="password"
-            required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
           />
-        </div>
+        </FormField>
 
         <button
           type="submit"
