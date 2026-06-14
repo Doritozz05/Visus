@@ -14,10 +14,10 @@ export const COLOR_PRESETS: Record<string, string> = {
 };
 
 export const THEME_DEFAULTS: Record<string, { fg: string, primary: string, muted: string }> = {
-  "dark-violet": { fg: "#dde4fd", primary: "#c2c3ff", muted: "#cac7d6" },
-  "light": { fg: "#0f1729", primary: "#8b5cf6", muted: "#a8a2f8" },
+  "dark-violet": { fg: "#dae2fd", primary: "#c2c3ff", muted: "#cac7d6" },
+  "light": { fg: "#0f1729", primary: "#4f46e5", muted: "#a8a2f8" },
   "sepia": { fg: "#5a4535", primary: "#ac6b39", muted: "#81624b" },
-  "nord": { fg: "#e5e9f0", primary: "#87bfcf", muted: "#b6bdc9" },
+  "nord": { fg: "#eceff4", primary: "#88c0d0", muted: "#b6bdc9" },
 };
 
 /**

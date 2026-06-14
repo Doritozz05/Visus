@@ -61,7 +61,7 @@ module.exports = {
           foreground: "#dbdee1",
           border: "#1e1f22",
         },
-        nordic: {
+        nord: {
           background: "#2e3440",
           foreground: "#d8dee9",
           border: "#4c566a",

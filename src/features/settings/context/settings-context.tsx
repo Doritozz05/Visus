@@ -42,15 +42,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           // Dynamic theme migration for legacy configurations in local development
           if (parsed.general && parsed.general.theme) {
             const t = parsed.general.theme;
-            if (t === "dark" || t === "midnight" || t === "sepia" || t === "nordic" || t === "forest" || t === "light" || t === "matrix-green") {
-              if (t === "dark" || t === "midnight") {
-                parsed.general.theme = "dark-violet";
-              } else if (t === "forest" || t === "matrix-green") {
+            const legacyThemes = ["dark", "midnight", "sepia", "nordic", "nord", "forest", "light", "matrix-green"];
+            if (legacyThemes.includes(t)) {
+              if (t === "dark" || t === "midnight" || t === "forest" || t === "matrix-green") {
                 parsed.general.theme = "dark-violet";
               } else if (t === "light") {
                 parsed.general.theme = "light";
-              } else {
-                parsed.general.theme = "dark-violet"; // safe default
+              } else if (t === "sepia") {
+                parsed.general.theme = "sepia";
+              } else if (t === "nordic" || t === "nord") {
+                parsed.general.theme = "nord";
               }
             }
           }

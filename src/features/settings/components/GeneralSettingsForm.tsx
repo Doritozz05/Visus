@@ -88,7 +88,7 @@ export function GeneralSettingsForm() {
               "dark-violet": "Dark violet",
               "light": "Light minimal",
               "sepia": "Warm sepia",
-              "nord": "Nord arctic"
+              "nord": "Nord"
             };
             const templateName = presetIdToTemplateName[t.id];
             const preset = PRESETS_TEMPLATES.find(p => p.name === templateName);
@@ -160,9 +160,9 @@ export function GeneralSettingsForm() {
           <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Color scheme theme</label>
           <div className="grid grid-cols-2 gap-2.5">
             {[
-              { id: "dark-violet", name: "Dark Violet", desc: "Original Clinical Navy", preview: "bg-[#0b1326]" },
-              { id: "light", name: "Light Paper", desc: "Warm Minimal Light", preview: "bg-[#f1f3f6]" },
-              { id: "sepia", name: "Sepia Warm", desc: "Parchment Reading", preview: "bg-[#f4ecd8]" },
+              { id: "dark-violet", name: "Dark Violet", desc: "Original Clinical Navy", preview: "bg-[#0b1428]" },
+              { id: "light", name: "Light Paper", desc: "Warm Minimal Light", preview: "bg-[#f6f7f9]" },
+              { id: "sepia", name: "Sepia Warm", desc: "Parchment Reading", preview: "bg-[#f3ebd8]" },
               { id: "nord", name: "Nord Arctic", desc: "Snowy Blue Cold", preview: "bg-[#2e3440]" },
             ].map((t) => (
               <button

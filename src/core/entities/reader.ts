@@ -12,7 +12,7 @@ export type ReadingMode = "rsvp" | "clusters";
 /**
  * Visual themes available in reading panels, optimized for visual strain and contrast.
  */
-export type ReadingTheme = "light" | "dark" | "sepia" | "nordic" | "contrast";
+export type ReadingTheme = "light" | "dark" | "sepia" | "nord" | "contrast";
 
 /**
  * General configuration settings for the rapid reading engine.
