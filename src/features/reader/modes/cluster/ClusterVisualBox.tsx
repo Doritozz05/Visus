@@ -2,7 +2,7 @@ import * as React from "react";
 import { DynamicCluster } from "@/core/algorithms/clusters";
 import { ClusterSettings } from "@/core/entities/settings";
 import { useReadingStore } from "../../stores/reading-store";
-import { hexToRgba } from "@/lib/color-utils";
+import { hexToRgba, resolveColor } from "@/lib/color-utils";
 import { BUILTIN_THEMES } from "@/core/config/themes";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { getFontFamilyStyle, getReaderFontClass } from "@/lib/typography";
@@ -118,13 +118,6 @@ export function ClusterVisualBox({
     white: "text-foreground",
   };
 
-  const glows = {
-    indigo: "text-shadow-glow-indigo",
-    amber: "text-shadow-glow-amber",
-    green: "text-shadow-glow-green",
-    none: "",
-  };
-
   const sizeClass = `leading-relaxed md:leading-loose`;
   
   const innerStyle: React.CSSProperties = {
@@ -135,6 +128,7 @@ export function ClusterVisualBox({
   };
 
   const resolvedActiveColor = settings.activeColor === "primary" ? getThemeColor("primary") : settings.activeColor;
+  const resolvedGlowColor = settings.glowEffect === "none" ? "none" : (settings.glowEffect === "primary" ? getThemeColor("primary") : resolveColor(settings.glowEffect));
   const isPreset = resolvedActiveColor in activeColors;
   const activeColorClass = isPreset ? activeColors[resolvedActiveColor as keyof typeof activeColors] : "";
   const readerFontClass = getReaderFontClass(settings.fontFamily);
@@ -192,58 +186,53 @@ export function ClusterVisualBox({
 
           if (isActive) {
             if (settings.highlightStyle === "spotlight") {
-              const glowClass = isPreset ? (glows[settings.glowEffect as keyof typeof glows] || "") : "";
-              highlightClass = `${activeColorClass} ${glowClass}`;
-              if (!isPreset) {
-                highlightStyle = {
-                  ...highlightStyle,
-                  color: resolvedActiveColor,
-                  textShadow: settings.glowEffect !== "none"
-                    ? `0 0 12px ${hexToRgba(resolvedActiveColor, 0.55)}, 0 0 2px ${hexToRgba(resolvedActiveColor, 0.3)}`
-                    : undefined
-                };
-              }
+              highlightStyle = {
+                ...highlightStyle,
+                color: resolvedActiveColor,
+                textShadow: resolvedGlowColor !== "none"
+                  ? `0 0 12px ${hexToRgba(resolvedGlowColor, 0.55)}, 0 0 2px ${hexToRgba(resolvedGlowColor, 0.3)}`
+                  : undefined
+              };
             } else if (settings.highlightStyle === "capsule") {
-              highlightClass = `${activeColorClass} bg-primary/10 px-2 py-0.5 rounded border border-primary/20 shadow-[0_0_15px_rgba(var(--primary),0.15)]`;
-              if (!isPreset) {
-                highlightStyle = {
-                  ...highlightStyle,
-                  color: resolvedActiveColor,
-                  backgroundColor: hexToRgba(resolvedActiveColor, 0.1),
-                  borderColor: hexToRgba(resolvedActiveColor, 0.2),
-                  borderWidth: "1px",
-                  borderStyle: "solid"
-                };
-              }
+              highlightStyle = {
+                ...highlightStyle,
+                color: resolvedActiveColor,
+                backgroundColor: hexToRgba(resolvedActiveColor, 0.1),
+                borderColor: hexToRgba(resolvedActiveColor, 0.2),
+                borderWidth: "1px",
+                borderStyle: "solid",
+                boxShadow: `0 0 15px ${hexToRgba(resolvedActiveColor, 0.15)}`,
+                padding: "2px 6px",
+                borderRadius: "6px"
+              };
             } else if (settings.highlightStyle === "underline") {
-              highlightClass = `${activeColorClass} border-b-2 border-primary px-0.5`;
-              if (!isPreset) {
-                highlightStyle = {
-                  ...highlightStyle,
-                  color: resolvedActiveColor,
-                  borderBottom: `2px solid ${resolvedActiveColor}`
-                };
-              }
+              highlightStyle = {
+                ...highlightStyle,
+                color: resolvedActiveColor,
+                borderBottom: `2px solid ${resolvedActiveColor}`,
+                paddingBottom: "1px"
+              };
             } else if (settings.highlightStyle === "bold-only") {
-              highlightClass = "text-foreground font-extrabold";
+              highlightStyle = {
+                ...highlightStyle,
+                color: resolvedActiveColor,
+                fontWeight: "800"
+              };
             } else if (settings.highlightStyle === "color-only") {
-              highlightClass = activeColorClass;
-              if (!isPreset) {
-                highlightStyle = {
-                  ...highlightStyle,
-                  color: resolvedActiveColor
-                };
-              }
+              highlightStyle = {
+                ...highlightStyle,
+                color: resolvedActiveColor
+              };
             }
           } else {
             if (settings.highlightStyle === "capsule") {
-              highlightClass = "border border-transparent px-2 py-0.5 text-muted-foreground/60";
+              highlightClass = "border border-transparent px-2 py-0.5 text-muted-foreground";
             } else if (settings.highlightStyle === "underline") {
-              highlightClass = "border-b-2 border-transparent px-0.5 text-muted-foreground/60";
+              highlightClass = "border-b-2 border-transparent px-0.5 text-muted-foreground";
             } else if (settings.highlightStyle === "bold-only") {
-              highlightClass = "text-muted-foreground/35 font-extrabold";
+              highlightClass = "text-muted-foreground font-normal";
             } else {
-              highlightClass = "text-muted-foreground/60";
+              highlightClass = "text-muted-foreground";
             }
           }
 

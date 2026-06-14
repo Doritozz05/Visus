@@ -5,10 +5,24 @@ import { useSettings } from "@/features/settings/context/settings-context";
 import { Columns } from "lucide-react";
 import { ColorSelector } from "@/components/ui/ColorSelector";
 import { FontSelector } from "@/components/ui/FontSelector";
+import { resolveColor, hexToRgba, THEME_DEFAULTS } from "@/lib/color-utils";
 
 export function ClusterSettingsForm() {
   const { settings, updateClusterSettings, customFonts, refreshCustomFonts } = useSettings();
   const cluster = settings.cluster;
+
+  const resolvedColor = React.useMemo(() => {
+    const color = cluster.activeColor;
+    if (color && color !== "primary" && color !== "foreground" && color !== "muted") return resolveColor(color);
+    
+    // Resolve theme colors
+    const themeId = settings.general.theme;
+    const currentTheme = THEME_DEFAULTS[themeId];
+    
+    if (color === "foreground") return currentTheme?.fg || "#000000";
+    if (color === "muted") return currentTheme?.muted || "#94a3b8";
+    return currentTheme?.primary || "#8b5cf6";
+  }, [cluster.activeColor, settings.general.theme]);
 
   return (
     <div className="space-y-6">
@@ -56,21 +70,67 @@ export function ClusterSettingsForm() {
           <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Highlight visual style</label>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { id: "spotlight", label: "Spotlight" },
-              { id: "capsule", label: "Capsule Bubble" },
-              { id: "underline", label: "Underline" },
-              { id: "bold-only", label: "Bold text" },
-              { id: "color-only", label: "Pure color" },
+              { id: "spotlight", render: () => {
+                const resolvedGlowColor = cluster.glowEffect === "none" ? "none" : (cluster.glowEffect === "primary" ? resolvedColor : resolveColor(cluster.glowEffect));
+                return (
+                  <span 
+                    style={{
+                      color: resolvedColor,
+                      textShadow: resolvedGlowColor !== "none" 
+                        ? `0 0 8px ${hexToRgba(resolvedGlowColor, 0.55)}, 0 0 2px ${hexToRgba(resolvedGlowColor, 0.3)}` 
+                        : undefined
+                    }}
+                    className="font-medium"
+                  >
+                    Spotlight
+                  </span>
+                );
+              }},
+              { id: "capsule", render: () => (
+                <span 
+                  style={{
+                    color: resolvedColor,
+                    backgroundColor: hexToRgba(resolvedColor, 0.1),
+                    borderColor: hexToRgba(resolvedColor, 0.2),
+                  }}
+                  className="px-2 py-0.5 rounded border text-[11px] inline-block font-medium"
+                >
+                  Capsule Bubble
+                </span>
+              )},
+              { id: "underline", render: () => (
+                <span 
+                  style={{
+                    color: resolvedColor,
+                    borderBottom: `2px solid ${resolvedColor}`
+                  }}
+                  className="px-0.5 font-medium"
+                >
+                  Underline
+                </span>
+              )},
+              { id: "bold-only", render: () => (
+                <span style={{ color: resolvedColor }} className="font-extrabold">
+                  Bold text
+                </span>
+              )},
+              { id: "color-only", render: () => (
+                <span style={{ color: resolvedColor }} className="font-medium">
+                  Pure color
+                </span>
+              )},
             ].map((style) => (
               <button
                 key={style.id}
+                type="button"
                 onClick={() => updateClusterSettings({ highlightStyle: style.id as any })}
-                className={`p-2 border rounded-lg text-center transition-all text-xs ${cluster.highlightStyle === style.id
-                  ? "border-primary bg-accent/45 text-primary font-bold"
-                  : "border-border/20 hover:border-border/50 text-muted-foreground bg-card"
-                  }`}
+                className={`p-3 border rounded-xl text-center transition-all flex items-center justify-center min-h-[48px] ${
+                  cluster.highlightStyle === style.id
+                    ? "border-primary bg-accent/45 shadow-sm"
+                    : "border-border/20 hover:border-border/45 bg-card/40 hover:bg-card"
+                }`}
               >
-                {style.label}
+                {style.render()}
               </button>
             ))}
           </div>
@@ -128,32 +188,39 @@ export function ClusterSettingsForm() {
           </div>
         </div>
 
-        {/* Dynamic glow effect */}
-        <div className="flex items-center justify-between py-4 border-t border-border/10">
-          <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Spotlight glow</label>
-            <p className="text-[9px] text-muted-foreground mt-0.5">Adds subtle ambient glow under highlighted line.</p>
-          </div>
-          <div className="flex gap-1">
-            {[
-              { id: "none", label: "None" },
-              { id: "indigo", label: "Indigo" },
-              { id: "amber", label: "Amber" },
-              { id: "green", label: "Green" },
-            ].map((glow) => (
+        {/* Spotlight Glow controls - Conditionally rendered */}
+        {cluster.highlightStyle === "spotlight" && (
+          <div className="py-4 border-t border-border/10 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Spotlight glow</label>
+                <p className="text-[9px] text-muted-foreground mt-0.5">Adds subtle ambient glow under the highlighted line.</p>
+              </div>
               <button
-                key={glow.id}
-                onClick={() => updateClusterSettings({ glowEffect: glow.id as any })}
-                className={`px-2 py-1 text-[9px] font-sans border rounded transition-all ${cluster.glowEffect === glow.id
-                  ? "bg-primary text-primary-foreground font-bold border-primary"
-                  : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                  }`}
+                type="button"
+                onClick={() => updateClusterSettings({ glowEffect: cluster.glowEffect === "none" ? "primary" : "none" })}
+                className={`px-3 py-1.5 rounded-lg border font-mono text-[9px] uppercase tracking-widest transition-all ${
+                  cluster.glowEffect !== "none"
+                    ? "border-primary bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(var(--primary),0.1)]"
+                    : "border-border/30 bg-card/50 text-muted-foreground hover:text-foreground"
+                }`}
               >
-                {glow.label}
+                {cluster.glowEffect !== "none" ? "Enabled" : "Disabled"}
               </button>
-            ))}
+            </div>
+
+            {cluster.glowEffect !== "none" && (
+              <div className="animate-in fade-in slide-in-from-top-1 duration-200">
+                <ColorSelector
+                  label="Glow color"
+                  value={cluster.glowEffect}
+                  onChange={(color) => updateClusterSettings({ glowEffect: color })}
+                  showWhitePreset={true}
+                />
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
       </div>
     </div>
