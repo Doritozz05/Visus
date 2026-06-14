@@ -281,22 +281,24 @@ export function GeneralSettingsForm() {
         {/* Settings toggles */}
         <div className="space-y-4">
 
-          {/* Glassmorphism */}
-          <div className="flex items-center justify-between py-1">
-            <div>
-              <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Liquid glass</label>
-              <p className="text-[9px] text-muted-foreground mt-0.5">Enables glass effects. Disable on slow hardware.</p>
+          {/* Glassmorphism - ONLY for Built-in themes */}
+          {isBuiltInTheme && (
+            <div className="flex items-center justify-between py-1">
+              <div>
+                <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Liquid glass</label>
+                <p className="text-[9px] text-muted-foreground mt-0.5">Enables glass effects. Disable on slow hardware.</p>
+              </div>
+              <button
+                onClick={() => updateGeneralSettings({ glassmorphism: !glassmorphism })}
+                className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${glassmorphism ? "bg-primary" : "bg-accent"}`}
+              >
+                <div className={`w-4 h-4 rounded-full bg-background transition-transform duration-300 ${glassmorphism ? "translate-x-5" : "translate-x-0"}`} />
+              </button>
             </div>
-            <button
-              onClick={() => updateGeneralSettings({ glassmorphism: !glassmorphism })}
-              className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${glassmorphism ? "bg-primary" : "bg-accent"}`}
-            >
-              <div className={`w-4 h-4 rounded-full bg-background transition-transform duration-300 ${glassmorphism ? "translate-x-5" : "translate-x-0"}`} />
-            </button>
-          </div>
+          )}
 
           {/* Reduced Motion */}
-          <div className="flex items-center justify-between py-1 border-t border-border/10 pt-3">
+          <div className={`flex items-center justify-between py-1 ${isBuiltInTheme ? "border-t border-border/10 pt-3" : ""}`}>
             <div>
               <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Reduce UI motion</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Disables transitions for speed loads and pagination changes.</p>
