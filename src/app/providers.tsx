@@ -7,12 +7,12 @@ import { AuthProvider } from "@/features/auth/context/auth-context";
 import { Toaster } from "sonner";
 import { ContextMenuProvider } from "@/components/ui/ContextMenu";
 import { hexToHsl, resolveColor, THEME_DEFAULTS } from "@/lib/color-utils";
+import { BUILTIN_THEMES } from "@/core/config/themes";
 import type { CustomTheme } from "@/core/entities/settings";
 import { MotionConfig } from "framer-motion";
 import { getFontFamilyStyle } from "@/lib/typography";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
-// ... (rest of imports/helpers)
   const { settings, customFonts } = useSettings();
   const { theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes = [] } = settings.general;
 
@@ -97,163 +97,138 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     const prevStyleTag = document.getElementById("visus-custom-theme-css");
     if (prevStyleTag) prevStyleTag.remove();
 
-    const customTheme = customThemes.find((t) => t.id === theme);
+    // Look for active theme in all sources
+    const allThemes = [...BUILTIN_THEMES, ...customThemes];
+    const activeTheme = allThemes.find((t) => t.id === theme) || BUILTIN_THEMES[0];
 
-    if (customTheme) {
+    const isCustom = customThemes.some(t => t.id === theme);
+    if (isCustom) {
       root.classList.add("theme-custom");
-      root.classList.add(`theme-${theme}`);
+    }
+    
+    root.classList.add(`theme-${theme}`);
 
-      if (customTheme.isDark) {
-        root.classList.add("dark");
-      } else {
-        root.classList.remove("dark");
-      }
-
-      root.style.setProperty("--background", toHslString(customTheme.background));
-      root.style.setProperty("--foreground", toHslString(customTheme.foreground));
-      root.style.setProperty("--border", toHslString(customTheme.border));
-      root.style.setProperty("--card", toHslString(customTheme.cardBackground));
-      root.style.setProperty("--card-foreground", toHslString(customTheme.cardForeground));
-      root.style.setProperty("--popover", toHslString(customTheme.popover || customTheme.cardBackground));
-      root.style.setProperty("--popover-foreground", toHslString(customTheme.popoverForeground || customTheme.cardForeground));
-      root.style.setProperty("--primary", toHslString(customTheme.accent));
-      root.style.setProperty("--primary-foreground", toHslString(customTheme.accentForeground));
-      root.style.setProperty("--secondary", toHslString(customTheme.secondary || (customTheme.isDark ? "#1e293b" : "#f1f5f9")));
-      root.style.setProperty("--secondary-foreground", toHslString(customTheme.secondaryForeground || customTheme.foreground));
-      root.style.setProperty("--muted", toHslString(customTheme.muted));
-      root.style.setProperty("--muted-foreground", toHslString(customTheme.mutedForeground));
-      root.style.setProperty("--accent", toHslString(customTheme.uiAccent || customTheme.muted));
-      root.style.setProperty("--accent-foreground", toHslString(customTheme.uiAccentForeground || customTheme.accent));
-      root.style.setProperty("--input", toHslString(customTheme.input || customTheme.border));
-      root.style.setProperty("--ring", toHslString(customTheme.ring || customTheme.accent));
-
-      // Sidebar overrides
-      if (customTheme.overrideSidebar) {
-        root.style.setProperty("--sidebar-background", toHslString(customTheme.sidebarBackground || customTheme.cardBackground));
-        root.style.setProperty("--sidebar-foreground", toHslString(customTheme.sidebarForeground || customTheme.cardForeground));
-        root.style.setProperty("--sidebar-border", toHslString(customTheme.sidebarBorder || customTheme.border));
-        root.style.setProperty("--sidebar-active-background", toHslString(customTheme.sidebarActiveBackground || customTheme.accent));
-        root.style.setProperty("--sidebar-active-foreground", toHslString(customTheme.sidebarActiveForeground || customTheme.accentForeground));
-      } else {
-        root.style.setProperty("--sidebar-background", toHslString(customTheme.cardBackground));
-        root.style.setProperty("--sidebar-foreground", toHslString(customTheme.cardForeground));
-        root.style.setProperty("--sidebar-border", toHslString(customTheme.border));
-        root.style.setProperty("--sidebar-active-background", toHslString(customTheme.accent));
-        root.style.setProperty("--sidebar-active-foreground", toHslString(customTheme.accentForeground));
-      }
-
-      // Reader overrides
-      if (customTheme.overrideReader) {
-        root.style.setProperty("--reader-background", toHslString(customTheme.readerBackground || customTheme.background));
-        root.style.setProperty("--reader-foreground", toHslString(customTheme.readerForeground || customTheme.foreground));
-        root.style.setProperty("--reader-border", toHslString(customTheme.readerBorder || customTheme.border));
-      } else {
-        root.style.setProperty("--reader-background", toHslString(customTheme.background));
-        root.style.setProperty("--reader-foreground", toHslString(customTheme.foreground));
-        root.style.setProperty("--reader-border", toHslString(customTheme.border));
-      }
-
-      root.style.setProperty("--radius", customTheme.cardRadius || "0.75rem");
-      root.style.setProperty("--card-shadow", getShadowValue(customTheme.cardShadow, customTheme.glowSettings));
-      root.style.setProperty("--primary-shadow", `rgba(${toRgbString(customTheme.accent)}, 0.25)`);
-
-      // Glassmorphism
-      if (customTheme.glassmorphism?.enabled) {
-        const bgRgb = toRgbString(customTheme.cardBackground);
-        const borderRgb = toRgbString(customTheme.border);
-        root.style.setProperty("--glass-bg", `rgba(${bgRgb}, ${customTheme.glassmorphism.opacity})`);
-        root.style.setProperty("--glass-blur", `blur(${customTheme.glassmorphism.blur}px)`);
-        root.style.setProperty("--glass-border", `1px solid rgba(${borderRgb}, ${customTheme.glassmorphism.borderOpacity})`);
-      } else {
-        root.style.removeProperty("--glass-bg");
-        root.style.removeProperty("--glass-blur");
-        root.style.removeProperty("--glass-border");
-      }
-
-      // Background graphics engine
-      if (customTheme.bgType === "image" && customTheme.bgImageUrl) {
-        root.style.setProperty("--bg-image", `url("${customTheme.bgImageUrl}")`);
-        root.style.setProperty("--bg-image-opacity", (customTheme.bgImageOpacity ?? 1).toString());
-        root.style.setProperty("--bg-image-blur", `${customTheme.bgImageBlur ?? 0}px`);
-        if (customTheme.bgImageOverlay) {
-          const overlayRgb = toRgbString(customTheme.bgImageOverlay);
-          root.style.setProperty("--bg-image-overlay", `rgba(${overlayRgb}, ${customTheme.bgImageOverlayOpacity ?? 0})`);
-        } else {
-          root.style.setProperty("--bg-image-overlay", "transparent");
-        }
-      } else if (customTheme.bgType === "gradient" && customTheme.bgGradientStart && customTheme.bgGradientEnd) {
-        const angle = customTheme.bgGradientAngle ?? 135;
-        root.style.setProperty("--bg-image", `linear-gradient(${angle}deg, ${customTheme.bgGradientStart}, ${customTheme.bgGradientEnd})`);
-        root.style.setProperty("--bg-image-opacity", "1");
-        root.style.setProperty("--bg-image-blur", "0px");
-        root.style.setProperty("--bg-image-overlay", "transparent");
-      } else {
-        root.style.removeProperty("--bg-image");
-        root.style.removeProperty("--bg-image-opacity");
-        root.style.removeProperty("--bg-image-blur");
-        root.style.removeProperty("--bg-image-overlay");
-      }
-
-      body.setAttribute("data-accent", "custom");
-      body.setAttribute("data-ui-font", customTheme.uiFont || uiFont);
-      body.setAttribute("data-glass", customTheme.glassmorphism?.enabled ? "enabled" : "disabled");
-      body.setAttribute("data-bg-type", customTheme.bgType);
-
-      // Injects user CSS custom stylesheet if present
-      if (customTheme.customCss) {
-        const style = document.createElement("style");
-        style.id = "visus-custom-theme-css";
-        style.appendChild(document.createTextNode(customTheme.customCss));
-        document.head.appendChild(style);
-      }
+    if (activeTheme.isDark) {
+      root.classList.add("dark");
     } else {
-      root.classList.remove("theme-custom");
-      root.classList.add(`theme-${theme}`);
+      root.classList.remove("dark");
+    }
 
-      if (theme === "dark-violet" || theme === "nord") {
-        root.classList.add("dark");
-      } else {
-        root.classList.remove("dark");
-      }
+    // Apply primary colors from theme
+    root.style.setProperty("--background", toHslString(activeTheme.background));
+    root.style.setProperty("--foreground", toHslString(activeTheme.foreground));
+    root.style.setProperty("--border", toHslString(activeTheme.border));
+    root.style.setProperty("--card", toHslString(activeTheme.cardBackground));
+    root.style.setProperty("--card-foreground", toHslString(activeTheme.cardForeground));
+    root.style.setProperty("--popover", toHslString(activeTheme.popover || activeTheme.cardBackground));
+    root.style.setProperty("--popover-foreground", toHslString(activeTheme.popoverForeground || activeTheme.cardForeground));
+    
+    // Primary/Accent logic: Built-in themes can be tinted by user accentColor
+    const resolvedAccent = (!isCustom && accentColor) ? accentColor : activeTheme.accent;
+    root.style.setProperty("--primary", toHslString(resolvedAccent));
+    root.style.setProperty("--primary-foreground", toHslString(activeTheme.accentForeground));
+    root.style.setProperty("--ring", toHslString(resolvedAccent));
 
-      const propertiesToClear = [
-        "--background", "--foreground", "--border", "--card", "--card-foreground",
-        "--popover", "--popover-foreground", "--primary", "--primary-foreground",
-        "--secondary", "--secondary-foreground", "--muted", "--muted-foreground",
-        "--accent", "--accent-foreground", "--input", "--ring",
-        "--sidebar-background", "--sidebar-foreground", "--sidebar-border", "--sidebar-active-background", "--sidebar-active-foreground",
-        "--reader-background", "--reader-foreground", "--reader-border",
-        "--radius", "--card-shadow", "--primary-shadow",
-        "--glass-bg", "--glass-blur", "--glass-border",
-        "--bg-image", "--bg-image-opacity", "--bg-image-blur", "--bg-image-overlay",
-        "--font-sans"
-      ];
-      propertiesToClear.forEach((p) => root.style.removeProperty(p));
+    root.style.setProperty("--secondary", toHslString(activeTheme.secondary || (activeTheme.isDark ? "#1e293b" : "#f1f5f9")));
+    root.style.setProperty("--secondary-foreground", toHslString(activeTheme.secondaryForeground || activeTheme.foreground));
+    root.style.setProperty("--muted", toHslString(activeTheme.muted));
+    root.style.setProperty("--muted-foreground", toHslString(activeTheme.mutedForeground));
+    root.style.setProperty("--accent", toHslString(activeTheme.uiAccent || activeTheme.muted));
+    root.style.setProperty("--accent-foreground", toHslString(activeTheme.uiAccentForeground || activeTheme.accent));
+    root.style.setProperty("--input", toHslString(activeTheme.input || activeTheme.border));
 
-      if (accentColor) {
-        body.setAttribute("data-accent", accentColor);
-      } else {
-        body.removeAttribute("data-accent");
-      }
+    if (activeTheme.destructive) {
+      root.style.setProperty("--destructive", toHslString(activeTheme.destructive));
+      root.style.setProperty("--destructive-foreground", toHslString(activeTheme.destructiveForeground || "#ffffff"));
+    }
+
+    // Sidebar overrides
+    if (activeTheme.overrideSidebar) {
+      root.style.setProperty("--sidebar-background", toHslString(activeTheme.sidebarBackground || activeTheme.cardBackground));
+      root.style.setProperty("--sidebar-foreground", toHslString(activeTheme.sidebarForeground || activeTheme.cardForeground));
+      root.style.setProperty("--sidebar-border", toHslString(activeTheme.sidebarBorder || activeTheme.border));
+      root.style.setProperty("--sidebar-active-background", toHslString(activeTheme.sidebarActiveBackground || resolvedAccent));
+      root.style.setProperty("--sidebar-active-foreground", toHslString(activeTheme.sidebarActiveForeground || activeTheme.accentForeground));
+    } else {
+      root.style.setProperty("--sidebar-background", toHslString(activeTheme.cardBackground));
+      root.style.setProperty("--sidebar-foreground", toHslString(activeTheme.cardForeground));
+      root.style.setProperty("--sidebar-border", toHslString(activeTheme.border));
+      root.style.setProperty("--sidebar-active-background", toHslString(resolvedAccent));
+      root.style.setProperty("--sidebar-active-foreground", toHslString(activeTheme.accentForeground));
+    }
+
+    // Reader overrides
+    if (activeTheme.overrideReader) {
+      root.style.setProperty("--reader-background", toHslString(activeTheme.readerBackground || activeTheme.background));
+      root.style.setProperty("--reader-foreground", toHslString(activeTheme.readerForeground || activeTheme.foreground));
+      root.style.setProperty("--reader-border", toHslString(activeTheme.readerBorder || activeTheme.border));
+    } else {
+      root.style.setProperty("--reader-background", toHslString(activeTheme.background));
+      root.style.setProperty("--reader-foreground", toHslString(activeTheme.foreground));
+      root.style.setProperty("--reader-border", toHslString(activeTheme.border));
+    }
+
+    root.style.setProperty("--radius", activeTheme.cardRadius || "0.75rem");
+    root.style.setProperty("--card-shadow", getShadowValue(activeTheme.cardShadow, activeTheme.glowSettings));
+    root.style.setProperty("--primary-shadow", `rgba(${toRgbString(resolvedAccent)}, 0.25)`);
+
+    // Glassmorphism (Global toggle for built-in, theme-specific for custom)
+    const glassEnabled = isCustom ? activeTheme.glassmorphism?.enabled : glassmorphism;
+    if (glassEnabled) {
+      const bgRgb = toRgbString(activeTheme.cardBackground);
+      const borderRgb = toRgbString(activeTheme.border);
+      const opacity = isCustom ? (activeTheme.glassmorphism?.opacity ?? 0.45) : 0.45;
+      const blur = isCustom ? (activeTheme.glassmorphism?.blur ?? 12) : 12;
+      const bOpacity = isCustom ? (activeTheme.glassmorphism?.borderOpacity ?? 0.1) : (activeTheme.isDark ? 0.1 : 0.25);
       
-      body.setAttribute("data-ui-font", uiFont);
-      body.setAttribute("data-glass", glassmorphism ? "enabled" : "disabled");
-      body.setAttribute("data-bg-type", "solid");
+      root.style.setProperty("--glass-bg", `rgba(${bgRgb}, ${opacity})`);
+      root.style.setProperty("--glass-blur", `blur(${blur}px)`);
+      root.style.setProperty("--glass-border", `1px solid rgba(${borderRgb}, ${bOpacity})`);
+    } else {
+      root.style.removeProperty("--glass-bg");
+      root.style.removeProperty("--glass-blur");
+      root.style.removeProperty("--glass-border");
+    }
 
-      try {
-        const defaultAccent = THEME_DEFAULTS[theme as keyof typeof THEME_DEFAULTS]?.primary || "#8b5cf6";
-        const hex = resolveColor(accentColor || defaultAccent);
-        const { stringVal } = hexToHsl(hex);
-        root.style.setProperty("--primary", stringVal);
-        root.style.setProperty("--ring", stringVal);
-      } catch (err) {
-        root.style.removeProperty("--primary");
-        root.style.removeProperty("--ring");
+    // Background graphics engine
+    if (activeTheme.bgType === "image" && activeTheme.bgImageUrl) {
+      root.style.setProperty("--bg-image", `url("${activeTheme.bgImageUrl}")`);
+      root.style.setProperty("--bg-image-opacity", (activeTheme.bgImageOpacity ?? 1).toString());
+      root.style.setProperty("--bg-image-blur", `${activeTheme.bgImageBlur ?? 0}px`);
+      if (activeTheme.bgImageOverlay) {
+        const overlayRgb = toRgbString(activeTheme.bgImageOverlay);
+        root.style.setProperty("--bg-image-overlay", `rgba(${overlayRgb}, ${activeTheme.bgImageOverlayOpacity ?? 0})`);
+      } else {
+        root.style.setProperty("--bg-image-overlay", "transparent");
       }
+    } else if (activeTheme.bgType === "gradient" && activeTheme.bgGradientStart && activeTheme.bgGradientEnd) {
+      const angle = activeTheme.bgGradientAngle ?? 135;
+      root.style.setProperty("--bg-image", `linear-gradient(${angle}deg, ${activeTheme.bgGradientStart}, ${activeTheme.bgGradientEnd})`);
+      root.style.setProperty("--bg-image-opacity", "1");
+      root.style.setProperty("--bg-image-blur", "0px");
+      root.style.setProperty("--bg-image-overlay", "transparent");
+    } else {
+      root.style.removeProperty("--bg-image");
+      root.style.removeProperty("--bg-image-opacity");
+      root.style.removeProperty("--bg-image-blur");
+      root.style.removeProperty("--bg-image-overlay");
+    }
+
+    body.setAttribute("data-accent", isCustom ? "custom" : (accentColor || "default"));
+    body.setAttribute("data-ui-font", activeTheme.uiFont || uiFont);
+    body.setAttribute("data-glass", glassEnabled ? "enabled" : "disabled");
+    body.setAttribute("data-bg-type", activeTheme.bgType);
+
+    // Injects user CSS custom stylesheet if present
+    if (activeTheme.customCss) {
+      const style = document.createElement("style");
+      style.id = "visus-custom-theme-css";
+      style.appendChild(document.createTextNode(activeTheme.customCss));
+      document.head.appendChild(style);
     }
 
     // Apply active UI font family globally via CSS variables
-    const activeUiFont = customTheme ? (customTheme.uiFont || uiFont) : uiFont;
+    const activeUiFont = activeTheme.uiFont || uiFont;
     const resolvedUiFont = getFontFamilyStyle(activeUiFont, customFonts);
 
     if (resolvedUiFont.includes("var(--font-sans)")) {

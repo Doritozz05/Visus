@@ -24,6 +24,8 @@ export interface CustomTheme {
   uiAccentForeground?: string;
   input?: string;
   ring?: string;
+  destructive?: string;
+  destructiveForeground?: string;
 
   // Panel & Card Override Styles
   cardBackground: string;

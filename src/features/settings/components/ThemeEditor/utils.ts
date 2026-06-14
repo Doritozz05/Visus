@@ -1,5 +1,6 @@
 import type { CustomTheme } from "@/core/entities/settings";
 import { resolveColor } from "@/lib/color-utils";
+import { BUILTIN_THEMES } from "@/core/config/themes";
 
 export const DEFAULT_NEW_THEME = (id: string): CustomTheme => ({
   id,
@@ -75,120 +76,34 @@ export function scopeCss(css: string, prefix: string): string {
     .join("}");
 }
 
-export const PRESETS_TEMPLATES = [
-  {
-    name: "Light minimal",
-    isDark: false,
-    background: "#f6f7f9",
-    foreground: "#0f1729",
-    border: "#ced3d9",
-    cardBackground: "#ffffff",
-    cardForeground: "#0f1729",
-    cardBorder: "#ced3d9",
-    accent: "#4f46e5",
-    accentForeground: "#ffffff",
-    muted: "#ececf9",
-    mutedForeground: "#a8a2f8",
-    secondary: "#e5e7eb",
-    secondaryForeground: "#0f1729",
-    popover: "#ffffff",
-    popoverForeground: "#0f1729",
-    uiAccent: "#e5e7eb",
-    uiAccentForeground: "#4f46e5",
-    cardRadius: "12px",
-    cardShadow: "sm",
-    glassmorphism: {
-      enabled: false,
-      blur: 12,
-      opacity: 0.45,
-      borderOpacity: 0.25
-    }
-  },
-  {
-    name: "Dark violet",
-    isDark: true,
-    background: "#0b1428",
-    foreground: "#dae2fd",
-    border: "#464554",
-    cardBackground: "#182035",
-    cardForeground: "#dae2fd",
-    cardBorder: "#464554",
-    accent: "#c2c3ff",
-    accentForeground: "#0b1428",
-    muted: "#222a3d",
-    mutedForeground: "#cac7d6",
-    secondary: "#222a3d",
-    secondaryForeground: "#dae2fd",
-    popover: "#182035",
-    popoverForeground: "#dae2fd",
-    uiAccent: "#222a3d",
-    uiAccentForeground: "#c2c3ff",
-    cardRadius: "12px",
-    cardShadow: "none",
-    glassmorphism: {
-      enabled: false,
-      blur: 12,
-      opacity: 0.45,
-      borderOpacity: 0.1
-    }
-  },
-  {
-    name: "Nord",
-    isDark: true,
-    background: "#2e3440",
-    foreground: "#eceff4",
-    border: "#4c566a",
-    cardBackground: "#394050",
-    cardForeground: "#eceff4",
-    cardBorder: "#4c566a",
-    accent: "#88c0d0",
-    accentForeground: "#2e3440",
-    muted: "#434c5e",
-    mutedForeground: "#b6bdc9",
-    secondary: "#434c5e",
-    secondaryForeground: "#eceff4",
-    popover: "#394050",
-    popoverForeground: "#eceff4",
-    uiAccent: "#434c5e",
-    uiAccentForeground: "#88c0d0",
-    cardRadius: "8px",
-    cardShadow: "none",
-    glassmorphism: {
-      enabled: false,
-      blur: 12,
-      opacity: 0.45,
-      borderOpacity: 0.1
-    }
-  },
-  {
-    name: "Warm sepia",
-    isDark: false,
-    background: "#f3ebd8",
-    foreground: "#5a4535",
-    border: "#dbd2bd",
-    cardBackground: "#f8f3e7",
-    cardForeground: "#5a4535",
-    cardBorder: "#dbd2bd",
-    accent: "#ac6b39",
-    accentForeground: "#fdfbf7",
-    muted: "#e4ddcd",
-    mutedForeground: "#81624b",
-    secondary: "#e4ddcd",
-    secondaryForeground: "#5a4535",
-    popover: "#f8f3e7",
-    popoverForeground: "#5a4535",
-    uiAccent: "#e4ddcd",
-    uiAccentForeground: "#ac6b39",
-    cardRadius: "16px",
-    cardShadow: "md",
-    glassmorphism: {
-      enabled: false,
-      blur: 12,
-      opacity: 0.45,
-      borderOpacity: 0.1
-    }
+export const PRESETS_TEMPLATES = BUILTIN_THEMES.map(t => ({
+  name: t.name,
+  isDark: t.isDark,
+  background: t.background,
+  foreground: t.foreground,
+  border: t.border,
+  cardBackground: t.cardBackground,
+  cardForeground: t.cardForeground,
+  cardBorder: t.cardBorder,
+  accent: t.accent,
+  accentForeground: t.accentForeground,
+  muted: t.muted,
+  mutedForeground: t.mutedForeground,
+  secondary: t.secondary,
+  secondaryForeground: t.secondaryForeground,
+  popover: t.popover,
+  popoverForeground: t.popoverForeground,
+  uiAccent: t.uiAccent,
+  uiAccentForeground: t.uiAccentForeground,
+  cardRadius: t.cardRadius,
+  cardShadow: t.cardShadow,
+  glassmorphism: t.glassmorphism || {
+    enabled: false,
+    blur: 12,
+    opacity: 0.45,
+    borderOpacity: 0.25
   }
-];
+}));
 
 export const compressImage = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {

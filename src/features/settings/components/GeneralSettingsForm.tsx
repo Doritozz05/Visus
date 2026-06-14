@@ -5,9 +5,10 @@ import { Palette, CheckCircle, Settings2, Edit, Trash2, Plus, Copy, Check } from
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/features/settings/context/settings-context";
 import type { GeneralSettings, CustomTheme } from "@/core/entities/settings";
+import { BUILTIN_THEMES, BUILTIN_THEME_DETAILS } from "@/core/config/themes";
 import { ColorSelector } from "@/components/ui/ColorSelector";
 import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
-import { PRESETS_TEMPLATES, DEFAULT_NEW_THEME, deepCloneTheme } from "./ThemeEditor/utils";
+import { DEFAULT_NEW_THEME, deepCloneTheme } from "./ThemeEditor/utils";
 import { FontSelector } from "@/components/ui/FontSelector";
 
 export function GeneralSettingsForm() {
@@ -28,7 +29,7 @@ export function GeneralSettingsForm() {
     customThemes = []
   } = settings.general;
 
-  const BUILTIN_THEME_IDS = ["dark-violet", "light", "sepia", "nord"];
+  const BUILTIN_THEME_IDS = BUILTIN_THEMES.map(t => t.id);
   const isBuiltInTheme = BUILTIN_THEME_IDS.includes(theme);
 
   const handleDeleteTheme = (id: string, e?: React.MouseEvent) => {
@@ -55,7 +56,8 @@ export function GeneralSettingsForm() {
       name: `${t.name} (Copy)`
     };
     updateGeneralSettings({
-      customThemes: [...customThemes, newTheme]
+      customThemes: [...customThemes, newTheme],
+      theme: newId
     });
   };
 
@@ -71,6 +73,7 @@ export function GeneralSettingsForm() {
 
     if ('isPreset' in t && t.isPreset) {
       // Predefined theme items
+      const presetTheme = BUILTIN_THEMES.find(p => p.id === t.id);
       items.push(
         {
           id: "activate",
@@ -84,22 +87,12 @@ export function GeneralSettingsForm() {
           label: "Duplicate to edit",
           icon: <Copy className="w-4 h-4" />,
           onClick: () => {
-            const presetIdToTemplateName: Record<string, string> = {
-              "dark-violet": "Dark violet",
-              "light": "Light minimal",
-              "sepia": "Warm sepia",
-              "nord": "Nord"
-            };
-            const templateName = presetIdToTemplateName[t.id];
-            const preset = PRESETS_TEMPLATES.find(p => p.name === templateName);
-            if (preset) {
+            if (presetTheme) {
               const newId = `theme-custom-${Date.now()}`;
               const newTheme: CustomTheme = {
-                ...DEFAULT_NEW_THEME(newId),
-                ...deepCloneTheme(preset as any),
+                ...deepCloneTheme(presetTheme),
                 id: newId,
-                name: `${t.name} Custom`,
-                bgType: (preset as any).bgType || "solid",
+                name: `${presetTheme.name} Custom`,
               };
               updateGeneralSettings({
                 customThemes: [...customThemes, newTheme],
@@ -159,35 +152,33 @@ export function GeneralSettingsForm() {
         <div className="mb-6">
           <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Color scheme theme</label>
           <div className="grid grid-cols-2 gap-2.5">
-            {[
-              { id: "dark-violet", name: "Dark Violet", desc: "Original Clinical Navy", preview: "bg-[#0b1428]" },
-              { id: "light", name: "Light Paper", desc: "Warm Minimal Light", preview: "bg-[#f6f7f9]" },
-              { id: "sepia", name: "Sepia Warm", desc: "Parchment Reading", preview: "bg-[#f3ebd8]" },
-              { id: "nord", name: "Nord Arctic", desc: "Snowy Blue Cold", preview: "bg-[#2e3440]" },
-            ].map((t) => (
-              <button
-                key={t.id}
-                onClick={() => updateGeneralSettings({ 
-                  theme: t.id as GeneralSettings["theme"],
-                  accentColor: undefined, // Reset to theme default
-                  uiFont: "inter" // Reset to base UI font
-                })}
-                onContextMenu={(e) => onThemeContextMenu(e, { ...t, isPreset: true })}
-                className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between ${theme === t.id
-                  ? "border-primary bg-accent/65"
-                  : "border-border/30 bg-card hover:border-border/60"
-                  }`}
-              >
-                <div className="flex items-center justify-between mb-2 w-full">
-                  <span className="text-[11px] font-bold">{t.name}</span>
-                  {theme === t.id && <CheckCircle className="text-primary h-3.5 w-3.5" />}
-                </div>
-                <div className="flex gap-1.5 items-center">
-                  <div className={`w-4 h-4 rounded-full ${t.preview} border border-border/40 shrink-0`}></div>
-                  <span className="text-[8px] text-muted-foreground leading-tight truncate">{t.desc}</span>
-                </div>
-              </button>
-            ))}
+            {BUILTIN_THEMES.map((t) => {
+              const details = BUILTIN_THEME_DETAILS[t.id];
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => updateGeneralSettings({ 
+                    theme: t.id as GeneralSettings["theme"],
+                    accentColor: undefined, // Reset to theme default
+                    uiFont: "inter" // Reset to base UI font
+                  })}
+                  onContextMenu={(e) => onThemeContextMenu(e, { ...t, isPreset: true })}
+                  className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between ${theme === t.id
+                    ? "border-primary bg-accent/65"
+                    : "border-border/30 bg-card hover:border-border/60"
+                    }`}
+                >
+                  <div className="flex items-center justify-between mb-2 w-full">
+                    <span className="text-[11px] font-bold">{t.name}</span>
+                    {theme === t.id && <CheckCircle className="text-primary h-3.5 w-3.5" />}
+                  </div>
+                  <div className="flex gap-1.5 items-center">
+                    <div className={`w-4 h-4 rounded-full ${details?.preview} border border-border/40 shrink-0`}></div>
+                    <span className="text-[8px] text-muted-foreground leading-tight truncate">{details?.desc}</span>
+                  </div>
+                </button>
+              );
+            })}
 
             {/* Custom themes list */}
             {customThemes.map((t) => (

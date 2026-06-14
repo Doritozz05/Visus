@@ -1,3 +1,5 @@
+import { BUILTIN_THEMES } from "@/core/config/themes";
+
 /**
  * Color Presets defined for the Visus aesthetic.
  */
@@ -13,12 +15,10 @@ export const COLOR_PRESETS: Record<string, string> = {
   white: "#ffffff",
 };
 
-export const THEME_DEFAULTS: Record<string, { fg: string, primary: string, muted: string }> = {
-  "dark-violet": { fg: "#dae2fd", primary: "#c2c3ff", muted: "#cac7d6" },
-  "light": { fg: "#0f1729", primary: "#4f46e5", muted: "#a8a2f8" },
-  "sepia": { fg: "#5a4535", primary: "#ac6b39", muted: "#81624b" },
-  "nord": { fg: "#eceff4", primary: "#88c0d0", muted: "#b6bdc9" },
-};
+export const THEME_DEFAULTS: Record<string, { fg: string, primary: string, muted: string }> = BUILTIN_THEMES.reduce((acc, t) => ({
+  ...acc,
+  [t.id]: { fg: t.foreground, primary: t.accent, muted: t.mutedForeground }
+}), {});
 
 /**
  * Resolves a color string. If it is a predefined preset key,
