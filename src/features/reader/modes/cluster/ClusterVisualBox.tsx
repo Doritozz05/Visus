@@ -163,7 +163,7 @@ export function ClusterVisualBox({
     <div
       ref={containerRef}
       style={maskStyle}
-      className="w-full max-w-3xl h-[280px] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl px-8 py-0 bg-card/45 backdrop-blur-xl relative transition-all duration-300 shadow-xl"
+      className="w-full max-w-3xl h-[280px] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl px-8 py-0 bg-card relative transition-all duration-300 shadow-xl"
     >
       <div 
         style={innerStyle}

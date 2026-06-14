@@ -298,7 +298,7 @@ export class AchievementDispatcher {
       return React.createElement(
         "div",
         {
-          className: `w-full max-w-sm bg-card border border-border p-4 rounded-xl shadow-lg flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300 relative overflow-hidden backdrop-blur-md shine-overlay`
+          className: `w-full max-w-sm liquid-glass p-4 rounded-xl flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300 relative overflow-hidden shine-overlay`
         },
         React.createElement("div", {
           className: `absolute inset-0 ${style.bg} pointer-events-none mix-blend-overlay`

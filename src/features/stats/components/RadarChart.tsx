@@ -238,7 +238,8 @@ export function RadarChart({ logs, books }: RadarChartProps) {
         {/* Floating HTML Tooltip */}
         {hoveredMetric && (
           <div
-            className="absolute bg-popover/90 text-popover-foreground border border-border/40 text-[10px] font-mono px-2 py-1 rounded shadow-xl pointer-events-none backdrop-blur-sm z-50"
+            className="absolute bg-popover text-popover-foreground border border-border/40 text-[10px] font-mono px-2 py-1 rounded shadow-xl pointer-events-none liquid-glass z-50"
+
             style={{
               left: `${hoveredMetric.x}px`,
               top: `${hoveredMetric.y - 35}px`,

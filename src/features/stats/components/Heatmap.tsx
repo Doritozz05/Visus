@@ -189,7 +189,7 @@ export function Heatmap({ logs }: HeatmapProps) {
       {/* Floating Tooltip */}
       {hoveredDay && (
         <div
-          className="absolute bg-popover/90 text-popover-foreground border border-border/40 text-[9px] font-mono px-2 py-1.5 rounded shadow-xl pointer-events-none backdrop-blur-sm z-50 flex flex-col items-center"
+          className="absolute bg-popover text-popover-foreground border border-border/40 text-[9px] font-mono px-2 py-1.5 rounded shadow-xl pointer-events-none liquid-glass z-50 flex flex-col items-center"
           style={{
             left: `${hoveredDay.x}px`,
             top: `${hoveredDay.y}px`,

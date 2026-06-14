@@ -165,8 +165,8 @@ export function GeneralSettingsForm() {
                     uiFont: "inter" // Reset to base UI font
                   })}
                   onContextMenu={(e) => onThemeContextMenu(e, { ...t, isPreset: true })}
-                  className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between ${theme === t.id
-                    ? "border-primary bg-accent/65"
+                  className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between liquid-glass ${theme === t.id
+                    ? "border-primary bg-accent/65 shadow-[0_0_15px_rgba(var(--primary),0.1)]"
                     : "border-border/30 bg-card hover:border-border/60"
                     }`}
                 >
@@ -191,8 +191,8 @@ export function GeneralSettingsForm() {
                 key={t.id}
                 onClick={() => updateGeneralSettings({ theme: t.id })}
                 onContextMenu={(e) => onThemeContextMenu(e, t)}
-                className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer group ${theme === t.id
-                  ? "border-primary bg-accent/65"
+                className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer group liquid-glass ${theme === t.id
+                  ? "border-primary bg-accent/65 shadow-[0_0_15px_rgba(var(--primary),0.1)]"
                   : "border-border/30 bg-card hover:border-border/60"
                   }`}
               >

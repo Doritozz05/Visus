@@ -300,7 +300,7 @@ export function ColorSelector({
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-2.5 bg-card/40 border border-border/30 hover:border-border/60 hover:bg-accent/10 rounded-xl transition-all font-mono text-xs text-left"
+        className="w-full flex items-center justify-between p-2.5 bg-card border border-border/30 hover:border-border/60 hover:bg-accent/10 rounded-xl transition-all font-mono text-xs text-left liquid-glass"
       >
         <div className="flex items-center gap-2.5">
           <div
@@ -320,7 +320,7 @@ export function ColorSelector({
         <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      {/* Dropdown Panel - Solid Opaque bg-card for readability */}
+      {/* Dropdown Panel - Dynamic glass background */}
       {isOpen && typeof document !== "undefined" && createPortal(
         <div 
           ref={dropdownRef}
@@ -328,7 +328,7 @@ export function ColorSelector({
             ...menuStyle,
             visibility: isMenuPositioned ? "visible" : "hidden",
           }}
-          className="p-4 bg-card border border-border/40 rounded-xl shadow-2xl animate-slide-in-top flex flex-col gap-4"
+          className="p-4 bg-card border border-border/40 rounded-xl shadow-2xl animate-slide-in-top flex flex-col gap-4 liquid-glass"
           onMouseUp={handleInteractionEnd}
           onMouseLeave={handleInteractionEnd}
           onTouchEnd={handleInteractionEnd}

@@ -163,7 +163,7 @@ export function FancyDropdown({
         onClick={() => setIsOpen((current) => !current)}
         className={
           triggerClassName ??
-          "group flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-card/80 px-3.5 text-left text-sm text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary/20"
+          "group flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-card px-3.5 text-left text-sm text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 liquid-glass"
         }
       >
         <span className="min-w-0 flex-1 truncate text-sm">{selectedOption?.label ?? placeholder}</span>
@@ -185,7 +185,7 @@ export function FancyDropdown({
                 data-positioned={isMenuPositioned ? "true" : "false"}
                 className={
                   menuClassName ??
-                  `overflow-hidden rounded-2xl border border-border/40 bg-card/95 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl ${maxMenuHeightClassName}`
+                  `overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass ${maxMenuHeightClassName}`
                 }
                 aria-hidden={!isMenuPositioned}
               >
@@ -208,7 +208,7 @@ export function FancyDropdown({
                   </div>
                 )}
                 <div
-                  className="overflow-y-auto p-1.5"
+                  className="overflow-y-auto p-1.5 flex flex-col gap-0.5"
                   style={{
                     maxHeight: `${maxOptionsHeight}px`,
                     visibility: isMenuPositioned ? "visible" : "hidden",

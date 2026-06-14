@@ -12,8 +12,8 @@ interface RsvpVisualBoxProps {
   settings: RsvpSettings;
 }
 
-export function RsvpVisualBox({ 
-  rsvpSequence, 
+export function RsvpVisualBox({
+  rsvpSequence,
   settings,
 }: RsvpVisualBoxProps) {
   const { settings: globalSettings, customFonts } = useSettings();
@@ -23,7 +23,7 @@ export function RsvpVisualBox({
   const getThemeColor = (key: string) => {
     const themeId = globalSettings.general.theme;
     const customThemes = globalSettings.general.customThemes || [];
-    
+
     // Check built-in themes first
     const builtIn = BUILTIN_THEMES.find(t => t.id === themeId);
     if (builtIn) {
@@ -69,12 +69,12 @@ export function RsvpVisualBox({
   };
 
   const readerFontClass = getReaderFontClass(settings.fontFamily);
-  
+
   const resolvedOrpColor = settings.orpColor === "primary" ? getThemeColor("primary") : settings.orpColor;
   const isPreset = resolvedOrpColor in orpColors;
   const orpColorClass = isPreset ? orpColors[resolvedOrpColor as keyof typeof orpColors] : "";
   const orpGlowClass = isPreset && settings.orpGlow ? orpGlows[resolvedOrpColor as keyof typeof orpGlows] : "";
-  
+
   const customOrpStyle: React.CSSProperties = !isPreset ? {
     color: resolvedOrpColor,
     textShadow: settings.orpGlow
@@ -82,8 +82,8 @@ export function RsvpVisualBox({
       : undefined
   } : {};
 
-  const resolvedUnmarkedColor = settings.unmarkedColor === "foreground" 
-    ? getThemeColor("foreground") 
+  const resolvedUnmarkedColor = settings.unmarkedColor === "foreground"
+    ? getThemeColor("foreground")
     : (settings.unmarkedColor === "primary" ? getThemeColor("primary") : settings.unmarkedColor);
 
   const customUnmarkedStyle: React.CSSProperties = {
@@ -97,8 +97,7 @@ export function RsvpVisualBox({
   };
 
   return (
-    <div className="w-full py-20 border border-border/30 dark:border-border/15 relative flex items-center justify-center bg-card/50 dark:bg-card/30 rounded-2xl overflow-hidden backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] transition-all duration-300">
-      
+    <div className="w-full py-20 border border-border/30 dark:border-border/15 relative flex items-center justify-center bg-card rounded-2xl overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] transition-all duration-300">
       {settings.showFocusGuides && (
         <div className="absolute left-[42%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-32 pointer-events-none z-0">
           <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[2px] bg-primary/15" />
@@ -107,31 +106,31 @@ export function RsvpVisualBox({
         </div>
       )}
 
-      <div 
+      <div
         style={fontSizeStyle}
         className={`w-full h-[1.2em] font-heading select-none tracking-tight flex items-center justify-center relative z-10 ${readerFontClass}`}
       >
-        <div 
+        <div
           style={{ left: "42%" }}
           className="absolute -translate-x-1/2 flex items-center justify-center h-full"
         >
-          <div 
+          <div
             style={customUnmarkedStyle}
             className="absolute right-full pr-[0.08em] font-bold text-right whitespace-nowrap select-none pointer-events-none transition-opacity duration-350"
           >
             {leftPart}
           </div>
-          
+
           <div className="relative flex items-center justify-center z-10">
-            <span 
+            <span
               style={customOrpStyle}
               className={`font-extrabold text-center relative transition-colors duration-200 ${orpColorClass} ${orpGlowClass}`}
             >
               {focusLetter}
             </span>
           </div>
-          
-          <div 
+
+          <div
             style={customUnmarkedStyle}
             className="absolute left-full pl-[0.08em] font-bold text-left whitespace-nowrap select-none pointer-events-none transition-opacity duration-350"
           >

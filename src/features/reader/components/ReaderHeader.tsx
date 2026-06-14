@@ -100,16 +100,36 @@ export function ReaderHeader({
   };
 
   return (
-    <div className={`w-full grid grid-cols-3 items-center px-6 md:px-8 z-30 border-b border-border/10 pb-4 gap-4 bg-background/95 backdrop-blur-sm transition-all duration-300 ${isFocusMode ? 'opacity-0 h-0 overflow-hidden py-0 border-0 pointer-events-none' : 'opacity-100'}`}>
-      {/* Left: Back to Bookshelf */}
+    <div className={`w-full grid grid-cols-3 items-center px-6 md:px-8 z-30 border-b border-border/10 pb-4 gap-4 transition-all duration-300 glass-surface ${isFocusMode ? 'opacity-0 h-0 overflow-hidden py-0 border-0 pointer-events-none' : 'opacity-100'}`}>
+      {/* Left: Back to Bookshelf & Tools */}
       <div className="flex items-center justify-start gap-2 min-w-0">
         <button
           onClick={() => setActiveBookId(null)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass"
           title="Change book or back to selection list"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Bookshelf</span>
+        </button>
+
+        <div className="h-4 w-px bg-border/20 mx-1 hidden sm:block" />
+
+        {/* Fullscreen Toggle */}
+        <button
+          onClick={toggleFullscreen}
+          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass"
+          title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+        >
+          {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+        </button>
+
+        {/* Focus Mode Toggle */}
+        <button
+          onClick={() => setIsFocusMode(true)}
+          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass"
+          title="Enter Focus Mode"
+        >
+          <EyeOff className="w-4 h-4" />
         </button>
       </div>
 
@@ -126,7 +146,7 @@ export function ReaderHeader({
               }
             }}
             disabled={activeChapterIndex === 0}
-            className="w-5 h-5 rounded border border-border/30 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
+            className="w-5 h-5 rounded border border-border/30 hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none liquid-glass"
             title="Previous chapter"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
@@ -136,7 +156,7 @@ export function ReaderHeader({
           <button
             ref={chapterBtnRef}
             onClick={handleToggleToc}
-            className="text-xs text-primary/80 hover:text-primary font-semibold bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/45 px-2.5 py-0.5 rounded flex items-center gap-1 transition-all truncate max-w-[110px] sm:max-w-[180px]"
+            className="text-xs text-primary/80 hover:text-primary font-semibold bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/45 px-2.5 py-0.5 rounded flex items-center gap-1 transition-all truncate max-w-[110px] sm:max-w-[180px] liquid-glass"
             title="Open table of contents / chapter index"
           >
             <span className="truncate">{currentChapter.title}</span>
@@ -150,7 +170,7 @@ export function ReaderHeader({
               }
             }}
             disabled={activeChapterIndex === chaptersData.length - 1}
-            className="w-5 h-5 rounded border border-border/30 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
+            className="w-5 h-5 rounded border border-border/30 hover:bg-accent text-muted-foreground hover:text-primary transition-all flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none liquid-glass"
             title="Next chapter"
           >
             <ChevronRight className="w-3.5 h-3.5" />
@@ -169,26 +189,8 @@ export function ReaderHeader({
 
       {/* Right: Mode selector & Settings */}
       <div className="flex items-center justify-end gap-3 min-w-0">
-        {/* Fullscreen Toggle */}
-        <button
-          onClick={toggleFullscreen}
-          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
-          title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-        >
-          {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-        </button>
-
-        {/* Focus Mode Toggle */}
-        <button
-          onClick={() => setIsFocusMode(true)}
-          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
-          title="Enter Focus Mode"
-        >
-          <EyeOff className="w-4 h-4" />
-        </button>
-
         {/* Triple Mode Switcher */}
-        <div className="hidden md:flex bg-card border border-border/30 p-1 rounded-lg flex items-center shadow-sm">
+        <div className="hidden md:flex border border-border/30 p-1 rounded-lg flex items-center shadow-sm liquid-glass">
           <button
             onClick={() => {
               setIsPlaying(false);
@@ -233,10 +235,10 @@ export function ReaderHeader({
         {/* Pomodoro Timer Toggle */}
         <button
           onClick={() => setIsPomodoroOpen?.(!isPomodoroOpen)}
-          className={`flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm ${
+          className={`flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm liquid-glass ${
             isPomodoroOpen
               ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(var(--primary),0.2)]"
-              : "bg-card hover:bg-accent text-muted-foreground hover:text-primary"
+              : "hover:bg-accent text-muted-foreground hover:text-primary"
           }`}
           title="Toggle Pomodoro Timer"
         >
@@ -247,7 +249,7 @@ export function ReaderHeader({
         <button
           data-testid="desktop-settings-button"
           onClick={openQuickSettings}
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass"
         >
           <Settings className="w-4 h-4 animate-spin-slow" />
           Settings

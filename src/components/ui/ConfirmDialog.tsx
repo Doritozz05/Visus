@@ -81,7 +81,7 @@ export function ConfirmDialog({
       {/* Backdrop with blur */}
       <div 
         onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-[6px] transition-opacity animate-in fade-in duration-300"
+        className="absolute inset-0 bg-black/60 transition-opacity animate-in fade-in duration-300"
       />
       
       {/* Dialog Content */}

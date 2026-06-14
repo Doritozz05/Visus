@@ -21,7 +21,7 @@ export function ThemeEditorHeader({
   onClose,
 }: ThemeEditorHeaderProps) {
   return (
-    <header className="flex justify-between items-center px-6 py-4 border-b border-border/40 bg-card/60 backdrop-blur-md sticky top-0 z-10 shrink-0">
+    <header className="flex justify-between items-center px-6 py-4 border-b border-border/40 sticky top-0 z-10 shrink-0 transition-all duration-300 glass-surface">
       <div className="flex items-center gap-3">
         <div className="p-2 bg-primary/10 rounded-lg text-primary">
           <Palette className="h-5 w-5" />

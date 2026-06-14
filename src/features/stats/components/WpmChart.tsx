@@ -286,7 +286,7 @@ export function WpmChart({ logs }: WpmChartProps) {
         {/* Floating Tooltip */}
         {hoveredPoint && (
           <div
-            className="absolute bg-popover/90 text-popover-foreground border border-border/40 text-[9px] font-mono px-2 py-1.5 rounded shadow-xl pointer-events-none backdrop-blur-sm z-50"
+            className="absolute bg-popover text-popover-foreground border border-border/40 text-[9px] font-mono px-2 py-1.5 rounded shadow-xl pointer-events-none liquid-glass z-50"
             style={{
               left: `${hoveredPoint.x}px`,
               top: `${hoveredPoint.y + 40 - 35}px`,

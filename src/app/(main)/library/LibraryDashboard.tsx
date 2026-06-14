@@ -283,7 +283,7 @@ export default function LibraryDashboard() {
           <div className="flex items-center gap-6">
             <Link 
               href="/dashboard"
-              className="flex items-center gap-4 bg-accent/30 px-4 py-1.5 rounded-xl border border-border/10 shadow-sm backdrop-blur-sm hover:bg-accent/50 hover:border-primary/30 transition-all group/header"
+              className="flex items-center gap-4 bg-accent/30 px-4 py-1.5 rounded-xl border border-border/10 shadow-sm hover:bg-accent/50 hover:border-primary/30 transition-all group/header liquid-glass"
             >
               <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
                 <Flame 
@@ -427,7 +427,7 @@ export default function LibraryDashboard() {
                   />
                 </div>
                 <div className="flex gap-2 items-center w-full sm:w-auto px-2 shrink-0">
-                  <div className="flex bg-background/50 border border-border/10 p-1 rounded-lg">
+                  <div className="flex bg-background border border-border/10 p-1 rounded-lg liquid-glass">
                     {[
                       { id: "active", label: "Active" },
                       { id: "completed", label: "Completed" },
@@ -482,7 +482,7 @@ export default function LibraryDashboard() {
                   <button
                     type="button"
                     onClick={handleResetFilters}
-                    className="h-9 w-9 shrink-0 rounded-lg border border-border/40 bg-card/80 text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-accent/80 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 flex items-center justify-center"
+                    className="h-9 w-9 shrink-0 rounded-lg border border-border/40 bg-card text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-accent/80 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 flex items-center justify-center liquid-glass"
                     aria-label="Reset filters"
                     title="Reset filters"
                   >

@@ -151,7 +151,7 @@ export function FontSelector({
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`group flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-card/80 px-3.5 text-left text-sm text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+        className={`group flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-card px-3.5 text-left text-sm text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 liquid-glass ${
           isOpen ? "border-primary/50 ring-2 ring-primary/10 bg-card" : ""
         }`}
       >
@@ -171,7 +171,7 @@ export function FontSelector({
           <div
             ref={menuRef}
             style={menuStyle}
-            className="flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card/95 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200"
+            className="flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass animate-in fade-in zoom-in-95 duration-200"
           >
             <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5 max-h-[320px] scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
               {/* Built-in Fonts */}

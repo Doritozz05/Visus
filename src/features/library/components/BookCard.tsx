@@ -99,7 +99,7 @@ export function BookCard({
               ref={menuRef}
               role="menu"
               onClick={(e) => e.stopPropagation()}
-              className="absolute right-0 top-8 z-30 w-52 overflow-hidden rounded-2xl border border-border/40 bg-card/95 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl animate-fade-in opacity-100"
+              className="absolute right-0 top-8 z-30 w-52 overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass animate-fade-in opacity-100"
             >
               <button
                 role="menuitem"

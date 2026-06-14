@@ -194,7 +194,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
   };
 
   return (
-    <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-[100] flex flex-col font-sans animate-fade-in">
+    <div className="fixed inset-0 z-[100] flex flex-col font-sans animate-fade-in glass-surface">
       <ThemeEditorHeader
         themeName={themeState.name}
         setThemeName={(name) => updateThemeState(prev => ({ ...prev, name }))}

@@ -235,6 +235,23 @@ body[data-accent="blue"] {
    CUSTOM UI UTILITIES & ANIMATIONS
    ========================================================================== */
 
+/* Flat glass surface for headers and integrated elements (no card borders/shadows) */
+.glass-surface {
+  background: hsl(var(--background));
+  backdrop-filter: none;
+  transition: background 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+body[data-glass="enabled"] .glass-surface {
+  background: hsla(var(--background-h), var(--background-s), var(--background-l), 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark body[data-glass="enabled"] .glass-surface {
+  background: hsla(var(--background-h), var(--background-s), var(--background-l), 0.45);
+}
+
 .liquid-glass {
   background: hsl(var(--card));
   backdrop-filter: none;

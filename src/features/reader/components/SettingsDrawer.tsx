@@ -30,11 +30,10 @@ export function SettingsDrawer({
 
   return (
     <>
-      <div
+      <div 
         onClick={onClose}
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[90] transition-opacity duration-300"
+        className="fixed inset-0 bg-black/40 z-[90] transition-opacity duration-300"
       />
-
       <div className="fixed right-0 top-0 bottom-0 z-[100] w-full sm:w-[400px] bg-card border-l border-border/40 shadow-2xl liquid-glass p-6 flex flex-col transition-all duration-300 animate-slide-in">
 
         <div className="flex items-center justify-between pb-4 border-b border-border/30 mb-6">
