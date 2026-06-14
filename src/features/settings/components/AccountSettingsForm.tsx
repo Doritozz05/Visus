@@ -188,10 +188,13 @@ export function AccountSettingsForm() {
                 <Mail className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-bold font-heading">Email Address</h3>
               </div>
-              <UpdateEmailForm currentEmail={user?.email || ""} disabled={hasGoogleLinked} />
-              {hasGoogleLinked && (
+              <UpdateEmailForm 
+                currentEmail={user?.email || ""} 
+                disabled={!hasPasswordIdentity} 
+              />
+              {!hasPasswordIdentity && (
                 <p className="text-[10px] text-muted-foreground mt-3 italic">
-                  * Email management is disabled while a social account is linked.
+                  * Email management is handled by your social provider.
                 </p>
               )}
             </section>
@@ -202,8 +205,12 @@ export function AccountSettingsForm() {
                 <Lock className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-bold font-heading">Password</h3>
               </div>
-              <UpdatePasswordForm requireCurrentPassword={hasPasswordIdentity} />
+              <UpdatePasswordForm 
+                disabled={!hasPasswordIdentity} 
+                requireCurrentPassword={true} 
+              />
             </section>
+
           </div>
         </div>
       )}
