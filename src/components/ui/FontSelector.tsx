@@ -51,7 +51,7 @@ export function FontSelector({
   }, [value, customFonts]);
 
   // Logic to calculate position relative to the DOCUMENT (to allow natural scrolling without JS updates)
-  const calculatePosition = React.useCallback(() => {
+  const updateMenuPosition = React.useCallback(() => {
     const triggerEl = triggerRef.current;
     if (!triggerEl) return;
 
@@ -78,12 +78,16 @@ export function FontSelector({
       style.top = rect.bottom + scrollY + 8;
     }
 
-    setMenuStyle(style);
+    // Only update if something actually changed to prevent render loops
+    setMenuStyle(prev => {
+      if (JSON.stringify(prev) === JSON.stringify(style)) return prev;
+      return style;
+    });
   }, []);
 
   React.useLayoutEffect(() => {
     if (!isOpen) return;
-    calculatePosition();
+    updateMenuPosition();
 
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
@@ -93,14 +97,18 @@ export function FontSelector({
 
     // Note: We don't need a scroll listener here because 'absolute' positioning
     // in the body will naturally follow the document scroll.
-    window.addEventListener("resize", calculatePosition);
+    const handleResize = () => {
+      window.requestAnimationFrame(updateMenuPosition);
+    };
+
+    window.addEventListener("resize", handleResize);
     document.addEventListener("pointerdown", handlePointerDown);
 
     return () => {
-      window.removeEventListener("resize", calculatePosition);
+      window.removeEventListener("resize", handleResize);
       document.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, [isOpen, calculatePosition]);
+  }, [isOpen, updateMenuPosition]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

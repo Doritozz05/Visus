@@ -43,20 +43,11 @@ export function RsvpVisualBox({
     rose: "text-shadow-glow-rose",
   };
 
-  const unmarkedColors = {
-    foreground: "text-foreground",
-    primary: "text-primary",
-    muted: "text-muted-foreground",
-  };
-
   const readerFontClass = getReaderFontClass(settings.fontFamily);
   
   const isPreset = settings.orpColor in orpColors;
   const orpColorClass = isPreset ? orpColors[settings.orpColor as keyof typeof orpColors] : "";
   const orpGlowClass = isPreset && settings.orpGlow ? orpGlows[settings.orpColor as keyof typeof orpGlows] : "";
-  
-  const isUnmarkedPreset = settings.unmarkedColor in unmarkedColors;
-  const unmarkedColorClass = isUnmarkedPreset ? unmarkedColors[settings.unmarkedColor as keyof typeof unmarkedColors] : "";
   
   const customOrpStyle: React.CSSProperties = !isPreset ? {
     color: settings.orpColor,
@@ -67,9 +58,9 @@ export function RsvpVisualBox({
 
   const customUnmarkedStyle: React.CSSProperties = {
     opacity: settings.unmarkedOpacity,
-    color: !isUnmarkedPreset ? settings.unmarkedColor : undefined,
+    color: settings.unmarkedColor,
   };
-  
+
   const fontSizeStyle: React.CSSProperties = {
     fontSize: `${settings.fontSize}px`,
     fontFamily: getFontFamilyStyle(settings.fontFamily, customFonts),
@@ -96,7 +87,7 @@ export function RsvpVisualBox({
         >
           <div 
             style={customUnmarkedStyle}
-            className={`absolute right-full pr-[0.08em] font-bold text-right whitespace-nowrap select-none pointer-events-none transition-opacity duration-350 ${unmarkedColorClass}`}
+            className="absolute right-full pr-[0.08em] font-bold text-right whitespace-nowrap select-none pointer-events-none transition-opacity duration-350"
           >
             {leftPart}
           </div>
@@ -112,7 +103,7 @@ export function RsvpVisualBox({
           
           <div 
             style={customUnmarkedStyle}
-            className={`absolute left-full pl-[0.08em] font-bold text-left whitespace-nowrap select-none pointer-events-none transition-opacity duration-350 ${unmarkedColorClass}`}
+            className="absolute left-full pl-[0.08em] font-bold text-left whitespace-nowrap select-none pointer-events-none transition-opacity duration-350"
           >
             {rightPart}
           </div>

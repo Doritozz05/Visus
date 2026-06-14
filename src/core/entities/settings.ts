@@ -141,7 +141,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
     orpGlow: true,
     showFocusGuides: false,
     unmarkedOpacity: 0.3,
-    unmarkedColor: "foreground",
+    unmarkedColor: "#0f1729",
   },
   cluster: {
     fontSize: 24,

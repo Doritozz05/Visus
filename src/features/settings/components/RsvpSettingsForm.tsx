@@ -112,20 +112,6 @@ export function RsvpSettingsForm() {
             label="Unmarked text color"
             value={rsvp.unmarkedColor}
             onChange={(color) => updateRsvpSettings({ unmarkedColor: color })}
-            presets={[
-              { id: "foreground", hex: "var(--foreground)", name: "Standard" },
-              { id: "primary", hex: "var(--primary)", name: "Accent" },
-              { id: "muted", hex: "var(--muted-foreground)", name: "Dimmed" },
-              { id: "violet", hex: "#8b5cf6", name: "Violet" },
-              { id: "indigo", hex: "#6366f1", name: "Indigo" },
-              { id: "emerald", hex: "#10b981", name: "Emerald" },
-              { id: "amber", hex: "#f59e0b", name: "Amber" },
-              { id: "rose", hex: "#f43f5e", name: "Rose" },
-              { id: "blue", hex: "#3b82f6", name: "Blue" },
-              { id: "orange", hex: "#f97316", name: "Orange" },
-              { id: "periwinkle", hex: "#c0c1ff", name: "Periwinkle" },
-              { id: "white", hex: "#ffffff", name: "White" },
-            ]}
           />
         </div>
 

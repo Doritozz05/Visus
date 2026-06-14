@@ -43,6 +43,45 @@ export function ColorSelector({
   const [isOpen, setIsOpen] = React.useState(false);
   const [hexInput, setHexInput] = React.useState("");
   
+  // Resolve current theme colors for quick picking
+  const themeColors = React.useMemo(() => {
+    const { theme, customThemes = [], accentColor } = settings.general;
+    
+    // Default built-in colors
+    const builtInColors: Record<string, { fg: string, primary: string, muted: string }> = {
+      "dark-violet": { fg: "#dde4fd", primary: "#c2c3ff", muted: "#cac7d6" },
+      "light": { fg: "#0f1729", primary: "#5048e5", muted: "#365396" },
+      "sepia": { fg: "#5a4535", primary: "#ac6b39", muted: "#81624b" },
+      "nord": { fg: "#e5e9f0", primary: "#87bfcf", muted: "#b6bdc9" },
+    };
+
+    // If it's a built-in theme
+    if (builtInColors[theme]) {
+      const colors = { ...builtInColors[theme] };
+      // Override primary if global accent color is set and theme is not custom
+      if (accentColor && accentColor.startsWith("#")) {
+        colors.primary = accentColor;
+      }
+      return [
+        { id: "foreground", hex: colors.fg, name: "Theme Text" },
+        { id: "primary", hex: colors.primary, name: "Theme Accent" },
+        { id: "muted", hex: colors.muted, name: "Theme Dimmed" },
+      ];
+    }
+
+    // If it's a custom theme
+    const custom = customThemes.find(t => t.id === theme);
+    if (custom) {
+      return [
+        { id: "foreground", hex: custom.foreground, name: "Theme Text" },
+        { id: "primary", hex: custom.accent, name: "Theme Accent" },
+        { id: "muted", hex: custom.mutedForeground, name: "Theme Dimmed" },
+      ];
+    }
+
+    return [];
+  }, [settings.general]);
+
   // Track internal HSL to avoid rounding drift during slider interaction
   const [internalHsl, setInternalHsl] = React.useState<{h: number, s: number, l: number} | null>(null);
   const isInteracting = React.useRef(false);
@@ -73,39 +112,46 @@ export function ColorSelector({
     setHexInput(resolvedHex);
   }, [resolvedHex]);
 
+  // Logic to calculate position relative to the DOCUMENT (natural scrolling)
   const updateMenuPosition = React.useCallback(() => {
     const triggerEl = triggerRef.current;
     if (!triggerEl) return;
 
     const rect = triggerEl.getBoundingClientRect();
-    const width = rect.width;
+    const scrollY = window.scrollY;
+    const scrollX = window.scrollX;
     const viewportHeight = window.innerHeight;
-
-    const spaceBelow = viewportHeight - rect.bottom - 16;
-    const spaceAbove = rect.top - 16;
+    
+    const menuWidth = Math.max(280, rect.width);
+    const spaceBelow = viewportHeight - rect.bottom;
+    const spaceAbove = rect.top;
     const preferAbove = spaceBelow < 400 && spaceAbove > spaceBelow;
 
     const style: React.CSSProperties = {
-      position: "fixed",
-      left: rect.left,
-      width,
+      position: "absolute", // Absolute relative to body
+      left: rect.left + scrollX,
+      width: menuWidth,
       zIndex: menuZIndex,
     };
 
     if (preferAbove) {
-      style.bottom = viewportHeight - rect.top + 8;
+      style.bottom = (viewportHeight - rect.top) - scrollY + 8;
     } else {
-      style.top = rect.bottom + 8;
+      style.top = rect.bottom + scrollY + 8;
     }
 
-    setMenuStyle(style);
+    // Only update if something actually changed to prevent render loops
+    setMenuStyle(prev => {
+      if (JSON.stringify(prev) === JSON.stringify(style)) return prev;
+      return style;
+    });
     setIsMenuPositioned(true);
   }, [menuZIndex]);
 
   React.useLayoutEffect(() => {
     if (!isOpen) return;
-
-    setIsMenuPositioned(false);
+    
+    // Initial position
     updateMenuPosition();
 
     const handlePointerDown = (event: PointerEvent) => {
@@ -114,16 +160,17 @@ export function ColorSelector({
       setIsOpen(false);
     };
 
-    const handleResizeOrScroll = () => updateMenuPosition();
+    // We only need to reposition on resize (absolute positioning handles scroll naturally)
+    const handleResize = () => {
+      window.requestAnimationFrame(updateMenuPosition);
+    };
 
     document.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("resize", handleResizeOrScroll);
-    window.addEventListener("scroll", handleResizeOrScroll, true);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("resize", handleResizeOrScroll);
-      window.removeEventListener("scroll", handleResizeOrScroll, true);
+      window.removeEventListener("resize", handleResize);
     };
   }, [isOpen, updateMenuPosition]);
 
@@ -385,6 +432,36 @@ export function ColorSelector({
               </button>
             )}
           </div>
+
+          {/* Theme Specific Presets */}
+          {themeColors.length > 0 && (
+            <div>
+              <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Current Theme Colors</span>
+              <div className="flex flex-wrap gap-2">
+                {themeColors.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => {
+                      onChange(preset.hex);
+                      onChangeComplete?.(preset.hex);
+                    }}
+                    style={{ backgroundColor: preset.hex }}
+                    className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                      value.toLowerCase() === preset.hex.toLowerCase()
+                        ? "border-foreground scale-110 shadow-md ring-2 ring-primary/45"
+                        : "border-transparent hover:scale-105"
+                    }`}
+                    title={preset.name}
+                  >
+                    {value.toLowerCase() === preset.hex.toLowerCase() && (
+                      <Check className="text-white h-3.5 w-3.5 stroke-[3] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Standard Presets */}
           <div>
