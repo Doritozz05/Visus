@@ -6,8 +6,8 @@ const DB_VERSION = 1;
 
 function getDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") {
-      reject(new Error("IndexedDB is only available in browser environments"));
+    if (typeof window === "undefined" || !window.indexedDB) {
+      reject(new Error("IndexedDB is only available in browser environments with IndexedDB support"));
       return;
     }
 

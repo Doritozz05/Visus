@@ -151,9 +151,11 @@ export function ColorSelector({
     };
 
     if (preferAbove) {
-      style.bottom = (viewportHeight - rect.top) - scrollY + 8;
+      style.top = rect.top + scrollY - 8;
+      style.transform = "translateY(-100%)";
     } else {
       style.top = rect.bottom + scrollY + 8;
+      style.transform = "none";
     }
 
     // Only update if something actually changed to prevent render loops
