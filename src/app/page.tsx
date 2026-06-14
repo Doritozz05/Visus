@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Eye, ArrowRight } from "lucide-react";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { BentoFeatures } from "@/components/landing/BentoFeatures";
+import { MiniRSVP } from "@/components/landing/MiniRSVP";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { FaqSection } from "@/components/landing/FaqSection";
 
@@ -38,15 +39,36 @@ export default function Home() {
         </div>
       </nav>
 
+      {/* Hero Section (now showing the traditional saccades eye demo) */}
       <HeroSection />
 
+      {/* RSVP Explanation Section (showing the original RSVP player underneath) */}
+      <section className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-border/10">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-extrabold font-heading mb-6 tracking-tight">
+            Read faster with <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">sequential word presentation.</span>
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            By flashing words sequentially at a single focal point (RSVP), Visus eliminates the mechanical sweep of your eyes and pauses to capture details. Test your capability with the player below.
+          </p>
+        </div>
+
+        <div className="w-full max-w-2xl mx-auto relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+          <MiniRSVP />
+        </div>
+      </section>
+
+      {/* Bento grid features list (reverted to original standard features) */}
       <div className="relative">
         <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
         <BentoFeatures />
       </div>
 
+      {/* User testimonials */}
       <Testimonials />
 
+      {/* Frequently asked questions */}
       <FaqSection />
 
       {/* CTA Section */}
@@ -75,8 +97,8 @@ export default function Home() {
             <span className="font-heading font-bold tracking-tight">Visus &copy; {new Date().getFullYear()}</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground font-medium">
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy policy</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms of service</Link>
             <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">GitHub</a>
           </div>
         </div>

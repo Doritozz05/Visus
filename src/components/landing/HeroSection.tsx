@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap } from "lucide-react";
-import { MiniRSVP } from "./MiniRSVP";
+import { TraditionalDemo } from "./TraditionalDemo";
 
 export function HeroSection() {
   const containerVariants = {
@@ -64,19 +64,19 @@ export function HeroSection() {
           </Link>
         </motion.div>
 
-        {/* Floating Mini RSVP Demo */}
+        {/* Traditional eye-movement demo player */}
         <motion.div
           variants={itemVariants}
           className="w-full max-w-2xl relative"
         >
-          {/* Decorative glow behind the RSVP player */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+          {/* Decorative glow behind the player */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
 
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
           >
-            <MiniRSVP />
+            <TraditionalDemo />
           </motion.div>
         </motion.div>
 
