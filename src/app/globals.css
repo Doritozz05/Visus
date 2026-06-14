@@ -136,8 +136,8 @@
     --secondary: 222 47% 90%;
     --secondary-foreground: 243 75% 59%;
     
-    --muted: 222 47% 92%;
-    --muted-foreground: 222 47% 40%;
+    --muted: 244 30% 94%;
+    --muted-foreground: 244 86% 80%;
     
     --accent: 243 75% 95%;
     --accent-foreground: 243 75% 59%;
@@ -202,8 +202,8 @@ html.theme-light {
   --primary-foreground: 222 47% 98%;
   --secondary: 220 20% 92%;
   --secondary-foreground: 222 47% 11%;
-  --muted: 220 20% 92%;
-  --muted-foreground: 222 47% 40%;
+  --muted: 244 30% 92%;
+  --muted-foreground: 244 86% 80%;
   --accent: 220 20% 92%;
   --accent-foreground: 243 75% 59%;
   --border: 220 20% 85%;
