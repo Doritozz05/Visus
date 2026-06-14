@@ -6,6 +6,7 @@ import { Book, Trash2, MoreVertical, Info, BookOpen, CheckCircle, Pencil, Archiv
 import { Book as BookEntity } from "@/core/entities/book";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
 
 interface BookCardProps {
   book: BookEntity;
@@ -36,6 +37,7 @@ export function BookCard({
 }: BookCardProps) {
   const menuRef = React.useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+  const { showMenu } = useContextMenu();
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (activeDropdownId !== book.id) return;
@@ -63,6 +65,60 @@ export function BookCard({
 
   return (
     <div
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const items: ContextMenuItem[] = [
+          ...(book.format !== "PHYSICAL" ? [{
+            id: "read",
+            label: "Leer libro",
+            icon: <BookOpen className="w-4 h-4" />,
+            onClick: () => onRead(book.id),
+          }] : []),
+          {
+            id: "details",
+            label: "Ver detalles",
+            icon: <Info className="w-4 h-4" />,
+            onClick: () => onDetails(book),
+          },
+          {
+            id: "toggle-completed",
+            label: book.status === "completed" ? "Marcar como activo" : "Marcar como completado",
+            icon: book.status === "completed" ? <BookOpen className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />,
+            onClick: () => onToggleCompleted(book.id),
+          },
+          {
+            id: "edit",
+            label: "Editar detalles",
+            icon: <Pencil className="w-4 h-4" />,
+            onClick: () => onEdit(book),
+          },
+          {
+            id: "archive",
+            label: book.status === "archived" ? "Desarchivar libro" : "Archivar libro",
+            icon: book.status === "archived" ? <FolderPlus className="w-4 h-4" /> : <Archive className="w-4 h-4" />,
+            onClick: () => onUpdateBook(book.id, { status: book.status === "archived" ? "active" : "archived" }),
+          },
+          ...(book.format !== "PHYSICAL" && onToggleCloudSync ? [{
+            id: "cloud-sync",
+            label: book.isInCloud ? "Quitar de la nube" : "Sincronizar en la nube",
+            icon: book.isInCloud ? <CloudOff className="w-4 h-4" /> : <Cloud className="w-4 h-4" />,
+            onClick: () => onToggleCloudSync(book.id),
+            disabled: isSyncing,
+          }] : []),
+          { id: "divider-delete", label: "", divider: true },
+          {
+            id: "delete",
+            label: "Eliminar libro",
+            icon: <Trash2 className="w-4 h-4" />,
+            tone: "danger",
+            onClick: () => setShowDeleteConfirm(true),
+          }
+        ];
+
+        showMenu(e, items);
+      }}
       className="bg-card border border-border/20 rounded-xl p-5 flex flex-col relative hover:border-primary/50 transition-all shadow-md liquid-glass h-[235px]"
     >
       {/* Option Actions Row */}
@@ -99,7 +155,7 @@ export function BookCard({
               ref={menuRef}
               role="menu"
               onClick={(e) => e.stopPropagation()}
-              className="absolute right-0 top-8 z-30 w-52 overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass animate-fade-in opacity-100"
+              className="absolute right-0 top-8 z-30 w-52 overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] animate-fade-in opacity-100"
             >
               <button
                 role="menuitem"

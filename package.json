@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/print-logo.js && next dev",
     "prebuild": "node scripts/copy-worker.js",
     "build": "next build",
     "start": "next start",
@@ -55,7 +55,8 @@
     "postcss": "^8.5.15",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "figlet": "^1.8.0"
   },
   "overrides": {
     "postcss": "^8.5.15"
