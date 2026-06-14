@@ -185,6 +185,16 @@
   body[data-bg-type="gradient"] {
     background-color: transparent !important;
   }
+
+  /* Disable spinner arrows globally for number inputs */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 }
 
 /* ==========================================================================

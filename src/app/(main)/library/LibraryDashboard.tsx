@@ -16,6 +16,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { StatsService } from "@/core/services/stats-service";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { toast } from "sonner";
+import { NumberInput } from "@/components/ui/NumberInput";
 
 // Extracted Sub-Components
 import { IngestionDropzone } from "@/features/library/components/IngestionDropzone";
@@ -370,13 +371,12 @@ export default function LibraryDashboard() {
                   
                   {isEditingGoal ? (
                     <div className="flex items-center gap-2 mb-2 relative z-10 animate-in fade-in slide-in-from-top-1 duration-200">
-                      <input
-                        type="number"
+                      <NumberInput
                         min="1"
                         max="999"
                         value={tempGoal}
                         onChange={(e) => setTempGoal(parseInt(e.target.value) || 1)}
-                        className="w-16 bg-background border border-border/50 rounded px-1.5 py-0.5 text-lg font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-20 bg-background border border-border/50 rounded px-1.5 py-0.5 text-lg font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
                         autoFocus
                         onKeyDown={(e) => e.key === 'Enter' && handleUpdateGoal()}
                       />

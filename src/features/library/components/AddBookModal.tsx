@@ -3,6 +3,7 @@
 import * as React from "react";
 import { BookOpen, X } from "lucide-react";
 import { FormField } from "@/components/ui/FormField";
+import { NumberInput } from "@/components/ui/NumberInput";
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -110,8 +111,7 @@ export function AddBookModal({
 
           <div className="flex gap-4">
             <FormField label="Current Page" className="flex-1">
-              <input 
-                type="number" 
+              <NumberInput 
                 min="0"
                 value={newCurrentPage}
                 onChange={(e) => setNewCurrentPage(e.target.value ? Number(e.target.value) : "")}
@@ -120,8 +120,7 @@ export function AddBookModal({
               />
             </FormField>
             <FormField label="Total Pages" className="flex-1">
-              <input 
-                type="number" 
+              <NumberInput 
                 min="1"
                 value={newTotalPages}
                 onChange={(e) => setNewTotalPages(e.target.value ? Number(e.target.value) : "")}

@@ -12,6 +12,7 @@ import { DEFAULT_NEW_THEME, deepCloneTheme } from "./ThemeEditor/utils";
 import { FontSelector } from "@/components/ui/FontSelector";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { NumberInput } from "@/components/ui/NumberInput";
 
 export function GeneralSettingsForm() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export function GeneralSettingsForm() {
     uiFont,
     glassmorphism,
     reducedMotion,
+    yearlyReadingGoal = 15,
     customThemes = []
   } = settings.general;
 
@@ -282,9 +284,27 @@ export function GeneralSettingsForm() {
         {/* Settings toggles */}
         <div className="space-y-4">
 
+          {/* Yearly Reading Goal */}
+          <div className="flex items-center justify-between py-1">
+            <div>
+              <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Yearly reading goal</label>
+              <p className="text-[9px] text-muted-foreground mt-0.5">Target number of books to read this year.</p>
+            </div>
+            <NumberInput
+              min="1"
+              max="999"
+              value={yearlyReadingGoal}
+              onChange={(e) => {
+                const val = parseInt(e.target.value) || 1;
+                updateGeneralSettings({ yearlyReadingGoal: val });
+              }}
+              className="w-20 px-3 py-1.5 text-right bg-background border border-border/40 rounded-lg text-sm font-semibold focus:outline-none focus:border-primary/80 transition-colors animate-none"
+            />
+          </div>
+
           {/* Glassmorphism - ONLY for Built-in themes */}
           {isBuiltInTheme && (
-            <div className="flex items-center justify-between py-1">
+            <div className="flex items-center justify-between py-1 border-t border-border/10 pt-3">
               <div>
                 <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Liquid glass</label>
                 <p className="text-[9px] text-muted-foreground mt-0.5">Enables glass effects. Disable on slow hardware.</p>
@@ -299,7 +319,7 @@ export function GeneralSettingsForm() {
           )}
 
           {/* Reduced Motion */}
-          <div className={`flex items-center justify-between py-1 ${isBuiltInTheme ? "border-t border-border/10 pt-3" : ""}`}>
+          <div className="flex items-center justify-between py-1 border-t border-border/10 pt-3">
             <div>
               <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Reduce UI motion</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Disables transitions for speed loads and pagination changes.</p>

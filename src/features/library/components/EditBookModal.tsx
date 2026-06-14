@@ -4,6 +4,7 @@ import * as React from "react";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { Pencil, X } from "lucide-react";
 import { FormField } from "@/components/ui/FormField";
+import { NumberInput } from "@/components/ui/NumberInput";
 
 interface EditBookModalProps {
   isOpen: boolean;
@@ -125,8 +126,7 @@ export function EditBookModal({
           {editFormat === "PHYSICAL" ? (
             <div className="flex gap-4">
               <FormField label="Current Page" className="flex-1">
-                <input 
-                  type="number" 
+                <NumberInput 
                   min="0"
                   value={editCurrentPage}
                   onChange={(e) => setEditCurrentPage(e.target.value ? Number(e.target.value) : "")}
@@ -135,8 +135,7 @@ export function EditBookModal({
                 />
               </FormField>
               <FormField label="Total Pages" className="flex-1">
-                <input 
-                  type="number" 
+                <NumberInput 
                   min="1"
                   value={editTotalPages}
                   onChange={(e) => setEditTotalPages(e.target.value ? Number(e.target.value) : "")}

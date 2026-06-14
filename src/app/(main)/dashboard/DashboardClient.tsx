@@ -15,6 +15,7 @@ import { ReadingSessionLog, LibraryStatsSummary } from "@/core/entities/stats";
 import { Flame, Gauge, TrendingUp, Brain, CheckCircle, BarChart, Download, Trash2, ShieldCheck, BookOpen, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { NumberInput } from "@/components/ui/NumberInput";
 
 // Custom premium visual components
 import { RadarChart } from "@/features/stats/components/RadarChart";
@@ -224,13 +225,12 @@ export default function DashboardClient() {
 
             {isEditingGoal ? (
               <div className="flex items-center gap-2 mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                <input
-                  type="number"
+                <NumberInput
                   min="1"
                   max="999"
                   value={tempGoal}
                   onChange={(e) => setTempGoal(parseInt(e.target.value) || 1)}
-                  className="w-16 bg-background border border-border/50 rounded px-2 py-1 text-xl font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-xl font-bold font-heading focus:outline-none focus:ring-1 focus:ring-primary"
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && handleUpdateGoal()}
                 />
