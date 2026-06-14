@@ -261,9 +261,11 @@ export function ColorSelector({
     .map(([key, hex]) => ({ id: key, hex, name: key }));
 
   const isActivePreset = (presetId: string, hex: string) => {
-    // If value is undefined, it's 'active' if this is the theme primary color
-    if (!value && presetId === "primary") return true;
-    return (value?.toLowerCase() || "") === presetId.toLowerCase() || (value?.toLowerCase() || "") === hex.toLowerCase();
+    const activeHex = resolvedHex.toLowerCase();
+    const presetHex = resolveColor(hex).toLowerCase();
+    
+    // Active if the HEX codes match (visual sync) OR the semantic ID matches (logical sync)
+    return activeHex === presetHex || (value?.toLowerCase() || "") === presetId.toLowerCase();
   };
 
   const isActiveSaved = (hex: string) => {

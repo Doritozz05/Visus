@@ -121,7 +121,7 @@ export interface SettingsState {
 export const DEFAULT_SETTINGS: SettingsState = {
   general: {
     theme: "light",
-    accentColor: "violet",
+    accentColor: undefined, // Let theme primary take over
     uiFont: "inter",
     glassmorphism: false,
     reducedMotion: false,
