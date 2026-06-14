@@ -13,10 +13,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://visuslabs.tech"),
   title: "Visus - Advanced Speed Reading Platform",
   description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
   manifest: "/manifest.json",
+  alternates: {
+    canonical: "/",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -66,6 +69,33 @@ export default function RootLayout({
         <link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/Outfit-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/Outfit-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "name": "Visus",
+                  "url": "https://visuslabs.tech",
+                  "description": "Advanced Speed Reading Platform based on RSVP."
+                },
+                {
+                  "@type": "SoftwareApplication",
+                  "name": "Visus",
+                  "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
+                  "applicationCategory": "EducationalApplication",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD"
+                  }
+                }
+              ]
+            })
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
