@@ -113,29 +113,35 @@ test.describe('Visus Playback and Progress Persistence E2E', () => {
     const nameInput = page.locator('#bookmark-name-input').first();
     await expect(nameInput).toBeVisible();
     
-    const testBookmarkName = `E2E Bookmark - ${Date.now()}`;
+    const testBookmarkName = 'UNIQUE_BKMK';
     await nameInput.fill(testBookmarkName);
     
     // Save bookmark
     await page.locator('button', { hasText: 'Save' }).first().click();
-    await page.waitForTimeout(500);
+    
+    // Wait for the bookmark form to close
+    await expect(page.locator('#bookmark-name-input')).toBeHidden();
 
     // Verify bookmark exists in TOC dropdown
     const chapterBadge = page.getByTitle('Open table of contents / chapter index').first();
     await expect(chapterBadge).toBeVisible();
     await chapterBadge.click();
 
-    // Click Bookmarks tab in TOC dropdown
-    const bookmarksTab = page.locator('button', { hasText: 'Bookmarks' }).first();
-    await expect(bookmarksTab).toBeVisible();
+    // Click Bookmarks tab in TOC dropdown (wait for count to be at least 1)
+    const bookmarksTab = page.locator('button', { hasText: /Bookmarks \([1-9]\d*\)/ }).first();
+    await expect(bookmarksTab).toBeVisible({ timeout: 15000 });
     await bookmarksTab.click();
 
+    // Verify the test bookmark index heading is visible and showing at least 1 saved
+    await expect(page.getByText('Bookmarks index')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/[1-9]\d* saved/)).toBeVisible({ timeout: 10000 });
+
     // Verify the test bookmark is listed
-    const bookmarkItem = page.locator('span', { hasText: testBookmarkName }).first();
-    await expect(bookmarkItem).toBeVisible();
+    const bookmarkItem = page.getByTestId('bookmark-item').filter({ hasText: testBookmarkName }).first();
+    await expect(bookmarkItem).toBeVisible({ timeout: 15000 });
 
     // Delete bookmark
-    const deleteButton = page.locator('button[title="Delete bookmark"]').first();
+    const deleteButton = bookmarkItem.getByTestId('bookmark-delete-button');
     await expect(deleteButton).toBeVisible();
     await deleteButton.click();
 
@@ -155,7 +161,7 @@ test.describe('Visus Playback and Progress Persistence E2E', () => {
     await rsvpModeButton.click();
 
     // Verify player control bar appears
-    const playerBar = page.locator('.material-symbols-outlined', { hasText: 'play_arrow' }).first();
+    const playerBar = page.locator('button[title="Play"], button[title="Pause"]').first();
     await expect(playerBar).toBeVisible();
 
     // Switch to Cluster mode
@@ -167,7 +173,7 @@ test.describe('Visus Playback and Progress Persistence E2E', () => {
     await expect(playerBar).toBeVisible();
 
     // Switch back to Pages (normal) mode
-    const pagesModeButton = page.locator('button', { hasText: 'Pages' }).first();
+    const pagesModeButton = page.locator('button', { hasText: 'Reader' }).first();
     await expect(pagesModeButton).toBeVisible();
     await pagesModeButton.click();
 

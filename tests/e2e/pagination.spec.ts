@@ -59,7 +59,8 @@ test.describe('Visus Pagination Stress Test - 3 EPUBs x 108 Combinations', () =>
     { titlePattern: /Moby/i, label: 'Moby Dick' },
   ];
 
-  for (const book of testBooks) {
+  for (let bookIndex = 0; bookIndex < testBooks.length; bookIndex++) {
+    const book = testBooks[bookIndex];
     test(`Pagination Traversal Validation for: ${book.label}`, async ({ page }) => {
       // Find the book card and open the reader
       const bookCard = page.locator('.bg-card', { has: page.locator('h3', { hasText: book.titlePattern }) }).first();
@@ -68,16 +69,21 @@ test.describe('Visus Pagination Stress Test - 3 EPUBs x 108 Combinations', () =>
       await page.waitForSelector('.epub-content');
 
       // Test combinations
+      let comboIndex = 0;
+      const totalCombos = fontFamilies.length * fontSizes.length * densities.length;
+
       for (const fontFamily of fontFamilies) {
         for (const fontSize of fontSizes) {
           for (const density of densities) {
-            console.log(`Testing [${book.label}] Combo: Font=${fontFamily}, Size=${fontSize}px, Density=${density}w`);
+            comboIndex++;
+            console.log(`[Book ${bookIndex + 1}/${testBooks.length}] [Combo ${comboIndex}/${totalCombos}] Testing [${book.label}]: Font=${fontFamily}, Size=${fontSize}px, Density=${density}w`);
 
             // Open settings drawer
             await page.getByTestId('desktop-settings-button').click();
             await page.waitForSelector('[data-testid="settings-close-button"]');
 
             // Apply typeface family
+            await page.getByTestId('font-selector-trigger').click();
             await page.getByTestId(`font-family-button-${fontFamily}`).click();
 
             // Apply font size

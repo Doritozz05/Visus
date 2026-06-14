@@ -29,14 +29,19 @@ export function BookmarkCorner({
   const [isOpen, setIsOpen] = React.useState(false);
   const [nameInput, setNameInput] = React.useState("");
 
+  const lastOpenRef = React.useRef(false);
+
   // Sync input name when active bookmark changes or popover opens
   React.useEffect(() => {
-    if (activeBookmark) {
-      setNameInput(activeBookmark.name);
-    } else {
-      setNameInput(defaultName);
+    if (isOpen && !lastOpenRef.current) {
+      if (activeBookmark) {
+        setNameInput(activeBookmark.name);
+      } else {
+        setNameInput(defaultName);
+      }
     }
-  }, [activeBookmark, defaultName, isOpen]);
+    lastOpenRef.current = isOpen;
+  }, [isOpen, activeBookmark, defaultName]);
 
   const handleTogglePopover = (e: React.MouseEvent) => {
     e.stopPropagation();

@@ -39,7 +39,7 @@ interface ReadingCanvasProps {
   handlePrevChapter: () => void;
   handleChapterChange: (idx: number) => void;
   saveProgressForBook: (bookId: string, chIdx: number, wIdx: number, localPageIdx?: number) => void;
-  handleAddBookmark: (name: string, wordIdx: number, chIdx: number) => void;
+  handleAddBookmark: (name: string, chapterIndex: number, wordIndex: number) => void;
   handleRemoveBookmark: (id: string) => void;
   handleUpdateBookmarkName: (id: string, name: string) => void;
 }

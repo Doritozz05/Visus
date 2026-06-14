@@ -66,8 +66,10 @@ test.describe('Visus Real Pagination E2E Validation - 1920x1080', () => {
     { label: 'Standard Configuration (16px, 300w)', fontSize: 16, density: 300, fontFamily: 'serif' },
   ];
 
-  for (const book of testBooks) {
-    for (const config of testConfigs) {
+  for (let bookIndex = 0; bookIndex < testBooks.length; bookIndex++) {
+    const book = testBooks[bookIndex];
+    for (let configIndex = 0; configIndex < testConfigs.length; configIndex++) {
+      const config = testConfigs[configIndex];
       test(`Page-by-page traversal for: ${book.label} under ${config.label}`, async ({ page }) => {
         // Open the reader for this book
         const bookCard = page.locator('.bg-card', { has: page.locator('h3', { hasText: book.titlePattern }) }).first();
@@ -75,13 +77,14 @@ test.describe('Visus Real Pagination E2E Validation - 1920x1080', () => {
         await page.waitForURL('**/reader');
         await page.waitForSelector('.epub-content');
 
-        console.log(`Setting config for [${book.label}]: Font=${config.fontFamily}, Size=${config.fontSize}px, Density=${config.density}w`);
+        console.log(`[Book ${bookIndex + 1}/${testBooks.length}] [Config ${configIndex + 1}/${testConfigs.length}] Setting config for [${book.label}]: Font=${config.fontFamily}, Size=${config.fontSize}px, Density=${config.density}w`);
 
         // Open settings drawer
         await page.getByTestId('desktop-settings-button').click();
         await page.waitForSelector('[data-testid="settings-close-button"]');
 
         // Apply typeface family
+        await page.getByTestId('font-selector-trigger').click();
         await page.getByTestId(`font-family-button-${config.fontFamily}`).click();
 
         // Apply font size

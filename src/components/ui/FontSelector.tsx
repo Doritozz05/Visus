@@ -149,6 +149,7 @@ export function FontSelector({
 
       <button
         ref={triggerRef}
+        data-testid="font-selector-trigger"
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`group flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-card px-3.5 text-left text-sm text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 liquid-glass ${
@@ -178,6 +179,7 @@ export function FontSelector({
               {filteredBuiltins.map((font) => (
                 <button
                   key={font.id}
+                  data-testid={`font-family-button-${font.id}`}
                   type="button"
                   onClick={() => {
                     onChange(font.id);
@@ -220,6 +222,7 @@ export function FontSelector({
                     >
                       <button
                         type="button"
+                        data-testid={`font-family-button-${font.id}`}
                         onClick={() => {
                           onChange(font.id);
                           setIsOpen(false);

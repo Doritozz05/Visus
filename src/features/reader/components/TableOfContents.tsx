@@ -144,6 +144,7 @@ export function TableOfContents({
                 <div
                   key={b.id}
                   className="w-full flex items-center justify-between rounded hover:bg-accent group transition-all"
+                  data-testid="bookmark-item"
                 >
                   <button
                     onClick={() => {
@@ -165,6 +166,7 @@ export function TableOfContents({
                       }}
                       className="p-1 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded transition-all mr-1 shrink-0"
                       title="Delete bookmark"
+                      data-testid="bookmark-delete-button"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
