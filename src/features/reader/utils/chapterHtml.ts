@@ -64,7 +64,12 @@ export function prepareChapterHtml(chapter: ChapterHtmlData): string {
     console.warn("Failed to sanitize/trim trailing empty tags:", e);
   }
 
-  finalHtml = DOMPurify.sanitize(finalHtml);
+  // Apply defense-in-depth security configuration to DOMPurify
+  // Explicitly block SSRF vectors (object, embed) and phishing vectors (forms, inputs)
+  finalHtml = DOMPurify.sanitize(finalHtml, {
+    FORBID_TAGS: ["object", "embed", "form", "script", "input", "button", "textarea", "select"],
+    FORBID_ATTR: ["formaction", "form"],
+  });
 
   const tagged = tagHtmlBlocksWithWordIndices(finalHtml);
   return tagged.html;
