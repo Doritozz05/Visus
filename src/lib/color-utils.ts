@@ -13,6 +13,13 @@ export const COLOR_PRESETS: Record<string, string> = {
   white: "#ffffff",
 };
 
+export const THEME_DEFAULTS: Record<string, { fg: string, primary: string, muted: string }> = {
+  "dark-violet": { fg: "#dde4fd", primary: "#c2c3ff", muted: "#cac7d6" },
+  "light": { fg: "#0f1729", primary: "#5048e5", muted: "#365396" },
+  "sepia": { fg: "#5a4535", primary: "#ac6b39", muted: "#81624b" },
+  "nord": { fg: "#e5e9f0", primary: "#87bfcf", muted: "#b6bdc9" },
+};
+
 /**
  * Resolves a color string. If it is a predefined preset key,
  * returns its hex code. Otherwise, returns the color string as-is.

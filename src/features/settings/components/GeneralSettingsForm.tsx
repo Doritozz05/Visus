@@ -167,7 +167,11 @@ export function GeneralSettingsForm() {
             ].map((t) => (
               <button
                 key={t.id}
-                onClick={() => updateGeneralSettings({ theme: t.id as GeneralSettings["theme"] })}
+                onClick={() => updateGeneralSettings({ 
+                  theme: t.id as GeneralSettings["theme"],
+                  accentColor: undefined, // Reset to theme default
+                  uiFont: "inter" // Reset to base UI font
+                })}
                 onContextMenu={(e) => onThemeContextMenu(e, { ...t, isPreset: true })}
                 className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between ${theme === t.id
                   ? "border-primary bg-accent/65"
@@ -252,6 +256,7 @@ export function GeneralSettingsForm() {
               label="Accent tint color"
               value={accentColor}
               onChange={(color) => updateGeneralSettings({ accentColor: color })}
+              useFactoryDefaults={true}
             />
           </div>
         )}

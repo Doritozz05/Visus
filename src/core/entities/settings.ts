@@ -77,7 +77,7 @@ export interface CustomTheme {
 
 export interface GeneralSettings {
   theme: "dark-violet" | "light" | "sepia" | "nord" | string;
-  accentColor: string; // "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue" or custom hex
+  accentColor?: string; // Optional: theme default used if undefined
   uiFont: string;
   glassmorphism: boolean;
   reducedMotion: boolean;

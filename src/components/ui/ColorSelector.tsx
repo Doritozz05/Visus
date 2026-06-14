@@ -4,10 +4,10 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { Check, Plus, X, Pipette, ChevronDown, RotateCcw } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
-import { COLOR_PRESETS, resolveColor, hexToHsl } from "@/lib/color-utils";
+import { COLOR_PRESETS, resolveColor, hexToHsl, THEME_DEFAULTS } from "@/lib/color-utils";
 
 export interface ColorSelectorProps {
-  value: string;
+  value?: string;
   onChange: (color: string) => void;
   onChangeComplete?: (color: string) => void;
   initialValue?: string;
@@ -15,6 +15,7 @@ export interface ColorSelectorProps {
   showWhitePreset?: boolean;
   presets?: Array<{ id: string; hex: string; name?: string }>;
   menuZIndex?: number;
+  useFactoryDefaults?: boolean;
 }
 
 // Helper to convert HSL to Hex
@@ -38,6 +39,7 @@ export function ColorSelector({
   showWhitePreset = false,
   presets,
   menuZIndex = 160,
+  useFactoryDefaults = false,
 }: ColorSelectorProps) {
   const { settings, updateGeneralSettings } = useSettings();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -47,24 +49,17 @@ export function ColorSelector({
   const themeColors = React.useMemo(() => {
     const { theme, customThemes = [], accentColor } = settings.general;
     
-    // Default built-in colors
-    const builtInColors: Record<string, { fg: string, primary: string, muted: string }> = {
-      "dark-violet": { fg: "#dde4fd", primary: "#c2c3ff", muted: "#cac7d6" },
-      "light": { fg: "#0f1729", primary: "#5048e5", muted: "#365396" },
-      "sepia": { fg: "#5a4535", primary: "#ac6b39", muted: "#81624b" },
-      "nord": { fg: "#e5e9f0", primary: "#87bfcf", muted: "#b6bdc9" },
-    };
-
     // If it's a built-in theme
-    if (builtInColors[theme]) {
-      const colors = { ...builtInColors[theme] };
-      // Override primary if global accent color is set and theme is not custom
-      if (accentColor && accentColor.startsWith("#")) {
+    if (THEME_DEFAULTS[theme]) {
+      const colors = { ...THEME_DEFAULTS[theme] };
+      
+      if (!useFactoryDefaults && accentColor && accentColor.startsWith("#")) {
         colors.primary = accentColor;
       }
+
       return [
         { id: "foreground", hex: colors.fg, name: "Theme Text" },
-        { id: "primary", hex: colors.primary, name: "Theme Accent" },
+        { id: "primary", hex: colors.primary, name: useFactoryDefaults ? "Original Accent" : "Active Accent" },
         { id: "muted", hex: colors.muted, name: "Theme Dimmed" },
       ];
     }
@@ -80,7 +75,7 @@ export function ColorSelector({
     }
 
     return [];
-  }, [settings.general]);
+  }, [settings.general, useFactoryDefaults]);
 
   // Track internal HSL to avoid rounding drift during slider interaction
   const [internalHsl, setInternalHsl] = React.useState<{h: number, s: number, l: number} | null>(null);
@@ -95,7 +90,14 @@ export function ColorSelector({
   const [isMenuPositioned, setIsMenuPositioned] = React.useState(false);
 
   const savedColors = settings.general.savedColors || [];
-  const resolvedHex = resolveColor(value);
+
+  // Source of truth for resolving the color: 
+  // If 'value' is missing, we use the theme's primary color from THEME_DEFAULTS
+  const resolvedHex = React.useMemo(() => {
+    if (value) return resolveColor(value);
+    const themeId = settings.general.theme;
+    return THEME_DEFAULTS[themeId]?.primary || "#8b5cf6";
+  }, [value, settings.general.theme]);
 
   // Derive HSL for sliders
   const { h, s, l } = React.useMemo(() => {
@@ -214,7 +216,7 @@ export function ColorSelector({
   React.useEffect(() => {
     if (internalHsl) {
       const currentInternalHex = hslToHex(internalHsl.h, internalHsl.s, internalHsl.l);
-      if (resolvedHex.toLowerCase() !== currentInternalHex.toLowerCase()) {
+      if ((resolvedHex?.toLowerCase() || "") !== currentInternalHex.toLowerCase()) {
         setInternalHsl(null);
       }
     }
@@ -233,7 +235,7 @@ export function ColorSelector({
   };
 
   const saveCurrentColor = () => {
-    const currentHex = resolveColor(value);
+    const currentHex = resolveColor(value || resolvedHex);
     if (!savedColors.includes(currentHex)) {
       const updated = [...savedColors, currentHex];
       updateGeneralSettings({ savedColors: updated });
@@ -247,7 +249,7 @@ export function ColorSelector({
   };
 
   const revertToInitial = () => {
-    const resetColor = initialValue || value;
+    const resetColor = initialValue || value || resolvedHex;
     onChange(resetColor);
     onChangeComplete?.(resetColor);
     setInternalHsl(null);
@@ -259,10 +261,13 @@ export function ColorSelector({
     .map(([key, hex]) => ({ id: key, hex, name: key }));
 
   const isActivePreset = (presetId: string, hex: string) => {
-    return value.toLowerCase() === presetId.toLowerCase() || value.toLowerCase() === hex.toLowerCase();
+    // If value is undefined, it's 'active' if this is the theme primary color
+    if (!value && presetId === "primary") return true;
+    return (value?.toLowerCase() || "") === presetId.toLowerCase() || (value?.toLowerCase() || "") === hex.toLowerCase();
   };
 
   const isActiveSaved = (hex: string) => {
+    if (!value) return false;
     const currentHex = resolveColor(value).toLowerCase();
     const presetKeys = presetsList.map((p) => p.id.toLowerCase());
     return currentHex === hex.toLowerCase() && !presetKeys.includes(value.toLowerCase());
@@ -291,7 +296,7 @@ export function ColorSelector({
           <div className="flex flex-col">
             <span className="font-semibold text-foreground capitalize">
               {presetsList.find(p => p.id === value || p.hex === value)?.name || 
-               (value in COLOR_PRESETS ? value : "Custom Color")}
+               (value && (value in COLOR_PRESETS) ? value : (!value ? "Theme Default" : "Custom Color"))}
             </span>
             <span className="text-[10px] text-muted-foreground uppercase">{resolvedHex}</span>
           </div>
@@ -448,13 +453,13 @@ export function ColorSelector({
                     }}
                     style={{ backgroundColor: preset.hex }}
                     className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-                      value.toLowerCase() === preset.hex.toLowerCase()
+                      isActivePreset(preset.id, preset.hex)
                         ? "border-foreground scale-110 shadow-md ring-2 ring-primary/45"
                         : "border-transparent hover:scale-105"
                     }`}
                     title={preset.name}
                   >
-                    {value.toLowerCase() === preset.hex.toLowerCase() && (
+                    {isActivePreset(preset.id, preset.hex) && (
                       <Check className="text-white h-3.5 w-3.5 stroke-[3] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
                     )}
                   </button>

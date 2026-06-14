@@ -6,12 +6,13 @@ import { LibraryProvider } from "@/features/library/context/library-context";
 import { AuthProvider } from "@/features/auth/context/auth-context";
 import { Toaster } from "sonner";
 import { ContextMenuProvider } from "@/components/ui/ContextMenu";
-import { hexToHsl, resolveColor } from "@/lib/color-utils";
+import { hexToHsl, resolveColor, THEME_DEFAULTS } from "@/lib/color-utils";
 import type { CustomTheme } from "@/core/entities/settings";
 import { MotionConfig } from "framer-motion";
 import { getFontFamilyStyle } from "@/lib/typography";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
+// ... (rest of imports/helpers)
   const { settings, customFonts } = useSettings();
   const { theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes = [] } = settings.general;
 
@@ -229,13 +230,19 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       ];
       propertiesToClear.forEach((p) => root.style.removeProperty(p));
 
-      body.setAttribute("data-accent", accentColor);
+      if (accentColor) {
+        body.setAttribute("data-accent", accentColor);
+      } else {
+        body.removeAttribute("data-accent");
+      }
+      
       body.setAttribute("data-ui-font", uiFont);
       body.setAttribute("data-glass", glassmorphism ? "enabled" : "disabled");
       body.setAttribute("data-bg-type", "solid");
 
       try {
-        const hex = resolveColor(accentColor);
+        const defaultAccent = THEME_DEFAULTS[theme as keyof typeof THEME_DEFAULTS]?.primary || "#8b5cf6";
+        const hex = resolveColor(accentColor || defaultAccent);
         const { stringVal } = hexToHsl(hex);
         root.style.setProperty("--primary", stringVal);
         root.style.setProperty("--ring", stringVal);
