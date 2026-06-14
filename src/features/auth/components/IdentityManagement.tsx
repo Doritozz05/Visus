@@ -34,7 +34,10 @@ export function IdentityManagement() {
     try {
       await authService.linkIdentity('google');
     } catch (err) {
-      toast.error("Failed to link Google account");
+      console.error("Failed to link Google account:", err);
+      toast.error("Failed to link Google account", {
+        description: err instanceof Error ? err.message : "An unexpected error occurred."
+      });
     }
   };
 

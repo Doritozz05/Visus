@@ -20,6 +20,8 @@ export function UpdatePasswordForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const isInitialPassword = !requireCurrentPassword;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -41,14 +43,18 @@ export function UpdatePasswordForm({
       }
 
       await authService.updatePassword(newPassword);
-      toast.success("Password updated successfully. You will be redirected to login.");
+      
+      if (isInitialPassword) {
+        toast.success("Account password has been set. You can now log in with either Google or your email.");
+      } else {
+        toast.success("Password updated successfully. You will be redirected to login.");
+        // Force logout after update so they have to log in with new password
+        await authService.logout();
+      }
       
       setNewPassword("");
       setConfirmPassword("");
       setCurrentPassword("");
-      
-      // Force logout after update so they have to log in with new password
-      await authService.logout();
       
       if (onSuccess) onSuccess();
     } catch (err) {
@@ -63,7 +69,7 @@ export function UpdatePasswordForm({
       <div className="space-y-4 opacity-70">
         <h3 className="text-sm font-bold font-heading text-foreground uppercase tracking-tight">Security Credentials</h3>
         <p className="text-xs text-muted-foreground">
-          You cannot change the password for an account linked to Google from here.
+          Password management is currently restricted for this account type.
         </p>
       </div>
     );
@@ -85,7 +91,10 @@ export function UpdatePasswordForm({
           </FormField>
         )}
 
-        <FormField label="New Password" id="new-password">
+        <FormField 
+          label={isInitialPassword ? "Set New Password" : "New Password"} 
+          id="new-password"
+        >
           <PasswordInput
             id="new-password"
             required
@@ -113,8 +122,14 @@ export function UpdatePasswordForm({
         disabled={isLoading || !newPassword || !confirmPassword || (requireCurrentPassword && !currentPassword)}
         className="w-full py-3 bg-primary text-primary-foreground text-[10px] font-mono uppercase tracking-wider font-bold rounded-xl hover:brightness-110 transition-all disabled:opacity-50"
       >
-        {isLoading ? "Updating..." : "Update Password"}
+        {isLoading ? "Processing..." : isInitialPassword ? "Set Account Password" : "Update Password"}
       </button>
+      
+      {isInitialPassword && (
+        <p className="text-[10px] text-muted-foreground text-center italic mt-2">
+          Adding a password allows you to log in without Google using your email address.
+        </p>
+      )}
     </form>
   );
 }

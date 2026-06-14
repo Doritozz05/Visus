@@ -47,7 +47,7 @@ export class SupabaseAuthService implements IAuthService {
     const { error } = await supabase.auth.linkIdentity({
       provider,
       options: {
-        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback?next=/settings/account` : undefined,
+        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback?next=/settings?tab=account` : undefined,
       }
     });
     if (error) throw new Error(error.message);

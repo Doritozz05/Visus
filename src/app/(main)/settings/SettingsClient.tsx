@@ -9,6 +9,7 @@ import { ClusterSettingsForm } from "@/features/settings/components/ClusterSetti
 import { AccountSettingsForm } from "@/features/settings/components/AccountSettingsForm";
 import { Settings, Zap, Columns, UserCircle, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -52,8 +53,18 @@ const formVariants = {
 };
 
 export default function SettingsClient() {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") as "general" | "reader" | "rsvp" | "cluster" | "account";
+  
   const { resetSettings } = useSettings();
-  const [activeTab, setActiveTab] = React.useState<"general" | "reader" | "rsvp" | "cluster" | "account">("general");
+  const [activeTab, setActiveTab] = React.useState<"general" | "reader" | "rsvp" | "cluster" | "account">(tabParam || "general");
+
+  // Sync activeTab if searchParam changes
+  React.useEffect(() => {
+    if (tabParam && ["general", "reader", "rsvp", "cluster", "account"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   return (
     <motion.div 

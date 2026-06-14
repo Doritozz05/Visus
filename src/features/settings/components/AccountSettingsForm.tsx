@@ -3,9 +3,10 @@
 import React from "react";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { MfaSetup } from "@/features/auth/components/MfaSetup";
+import { IdentityManagement } from "@/features/auth/components/IdentityManagement";
 import { UpdateEmailForm } from "@/features/auth/components/UpdateEmailForm";
 import { UpdatePasswordForm } from "@/features/auth/components/UpdatePasswordForm";
-import { User, ShieldCheck, Mail, Lock, LogOut, RefreshCw, UserCircle, CheckCircle, AlertTriangle, Cloud } from "lucide-react";
+import { User, ShieldCheck, Mail, Lock, LogOut, RefreshCw, UserCircle, CheckCircle, AlertTriangle, Cloud, Fingerprint } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLibrary } from "@/features/library/context/library-context";
@@ -17,7 +18,9 @@ export function AccountSettingsForm() {
   const [syncStatus, setSyncStatus] = React.useState<"idle" | "success" | "error">("idle");
   const [syncError, setSyncError] = React.useState<string | null>(null);
 
-  const isGoogleUser = user?.avatarUrl !== undefined;
+  // Logic for UI states
+  const hasGoogleLinked = user?.provider === 'google' || false;
+  const hasPasswordIdentity = user?.hasPassword === true;
 
   const handleSync = async () => {
     if (!user) return;
@@ -77,7 +80,7 @@ export function AccountSettingsForm() {
                 </span>
                 {user && (
                   <span className="text-[9px] font-sans text-primary uppercase tracking-wider font-bold bg-primary/10 px-2 py-0.5 rounded">
-                    {isGoogleUser ? "Google" : "Email"}
+                    {user.provider === 'google' ? "Google" : "Email"}
                   </span>
                 )}
               </div>
@@ -161,6 +164,15 @@ export function AccountSettingsForm() {
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Identity Management Section */}
+            <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass md:col-span-2">
+              <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
+                <Fingerprint className="text-primary h-5 w-5" />
+                <h3 className="text-lg font-bold font-heading">Login Methods</h3>
+              </div>
+              <IdentityManagement />
+            </section>
+
             {/* MFA Section */}
             <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass relative overflow-hidden md:col-span-2">
               <div className="flex items-center gap-2 mb-6 border-b border-border/30 pb-4">
@@ -176,7 +188,12 @@ export function AccountSettingsForm() {
                 <Mail className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-bold font-heading">Email Address</h3>
               </div>
-              <UpdateEmailForm currentEmail={user?.email || ""} disabled={isGoogleUser} />
+              <UpdateEmailForm currentEmail={user?.email || ""} disabled={hasGoogleLinked} />
+              {hasGoogleLinked && (
+                <p className="text-[10px] text-muted-foreground mt-3 italic">
+                  * Email management is disabled while a social account is linked.
+                </p>
+              )}
             </section>
 
             {/* Password Management */}
@@ -185,7 +202,7 @@ export function AccountSettingsForm() {
                 <Lock className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-bold font-heading">Password</h3>
               </div>
-              <UpdatePasswordForm disabled={isGoogleUser} />
+              <UpdatePasswordForm requireCurrentPassword={hasPasswordIdentity} />
             </section>
           </div>
         </div>
