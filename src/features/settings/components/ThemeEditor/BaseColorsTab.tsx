@@ -33,6 +33,7 @@ export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseC
     { label: "Popover/Menu text", key: "popoverForeground" as const },
     { label: "Card background", key: "cardBackground" as const },
     { label: "Card text", key: "cardForeground" as const },
+    { label: "Card border color", key: "cardBorder" as const },
     { label: "Borders & Lines", key: "border" as const },
     { label: "Accent highlight (brand)", key: "accent" as const },
     { label: "Accent button text", key: "accentForeground" as const },
@@ -40,6 +41,8 @@ export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseC
     { label: "UI Accent text", key: "uiAccentForeground" as const },
     { label: "Muted background", key: "muted" as const },
     { label: "Muted text", key: "mutedForeground" as const },
+    { label: "Input fields background", key: "input" as const },
+    { label: "Focus ring highlight", key: "ring" as const },
   ];
 
   return (
@@ -76,13 +79,22 @@ export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseC
         <h3 className="text-xs font-bold font-heading mb-3 pb-1.5 border-b border-border/30">Base colors</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {colorFields.map((field) => {
-            const hexVal = themeState[field.key] as string;
+            const hexVal = (themeState[field.key] as string) || 
+              (field.key === "cardBorder" ? themeState.border :
+               field.key === "input" ? themeState.border :
+               field.key === "ring" ? themeState.accent : "");
+
+            const initialHexVal = (initialTheme[field.key] as string) || 
+              (field.key === "cardBorder" ? initialTheme.border :
+               field.key === "input" ? initialTheme.border :
+               field.key === "ring" ? initialTheme.accent : "");
+
             return (
               <div key={field.key} className="flex flex-col gap-2 p-3 bg-accent/15 border border-border/30 rounded-xl">
                 <span className="text-[11px] font-bold">{field.label}</span>
                 <ColorSelector
                   value={hexVal}
-                  initialValue={initialTheme[field.key] as string}
+                  initialValue={initialHexVal}
                   onChange={(color) => handleColorChange(field.key, color, false)}
                   onChangeComplete={(color) => handleColorChange(field.key, color, true)}
                 />
@@ -113,6 +125,25 @@ export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseC
                 { value: "outfit", label: "Outfit", description: "Modern, warm geometric design" },
                 { value: "roboto", label: "Hanken Grotesk", description: "Sophisticated grotesque typeface" },
                 { value: "system-ui", label: "System default", description: "Default operating system font stack" },
+              ]}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Reader room font family</label>
+            <FancyDropdown
+              ariaLabel="Reader room font family"
+              value={themeState.readerFont || ""}
+              placeholder="Default (inherit settings)"
+              menuZIndex={150}
+              onChange={(val) => setThemeState(prev => ({ ...prev, readerFont: (val || undefined) as any }))}
+              options={[
+                { value: "", label: "Default (inherit settings)", description: "Inherits the global reader font setting" },
+                { value: "inter", label: "Inter UI", description: "Clean, high-legibility sans-serif" },
+                { value: "serif", label: "Lora Serif", description: "Classic book typeface for long reading sessions" },
+                { value: "atkinson", label: "Atkinson Hyperlegible", description: "Optimized for visual recognition" },
+                { value: "dyslexic", label: "OpenDyslexic", description: "Accessibility design for reading assistance" },
+                { value: "sans-serif", label: "Sans-Serif", description: "Standard sans-serif font stack" },
               ]}
             />
           </div>

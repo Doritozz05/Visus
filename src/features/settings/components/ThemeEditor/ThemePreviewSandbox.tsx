@@ -2,7 +2,7 @@ import * as React from "react";
 import { Eye, Play, Pause, Plus, Minus, Settings2, BarChart2, Flame, Search } from "lucide-react";
 import type { CustomTheme } from "@/core/entities/settings";
 import { resolveColor, hexToRgba } from "@/lib/color-utils";
-import { getFontFamilyStyle, hexToRgb, PRESETS_TEMPLATES } from "./utils";
+import { getFontFamilyStyle, hexToRgb, PRESETS_TEMPLATES, scopeCss } from "./utils";
 
 interface ThemePreviewSandboxProps {
   themeState: CustomTheme;
@@ -25,6 +25,7 @@ export function ThemePreviewSandbox({
   const [selectedBook, setSelectedBook] = React.useState<number | null>(null);
   const [mockSync, setMockSync] = React.useState(false);
   const [streakActive, setStreakActive] = React.useState(true);
+  const [showFontPopover, setShowFontPopover] = React.useState(false);
 
   // Sample text for reader simulator
   const rsvpWords = React.useMemo(() => [
@@ -103,7 +104,7 @@ export function ThemePreviewSandbox({
       case "sm": return "0 1px 2px rgba(0,0,0,0.05)";
       case "md": return "0 4px 6px rgba(0,0,0,0.08)";
       case "lg": return "0 10px 15px rgba(0,0,0,0.1)";
-      case "retro": return `4px 4px 0px ${resolveColor(themeState.border)}`;
+      case "retro": return `4px 4px 0px ${resolveColor(themeState.cardBorder || themeState.border)}`;
       default: return "none";
     }
   };
@@ -113,8 +114,8 @@ export function ThemePreviewSandbox({
     : themeState.cardBackground;
   const glassBlur = themeState.glassmorphism?.enabled ? `blur(${themeState.glassmorphism.blur}px)` : "none";
   const glassBorder = themeState.glassmorphism?.enabled 
-    ? `1px solid rgba(${hexToRgb(themeState.border)}, ${themeState.glassmorphism.borderOpacity})` 
-    : `1px solid ${themeState.border}`;
+    ? `1px solid rgba(${hexToRgb(themeState.cardBorder || themeState.border)}, ${themeState.glassmorphism.borderOpacity})` 
+    : `1px solid ${resolveColor(themeState.cardBorder || themeState.border)}`;
 
   // Content Layout switcher
   const renderLayoutContent = () => {
@@ -128,11 +129,13 @@ export function ThemePreviewSandbox({
               <input 
                 type="text" 
                 placeholder="Search books..." 
-                className="w-full pl-7 pr-3 py-1.5 rounded-lg border text-[9px] focus:outline-none transition-all"
+                className="w-full pl-7 pr-3 py-1.5 border text-[9px] focus:outline-none transition-all"
                 style={{
-                  backgroundColor: glassBg,
+                  backgroundColor: themeState.input || glassBg,
                   borderColor: themeState.border,
-                  color: themeState.foreground
+                  color: themeState.foreground,
+                  borderRadius: `calc(${cardRadius} * 0.8)`,
+                  boxShadow: `0 0 0 1px ${resolveColor(themeState.ring || themeState.accent)}20`
                 }}
                 disabled
               />
@@ -146,13 +149,14 @@ export function ThemePreviewSandbox({
                   <div
                     key={idx}
                     onClick={() => setSelectedBook(isSelected ? null : idx)}
-                    className="p-2 border rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col gap-0.5 relative"
+                    className="p-2 border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col gap-0.5 relative"
                     style={{
                       backgroundColor: glassBg,
                       backdropFilter: glassBlur,
-                      border: isSelected ? `1px solid ${themeState.accent}` : glassBorder,
-                      boxShadow: isSelected ? `0 0 10px ${hexToRgba(themeState.accent, 0.2)}` : getShadowStyle(themeState.cardShadow),
-                      color: themeState.cardForeground
+                      border: isSelected ? `1.5px solid ${resolveColor(themeState.ring || themeState.accent)}` : glassBorder,
+                      boxShadow: isSelected ? `0 0 10px ${hexToRgba(themeState.ring || themeState.accent, 0.4)}` : getShadowStyle(themeState.cardShadow),
+                      color: themeState.cardForeground,
+                      borderRadius: cardRadius
                     }}
                   >
                     <div className="flex justify-between items-start">
@@ -160,8 +164,8 @@ export function ThemePreviewSandbox({
                       <span 
                         className="px-1 py-0.5 rounded text-[6px] font-bold font-mono uppercase"
                         style={{
-                          backgroundColor: `${book.color}15`,
-                          color: book.color
+                          backgroundColor: themeState.uiAccent || `${book.color}15`,
+                          color: themeState.uiAccentForeground || book.color
                         }}
                       >
                         {book.category}
@@ -185,11 +189,12 @@ export function ThemePreviewSandbox({
           <div className="flex flex-col flex-1 overflow-hidden gap-2">
             {/* Main reading text sheet */}
             <div 
-              className="flex-1 border rounded-2xl flex flex-col items-center justify-center p-4 min-h-[140px] transition-all duration-300 relative overflow-hidden"
+              className="flex-1 border flex flex-col items-center justify-center p-4 min-h-[140px] transition-all duration-300 relative overflow-hidden"
               style={{
                 backgroundColor: themeState.overrideReader ? themeState.readerBackground : themeState.background,
                 color: themeState.overrideReader ? themeState.readerForeground : themeState.foreground,
-                borderColor: themeState.overrideReader ? themeState.readerBorder : themeState.border
+                borderColor: themeState.overrideReader ? themeState.readerBorder : themeState.border,
+                borderRadius: cardRadius
               }}
             >
               <span className="absolute top-2 left-2 text-[7px] font-mono uppercase opacity-55">
@@ -246,11 +251,14 @@ export function ThemePreviewSandbox({
 
             {/* Playback speed controller */}
             <div 
-              className="p-2 border rounded-xl flex flex-col gap-1.5 shrink-0"
+              className="p-2 border flex flex-col gap-1.5 shrink-0"
               style={{
                 backgroundColor: glassBg,
-                borderColor: themeState.border,
-                color: themeState.cardForeground
+                backdropFilter: glassBlur,
+                border: glassBorder,
+                boxShadow: getShadowStyle(themeState.cardShadow),
+                color: themeState.cardForeground,
+                borderRadius: cardRadius
               }}
             >
               <div className="flex justify-between items-center text-[7.5px] font-mono">
@@ -261,8 +269,12 @@ export function ThemePreviewSandbox({
               <div className="flex justify-between items-center gap-2">
                 <button
                   onClick={() => setReaderMode(m => m === "rsvp" ? "cluster" : "rsvp")}
-                  className="px-2 py-1 bg-accent/10 border hover:bg-accent/25 rounded-lg text-[7.5px] font-bold font-mono uppercase transition-all"
-                  style={{ borderColor: themeState.border, color: themeState.cardForeground }}
+                  className="px-2 py-1 border rounded-lg text-[7.5px] font-bold font-mono uppercase transition-all"
+                  style={{
+                    backgroundColor: themeState.muted || "rgba(0,0,0,0.05)",
+                    borderColor: themeState.border,
+                    color: themeState.mutedForeground || themeState.cardForeground
+                  }}
                 >
                   {readerMode === "rsvp" ? "RSVP" : "Cluster"}
                 </button>
@@ -286,16 +298,18 @@ export function ThemePreviewSandbox({
                   )}
                 </button>
 
-                <div className="flex items-center gap-0.5 bg-accent/10 border rounded-lg p-0.5" style={{ borderColor: themeState.border }}>
+                <div className="flex items-center gap-0.5 border rounded-lg p-0.5" style={{ backgroundColor: themeState.muted || "rgba(0,0,0,0.05)", borderColor: themeState.border }}>
                   <button 
                     onClick={() => setWpm(w => Math.max(100, w - 50))}
-                    className="p-1 hover:bg-accent/20 rounded text-muted-foreground hover:text-foreground transition-all"
+                    className="p-1 rounded transition-all"
+                    style={{ color: themeState.mutedForeground }}
                   >
                     <Minus className="w-2.5 h-2.5" />
                   </button>
                   <button 
                     onClick={() => setWpm(w => Math.min(1000, w + 50))}
-                    className="p-1 hover:bg-accent/20 rounded text-muted-foreground hover:text-foreground transition-all"
+                    className="p-1 rounded transition-all"
+                    style={{ color: themeState.mutedForeground }}
                   >
                     <Plus className="w-2.5 h-2.5" />
                   </button>
@@ -310,38 +324,55 @@ export function ThemePreviewSandbox({
             {/* Stats header card */}
             <div className="grid grid-cols-2 gap-2 shrink-0">
               <div 
-                className="p-2 border rounded-xl flex flex-col gap-0.5"
-                style={{ backgroundColor: glassBg, borderColor: themeState.border }}
+                className="p-2 border flex flex-col gap-0.5"
+                style={{
+                  backgroundColor: glassBg,
+                  backdropFilter: glassBlur,
+                  border: glassBorder,
+                  boxShadow: getShadowStyle(themeState.cardShadow),
+                  borderRadius: cardRadius,
+                  color: themeState.cardForeground
+                }}
               >
-                <span className="text-[7.5px] text-muted-foreground uppercase font-mono">Daily progress</span>
-                <span className="text-[10px] font-bold" style={{ color: themeState.cardForeground }}>45 / 50 min</span>
+                <span className="text-[7.5px] text-muted-foreground uppercase font-mono" style={{ color: themeState.mutedForeground }}>Daily progress</span>
+                <span className="text-[10px] font-bold">45 / 50 min</span>
               </div>
               
               <div 
                 onClick={() => setStreakActive(!streakActive)}
-                className="p-2 border rounded-xl flex items-center gap-2 cursor-pointer transition-all duration-300 select-none"
+                className="p-2 border flex items-center gap-2 cursor-pointer transition-all duration-300 select-none"
                 style={{ 
                   backgroundColor: glassBg, 
-                  borderColor: streakActive ? themeState.accent : themeState.border,
-                  boxShadow: streakActive ? `0 0 10px ${hexToRgba(themeState.accent, 0.15)}` : "none"
+                  backdropFilter: glassBlur,
+                  border: streakActive ? `1px solid ${resolveColor(themeState.ring || themeState.accent)}` : glassBorder,
+                  boxShadow: streakActive ? `0 0 10px ${hexToRgba(themeState.ring || themeState.accent, 0.15)}` : getShadowStyle(themeState.cardShadow),
+                  borderRadius: cardRadius,
+                  color: themeState.cardForeground
                 }}
               >
-                <Flame className={`w-5 h-5 transition-all duration-300 ${streakActive ? "text-orange-500 animate-pulse" : "text-muted-foreground opacity-35"}`} />
+                <Flame className={`w-5 h-5 transition-all duration-300 ${streakActive ? "text-orange-500 animate-pulse" : "text-muted-foreground opacity-35"}`} style={{ color: streakActive ? undefined : themeState.mutedForeground }} />
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[7.5px] text-muted-foreground uppercase font-mono">Streak days</span>
-                  <span className="text-[10px] font-bold" style={{ color: themeState.cardForeground }}>{streakActive ? "12 days" : "0 days"}</span>
+                  <span className="text-[7.5px] text-muted-foreground uppercase font-mono" style={{ color: themeState.mutedForeground }}>Streak days</span>
+                  <span className="text-[10px] font-bold">{streakActive ? "12 days" : "0 days"}</span>
                 </div>
               </div>
             </div>
 
             {/* CSS weekly activity chart */}
             <div 
-              className="p-3 border rounded-xl flex flex-col gap-2 flex-1 min-h-[140px] max-h-[180px]"
-              style={{ backgroundColor: glassBg, borderColor: themeState.border }}
+              className="p-3 border flex flex-col gap-2 flex-1 min-h-[140px] max-h-[180px]"
+              style={{
+                backgroundColor: glassBg,
+                backdropFilter: glassBlur,
+                border: glassBorder,
+                boxShadow: getShadowStyle(themeState.cardShadow),
+                borderRadius: cardRadius,
+                color: themeState.cardForeground
+              }}
             >
               <div className="flex justify-between items-center text-[7.5px] font-mono text-muted-foreground shrink-0 border-b pb-1.5" style={{ borderColor: themeState.border }}>
-                <span className="font-bold uppercase flex items-center gap-1"><BarChart2 className="w-3 h-3 text-primary" /> Weekly read time</span>
-                <span>Total: 4.8 hr</span>
+                <span className="font-bold uppercase flex items-center gap-1"><BarChart2 className="w-3 h-3" style={{ color: themeState.accent }} /> Weekly read time</span>
+                <span style={{ color: themeState.mutedForeground }}>Total: 4.8 hr</span>
               </div>
 
               <div className="flex-1 flex items-end justify-between gap-1 px-1 h-[80px] mt-2">
@@ -355,7 +386,7 @@ export function ThemePreviewSandbox({
                   { day: "S", val: 25 }
                 ].map((item, idx) => (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-1.5">
-                    <div className="w-full bg-accent/15 rounded-t-sm relative flex items-end overflow-hidden" style={{ height: "65px" }}>
+                    <div className="w-full rounded-t-sm relative flex items-end overflow-hidden" style={{ height: "65px", backgroundColor: themeState.uiAccent || themeState.muted || "rgba(0,0,0,0.05)" }}>
                       <div 
                         className="w-full rounded-t-sm transition-all duration-500" 
                         style={{ 
@@ -375,33 +406,38 @@ export function ThemePreviewSandbox({
         return (
           <div className="flex flex-col flex-1 overflow-hidden gap-2">
             <div 
-              className="p-3 border rounded-xl flex flex-col gap-3 flex-1 overflow-y-auto max-h-[300px]"
-              style={{ backgroundColor: glassBg, borderColor: themeState.border }}
+              className="p-3 border flex flex-col gap-3 flex-1 overflow-y-auto max-h-[300px]"
+              style={{
+                backgroundColor: glassBg,
+                backdropFilter: glassBlur,
+                border: glassBorder,
+                boxShadow: getShadowStyle(themeState.cardShadow),
+                borderRadius: cardRadius,
+                color: themeState.cardForeground
+              }}
             >
-              <div className="text-[7.5px] font-mono uppercase text-muted-foreground border-b pb-1" style={{ borderColor: themeState.border }}>
+              <div className="text-[7.5px] font-mono uppercase text-muted-foreground border-b pb-1" style={{ borderColor: themeState.border, color: themeState.mutedForeground }}>
                 App preferences
               </div>
-
-
 
               {/* Auto sync toggle */}
               <div className="flex items-center justify-between select-none">
                 <div className="flex flex-col">
                   <span className="text-[9px] font-bold" style={{ color: themeState.cardForeground }}>Auto-sync</span>
-                  <span className="text-[7px] text-muted-foreground leading-tight">Sync readings in background</span>
+                  <span className="text-[7px] text-muted-foreground leading-tight" style={{ color: themeState.mutedForeground }}>Sync readings in background</span>
                 </div>
                 <button
                   onClick={() => setMockSync(!mockSync)}
                   className="w-7 h-4 rounded-full p-0.5 transition-all duration-300 relative border"
                   style={{
-                    backgroundColor: mockSync ? themeState.accent : "transparent",
+                    backgroundColor: mockSync ? themeState.accent : (themeState.muted || "transparent"),
                     borderColor: mockSync ? themeState.accent : themeState.border
                   }}
                 >
                   <div 
                     className="w-2.5 h-2.5 rounded-full shadow-sm transition-all duration-300"
                     style={{
-                      backgroundColor: mockSync ? themeState.accentForeground : themeState.mutedForeground,
+                      backgroundColor: mockSync ? themeState.accentForeground : (themeState.mutedForeground || themeState.border),
                       transform: mockSync ? "translateX(12px)" : "translateX(0px)"
                     }}
                   />
@@ -409,11 +445,16 @@ export function ThemePreviewSandbox({
               </div>
 
               {/* Font selection mockup dropdown */}
-              <div className="flex flex-col gap-1 mt-1">
+              <div className="flex flex-col gap-1 mt-1 relative">
                 <span className="text-[8px] font-bold" style={{ color: themeState.cardForeground }}>Interface font</span>
                 <div 
-                  className="p-1.5 border rounded-lg text-[8px] font-mono flex justify-between items-center bg-card/40 cursor-pointer"
-                  style={{ borderColor: themeState.border, color: themeState.cardForeground }}
+                  onClick={() => setShowFontPopover(!showFontPopover)}
+                  className="p-1.5 border rounded-lg text-[8px] font-mono flex justify-between items-center bg-card/40 cursor-pointer select-none"
+                  style={{ 
+                    borderColor: themeState.border, 
+                    color: themeState.cardForeground,
+                    backgroundColor: themeState.input || "rgba(0,0,0,0.02)"
+                  }}
                 >
                   <span>
                     {themeState.uiFont === "inter" ? "Inter (default)" :
@@ -421,8 +462,32 @@ export function ThemePreviewSandbox({
                      themeState.uiFont === "roboto" ? "Hanken Grotesk" :
                      themeState.uiFont === "system-ui" ? "System UI" : "Default"}
                   </span>
-                  <Settings2 className="w-2.5 h-2.5 opacity-60" />
+                  <Settings2 className="w-2.5 h-2.5 opacity-60" style={{ color: themeState.accent }} />
                 </div>
+
+                {/* Mock Popover menu */}
+                {showFontPopover && (
+                  <div 
+                    className="absolute right-0 bottom-8 z-30 w-36 p-1 border rounded-lg shadow-lg flex flex-col gap-0.5"
+                    style={{
+                      backgroundColor: popoverBg,
+                      color: popoverFg,
+                      borderColor: themeState.border
+                    }}
+                  >
+                    <div className="px-2 py-1 text-[7px] font-mono uppercase opacity-55 border-b pb-1 mb-1" style={{ borderColor: themeState.border }}>Select font</div>
+                    {["Inter", "Outfit", "Hanken Grotesk", "System UI"].map((font) => (
+                      <div 
+                        key={font}
+                        onClick={() => setShowFontPopover(false)}
+                        className="px-2 py-1 text-[8px] rounded hover:bg-accent/15 cursor-pointer font-sans"
+                        style={{ color: popoverFg }}
+                      >
+                        {font}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -487,12 +552,35 @@ export function ThemePreviewSandbox({
           {previewDevice === "desktop" ? (
             /* Desktop Mockup Screen */
             <div 
-              className={`border border-border/30 rounded-2xl w-full h-[380px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-xl ${themeState.isDark ? "dark" : ""}`}
+              className={`preview-sandbox-root border border-border/30 rounded-2xl w-full h-[380px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-xl ${themeState.isDark ? "dark" : ""}`}
               style={{
                 backgroundColor: resolveColor(themeState.background),
-                fontFamily: getFontFamilyStyle(themeState.uiFont)
-              }}
+                fontFamily: getFontFamilyStyle(themeState.uiFont),
+                // Inject CSS Variables for Tailwind classes and custom CSS overrides
+                "--background": resolveColor(themeState.background),
+                "--foreground": resolveColor(themeState.foreground),
+                "--border": resolveColor(themeState.border),
+                "--card": resolveColor(themeState.cardBackground),
+                "--card-foreground": resolveColor(themeState.cardForeground),
+                "--primary": resolveColor(themeState.accent),
+                "--primary-foreground": resolveColor(themeState.accentForeground),
+                "--secondary": resolveColor(themeState.secondary || (themeState.isDark ? "#1e293b" : "#f1f5f9")),
+                "--secondary-foreground": resolveColor(themeState.secondaryForeground || themeState.foreground),
+                "--muted": resolveColor(themeState.muted),
+                "--muted-foreground": resolveColor(themeState.mutedForeground),
+                "--accent": resolveColor(themeState.uiAccent || themeState.muted),
+                "--accent-foreground": resolveColor(themeState.uiAccentForeground || themeState.accent),
+                "--input": resolveColor(themeState.input || themeState.border),
+                "--ring": resolveColor(themeState.ring || themeState.accent),
+                "--radius": cardRadius,
+                "--card-shadow": getShadowStyle(themeState.cardShadow),
+              } as React.CSSProperties}
             >
+              {/* Custom CSS style tag scoped inside this mockup screen */}
+              {themeState.customCss && (
+                <style dangerouslySetInnerHTML={{ __html: scopeCss(themeState.customCss, ".preview-sandbox-root") }} />
+              )}
+
               {/* Background layers */}
               {(themeState.bgType === "gradient" || themeState.bgType === "image") && (
                 <div 
@@ -551,9 +639,9 @@ export function ThemePreviewSandbox({
                             isActive ? "border-l-primary" : "border-l-transparent opacity-60 hover:opacity-100"
                           }`}
                           style={{ 
-                            backgroundColor: isActive ? `${sidebarActiveBg}15` : "transparent", 
-                            color: isActive ? sidebarActiveBg : sidebarFg,
-                            borderLeftColor: isActive ? sidebarActiveBg : "transparent"
+                            backgroundColor: isActive ? `${themeState.accent}15` : "transparent", 
+                            color: isActive ? themeState.accent : sidebarFg,
+                            borderLeftColor: isActive ? themeState.accent : "transparent"
                           }}
                         >
                           {item.label}
@@ -589,14 +677,44 @@ export function ThemePreviewSandbox({
           ) : (
             /* Mobile Mockup Screen - Centered and Enlarged */
             <div 
-              className={`border border-border/30 rounded-[2.2rem] w-[280px] h-[520px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-2xl ${themeState.isDark ? "dark" : ""}`}
+              className={`preview-sandbox-root border border-border/30 rounded-[2.2rem] w-[280px] h-[520px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-2xl ${themeState.isDark ? "dark" : ""}`}
               style={{
                 backgroundColor: resolveColor(themeState.background),
-                fontFamily: getFontFamilyStyle(themeState.uiFont)
-              }}
+                fontFamily: getFontFamilyStyle(themeState.uiFont),
+                // Inject CSS Variables for Tailwind classes and custom CSS overrides
+                "--background": resolveColor(themeState.background),
+                "--foreground": resolveColor(themeState.foreground),
+                "--border": resolveColor(themeState.border),
+                "--card": resolveColor(themeState.cardBackground),
+                "--card-foreground": resolveColor(themeState.cardForeground),
+                "--primary": resolveColor(themeState.accent),
+                "--primary-foreground": resolveColor(themeState.accentForeground),
+                "--secondary": resolveColor(themeState.secondary || (themeState.isDark ? "#1e293b" : "#f1f5f9")),
+                "--secondary-foreground": resolveColor(themeState.secondaryForeground || themeState.foreground),
+                "--muted": resolveColor(themeState.muted),
+                "--muted-foreground": resolveColor(themeState.mutedForeground),
+                "--accent": resolveColor(themeState.uiAccent || themeState.muted),
+                "--accent-foreground": resolveColor(themeState.uiAccentForeground || themeState.accent),
+                "--input": resolveColor(themeState.input || themeState.border),
+                "--ring": resolveColor(themeState.ring || themeState.accent),
+                "--radius": cardRadius,
+                "--card-shadow": getShadowStyle(themeState.cardShadow),
+              } as React.CSSProperties}
             >
+              {/* Custom CSS style tag scoped inside this mockup screen */}
+              {themeState.customCss && (
+                <style dangerouslySetInnerHTML={{ __html: scopeCss(themeState.customCss, ".preview-sandbox-root") }} />
+              )}
+
               {/* Phone status bar */}
-              <div className="h-6 px-5 pt-2 flex justify-between items-center text-[8px] font-mono opacity-60 z-25 relative select-none">
+              <div 
+                className="h-6 px-5 pt-2 flex justify-between items-center text-[8px] font-mono z-25 relative select-none border-b transition-all"
+                style={{
+                  backgroundColor: secondaryBg,
+                  color: themeState.secondaryForeground || themeState.foreground,
+                  borderColor: `${themeState.border}20`
+                }}
+              >
                 <span>18:15</span>
                 <div className="flex items-center gap-1">
                   <span>5G</span>
@@ -665,11 +783,18 @@ export function ThemePreviewSandbox({
                       }}
                       className="flex flex-col items-center justify-center transition-all py-1 px-2 rounded-lg"
                       style={{ 
-                        color: isActive ? sidebarActiveBg : sidebarFg,
+                        color: isActive ? themeState.accent : sidebarFg,
                         opacity: isActive ? 1 : 0.55
                       }}
                     >
-                      <span className="text-[7.5px] font-bold font-mono uppercase tracking-wider">{item.label}</span>
+                      <div 
+                        className="p-1 px-3 rounded-full transition-all flex items-center justify-center"
+                        style={{
+                          backgroundColor: isActive ? `${themeState.accent}15` : "transparent"
+                        }}
+                      >
+                        <span className="text-[7.5px] font-bold font-mono uppercase tracking-wider">{item.label}</span>
+                      </div>
                     </button>
                   );
                 })}

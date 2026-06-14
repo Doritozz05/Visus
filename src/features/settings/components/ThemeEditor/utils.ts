@@ -47,9 +47,48 @@ export const getFontFamilyStyle = (font?: string) => {
     case "outfit": return "var(--font-heading), sans-serif";
     case "roboto": return "'Hanken Grotesk', sans-serif";
     case "system-ui": return "system-ui, -apple-system, sans-serif";
+    case "serif": return "var(--font-serif), Georgia, serif";
+    case "atkinson": return "'Atkinson Hyperlegible', sans-serif";
+    case "dyslexic": return "'OpenDyslexic', sans-serif";
+    case "sans-serif": return "sans-serif";
     default: return "inherit";
   }
 };
+
+/**
+ * Scopes custom CSS declarations by prefixing selectors with a wrapper selector.
+ * Prevents custom CSS from leaking out of the sandbox and breaking the parent editor UI.
+ */
+export function scopeCss(css: string, prefix: string): string {
+  if (!css) return "";
+  // Remove block comments
+  let cleanCss = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  
+  return cleanCss
+    .split("}")
+    .map((rule) => {
+      const parts = rule.split("{");
+      if (parts.length !== 2) return rule;
+      const selectors = parts[0];
+      const declarations = parts[1];
+      
+      const scopedSelectors = selectors
+        .split(",")
+        .map((sel) => {
+          const trimmed = sel.trim();
+          if (!trimmed) return "";
+          if (trimmed.startsWith("@")) {
+            return trimmed;
+          }
+          return `${prefix} ${trimmed}`;
+        })
+        .filter(Boolean)
+        .join(", ");
+        
+      return `${scopedSelectors} {${declarations}`;
+    })
+    .join("}");
+}
 
 export const PRESETS_TEMPLATES = [
   {
