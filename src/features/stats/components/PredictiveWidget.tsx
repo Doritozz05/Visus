@@ -75,9 +75,9 @@ export function PredictiveWidget({ books, summary }: PredictiveWidgetProps) {
                     <span className="text-[10px] font-mono font-bold text-primary shrink-0">{pred.percentage}%</span>
                   </div>
                   
-                  <div className="w-full bg-accent/50 h-1 rounded-full overflow-hidden mb-3">
-                    <div 
-                      className="bg-primary h-full rounded-full transition-all duration-500" 
+                  <div className="w-full bg-accent/50 h-1 rounded-lg overflow-hidden mb-3">
+                    <div
+                      className="bg-primary h-full rounded-lg transition-all duration-500"
                       style={{ width: `${pred.percentage}%` }}
                     />
                   </div>

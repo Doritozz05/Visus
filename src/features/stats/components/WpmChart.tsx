@@ -155,7 +155,7 @@ export function WpmChart({ logs }: WpmChartProps) {
           <p className="text-[10px] font-mono text-muted-foreground mt-0.5">WPM dynamics in: <span className="font-semibold text-primary">&quot;{activeLog.bookTitle.split(" - ")[0]}&quot;</span></p>
         </div>
         {fatigueZone && (
-          <div className="flex items-center gap-1 text-[9px] font-mono text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 animate-pulse">
+          <div className="flex items-center gap-1 text-[9px] font-mono text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 animate-pulse">
             <AlertCircle className="w-3.5 h-3.5" />
             <span>Fatigue: -{fatigueZone.dropPercentage}% WPM</span>
           </div>

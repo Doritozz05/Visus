@@ -94,7 +94,7 @@ export const PomodoroTimer = React.memo(function PomodoroTimer() {
           <Timer className="w-4 h-4 text-primary" />
           <span>Pomodoro</span>
         </div>
-        <div className={`flex items-center gap-1 text-[10px] font-mono bg-primary/10 px-2 py-0.5 rounded-full transition-all ${
+        <div className={`flex items-center gap-1 text-[10px] font-mono bg-primary/10 px-2 py-0.5 rounded-lg transition-all ${
           completedCycles >= 4 ? 'text-indigo-500 bg-indigo-500/10 shadow-[0_0_8px_rgba(99,102,241,0.3)] animate-achievement-shine' :
           completedCycles >= 3 ? 'text-yellow-500 bg-yellow-500/10' :
           completedCycles >= 2 ? 'text-slate-400 bg-slate-400/10' :

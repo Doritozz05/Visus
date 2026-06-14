@@ -154,7 +154,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
   };
 
   return (
-    <div className="bg-card border border-border/20 p-5 rounded-lg h-full flex flex-col justify-between group hover:border-primary/40 transition-all shadow-md liquid-glass">
+    <div className="bg-card border border-border/20 p-5 rounded-xl h-full flex flex-col justify-between group hover:border-primary/40 transition-all shadow-md liquid-glass overflow-hidden isolate">
       <div className="w-full border-b border-border/10 pb-2 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground font-bold">
@@ -199,7 +199,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
             return (
               <div
                 key={ach.id}
-                className={`border rounded-lg p-2.5 flex flex-col items-center justify-between text-center transition-all relative group/item ${
+                className={`border rounded-lg p-2.5 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden ${
                   isUnlocked
                     ? `${style.glow} border-primary/30 hover:border-primary/60 hover:scale-[1.05] cursor-default`
                     : "bg-background/25 border-border/10 opacity-60 filter grayscale"
@@ -211,7 +211,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
                 )}
 
                 {/* Badge Icon - Slightly smaller */}
-                <div className={`relative w-10 h-10 rounded-full bg-background/50 border border-border/20 flex items-center justify-center shadow-inner mb-2 ${isUnlocked ? 'animate-achievement-shine' : ''}`}>
+                <div className={`relative w-10 h-10 rounded-lg bg-background/50 border border-border/20 flex items-center justify-center shadow-inner mb-2 ${isUnlocked ? 'animate-achievement-shine' : ''}`}>
                   {isUnlocked ? (
                     React.cloneElement(style.icon as React.ReactElement<any>, { className: "w-5 h-5" })
                   ) : (
@@ -258,7 +258,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
               <div
                 key={milestone.id}
                 onClick={() => isUnlocked && setSelectedMascot(milestone)}
-                className={`border rounded-lg p-2.5 flex flex-col items-center justify-between text-center transition-all relative group/item ${
+                className={`border rounded-lg p-2.5 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden ${
                   isUnlocked
                     ? "shadow-[0_0_15px_rgba(79,70,229,0.15)] border-primary/30 hover:border-primary/60 hover:scale-[1.05] bg-primary/5 cursor-pointer"
                     : "bg-background/25 border-border/10 opacity-60 filter grayscale cursor-default"
@@ -275,7 +275,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
                     {milestone.renderPreview(days)}
                   </div>
                   {!isUnlocked && (
-                    <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] rounded-full flex items-center justify-center">
+                    <div className="absolute inset-0 bg-background/60 backdrop-blur-md rounded-lg flex items-center justify-center overflow-hidden border border-border/5">
                       <Lock className="w-3.5 h-3.5 text-muted-foreground" />
                     </div>
                   )}
