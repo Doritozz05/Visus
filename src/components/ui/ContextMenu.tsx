@@ -278,13 +278,18 @@ function ContextMenuUI({ x, y, items, onClose }: ContextMenuUIProps) {
                 className={`
                   group flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition-all
                   ${item.tone === "danger"
-                    ? "text-rose-500 hover:bg-rose-500/10"
+                    ? "text-foreground hover:bg-rose-500/10 hover:text-rose-500"
                     : "text-foreground hover:bg-accent/80"}
                   ${item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-default"}
                 `}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
+                  <span className={`
+                    flex h-5 w-5 shrink-0 items-center justify-center transition-colors
+                    ${item.tone === "danger"
+                      ? "text-rose-500 group-hover:text-rose-600"
+                      : "text-muted-foreground group-hover:text-foreground"}
+                  `}>
                     {item.icon}
                   </span>
                   <span className="truncate text-sm font-medium">{item.label}</span>

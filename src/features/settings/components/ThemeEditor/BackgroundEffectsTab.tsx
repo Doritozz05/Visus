@@ -146,7 +146,7 @@ export function BackgroundEffectsTab({
                       bgType: "solid"
                     }));
                   }}
-                  className="w-full py-1.5 px-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full py-1.5 px-3 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors shadow-sm"
                 >
                   <Trash2 className="h-3.5 w-3.5" /> Clear background image
                 </button>

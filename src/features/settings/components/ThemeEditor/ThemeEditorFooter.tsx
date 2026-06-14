@@ -27,7 +27,7 @@ export function ThemeEditorFooter({
           <button
             type="button"
             onClick={() => setShowDeleteConfirm(true)}
-            className="py-2.5 px-4 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+            className="py-2.5 px-4 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
           >
             <Trash2 className="w-4 h-4" /> Delete theme
           </button>

@@ -338,7 +338,7 @@ export default function DashboardClient() {
                 <button
                   onClick={handleResetStats}
                   disabled={logs.length === 0}
-                  className="flex items-center gap-1 px-2.5 py-1.5 border border-destructive/30 hover:border-destructive/60 hover:bg-destructive/10 rounded text-[10px] font-mono uppercase tracking-wider text-destructive transition-all"
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-destructive hover:bg-destructive/90 rounded text-[10px] font-mono uppercase tracking-wider text-destructive-foreground transition-all shadow-sm"
                   title="Reset all stats history"
                 >
                   <Trash2 className="w-3.5 h-3.5" />

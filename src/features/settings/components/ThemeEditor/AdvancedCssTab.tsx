@@ -30,7 +30,7 @@ export function AdvancedCssTab({
       {/* Advanced CSS Injection */}
       <div>
         <h3 className="text-xs font-bold font-heading mb-1.5 flex items-center gap-1.5">
-          Custom CSS playground <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[8px] uppercase font-mono border border-amber-500/20">Developer mode</span>
+          Custom CSS playground <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[8px] uppercase font-mono border border-primary/20">Developer mode</span>
         </h3>
         <p className="text-[10px] text-muted-foreground mb-3">
           Write raw CSS declarations. Targets classes: <code>aside</code> (sidebar), <code>.liquid-glass</code> (cards), <code>.reader-columns-canvas</code> (reader text).
@@ -105,10 +105,10 @@ export function AdvancedCssTab({
       </div>
 
       {/* Local Storage warning */}
-      <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 rounded-xl flex gap-3 text-[10px] leading-relaxed">
-        <ShieldAlert className="w-5 h-5 shrink-0 text-amber-500" />
+      <div className="p-3 bg-accent/40 border border-border/60 text-muted-foreground rounded-xl flex gap-3 text-[10px] leading-relaxed">
+        <ShieldAlert className="w-5 h-5 shrink-0 text-primary" />
         <div>
-          <span className="font-bold block mb-0.5">Offline storage warning</span>
+          <span className="font-bold block mb-0.5 text-foreground">Offline storage warning</span>
           Custom backgrounds utilizing local image uploads convert to base64 which occupies storage space. We recommend uploading optimized images (under 250KB) to prevent exceeding browser storage quotas.
         </div>
       </div>

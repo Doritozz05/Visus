@@ -90,7 +90,7 @@ export function AccountSettingsForm() {
           {user ? (
             <button 
               onClick={logout}
-              className="w-full py-2.5 mt-auto bg-destructive/10 text-destructive border border-destructive/20 rounded-lg font-sans text-xs uppercase tracking-wider hover:bg-destructive hover:text-destructive-foreground transition-all font-bold flex items-center justify-center gap-2"
+              className="w-full py-2.5 mt-auto bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg font-sans text-xs uppercase tracking-wider transition-all font-bold flex items-center justify-center gap-2 shadow-sm"
             >
               <LogOut className="h-4 w-4" />
               Sign Out
