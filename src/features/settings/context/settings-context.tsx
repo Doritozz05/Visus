@@ -73,7 +73,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoaded(true);
     }
-  }, []);
+  }, [refreshCustomFonts]);
 
   // Save settings to localStorage on change
   React.useEffect(() => {
