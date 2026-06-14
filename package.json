@@ -60,5 +60,10 @@
   },
   "overrides": {
     "postcss": "^8.5.15"
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "not op_mini all"
+  ]
 }

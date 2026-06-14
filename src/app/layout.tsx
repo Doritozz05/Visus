@@ -60,7 +60,49 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Outfit-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Outfit-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var stored = localStorage.getItem('visus_settings');
+                var theme = 'dark-violet';
+                var isDark = true;
+                if (stored) {
+                  var parsed = JSON.parse(stored);
+                  if (parsed && parsed.general && parsed.general.theme) {
+                    theme = parsed.general.theme;
+                    var legacyThemes = ["dark", "midnight", "sepia", "nordic", "nord", "forest", "light", "matrix-green"];
+                    if (legacyThemes.includes(theme)) {
+                      if (theme === "dark" || theme === "midnight" || theme === "forest" || theme === "matrix-green") {
+                        theme = "dark-violet";
+                      } else if (theme === "light") {
+                        theme = "light";
+                        isDark = false;
+                      } else if (theme === "sepia") {
+                        theme = "sepia";
+                        isDark = false;
+                      } else if (theme === "nordic" || theme === "nord") {
+                        theme = "nord";
+                      }
+                    } else if (theme === "light" || theme === "sepia") {
+                       isDark = false;
+                    }
+                  }
+                }
+                var root = document.documentElement;
+                root.classList.add('theme-' + theme);
+                if (isDark) root.classList.add('dark');
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
         <Providers>{children}</Providers>
         {/* <Analytics />
