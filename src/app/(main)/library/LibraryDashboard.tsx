@@ -10,6 +10,7 @@ import { Eraser, Search, Plus, Library, Flame, Pencil, BookOpen, ChevronRight } 
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { FancyTabs } from "@/components/ui/FancyTabs";
 
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { StatsService } from "@/core/services/stats-service";
@@ -427,25 +428,17 @@ export default function LibraryDashboard() {
                   />
                 </div>
                 <div className="flex gap-2 items-center w-full sm:w-auto px-2 shrink-0">
-                  <div className="flex bg-background border border-border/10 p-1 rounded-lg liquid-glass">
-                    {[
+                  <FancyTabs
+                    tabs={[
                       { id: "active", label: "Active" },
                       { id: "completed", label: "Completed" },
                       { id: "archived", label: "Archived" }
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
-                        className={`px-3 py-1.5 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
-                          activeTab === tab.id
-                            ? "bg-accent text-primary font-bold shadow-sm"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
+                    ]}
+                    activeTab={activeTab}
+                    onChange={(id) => setActiveTab(id as any)}
+                    layoutId="active-library-tab"
+                    variant="pill"
+                  />
                   <button 
                     onClick={() => setIsAddModalOpen(true)}
                     className="w-9 h-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:brightness-110 transition-all shadow-md"

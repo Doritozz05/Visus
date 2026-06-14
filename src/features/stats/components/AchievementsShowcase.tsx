@@ -11,6 +11,7 @@ import { MASTER_ACHIEVEMENTS, Achievement } from "../services/achievement-dispat
 import { Award, Lock, Trophy, Medal, Crown } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { STREAK_MILESTONES, StreakMilestone } from "../milestones";
+import { FancyTabs } from "@/components/ui/FancyTabs";
 
 interface AchievementsShowcaseProps {
   userId: string;
@@ -166,28 +167,17 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
               : "Visi mascot costumes unlocked by your reading streak"}
           </p>
         </div>
-        <div className="flex bg-accent/40 p-0.5 rounded-lg border border-border/10 shrink-0 self-end sm:self-auto">
-          <button
-            onClick={() => setActiveTab("achievements")}
-            className={`px-3 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider font-bold transition-all ${
-              activeTab === "achievements"
-                ? "bg-primary text-primary-foreground shadow"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Achievements
-          </button>
-          <button
-            onClick={() => setActiveTab("mascots")}
-            className={`px-3 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider font-bold transition-all ${
-              activeTab === "mascots"
-                ? "bg-primary text-primary-foreground shadow"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Streak milestones
-          </button>
-        </div>
+        <FancyTabs
+          tabs={[
+            { id: "achievements", label: "Achievements" },
+            { id: "mascots", label: "Streak milestones" }
+          ]}
+          activeTab={activeTab}
+          onChange={(id) => setActiveTab(id as any)}
+          layoutId="active-achievement-tab"
+          variant="pill"
+          className="shrink-0 self-end sm:self-auto bg-accent/40"
+        />
       </div>
 
       {activeTab === "achievements" ? (
