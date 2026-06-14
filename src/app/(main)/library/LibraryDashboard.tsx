@@ -275,12 +275,12 @@ export default function LibraryDashboard() {
           className="border-b border-border/20 pb-4 mb-6 flex flex-col md:flex-row justify-between items-end gap-4 shrink-0"
         >
           <div>
-            <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Library &amp; archives</h1>
+            <div className="flex items-center gap-3 mt-1 mb-1">
               <h2 className="text-xs font-mono uppercase tracking-widest text-primary">Digital assets</h2>
               <div className="h-3 w-px bg-border/40"></div>
               <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{books.length} Objects indexed</span>
             </div>
-            <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Library &amp; archives</h1>
           </div>
           <div className="flex items-center gap-6">
             <Link 

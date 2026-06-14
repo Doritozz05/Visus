@@ -27,9 +27,9 @@ export default function Home() {
 
         {/* Prototype Navigation Panels */}
         <div className="relative pt-6 border-t border-border/40 space-y-4">
-          <h3 className="text-sm font-semibold tracking-wider uppercase text-primary text-left font-heading">
+          <h2 className="text-sm font-semibold tracking-wider uppercase text-primary text-left font-heading">
             Interactive prototype screens (Visus Reader Pro)
-          </h3>
+          </h2>
           <div className="grid grid-cols-2 gap-4">
             <Link 
               href="/dashboard"

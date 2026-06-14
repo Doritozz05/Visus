@@ -9,11 +9,11 @@ export const viewport: Viewport = {
   themeColor: "#6366f1",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: "Visus - Advanced Speed Reading Platform",
   description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
   manifest: "/manifest.json",

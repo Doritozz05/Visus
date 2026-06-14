@@ -110,8 +110,8 @@ export default function DashboardClient() {
       {/* Bento Header */}
       <header className="sticky top-0 bg-background z-30 border-b border-border/20 pt-4 md:pt-8 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4">
         <div>
-          <h2 className="text-xs font-mono uppercase tracking-widest text-primary mb-2">System Diagnostics</h2>
           <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Telemetry & Performance</h1>
+          <h2 className="text-xs font-mono uppercase tracking-widest text-primary mb-2 mt-1">System Diagnostics</h2>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
