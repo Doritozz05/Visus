@@ -132,22 +132,22 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
 
   const tierStyles = {
     bronze: {
-      glow: "shadow-[0_0_15px_rgba(217,119,6,0.2)] border-amber-500/30 bg-amber-500/5",
+      glow: "shadow-[0_0_15px_rgba(217,119,6,0.2)] border-amber-500/30 bg-card liquid-glass",
       icon: <Award className="w-6 h-6 text-amber-600" />,
       textColor: "text-amber-700 dark:text-amber-500"
     },
     silver: {
-      glow: "shadow-[0_0_15px_rgba(148,163,184,0.2)] border-slate-400/30 bg-slate-400/5",
+      glow: "shadow-[0_0_15px_rgba(148,163,184,0.2)] border-slate-400/30 bg-card liquid-glass",
       icon: <Medal className="w-6 h-6 text-slate-400" />,
       textColor: "text-slate-600 dark:text-slate-300"
     },
     gold: {
-      glow: "shadow-[0_0_20px_rgba(234,179,8,0.25)] border-yellow-500/40 bg-yellow-500/5",
+      glow: "shadow-[0_0_20px_rgba(234,179,8,0.25)] border-yellow-500/40 bg-card liquid-glass",
       icon: <Trophy className="w-6 h-6 text-yellow-500" />,
       textColor: "text-yellow-700 dark:text-yellow-400"
     },
     platinum: {
-      glow: "shadow-[0_0_25px_rgba(99,102,241,0.3)] border-indigo-400/50 bg-indigo-500/5",
+      glow: "shadow-[0_0_25px_rgba(99,102,241,0.3)] border-indigo-400/50 bg-card liquid-glass",
       icon: <Crown className="w-6 h-6 text-indigo-400" />,
       textColor: "text-indigo-600 dark:text-indigo-300"
     }
@@ -202,7 +202,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
                 className={`border rounded-xl p-4 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden min-h-[170px] ${
                   isUnlocked
                     ? `${style.glow} border-primary/30 hover:border-primary/60 hover:scale-[1.05] cursor-default`
-                    : "bg-background/25 border-border/10 opacity-60 filter grayscale"
+                    : "bg-card border-border/10 opacity-60 filter grayscale liquid-glass"
                 }`}
               >
                 {/* Shine Overlay wrapper to avoid clipping external shadows */}
@@ -211,7 +211,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
                 )}
 
                 {/* Badge Icon - Premium sized */}
-                <div className={`relative w-14 h-14 rounded-xl bg-background/50 border border-border/20 flex items-center justify-center shadow-inner mb-3 ${isUnlocked ? 'animate-achievement-shine' : ''}`}>
+                <div className={`relative w-14 h-14 rounded-xl bg-background border border-border/20 flex items-center justify-center shadow-inner mb-3 ${isUnlocked ? 'animate-achievement-shine' : ''}`}>
                   {isUnlocked ? (
                     React.cloneElement(style.icon as React.ReactElement<any>, { className: "w-7 h-7" })
                   ) : (
@@ -264,8 +264,8 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
                 onClick={() => isUnlocked && setSelectedMascot(milestone)}
                 className={`border rounded-xl p-4 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden min-h-[170px] ${
                   isUnlocked
-                    ? "shadow-[0_0_15px_rgba(79,70,229,0.15)] border-primary/30 hover:border-primary/60 hover:scale-[1.05] bg-primary/5 cursor-pointer"
-                    : "bg-background/25 border-border/10 opacity-60 filter grayscale cursor-default"
+                    ? "shadow-[0_0_15px_rgba(79,70,229,0.15)] border-primary/30 hover:border-primary/60 hover:scale-[1.05] bg-card liquid-glass cursor-pointer"
+                    : "bg-card border-border/10 opacity-60 filter grayscale cursor-default liquid-glass"
                 }`}
               >
                 {/* Shine Overlay wrapper to avoid clipping external shadows */}
@@ -279,7 +279,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
                     {milestone.renderPreview(days)}
                   </div>
                   {!isUnlocked && (
-                    <div className="absolute inset-0 bg-background/60 backdrop-blur-md rounded-xl flex items-center justify-center overflow-hidden border border-border/5">
+                    <div className="absolute inset-0 bg-background/90 backdrop-blur-sm rounded-xl flex items-center justify-center overflow-hidden border border-border/5">
                       <Lock className="w-5 h-5 text-muted-foreground" />
                     </div>
                   )}
