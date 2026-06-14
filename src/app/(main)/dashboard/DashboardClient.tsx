@@ -34,7 +34,6 @@ export default function DashboardClient() {
   const { settings, updateGeneralSettings } = useSettings();
   const { yearlyReadingGoal } = settings.general;
   const { user } = useAuth();
-  const [isHydrated, setIsHydrated] = React.useState(false);
   const [isEditingGoal, setIsEditingGoal] = React.useState(false);
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
   const [tempGoal, setTempGoal] = React.useState(yearlyReadingGoal);
@@ -59,7 +58,6 @@ export default function DashboardClient() {
 
     setLogs(sortedLogs);
     setSummary(statsSummary);
-    setIsHydrated(true);
   }, [books]);
 
   React.useEffect(() => {
@@ -103,13 +101,7 @@ export default function DashboardClient() {
     setShowResetConfirm(true);
   };
 
-  if (!isHydrated) {
-    return (
-      <div className="flex-1 flex items-center justify-center min-h-screen">
-        <LoadingSpinner message="Loading system diagnostics..." />
-      </div>
-    );
-  }
+
 
   const userId = user?.id || "local";
 

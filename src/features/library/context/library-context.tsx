@@ -740,13 +740,6 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         forceSync
       }}
     >
-      {/* Optional built-in blocking overlay can be added here or handled by consumers checking isInitialSyncing */}
-      {isInitialSyncing && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 font-mono text-sm uppercase tracking-wider text-muted-foreground animate-pulse">Synchronizing Library...</p>
-        </div>
-      )}
       {children}
     </LibraryContext.Provider>
   );
