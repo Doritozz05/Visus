@@ -408,6 +408,19 @@ class DbService {
       }));
     });
   }
+
+  async clearAllUserAchievements(): Promise<void> {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.USER_ACHIEVEMENTS, "readwrite");
+        const store = transaction.objectStore(STORES.USER_ACHIEVEMENTS);
+        const request = store.clear();
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      }));
+    });
+  }
 }
 
 export const dbService = new DbService();

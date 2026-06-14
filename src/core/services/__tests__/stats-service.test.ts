@@ -8,12 +8,21 @@ vi.mock("../db-service", () => ({
     getAllLogs: vi.fn(),
     saveLog: vi.fn(),
     clearAllLogs: vi.fn(),
+    clearAllUserAchievements: vi.fn(),
+  },
+}));
+
+vi.mock("@/lib/supabase", () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+    },
   },
 }));
 
 describe("StatsService", () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
     
     // Use stubGlobal to avoid read-only property errors and preserve jsdom environment
     vi.stubGlobal("crypto", {
@@ -128,7 +137,11 @@ describe("StatsService", () => {
 
   describe("resetStats", () => {
     it("should call dbService.clearAllLogs", async () => {
+      const errSpy = vi.spyOn(console, "error").mockImplementation((...args) => {
+        console.log("LOGGED ERROR:", ...args);
+      });
       await StatsService.resetStats();
+      errSpy.mockRestore();
       expect(dbService.clearAllLogs).toHaveBeenCalled();
     });
   });

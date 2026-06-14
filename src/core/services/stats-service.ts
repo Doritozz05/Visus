@@ -135,8 +135,25 @@ export class StatsService {
   static async resetStats(): Promise<void> {
     if (typeof window !== "undefined") {
       try {
+        const { supabase } = await import("@/lib/supabase");
+        const { data: { session } } = await supabase.auth.getSession();
+        const isLoggedIn = !!session?.user?.id;
+
+        // Always clear local reading logs
         await dbService.clearAllLogs();
-      } catch (_) {}
+
+        if (isLoggedIn) {
+          // If logged in: Keep achievements, only delete logs from cloud
+          try {
+            await supabase.from("reading_logs").delete().eq("user_id", session!.user.id);
+          } catch (_) {}
+        } else {
+          // If guest: Wipe local achievements too so they can start completely fresh
+          await dbService.clearAllUserAchievements();
+        }
+      } catch (err) {
+        console.error("[StatsService] Error resetting stats:", err);
+      }
     }
   }
 }

@@ -60,16 +60,16 @@ export const MASTER_ACHIEVEMENTS: Achievement[] = [
 
 export class AchievementDispatcher {
   /**
-   * Helper to fetch current authenticated user ID, or fallback to 'local-user'
+   * Helper to fetch current authenticated user ID, or fallback to 'local'
    */
   static async getCurrentUserId(): Promise<string> {
-    if (typeof window === "undefined") return "local-user";
+    if (typeof window === "undefined") return "local";
     try {
       const { supabase } = await import("@/lib/supabase");
       const { data: { session } } = await supabase.auth.getSession();
-      return session?.user?.id || "local-user";
+      return session?.user?.id || "local";
     } catch (_) {
-      return "local-user";
+      return "local";
     }
   }
 
@@ -168,7 +168,7 @@ export class AchievementDispatcher {
           this.triggerToast(ach);
           
           // Push to Supabase if logged in
-          if (userId !== "local-user") {
+          if (userId !== "local") {
             this.pushUserAchievementToCloud(userId, ach.id, currentProgress, targetProgress);
           }
         }
