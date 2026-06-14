@@ -100,7 +100,7 @@ export function AccountSettingsForm() {
               href="/login"
               className="w-full mt-auto py-2.5 bg-primary text-primary-foreground rounded-lg font-sans text-xs uppercase tracking-wider hover:brightness-110 transition-all font-bold text-center"
             >
-              Login / Register
+              Login / register
             </Link>
           )}
         </section>
@@ -148,7 +148,7 @@ export function AccountSettingsForm() {
               className="w-full py-3 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border border-primary/20 rounded-xl font-sans text-xs uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-bold group"
             >
               <Cloud className={`h-5 w-5 ${isSyncing ? "animate-spin" : "group-hover:scale-110 transition-transform"}`} />
-              {isSyncing ? "Synchronizing..." : "Synchronize Library Now"}
+              {isSyncing ? "Synchronizing..." : "Synchronize library now"}
             </button>
           </div>
         </section>

@@ -97,6 +97,10 @@ test.describe('Visus Sentence Casing Validation', () => {
     const clusterTab = page.locator('button', { hasText: 'Cluster' });
     await expect(clusterTab).toBeVisible();
 
+    const accountTab = page.locator('button', { hasText: 'Account & Sync' });
+    await expect(accountTab).toBeVisible();
+    await accountTab.click();
+
     // Profile section
     const profileHeading = page.locator('h3', { hasText: 'Local profile' });
     await expect(profileHeading).toBeVisible();
@@ -104,7 +108,7 @@ test.describe('Visus Sentence Casing Validation', () => {
     const guestReader = page.locator('h4', { hasText: 'Guest reader' });
     await expect(guestReader).toBeVisible();
 
-    const loginButton = page.locator('button', { hasText: 'Login / register' });
+    const loginButton = page.locator('a, button', { hasText: 'Login / register' });
     await expect(loginButton).toBeVisible();
 
     // Cloud storage section
@@ -114,7 +118,7 @@ test.describe('Visus Sentence Casing Validation', () => {
     const syncStatusLabel = page.locator('span', { hasText: 'Cloud sync status' });
     await expect(syncStatusLabel).toBeVisible();
 
-    const forceSyncButton = page.locator('button', { hasText: 'Force DB synchronize' });
+    const forceSyncButton = page.locator('button', { hasText: 'Synchronize library now' });
     await expect(forceSyncButton).toBeVisible();
   });
 });

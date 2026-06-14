@@ -106,9 +106,9 @@ export default function DashboardClient() {
   const userId = user?.id || "local";
 
   return (
-    <div className="p-4 md:p-8 pb-24 md:pb-12 max-w-7xl mx-auto w-full transition-all duration-300">
+    <div className="px-4 md:px-8 pb-24 md:pb-12 max-w-7xl mx-auto w-full transition-all duration-300">
       {/* Bento Header */}
-      <header className="border-b border-border/20 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4">
+      <header className="sticky top-0 bg-background z-30 border-b border-border/20 pt-4 md:pt-8 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4">
         <div>
           <h2 className="text-xs font-mono uppercase tracking-widest text-primary mb-2">System Diagnostics</h2>
           <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Telemetry & Performance</h1>
