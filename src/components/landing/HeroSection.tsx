@@ -37,10 +37,10 @@ export function HeroSection() {
         </motion.div>
 
         <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight font-heading leading-[1.05] mb-6">
-          Read Faster. <br className="hidden sm:block" />
-          Retain More. <br />
+          Read faster. <br className="hidden sm:block" />
+          Retain more. <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-emerald-400 to-primary bg-[length:200%_auto] animate-gradient">
-            Entirely Private.
+            Entirely private.
           </span>
         </motion.h1>
 
@@ -53,25 +53,25 @@ export function HeroSection() {
             href="/library"
             className="flex items-center justify-center gap-2 bg-foreground text-background font-bold text-lg px-8 py-4 rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(var(--primary),0.5)] group w-full sm:w-auto"
           >
-            Start Reading Now
+            Start reading now
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
             href="/dashboard"
             className="flex items-center justify-center gap-2 bg-transparent text-foreground font-semibold text-lg px-8 py-4 rounded-full hover:bg-accent transition-colors border border-border w-full sm:w-auto"
           >
-            View Dashboard
+            View dashboard
           </Link>
         </motion.div>
 
         {/* Floating Mini RSVP Demo */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="w-full max-w-2xl relative"
         >
           {/* Decorative glow behind the RSVP player */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
-          
+
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}

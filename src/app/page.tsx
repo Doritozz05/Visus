@@ -14,7 +14,7 @@ export default function Home() {
       </div>
 
       {/* Navbar */}
-      <nav className="relative z-10 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto backdrop-blur-md sticky top-0 bg-background/50 border-b border-border/10">
+      <nav className="sticky z-10 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto backdrop-blur-md top-0 bg-background/50 border-b border-border/10">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center shadow-lg shadow-primary/20">
             <Eye className="w-5 h-5 text-white" />
@@ -28,25 +28,25 @@ export default function Home() {
           <Link href="/dashboard" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
             Dashboard
           </Link>
-          <Link 
-            href="/library" 
+          <Link
+            href="/library"
             className="text-sm font-bold bg-foreground text-background px-4 py-2 rounded-full hover:bg-foreground/90 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
           >
-            Launch App
+            Launch app
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </nav>
 
       <HeroSection />
-      
+
       <div className="relative">
         <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
         <BentoFeatures />
       </div>
 
       <Testimonials />
-      
+
       <FaqSection />
 
       {/* CTA Section */}
@@ -58,11 +58,11 @@ export default function Home() {
         <p className="text-xl text-muted-foreground mb-10 relative z-10 max-w-2xl mx-auto">
           Join readers who are consuming knowledge faster, retaining more, and building better habits with Visus.
         </p>
-        <Link 
-          href="/library" 
+        <Link
+          href="/library"
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-lg px-10 py-5 rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(var(--primary),0.5)] group relative z-10"
         >
-          Start Reading Now
+          Start reading now
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </Link>
       </section>

@@ -23,14 +23,14 @@ function getOrpIndex(word: string) {
 
 export function MiniRSVP() {
   const [index, setIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (!isPlaying) return;
 
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % WORD_LIST.length);
-    }, 250); // 240 WPM
+    }, 200); // 300 WPM
 
     return () => clearInterval(interval);
   }, [isPlaying]);
@@ -43,7 +43,7 @@ export function MiniRSVP() {
   const suffix = currentWord.substring(orpIndex + 1);
 
   return (
-    <div className="w-full max-w-sm mx-auto bg-card border border-border/50 rounded-3xl p-6 shadow-2xl relative overflow-hidden backdrop-blur-xl group">
+    <div className="w-full max-w-2xl mx-auto bg-card border border-border/50 rounded-3xl p-8 shadow-2xl relative overflow-hidden backdrop-blur-xl group">
       {/* Subtle grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] opacity-20" />
       
@@ -54,11 +54,12 @@ export function MiniRSVP() {
       <div className="h-28 flex items-center justify-center relative w-full font-serif text-4xl md:text-5xl tracking-wide">
         
         {/* 
-          Flexbox magic for absolute ORP centering. 
-          Both flex-1 sides push the center element exactly to the middle of the container. 
+          Flexbox magic for optimal ORP positioning. 
+          Using 40/60 split (flex-[4] and flex-[6]) shifts the ORP to the left,
+          which balances the visual weight of longer suffixes.
         */}
         <div className="flex w-full items-center">
-          <div className="flex-1 text-right text-muted-foreground whitespace-pre">
+          <div className="flex-[4] text-right text-muted-foreground whitespace-pre">
             {prefix}
           </div>
           
@@ -66,7 +67,7 @@ export function MiniRSVP() {
             {orp}
           </div>
           
-          <div className="flex-1 text-left text-muted-foreground whitespace-pre">
+          <div className="flex-[6] text-left text-muted-foreground whitespace-pre">
             {suffix}
           </div>
         </div>

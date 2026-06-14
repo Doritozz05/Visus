@@ -16,11 +16,11 @@ export function BentoFeatures() {
           Visus is built like a modern developer tool: blazingly fast, entirely offline-capable, and obsessively focused on typography and performance.
         </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
+
         {/* Card 1: Themes & Typography */}
-        <SpotlightCard className="md:col-span-2 p-8 md:p-12 flex flex-col md:flex-row gap-10 items-center" spotlightColor="rgba(var(--primary), 0.15)">
+        <SpotlightCard className="md:col-span-2 p-8 md:p-12 flex flex-col md:flex-row gap-10 items-center" spotlightColor="hsl(var(--primary) / 0.15)">
           <div className="flex-1">
             <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
               <Settings className="w-6 h-6 text-primary" />
@@ -30,7 +30,7 @@ export function BentoFeatures() {
               Choose from highly legible typography including Inter, Lora, and OpenDyslexic. Switch instantly between Dark, Light, Sepia, and Mono themes.
             </p>
           </div>
-          
+
           <div className="w-full md:w-72 grid grid-cols-2 gap-4 shrink-0">
             <div className="bg-background rounded-2xl border border-border/50 p-6 text-center shadow-lg transition-transform hover:scale-105">
               <span className="font-sans text-3xl font-bold text-foreground block">Aa</span>
@@ -74,16 +74,16 @@ export function BentoFeatures() {
             <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6">
               <BarChart className="w-6 h-6 text-blue-500" />
             </div>
-            <h3 className="text-2xl font-bold font-heading mb-3 tracking-tight">Track Velocity</h3>
+            <h3 className="text-2xl font-bold font-heading mb-3 tracking-tight">Track velocity</h3>
             <p className="text-muted-foreground mb-8">
               Beautiful telemetry visualizes your WPM, streaks, and progress over time.
             </p>
           </div>
-          
+
           {/* Mini Animated Chart */}
           <div className="h-24 w-full flex items-end gap-2 px-2">
             {[40, 70, 45, 90, 65, 80, 100].map((height, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
                 initial={{ height: 0 }}
                 whileInView={{ height: `${height}%` }}
@@ -104,14 +104,14 @@ export function BentoFeatures() {
             <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6">
               <LayoutGrid className="w-6 h-6 text-purple-500" />
             </div>
-            <h3 className="text-3xl font-extrabold font-heading mb-4 tracking-tight">Intelligent Library Parsing.</h3>
+            <h3 className="text-3xl font-extrabold font-heading mb-4 tracking-tight">Intelligent library parsing.</h3>
             <p className="text-muted-foreground text-lg mb-8">
               Our local parser handles massive EPUB files instantly. It extracts semantic chapters, generates crisp covers, and sanitizes HTML for a flawless, distraction-free reading experience.
             </p>
             <div className="flex gap-4">
-               <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold uppercase tracking-wider">Fast</span>
-               <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold uppercase tracking-wider">Accurate</span>
-               <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold uppercase tracking-wider">Semantic</span>
+              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold uppercase tracking-wider">Fast</span>
+              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold uppercase tracking-wider">Accurate</span>
+              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold uppercase tracking-wider">Semantic</span>
             </div>
           </div>
         </SpotlightCard>

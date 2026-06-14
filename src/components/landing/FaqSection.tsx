@@ -38,7 +38,7 @@ export function FaqSection() {
   return (
     <section className="py-24 px-6 max-w-3xl mx-auto border-t border-border/10">
       <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-extrabold font-heading mb-4 tracking-tight">Frequently Asked Questions</h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold font-heading mb-4 tracking-tight">Frequently asked questions</h2>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -46,8 +46,8 @@ export function FaqSection() {
           const isOpen = openIndex === i;
 
           return (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className={cn(
                 "border border-border/40 rounded-2xl bg-card overflow-hidden transition-colors",
                 isOpen ? "border-primary/30 shadow-[0_0_20px_-10px_rgba(var(--primary),0.2)]" : "hover:border-border"
