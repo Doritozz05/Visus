@@ -8,55 +8,57 @@ import { FaqSection } from "@/components/landing/FaqSection";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background text-foreground selection:bg-primary/30 overflow-hidden relative font-sans">
+    <main className="min-h-screen bg-background text-foreground selection:bg-primary/30 overflow-clip relative font-sans">
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-20 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/50 to-emerald-500/50 rounded-full blur-[100px]" />
       </div>
 
       {/* Navbar */}
-      <nav className="sticky z-10 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto backdrop-blur-md top-0 bg-background/50 border-b border-border/10">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center shadow-lg shadow-primary/20">
-            <Eye className="w-5 h-5 text-white" />
+      <div className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/60 border-b border-border/10 shadow-sm">
+        <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center shadow-lg shadow-primary/20">
+              <Eye className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-heading font-extrabold text-xl tracking-tight">Visus</span>
           </div>
-          <span className="font-heading font-extrabold text-xl tracking-tight">Visus</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link href="/library" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
-            Library
-          </Link>
-          <Link href="/dashboard" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
-            Dashboard
-          </Link>
-          <a
-            href="https://github.com/Doritozz05/Visus"
-            target="_blank"
-            rel="noreferrer"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-4 h-4"
+          <div className="flex items-center gap-6">
+            <Link href="/library" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
+              Library
+            </Link>
+            <Link href="/dashboard" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
+              Dashboard
+            </Link>
+            <a
+              href="https://github.com/Doritozz05/Visus"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
             >
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-            </svg>
-            <span>GitHub</span>
-          </a>
-          <Link
-            href="/library"
-            className="text-sm font-bold bg-foreground text-background px-4 py-2 rounded-full hover:bg-foreground/90 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-          >
-            Launch app
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </nav>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
+              >
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+              </svg>
+              <span>GitHub</span>
+            </a>
+            <Link
+              href="/library"
+              className="text-sm font-bold bg-foreground text-background px-4 py-2 rounded-full hover:bg-foreground/90 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            >
+              Launch app
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </nav>
+      </div>
 
       {/* Hero Section (now showing the traditional saccades eye demo) */}
       <HeroSection />

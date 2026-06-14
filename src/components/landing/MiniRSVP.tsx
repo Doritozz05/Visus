@@ -51,7 +51,7 @@ export function MiniRSVP() {
   const suffix = currentWord.substring(orpIndex + 1);
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-card border border-border/50 rounded-3xl p-8 shadow-2xl relative overflow-hidden backdrop-blur-xl group">
+    <div className="w-full max-w-2xl mx-auto bg-card border border-border/50 rounded-3xl p-8 shadow-2xl relative overflow-hidden group">
       {/* Subtle grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] opacity-20" />
 
@@ -71,8 +71,8 @@ export function MiniRSVP() {
             {prefix}
           </div>
 
-          <div className="text-primary font-bold z-10 relative">
-            {orp}
+          <div className="text-primary font-bold z-10 relative flex flex-col items-center justify-center">
+            <span>{orp}</span>
           </div>
 
           <div className="flex-[6] text-left text-muted-foreground whitespace-pre">
