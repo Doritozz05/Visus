@@ -215,32 +215,6 @@ body, .font-sans {
   font-family: var(--font-serif-override), var(--font-serif), serif;
 }
 
-/* Dynamic Accent Color bindings overriding primary theme colors */
-body[data-accent="indigo"] {
-  --primary: 243 75% 59%;
-  --ring: 243 75% 59%;
-}
-body[data-accent="violet"] {
-  --primary: 262 83% 58%;
-  --ring: 262 83% 58%;
-}
-body[data-accent="emerald"] {
-  --primary: 142 71% 45%;
-  --ring: 142 71% 45%;
-}
-body[data-accent="amber"] {
-  --primary: 38 92% 50%;
-  --ring: 38 92% 50%;
-}
-body[data-accent="rose"] {
-  --primary: 343 92% 60%;
-  --ring: 343 92% 60%;
-}
-body[data-accent="blue"] {
-  --primary: 217 91% 56%;
-  --ring: 217 91% 56%;
-}
-
 /* ==========================================================================
    CUSTOM UI UTILITIES & ANIMATIONS
    ========================================================================== */
@@ -253,13 +227,13 @@ body[data-accent="blue"] {
 }
 
 body[data-glass="enabled"] .glass-surface {
-  background: hsla(var(--background-h), var(--background-s), var(--background-l), 0.45);
+  background: hsl(var(--background) / 0.45);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
 .dark body[data-glass="enabled"] .glass-surface {
-  background: hsla(var(--background-h), var(--background-s), var(--background-l), 0.45);
+  background: hsl(var(--background) / 0.45);
 }
 
 .liquid-glass {
@@ -272,15 +246,15 @@ body[data-glass="enabled"] .glass-surface {
 }
 
 body[data-glass="enabled"] .liquid-glass {
-  background: hsl(var(--card) / 0.45);
-  backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--border) / 0.25);
+  background: var(--glass-bg, hsl(var(--card) / 0.45));
+  backdrop-filter: var(--glass-blur, blur(12px));
+  border: var(--glass-border, 1px solid hsl(var(--border) / 0.25));
 }
 
 .dark body[data-glass="enabled"] .liquid-glass {
-  background: hsl(var(--card) / 0.45);
-  backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--border) / 0.1);
+  background: var(--glass-bg, hsl(var(--card) / 0.45));
+  backdrop-filter: var(--glass-blur, blur(12px));
+  border: var(--glass-border, 1px solid hsl(var(--border) / 0.1));
 }
 
 /* Toggle glassmorphism off if user disables it for performance */
@@ -599,19 +573,8 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: var(--card-shadow, none) !important;
 }
 
-/* Dynamic glassmorphism overrides for custom themes - only applied when glassmorphism is enabled */
-.theme-custom body[data-glass="enabled"] .liquid-glass {
-  background: var(--glass-bg) !important;
-  backdrop-filter: var(--glass-blur) !important;
-  border: var(--glass-border) !important;
-}
-
 /* Dynamic page layout transparency when gradient or image background is active */
 body[data-bg-type="image"] .main-layout-wrapper,
 body[data-bg-type="gradient"] .main-layout-wrapper {
   background-color: transparent !important;
 }
-
-
-
-
