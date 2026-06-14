@@ -23,12 +23,12 @@ import { useReaderPlayback } from "@/features/reader/hooks/useReaderPlayback";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
 import { useTelemetryTracker } from "@/features/reader/hooks/useTelemetryTracker";
-import { READER_FONT_CLASSES } from "@/features/reader/utils/reader-fonts";
 import { Quiz } from "@/core/algorithms/quiz-generator";
 import { toast } from "sonner";
 import { PomodoroTimer } from "@/features/stats/components/PomodoroTimer";
 import { Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getReaderFontClass } from "@/lib/typography";
 
 const headerVariants = {
   hidden: { opacity: 0, y: -30 },
@@ -210,8 +210,7 @@ export default function ReaderClient() {
   };
 
   const readerFontClass = React.useMemo(() => {
-    const ff = settings.general.readerFontFamily || "serif";
-    return READER_FONT_CLASSES[ff as keyof typeof READER_FONT_CLASSES] || READER_FONT_CLASSES.serif;
+    return getReaderFontClass(settings.general.readerFontFamily);
   }, [settings.general.readerFontFamily]);
 
   // --- 5. RENDER LOGIC ---

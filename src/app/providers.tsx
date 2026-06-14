@@ -9,9 +9,10 @@ import { ContextMenuProvider } from "@/components/ui/ContextMenu";
 import { hexToHsl, resolveColor } from "@/lib/color-utils";
 import type { CustomTheme } from "@/core/entities/settings";
 import { MotionConfig } from "framer-motion";
+import { getFontFamilyStyle } from "@/lib/typography";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
-  const { settings } = useSettings();
+  const { settings, customFonts } = useSettings();
   const { theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes = [] } = settings.general;
 
   React.useEffect(() => {
@@ -19,6 +20,26 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
 
     const root = document.documentElement;
     const body = document.body;
+
+    // Injects custom fonts stylesheet dynamically
+    let customStyleTag = document.getElementById("visus-custom-fonts-style") as HTMLStyleElement;
+    if (!customStyleTag) {
+      customStyleTag = document.createElement("style");
+      customStyleTag.id = "visus-custom-fonts-style";
+      document.head.appendChild(customStyleTag);
+    }
+    let css = "";
+    customFonts.forEach((font) => {
+      const format = font.fileType.includes("woff2") ? "woff2" : font.fileType.includes("woff") ? "woff" : font.fileType.includes("ttf") ? "truetype" : font.fileType.includes("otf") ? "opentype" : "truetype";
+      css += `
+@font-face {
+  font-family: '${font.name}';
+  src: url('data:${font.fileType};base64,${font.dataBase64}') format('${format}');
+  font-display: swap;
+}
+`;
+    });
+    customStyleTag.innerHTML = css;
 
     const toHslString = (hex: string) => {
       try {
@@ -177,12 +198,6 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       body.setAttribute("data-glass", customTheme.glassmorphism?.enabled ? "enabled" : "disabled");
       body.setAttribute("data-bg-type", customTheme.bgType);
 
-      if (customTheme.uiFont === "system-ui") {
-        root.style.setProperty("--font-sans", "system-ui, -apple-system, sans-serif");
-      } else {
-        root.style.removeProperty("--font-sans");
-      }
-
       // Injects user CSS custom stylesheet if present
       if (customTheme.customCss) {
         const style = document.createElement("style");
@@ -230,12 +245,27 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // Apply active UI font family globally via CSS variables
+    const activeUiFont = customTheme ? (customTheme.uiFont || uiFont) : uiFont;
+    const resolvedUiFont = getFontFamilyStyle(activeUiFont, customFonts);
+
+    if (resolvedUiFont.includes("var(--font-sans)")) {
+      root.style.setProperty("--font-sans-override", "var(--font-sans)");
+    } else if (resolvedUiFont.includes("var(--font-heading)")) {
+      root.style.setProperty("--font-sans-override", "var(--font-heading)");
+    } else if (resolvedUiFont.includes("'Hanken Grotesk'")) {
+      root.style.setProperty("--font-sans-override", "'Hanken Grotesk'");
+    } else {
+      root.style.setProperty("--font-sans-override", resolvedUiFont);
+    }
+    root.style.setProperty("--font-heading-override", resolvedUiFont);
+
     if (reducedMotion) {
       root.classList.add("reduced-motion");
     } else {
       root.classList.remove("reduced-motion");
     }
-  }, [theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes]);
+  }, [theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes, customFonts]);
 
   return (
     <MotionConfig reducedMotion={reducedMotion ? "always" : "never"}>

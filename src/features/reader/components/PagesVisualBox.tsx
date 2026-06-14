@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Bookmark } from "@/core/entities/book";
+import { useSettings } from "@/features/settings/context/settings-context";
+import { getFontFamilyStyle } from "@/lib/typography";
 import { BookmarkCorner } from "./BookmarkCorner";
 import { BookVisualPage } from "@/lib/parser/paginator";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -54,6 +56,7 @@ export function PagesVisualBox({
   onRemoveBookmark,
   onUpdateBookmarkName,
 }: PagesVisualBoxProps) {
+  const { customFonts, settings } = useSettings();
   const columnGap = 40;
   const [totalPages, setTotalPages] = React.useState(1);
   const columnsContainerRef = React.useRef<HTMLDivElement>(null);
@@ -315,6 +318,7 @@ export function PagesVisualBox({
               transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
               fontSize: `${scaledFontSize}px`,
               lineHeight: "1.75",
+              fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
             }}
             dangerouslySetInnerHTML={{ __html: formattedHtml }}
           />
@@ -358,6 +362,7 @@ export function PagesVisualBox({
             columnFill: "auto",
             fontSize: `${scaledFontSize}px`,
             lineHeight: "1.75",
+            fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
           }}
         />
       </div>

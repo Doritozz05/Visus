@@ -11,6 +11,7 @@ export interface DropdownOption {
   icon?: React.ReactNode;
   dividerBefore?: boolean;
   tone?: "default" | "danger";
+  style?: React.CSSProperties;
 }
 
 interface FancyDropdownProps {
@@ -232,6 +233,7 @@ export function FancyDropdown({
                             onChange(option.value);
                             setIsOpen(false);
                           }}
+                          style={option.style}
                           className={
                             optionClassName ??
                             `flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-all ${

@@ -4,10 +4,23 @@ import * as React from "react";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { Columns } from "lucide-react";
 import { ColorSelector } from "@/components/ui/ColorSelector";
+import { BUILTIN_FONTS, getFontFamilyStyle } from "@/lib/typography";
 
 export function ClusterSettingsForm() {
-  const { settings, updateClusterSettings } = useSettings();
+  const { settings, updateClusterSettings, customFonts } = useSettings();
   const cluster = settings.cluster;
+
+  const fontOptions = React.useMemo(() => {
+    return [
+      ...BUILTIN_FONTS.filter(f => f.type === "reader" || f.type === "both"),
+      ...customFonts.map(cf => ({
+        id: cf.id,
+        name: cf.name,
+        desc: "Custom Font",
+        description: "User uploaded font"
+      }))
+    ];
+  }, [customFonts]);
 
   return (
     <div className="space-y-6">
@@ -41,22 +54,19 @@ export function ClusterSettingsForm() {
         {/* Typeface */}
         <div className="mb-6">
           <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Cluster canvas font family</label>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: "inter", name: "Standard Sans", desc: "Inter Default" },
-              { id: "atkinson", name: "Atkinson", desc: "Hyperlegible" },
-              { id: "dyslexic", name: "Dyslexic", desc: "Accessibility" },
-            ].map((tf) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {fontOptions.map((tf) => (
               <button
                 key={tf.id}
-                onClick={() => updateClusterSettings({ fontFamily: tf.id as any })}
-                className={`p-2 border rounded-lg text-center transition-all ${cluster.fontFamily === tf.id
+                onClick={() => updateClusterSettings({ fontFamily: tf.id })}
+                style={{ fontFamily: getFontFamilyStyle(tf.id, customFonts) }}
+                className={`p-2 border rounded-lg text-left transition-all ${cluster.fontFamily === tf.id
                   ? "border-primary bg-accent/40 text-primary font-bold"
                   : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
                   }`}
               >
-                <span className="block text-[11px] font-semibold">{tf.name}</span>
-                <span className="block text-[7px] opacity-60 font-sans tracking-widest">{tf.desc}</span>
+                <span className="block text-[11px] font-semibold truncate">{tf.name}</span>
+                <span className="block text-[7px] opacity-60 font-sans tracking-widest truncate">{tf.desc}</span>
               </button>
             ))}
           </div>
@@ -170,3 +180,4 @@ export function ClusterSettingsForm() {
     </div>
   );
 }
+

@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { SettingsState, GeneralSettings, RsvpSettings, ClusterSettings, DEFAULT_SETTINGS } from "@/core/entities/settings";
+import type { CustomFont } from "@/lib/typography";
+import { getCustomFonts, deleteCustomFont } from "@/lib/services/font-storage";
 
 interface SettingsContextType {
   settings: SettingsState;
@@ -9,6 +11,9 @@ interface SettingsContextType {
   updateRsvpSettings: (settings: Partial<RsvpSettings>) => void;
   updateClusterSettings: (settings: Partial<ClusterSettings>) => void;
   resetSettings: () => void;
+  customFonts: CustomFont[];
+  refreshCustomFonts: () => Promise<void>;
+  deleteCustomFontAndCleanup: (fontId: string) => Promise<void>;
 }
 
 const SettingsContext = React.createContext<SettingsContextType | undefined>(undefined);
@@ -18,9 +23,16 @@ const LOCAL_STORAGE_KEY = "visus_settings";
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = React.useState<SettingsState>(DEFAULT_SETTINGS);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [customFonts, setCustomFonts] = React.useState<CustomFont[]>([]);
+
+  const refreshCustomFonts = React.useCallback(async () => {
+    const fonts = await getCustomFonts();
+    setCustomFonts(fonts);
+  }, []);
 
   // Load settings from localStorage on mount
   React.useEffect(() => {
+    refreshCustomFonts();
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored && stored.trim() !== "") {
@@ -94,6 +106,60 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const deleteCustomFontAndCleanup = React.useCallback(async (fontId: string) => {
+    try {
+      await deleteCustomFont(fontId);
+      
+      // Auto-fallback settings if deleted font was active
+      setSettings(prev => {
+        const next = { ...prev };
+        let changed = false;
+
+        if (next.general.uiFont === fontId) {
+          next.general.uiFont = "inter";
+          changed = true;
+        }
+        if (next.general.readerFontFamily === fontId) {
+          next.general.readerFontFamily = "serif";
+          changed = true;
+        }
+        if (next.rsvp.fontFamily === fontId) {
+          next.rsvp.fontFamily = "inter";
+          changed = true;
+        }
+        if (next.cluster.fontFamily === fontId) {
+          next.cluster.fontFamily = "inter";
+          changed = true;
+        }
+
+        // Custom themes cleanup
+        if (next.general.customThemes && next.general.customThemes.length > 0) {
+          next.general.customThemes = next.general.customThemes.map(t => {
+            let tChanged = false;
+            const nt = { ...t };
+            if (nt.uiFont === fontId) {
+              nt.uiFont = "inter";
+              tChanged = true;
+            }
+            if (nt.readerFont === fontId) {
+              nt.readerFont = "serif";
+              tChanged = true;
+            }
+            if (tChanged) changed = true;
+            return nt;
+          });
+        }
+
+        return changed ? next : prev;
+      });
+
+      await refreshCustomFonts();
+    } catch (err) {
+      console.error("Failed to delete font and cleanup settings:", err);
+      throw err;
+    }
+  }, [refreshCustomFonts]);
+
   const resetSettings = React.useCallback(() => {
     setSettings(DEFAULT_SETTINGS);
   }, []);
@@ -106,6 +172,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         updateRsvpSettings,
         updateClusterSettings,
         resetSettings,
+        customFonts,
+        refreshCustomFonts,
+        deleteCustomFontAndCleanup,
       }}
     >
       {children}

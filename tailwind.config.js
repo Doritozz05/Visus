@@ -74,7 +74,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "Inter", "sans-serif"],
-        serif: ["var(--font-serif)", "Merriweather", "serif"],
+        serif: ["var(--font-serif)", "Lora", "serif"],
         mono: ["var(--font-mono)", "JetBrains Mono", "monospace"],
         heading: ["var(--font-heading)", "Outfit", "sans-serif"],
       },

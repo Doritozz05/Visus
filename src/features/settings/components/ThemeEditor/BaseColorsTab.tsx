@@ -1,7 +1,8 @@
 import * as React from "react";
 import type { CustomTheme } from "@/core/entities/settings";
 import { ColorSelector } from "@/components/ui/ColorSelector";
-import { FancyDropdown } from "@/components/ui/FancyDropdown";
+import { useSettings } from "@/features/settings/context/settings-context";
+import { FontSelector } from "@/components/ui/FontSelector";
 
 interface BaseColorsTabProps {
   themeState: CustomTheme;
@@ -10,18 +11,13 @@ interface BaseColorsTabProps {
 }
 
 export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseColorsTabProps) {
+  const { customFonts, refreshCustomFonts } = useSettings();
+
   const handleColorChange = (key: keyof CustomTheme, value: string, push: boolean = false) => {
     setThemeState((prev) => ({
       ...prev,
       [key]: value,
     }), push);
-  };
-
-  const handleFontChange = (val: string) => {
-    setThemeState((prev) => ({
-      ...prev,
-      uiFont: (val || undefined) as any,
-    }));
   };
 
   const colorFields = [
@@ -109,46 +105,28 @@ export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseC
 
       {/* Fonts */}
       <div>
-        <h3 className="text-xs font-bold font-heading mb-3 pb-1.5 border-b border-border/30">System typography</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">User interface UI font</label>
-            <FancyDropdown
-              ariaLabel="System UI font family"
-              value={themeState.uiFont || ""}
-              placeholder="Default (inherit settings)"
-              menuZIndex={150}
-              onChange={handleFontChange}
-              options={[
-                { value: "", label: "Default (inherit settings)", description: "Inherits the global configuration font" },
-                { value: "inter", label: "Inter", description: "Sleek and clean neo-grotesque sans-serif" },
-                { value: "outfit", label: "Outfit", description: "Modern, warm geometric design" },
-                { value: "roboto", label: "Hanken Grotesk", description: "Sophisticated grotesque typeface" },
-                { value: "system-ui", label: "System default", description: "Default operating system font stack" },
-              ]}
-            />
-          </div>
+        <h3 className="text-xs font-bold font-heading mb-3 pb-1.5 border-b border-border/30">Theme typography</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FontSelector
+            label="User interface UI font"
+            value={themeState.uiFont || ""}
+            onChange={(val) => setThemeState(prev => ({ ...prev, uiFont: val || undefined }))}
+            customFonts={customFonts}
+            onRefreshCustomFonts={refreshCustomFonts}
+            filterType="ui"
+          />
 
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Reader room font family</label>
-            <FancyDropdown
-              ariaLabel="Reader room font family"
-              value={themeState.readerFont || ""}
-              placeholder="Default (inherit settings)"
-              menuZIndex={150}
-              onChange={(val) => setThemeState(prev => ({ ...prev, readerFont: (val || undefined) as any }))}
-              options={[
-                { value: "", label: "Default (inherit settings)", description: "Inherits the global reader font setting" },
-                { value: "inter", label: "Inter UI", description: "Clean, high-legibility sans-serif" },
-                { value: "serif", label: "Lora Serif", description: "Classic book typeface for long reading sessions" },
-                { value: "atkinson", label: "Atkinson Hyperlegible", description: "Optimized for visual recognition" },
-                { value: "dyslexic", label: "OpenDyslexic", description: "Accessibility design for reading assistance" },
-                { value: "sans-serif", label: "Sans-Serif", description: "Standard sans-serif font stack" },
-              ]}
-            />
-          </div>
+          <FontSelector
+            label="Reader room font family"
+            value={themeState.readerFont || ""}
+            onChange={(val) => setThemeState(prev => ({ ...prev, readerFont: val || undefined }))}
+            customFonts={customFonts}
+            onRefreshCustomFonts={refreshCustomFonts}
+            filterType="reader"
+          />
         </div>
       </div>
     </div>
   );
 }
+

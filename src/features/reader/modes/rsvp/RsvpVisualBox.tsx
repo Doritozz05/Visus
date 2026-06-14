@@ -2,8 +2,9 @@ import * as React from "react";
 import { RsvpSettings } from "@/core/entities/settings";
 import { RSVPWord } from "@/core/entities/text";
 import { useReadingStore } from "../../stores/reading-store";
-import { SPEED_READER_FONT_CLASSES } from "../../utils/reader-fonts";
 import { hexToRgba } from "@/lib/color-utils";
+import { useSettings } from "@/features/settings/context/settings-context";
+import { getFontFamilyStyle, getReaderFontClass } from "@/lib/typography";
 
 interface RsvpVisualBoxProps {
   rsvpSequence: RSVPWord[];
@@ -14,6 +15,7 @@ export function RsvpVisualBox({
   rsvpSequence, 
   settings,
 }: RsvpVisualBoxProps) {
+  const { customFonts } = useSettings();
   const localWordIndex = useReadingStore((state) => state.wordIndex);
 
   const currentWordObj = rsvpSequence[localWordIndex] || { text: "Ready", orpIndex: 1, delayMultiplier: 1.0 };
@@ -47,7 +49,7 @@ export function RsvpVisualBox({
     muted: "text-muted-foreground",
   };
 
-  const fontFamilyClass = SPEED_READER_FONT_CLASSES[settings.fontFamily as keyof typeof SPEED_READER_FONT_CLASSES] || SPEED_READER_FONT_CLASSES.inter;
+  const readerFontClass = getReaderFontClass(settings.fontFamily);
   
   const isPreset = settings.orpColor in orpColors;
   const orpColorClass = isPreset ? orpColors[settings.orpColor as keyof typeof orpColors] : "";
@@ -70,6 +72,7 @@ export function RsvpVisualBox({
   
   const fontSizeStyle: React.CSSProperties = {
     fontSize: `${settings.fontSize}px`,
+    fontFamily: getFontFamilyStyle(settings.fontFamily, customFonts),
   };
 
   return (
@@ -85,7 +88,7 @@ export function RsvpVisualBox({
 
       <div 
         style={fontSizeStyle}
-        className={`w-full h-[1.2em] font-heading select-none tracking-tight flex items-center justify-center relative z-10 ${fontFamilyClass}`}
+        className={`w-full h-[1.2em] font-heading select-none tracking-tight flex items-center justify-center relative z-10 ${readerFontClass}`}
       >
         <div 
           style={{ left: "42%" }}

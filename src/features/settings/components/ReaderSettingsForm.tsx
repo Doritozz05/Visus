@@ -3,10 +3,10 @@
 import * as React from "react";
 import { Glasses } from "lucide-react";
 import { useSettings } from "@/features/settings/context/settings-context";
-import type { GeneralSettings } from "@/core/entities/settings";
+import { FontSelector } from "@/components/ui/FontSelector";
 
 export function ReaderSettingsForm() {
-  const { settings, updateGeneralSettings } = useSettings();
+  const { settings, updateGeneralSettings, customFonts, refreshCustomFonts } = useSettings();
   const {
     readerFontSize,
     readerFontFamily,
@@ -65,30 +65,16 @@ export function ReaderSettingsForm() {
           </div>
         </div>
 
-        {/* Reading Typeface */}
+        {/* Reading Typeface Selector */}
         <div>
-          <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Reader typeface</label>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { id: "inter", name: "Standard Sans", desc: "Inter UI" },
-              { id: "atkinson", name: "Atkinson", desc: "Hyperlegible" },
-              { id: "dyslexic", name: "Dyslexic", desc: "Accessibility" },
-              { id: "serif", name: "Lora Serif", desc: "Book Classic" },
-            ].map((tf) => (
-              <button
-                key={tf.id}
-                data-testid={`font-family-button-${tf.id}`}
-                onClick={() => updateGeneralSettings({ readerFontFamily: tf.id as GeneralSettings["readerFontFamily"] })}
-                className={`p-2 border rounded-lg text-left transition-all ${readerFontFamily === tf.id
-                    ? "border-primary bg-accent/40 text-primary font-bold"
-                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                  }`}
-              >
-                <span className="block text-[11px] font-semibold">{tf.name}</span>
-                <span className="block text-[7px] opacity-60 font-sans tracking-widest">{tf.desc}</span>
-              </button>
-            ))}
-          </div>
+          <FontSelector
+            label="Reader typeface"
+            value={readerFontFamily}
+            onChange={(val) => updateGeneralSettings({ readerFontFamily: val })}
+            customFonts={customFonts}
+            onRefreshCustomFonts={refreshCustomFonts}
+            filterType="reader"
+          />
         </div>
       </div>
     </div>

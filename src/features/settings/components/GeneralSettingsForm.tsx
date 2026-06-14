@@ -8,20 +8,28 @@ import type { GeneralSettings, CustomTheme } from "@/core/entities/settings";
 import { ColorSelector } from "@/components/ui/ColorSelector";
 import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
 import { PRESETS_TEMPLATES, DEFAULT_NEW_THEME, deepCloneTheme } from "./ThemeEditor/utils";
+import { FontSelector } from "@/components/ui/FontSelector";
 
 export function GeneralSettingsForm() {
   const router = useRouter();
   const { showMenu } = useContextMenu();
-  const { settings, updateGeneralSettings } = useSettings();
+  const { 
+    settings, 
+    updateGeneralSettings, 
+    customFonts, 
+    refreshCustomFonts 
+  } = useSettings();
   const {
     theme,
     accentColor,
     uiFont,
     glassmorphism,
     reducedMotion,
-    yearlyReadingGoal,
     customThemes = []
   } = settings.general;
+
+  const BUILTIN_THEME_IDS = ["dark-violet", "light", "sepia", "nord"];
+  const isBuiltInTheme = BUILTIN_THEME_IDS.includes(theme);
 
   const handleDeleteTheme = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation(); // prevent setting it as active
@@ -237,38 +245,30 @@ export function GeneralSettingsForm() {
           </div>
         </div>
 
-        {/* Accent Highlight Color Selection */}
-        <div className="mb-6">
-          <ColorSelector
-            label="Accent tint color"
-            value={accentColor}
-            onChange={(color) => updateGeneralSettings({ accentColor: color })}
-          />
-        </div>
-
-        {/* UI Typography */}
-        <div>
-          <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">System UI font family</label>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: "inter", name: "Inter", desc: "Sans-Serif" },
-              { id: "outfit", name: "Outfit", desc: "Geometric" },
-              { id: "roboto", name: "Hanken", desc: "Grotesk" },
-            ].map((f) => (
-              <button
-                key={f.id}
-                onClick={() => updateGeneralSettings({ uiFont: f.id as GeneralSettings["uiFont"] })}
-                className={`p-1.5 border rounded-lg text-center transition-all ${uiFont === f.id
-                  ? "border-primary bg-accent/30 text-primary font-bold"
-                  : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
-                  }`}
-              >
-                <span className="block text-[11px] font-semibold">{f.name}</span>
-                <span className="block text-[7px] opacity-60 font-sans tracking-widest">{f.desc}</span>
-              </button>
-            ))}
+        {/* Accent Highlight Color Selection - ONLY for Built-in themes */}
+        {isBuiltInTheme && (
+          <div className="mb-6">
+            <ColorSelector
+              label="Accent tint color"
+              value={accentColor}
+              onChange={(color) => updateGeneralSettings({ accentColor: color })}
+            />
           </div>
-        </div>
+        )}
+
+        {/* UI Typography Selector - ONLY for Built-in themes */}
+        {isBuiltInTheme && (
+          <div>
+            <FontSelector
+              label="System UI font family"
+              value={uiFont}
+              onChange={(val) => updateGeneralSettings({ uiFont: val })}
+              customFonts={customFonts}
+              onRefreshCustomFonts={refreshCustomFonts}
+              filterType="ui"
+            />
+          </div>
+        )}
       </div>
 
       {/* Behavioral & Advanced Configuration */}
@@ -308,12 +308,8 @@ export function GeneralSettingsForm() {
               <div className={`w-4 h-4 rounded-full bg-background transition-transform duration-300 ${reducedMotion ? "translate-x-5" : "translate-x-0"}`} />
             </button>
           </div>
-
-
-
         </div>
       </div>
-
     </div>
   );
 }

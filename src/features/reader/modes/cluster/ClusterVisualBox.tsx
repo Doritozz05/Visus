@@ -2,8 +2,9 @@ import * as React from "react";
 import { DynamicCluster } from "@/core/algorithms/clusters";
 import { ClusterSettings } from "@/core/entities/settings";
 import { useReadingStore } from "../../stores/reading-store";
-import { SPEED_READER_FONT_CLASSES } from "../../utils/reader-fonts";
 import { hexToRgba } from "@/lib/color-utils";
+import { useSettings } from "@/features/settings/context/settings-context";
+import { getFontFamilyStyle, getReaderFontClass } from "@/lib/typography";
 
 interface ClusterVisualBoxProps {
   clusterChunks: string[] | DynamicCluster[];
@@ -14,6 +15,7 @@ export function ClusterVisualBox({
   clusterChunks,
   settings,
 }: ClusterVisualBoxProps) {
+  const { customFonts } = useSettings();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const wordIndex = useReadingStore((state) => state.wordIndex);
 
@@ -103,11 +105,12 @@ export function ClusterVisualBox({
     fontSize: `${settings.fontSize}px`,
     paddingTop: `${140 - settings.fontSize / 2}px`,
     paddingBottom: `${140 - settings.fontSize / 2}px`,
+    fontFamily: getFontFamilyStyle(settings.fontFamily, customFonts),
   };
 
   const isPreset = settings.activeColor in activeColors;
   const activeColorClass = isPreset ? activeColors[settings.activeColor as keyof typeof activeColors] : "";
-  const fontFamilyClass = SPEED_READER_FONT_CLASSES[settings.fontFamily as keyof typeof SPEED_READER_FONT_CLASSES] || SPEED_READER_FONT_CLASSES.inter;
+  const readerFontClass = getReaderFontClass(settings.fontFamily);
 
   const visibleChunks = React.useMemo(() => {
     const WINDOW_SIZE = 15;
@@ -137,7 +140,7 @@ export function ClusterVisualBox({
     >
       <div 
         style={innerStyle}
-        className={`text-center whitespace-normal break-words w-full ${fontFamilyClass} ${sizeClass}`}
+        className={`text-center whitespace-normal break-words w-full ${readerFontClass} ${sizeClass}`}
       >
         {visibleChunks.map((chunk) => {
           const isActive = chunk.isActive;

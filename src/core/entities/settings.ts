@@ -4,8 +4,8 @@ export interface CustomTheme {
   isDark: boolean;
   
   // Custom Typography
-  uiFont?: "inter" | "roboto" | "outfit" | "system-ui";
-  readerFont?: "serif" | "inter" | "atkinson" | "dyslexic" | "sans-serif";
+  uiFont?: string;
+  readerFont?: string;
 
   // Core HSL Color Set (HEX strings)
   background: string;
@@ -78,12 +78,12 @@ export interface CustomTheme {
 export interface GeneralSettings {
   theme: "dark-violet" | "light" | "sepia" | "nord" | string;
   accentColor: string; // "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue" or custom hex
-  uiFont: "inter" | "roboto" | "outfit";
+  uiFont: string;
   glassmorphism: boolean;
   reducedMotion: boolean;
   autoSync: boolean;
   readerFontSize: number;      // Font size in px
-  readerFontFamily: "inter" | "atkinson" | "dyslexic" | "serif";
+  readerFontFamily: string;
   readerWordsPerPage: number;  // Target words per page
   telemetryPreference: "cloud" | "anonymous" | "disabled";
   yearlyReadingGoal: number;   // Yearly reading target in books
@@ -93,7 +93,7 @@ export interface GeneralSettings {
 
 export interface RsvpSettings {
   fontSize: number; // in px
-  fontFamily: "inter" | "atkinson" | "dyslexic";
+  fontFamily: string;
   orpColor: string; // "amber" | "orange" | "emerald" | "violet" | "indigo" | "rose" or custom hex
   orpGlow: boolean;
   showFocusGuides: boolean;
@@ -103,7 +103,7 @@ export interface RsvpSettings {
 
 export interface ClusterSettings {
   fontSize: number; // in px
-  fontFamily: "inter" | "atkinson" | "dyslexic";
+  fontFamily: string;
   highlightStyle: "spotlight" | "capsule" | "underline" | "bold-only" | "color-only";
   activeColor: string; // "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue" | "white" or custom hex
   inactiveOpacity: number;
