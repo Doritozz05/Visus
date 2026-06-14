@@ -119,6 +119,8 @@
 
     --font-sans-override: var(--font-sans);
     --font-heading-override: var(--font-heading);
+    --font-mono-override: var(--font-mono);
+    --font-serif-override: var(--font-serif);
     --background: 222 47% 95%; /* Default fallback light */
     --foreground: 222 47% 11%;
     
@@ -289,6 +291,12 @@ body, .font-sans {
 }
 .font-heading {
   font-family: var(--font-heading-override), var(--font-heading), sans-serif;
+}
+.font-mono {
+  font-family: var(--font-mono-override), var(--font-mono), monospace;
+}
+.font-serif {
+  font-family: var(--font-serif-override), var(--font-serif), serif;
 }
 
 /* Dynamic Accent Color bindings overriding primary theme colors */

@@ -60,12 +60,12 @@ export function Sidebar({ activePath }: SidebarProps) {
   return (
     <>
       {/* Desktop SideNav */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full flex-col z-40 bg-card border-r border-border/50 w-64 text-foreground transition-all duration-300">
+      <aside className="hidden md:flex fixed left-0 top-0 h-full flex-col z-40 bg-[hsl(var(--sidebar-background))] border-r border-[hsl(var(--sidebar-border)/0.5)] w-64 text-[hsl(var(--sidebar-foreground))] transition-all duration-300">
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="p-6 border-b border-border/50"
+          className="p-6 border-b border-[hsl(var(--sidebar-border)/0.5)]"
         >
           <Link href="/">
             <h1 className="text-2xl font-extrabold tracking-tight text-primary font-heading flex items-center gap-2">
@@ -73,7 +73,7 @@ export function Sidebar({ activePath }: SidebarProps) {
               Visus
             </h1>
           </Link>
-          <p className="text-[10px] font-mono text-muted-foreground mt-1 opacity-70 uppercase tracking-widest">
+          <p className="text-[10px] font-sans text-muted-foreground mt-1 opacity-70 uppercase tracking-widest">
             High-performance reading
           </p>
         </motion.div>
@@ -97,17 +97,17 @@ export function Sidebar({ activePath }: SidebarProps) {
               >
                 <Link
                   href={item.path}
-                  className={`flex items-center gap-3 px-6 py-3 transition-all font-mono text-xs uppercase tracking-wider group relative ${
+                  className={`flex items-center gap-3 px-6 py-3 transition-all font-sans text-xs uppercase tracking-wider group relative ${
                     isActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                      ? "text-[hsl(var(--sidebar-active-foreground))] bg-[hsl(var(--sidebar-active-background)/0.15)]"
+                      : "text-[hsl(var(--sidebar-foreground)/0.7)] hover:text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-active-background)/0.1)]"
                   }`}
                 >
                   {/* Active Indicator */}
                   {isActive && (
                     <motion.div 
                       layoutId="active-pill"
-                      className="absolute left-0 w-1 h-6 bg-primary rounded-r-full"
+                      className="absolute left-0 w-1 h-6 bg-[hsl(var(--sidebar-active-background))] rounded-r-full"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
@@ -117,11 +117,11 @@ export function Sidebar({ activePath }: SidebarProps) {
                   >
                     <Icon
                       className={`w-5 h-5 transition-colors ${
-                        isActive ? "text-primary" : "group-hover:text-primary"
+                        isActive ? "text-[hsl(var(--sidebar-active-background))]" : "group-hover:text-[hsl(var(--sidebar-active-background))]"
                       }`}
                     />
                   </motion.div>
-                  <span className="relative z-10">{item.name}</span>
+                  <span className="relative z-10 font-bold">{item.name}</span>
                 </Link>
               </motion.div>
             );
@@ -132,10 +132,10 @@ export function Sidebar({ activePath }: SidebarProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.4 }}
-          className="p-4 border-t border-border/50"
+          className="p-4 border-t border-[hsl(var(--sidebar-border)/0.5)]"
         >
           <Link href="/reader">
-            <button className="w-full py-3 bg-primary text-primary-foreground rounded font-mono text-xs uppercase tracking-wider hover:brightness-110 transition-all font-bold shadow-[0_0_15px_rgba(var(--primary),0.15)] overflow-hidden group relative">
+            <button className="w-full py-3 bg-[hsl(var(--sidebar-active-background))] text-[hsl(var(--sidebar-active-foreground))] rounded font-sans text-xs uppercase tracking-wider hover:brightness-110 transition-all font-bold shadow-[0_0_15px_rgba(var(--primary),0.15)] overflow-hidden group relative">
               <motion.span 
                 className="relative z-10"
                 whileHover={{ scale: 1.05 }}
