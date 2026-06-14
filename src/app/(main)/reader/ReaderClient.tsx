@@ -14,7 +14,6 @@ import { BookshelfSelector } from "@/features/reader/components/BookshelfSelecto
 import { ReaderHeader } from "@/features/reader/components/ReaderHeader";
 import { SettingsDrawer } from "@/features/reader/components/SettingsDrawer";
 import { CompletionModal } from "@/features/reader/components/CompletionModal";
-import { MobileReaderNav } from "@/features/reader/components/MobileReaderNav";
 import { ReadingCanvas } from "@/features/reader/components/ReadingCanvas";
 
 // Modular hooks
@@ -250,14 +249,12 @@ export default function ReaderClient() {
         </button>
       )}
 
-      {!isFocusMode && <MobileReaderNav onOpenSettings={openQuickSettings} />}
-
       <motion.main 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
         className={`flex-1 flex flex-col items-center justify-between relative w-full p-6 pt-4 pb-8 overflow-hidden overscroll-none transition-all duration-300 ${
-          isFocusMode ? "h-screen" : "h-[calc(100vh-80px)] md:h-screen"
+          isFocusMode ? "h-screen" : "h-[calc(100vh-64px)] md:h-screen"
         }`}
       >
         <ReaderHeader

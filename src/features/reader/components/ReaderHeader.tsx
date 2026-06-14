@@ -226,14 +226,15 @@ export function ReaderHeader({
           <Timer className="w-4 h-4" />
         </button>
 
-        {/* Quick Settings Trigger (Desktop) */}
+        {/* Quick Settings Trigger */}
         <button
           data-testid="desktop-settings-button"
           onClick={openQuickSettings}
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/40 hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass"
+          className="flex items-center justify-center md:gap-1.5 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded-lg border border-border/40 hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass"
+          title="Open settings"
         >
           <Settings className="w-4 h-4 animate-spin-slow" />
-          Settings
+          <span className="hidden md:inline">Settings</span>
         </button>
       </div>
 
