@@ -68,13 +68,13 @@ export default function SettingsClient() {
       >
         <div>
           <h2 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Configuration</h2>
-          <p className="text-muted-foreground text-xs font-mono uppercase tracking-wider mt-2 max-w-2xl">
+          <p className="text-muted-foreground text-xs font-sans uppercase tracking-wider mt-2 max-w-2xl">
             Adjust global visual engine parameters and manage your account security.
           </p>
         </div>
         <button
           onClick={resetSettings}
-          className="px-4 py-2 border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary rounded font-mono text-[10px] uppercase tracking-wider transition-all"
+          className="px-4 py-2 border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary rounded font-sans text-[10px] uppercase tracking-wider transition-all"
         >
           Reset defaults
         </button>
@@ -98,7 +98,7 @@ export default function SettingsClient() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-3 font-mono text-xs uppercase tracking-wider transition-all shrink-0 relative ${
+              className={`flex items-center gap-2 px-6 py-3 font-sans text-xs uppercase tracking-wider transition-all shrink-0 relative ${
                 isActive
                   ? "text-primary font-bold bg-accent/40"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/10"

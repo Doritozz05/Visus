@@ -520,6 +520,26 @@ body::after {
 .rounded-lg {
   border-radius: calc(var(--radius, 0.75rem) * 0.8) !important;
 }
+.rounded-md {
+  border-radius: calc(var(--radius, 0.75rem) * 0.7) !important;
+}
+.rounded {
+  border-radius: calc(var(--radius, 0.75rem) * 0.5) !important;
+}
+
+/* Dynamic range inputs styling */
+input[type="range"]::-webkit-slider-runnable-track {
+  border-radius: calc(var(--radius, 0.75rem) * 0.5) !important;
+}
+input[type="range"]::-webkit-slider-thumb {
+  border-radius: calc(var(--radius, 0.75rem) * 0.8) !important;
+}
+input[type="range"]::-moz-range-track {
+  border-radius: calc(var(--radius, 0.75rem) * 0.5) !important;
+}
+input[type="range"]::-moz-range-thumb {
+  border-radius: calc(var(--radius, 0.75rem) * 0.8) !important;
+}
 
 /* Dynamic shadows */
 .liquid-glass, .bg-card, [class*="bg-card/"] {

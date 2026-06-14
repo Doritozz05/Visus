@@ -72,11 +72,11 @@ export function AccountSettingsForm() {
               <h4 className="text-base font-bold font-heading">{user?.name || user?.email || "Guest Reader"}</h4>
               <p className="text-sm text-muted-foreground mb-1">{user?.email}</p>
               <div className="flex flex-wrap gap-2 mt-2">
-                <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider bg-accent/50 px-2 py-0.5 rounded">
+                <span className="text-[9px] font-sans text-muted-foreground uppercase tracking-wider bg-accent/50 px-2 py-0.5 rounded">
                   {user ? "Authenticated Session" : "Unregistered Account"}
                 </span>
                 {user && (
-                  <span className="text-[9px] font-mono text-primary uppercase tracking-wider font-bold bg-primary/10 px-2 py-0.5 rounded">
+                  <span className="text-[9px] font-sans text-primary uppercase tracking-wider font-bold bg-primary/10 px-2 py-0.5 rounded">
                     {isGoogleUser ? "Google" : "Email"}
                   </span>
                 )}
@@ -87,7 +87,7 @@ export function AccountSettingsForm() {
           {user ? (
             <button 
               onClick={logout}
-              className="w-full py-2.5 mt-auto bg-destructive/10 text-destructive border border-destructive/20 rounded-lg font-mono text-xs uppercase tracking-wider hover:bg-destructive hover:text-destructive-foreground transition-all font-bold flex items-center justify-center gap-2"
+              className="w-full py-2.5 mt-auto bg-destructive/10 text-destructive border border-destructive/20 rounded-lg font-sans text-xs uppercase tracking-wider hover:bg-destructive hover:text-destructive-foreground transition-all font-bold flex items-center justify-center gap-2"
             >
               <LogOut className="h-4 w-4" />
               Sign Out
@@ -95,7 +95,7 @@ export function AccountSettingsForm() {
           ) : (
             <Link
               href="/login"
-              className="w-full mt-auto py-2.5 bg-primary text-primary-foreground rounded-lg font-mono text-xs uppercase tracking-wider hover:brightness-110 transition-all font-bold text-center"
+              className="w-full mt-auto py-2.5 bg-primary text-primary-foreground rounded-lg font-sans text-xs uppercase tracking-wider hover:brightness-110 transition-all font-bold text-center"
             >
               Login / Register
             </Link>
@@ -110,7 +110,7 @@ export function AccountSettingsForm() {
           </div>
           
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Cloud Sync Status</span>
+            <span className="text-xs font-sans uppercase tracking-wider text-muted-foreground">Cloud Sync Status</span>
             <span className={`text-xs font-mono flex items-center gap-1.5 ${user ? "text-emerald-500" : "text-amber-500"}`}>
               <span className={`w-2 h-2 rounded-full inline-block animate-pulse ${user ? "bg-emerald-500" : "bg-amber-500"}`}></span>
               {user ? "Ready to sync" : "Local only"}
@@ -142,7 +142,7 @@ export function AccountSettingsForm() {
             <button 
               onClick={handleSync}
               disabled={isSyncing || !user}
-              className="w-full py-3 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border border-primary/20 rounded-xl font-mono text-xs uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-bold group"
+              className="w-full py-3 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border border-primary/20 rounded-xl font-sans text-xs uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-bold group"
             >
               <Cloud className={`h-5 w-5 ${isSyncing ? "animate-spin" : "group-hover:scale-110 transition-transform"}`} />
               {isSyncing ? "Synchronizing..." : "Synchronize Library Now"}
@@ -156,7 +156,7 @@ export function AccountSettingsForm() {
       {user && (
         <div className="pt-8 border-t border-border/30">
           <h2 className="text-2xl font-extrabold font-heading text-foreground tracking-tight mb-2">Security & Credentials</h2>
-          <p className="text-muted-foreground text-[10px] font-mono uppercase tracking-wider mb-8">
+          <p className="text-muted-foreground text-[10px] font-sans uppercase tracking-wider mb-8">
             Manage your authentication methods and data privacy.
           </p>
           

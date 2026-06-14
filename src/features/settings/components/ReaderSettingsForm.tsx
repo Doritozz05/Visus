@@ -25,7 +25,7 @@ export function ReaderSettingsForm() {
         {/* Font size */}
         <div className="mb-6">
           <div className="flex justify-between items-end mb-3">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Reader font size</label>
+            <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground">Reader font size</label>
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{readerFontSize || 16}px</span>
           </div>
           <input
@@ -46,7 +46,7 @@ export function ReaderSettingsForm() {
         {/* Words per page density */}
         <div className="mb-6">
           <div className="flex justify-between items-end mb-3">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Page text density (words)</label>
+            <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground">Page text density (words)</label>
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{readerWordsPerPage || 300} words</span>
           </div>
           <input
@@ -67,7 +67,7 @@ export function ReaderSettingsForm() {
 
         {/* Reading Typeface */}
         <div>
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Reader typeface</label>
+          <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Reader typeface</label>
           <div className="grid grid-cols-2 gap-2">
             {[
               { id: "inter", name: "Standard Sans", desc: "Inter UI" },
@@ -79,13 +79,13 @@ export function ReaderSettingsForm() {
                 key={tf.id}
                 data-testid={`font-family-button-${tf.id}`}
                 onClick={() => updateGeneralSettings({ readerFontFamily: tf.id as GeneralSettings["readerFontFamily"] })}
-                className={`p-2 border rounded text-left transition-all ${readerFontFamily === tf.id
+                className={`p-2 border rounded-lg text-left transition-all ${readerFontFamily === tf.id
                     ? "border-primary bg-accent/40 text-primary font-bold"
                     : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
                   }`}
               >
                 <span className="block text-[11px] font-semibold">{tf.name}</span>
-                <span className="block text-[7px] opacity-60 font-mono tracking-widest">{tf.desc}</span>
+                <span className="block text-[7px] opacity-60 font-sans tracking-widest">{tf.desc}</span>
               </button>
             ))}
           </div>

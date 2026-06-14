@@ -21,7 +21,7 @@ export function ClusterSettingsForm() {
         {/* Size control */}
         <div className="mb-6">
           <div className="flex justify-between items-end mb-3">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Active line optical font size</label>
+            <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground">Active line optical font size</label>
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{cluster.fontSize}px</span>
           </div>
           <input
@@ -40,7 +40,7 @@ export function ClusterSettingsForm() {
 
         {/* Typeface */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Cluster canvas font family</label>
+          <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Cluster canvas font family</label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { id: "inter", name: "Standard Sans", desc: "Inter Default" },
@@ -50,13 +50,13 @@ export function ClusterSettingsForm() {
               <button
                 key={tf.id}
                 onClick={() => updateClusterSettings({ fontFamily: tf.id as any })}
-                className={`p-2 border rounded text-center transition-all ${cluster.fontFamily === tf.id
+                className={`p-2 border rounded-lg text-center transition-all ${cluster.fontFamily === tf.id
                   ? "border-primary bg-accent/40 text-primary font-bold"
                   : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
                   }`}
               >
                 <span className="block text-[11px] font-semibold">{tf.name}</span>
-                <span className="block text-[7px] opacity-60 font-mono tracking-widest">{tf.desc}</span>
+                <span className="block text-[7px] opacity-60 font-sans tracking-widest">{tf.desc}</span>
               </button>
             ))}
           </div>
@@ -64,7 +64,7 @@ export function ClusterSettingsForm() {
 
         {/* Highlight Styles */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Highlight visual style</label>
+          <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Highlight visual style</label>
           <div className="grid grid-cols-2 gap-2">
             {[
               { id: "spotlight", label: "Spotlight" },
@@ -76,7 +76,7 @@ export function ClusterSettingsForm() {
               <button
                 key={style.id}
                 onClick={() => updateClusterSettings({ highlightStyle: style.id as any })}
-                className={`p-2 border rounded text-center transition-all text-xs ${cluster.highlightStyle === style.id
+                className={`p-2 border rounded-lg text-center transition-all text-xs ${cluster.highlightStyle === style.id
                   ? "border-primary bg-accent/45 text-primary font-bold"
                   : "border-border/20 hover:border-border/50 text-muted-foreground bg-card"
                   }`}
@@ -101,7 +101,7 @@ export function ClusterSettingsForm() {
         <div className="grid grid-cols-1 gap-6 py-4 border-t border-border/10">
           <div>
             <div className="flex justify-between items-end mb-2">
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Inactive lines opacity</label>
+              <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground">Inactive lines opacity</label>
               <span className="text-[10px] font-mono text-primary font-semibold">{Math.round(cluster.inactiveOpacity * 100)}%</span>
             </div>
             <input
@@ -116,7 +116,7 @@ export function ClusterSettingsForm() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Inactive blur amount</label>
+            <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Inactive blur amount</label>
             <div className="flex gap-1.5">
               {[
                 { val: "0px", label: "Sharp" },
@@ -127,7 +127,7 @@ export function ClusterSettingsForm() {
                 <button
                   key={b.val}
                   onClick={() => updateClusterSettings({ blurAmount: b.val })}
-                  className={`flex-1 py-1.5 text-[9px] font-mono border rounded transition-all ${cluster.blurAmount === b.val
+                  className={`flex-1 py-1.5 text-[9px] font-sans border rounded transition-all ${cluster.blurAmount === b.val
                     ? "bg-primary text-primary-foreground font-bold border-primary"
                     : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
                     }`}
@@ -142,7 +142,7 @@ export function ClusterSettingsForm() {
         {/* Dynamic glow effect */}
         <div className="flex items-center justify-between py-4 border-t border-border/10">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Spotlight glow</label>
+            <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Spotlight glow</label>
             <p className="text-[9px] text-muted-foreground mt-0.5">Adds subtle ambient glow under highlighted line.</p>
           </div>
           <div className="flex gap-1">
@@ -155,7 +155,7 @@ export function ClusterSettingsForm() {
               <button
                 key={glow.id}
                 onClick={() => updateClusterSettings({ glowEffect: glow.id as any })}
-                className={`px-2 py-1 text-[9px] font-mono border rounded transition-all ${cluster.glowEffect === glow.id
+                className={`px-2 py-1 text-[9px] font-sans border rounded transition-all ${cluster.glowEffect === glow.id
                   ? "bg-primary text-primary-foreground font-bold border-primary"
                   : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
                   }`}

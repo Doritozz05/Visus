@@ -149,7 +149,7 @@ export function GeneralSettingsForm() {
 
         {/* Predefined Themes Grid */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Color scheme theme</label>
+          <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Color scheme theme</label>
           <div className="grid grid-cols-2 gap-2.5">
             {[
               { id: "dark-violet", name: "Dark Violet", desc: "Original Clinical Navy", preview: "bg-[#0b1326]" },
@@ -232,7 +232,7 @@ export function GeneralSettingsForm() {
               className="p-2.5 border border-dashed border-border/40 hover:border-primary/50 bg-card/20 hover:bg-accent/10 rounded-lg text-center flex flex-col items-center justify-center transition-all min-h-[58px]"
             >
               <Plus className="h-4.5 w-4.5 text-muted-foreground mb-1" />
-              <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Create Theme</span>
+              <span className="text-[9px] font-sans uppercase tracking-wider text-muted-foreground">Create Theme</span>
             </button>
           </div>
         </div>
@@ -248,7 +248,7 @@ export function GeneralSettingsForm() {
 
         {/* UI Typography */}
         <div>
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">System UI font family</label>
+          <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">System UI font family</label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { id: "inter", name: "Inter", desc: "Sans-Serif" },
@@ -258,13 +258,13 @@ export function GeneralSettingsForm() {
               <button
                 key={f.id}
                 onClick={() => updateGeneralSettings({ uiFont: f.id as GeneralSettings["uiFont"] })}
-                className={`p-1.5 border rounded text-center transition-all ${uiFont === f.id
+                className={`p-1.5 border rounded-lg text-center transition-all ${uiFont === f.id
                   ? "border-primary bg-accent/30 text-primary font-bold"
                   : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
                   }`}
               >
                 <span className="block text-[11px] font-semibold">{f.name}</span>
-                <span className="block text-[7px] opacity-60 font-mono tracking-widest">{f.desc}</span>
+                <span className="block text-[7px] opacity-60 font-sans tracking-widest">{f.desc}</span>
               </button>
             ))}
           </div>
@@ -284,7 +284,7 @@ export function GeneralSettingsForm() {
           {/* Glassmorphism */}
           <div className="flex items-center justify-between py-1">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Liquid glass</label>
+              <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Liquid glass</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Enables glass effects. Disable on slow hardware.</p>
             </div>
             <button
@@ -298,7 +298,7 @@ export function GeneralSettingsForm() {
           {/* Reduced Motion */}
           <div className="flex items-center justify-between py-1 border-t border-border/10 pt-3">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Reduce UI motion</label>
+              <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Reduce UI motion</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Disables transitions for speed loads and pagination changes.</p>
             </div>
             <button

@@ -24,7 +24,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
         </div>
 
         {/* Scrollable Bookshelf Shelf */}
-        <div className="flex-1 max-h-[60vh] overflow-y-auto pr-1 scrollbar-none">
+        <div className="flex-1 max-h-[60vh] overflow-y-auto px-4 -mx-4 pt-4 -mt-4 pb-4 scrollbar-none">
           {hasBooks ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {books.map((book) => (

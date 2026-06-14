@@ -21,7 +21,7 @@ export function RsvpSettingsForm() {
         {/* Size control */}
         <div className="mb-6">
           <div className="flex justify-between items-end mb-3">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Focus text optical size</label>
+            <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground">Focus text optical size</label>
             <span className="text-[11px] font-mono text-primary font-bold bg-accent px-2 py-0.5 rounded border border-border/30">{rsvp.fontSize}px</span>
           </div>
           <input
@@ -40,7 +40,7 @@ export function RsvpSettingsForm() {
 
         {/* Typeface */}
         <div className="mb-6">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-3">Reading typeface</label>
+          <label className="block text-[10px] font-sans uppercase tracking-wider text-muted-foreground mb-3">Reading typeface</label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { id: "inter", name: "Standard Sans", desc: "Inter Default" },
@@ -50,13 +50,13 @@ export function RsvpSettingsForm() {
               <button
                 key={tf.id}
                 onClick={() => updateRsvpSettings({ fontFamily: tf.id as any })}
-                className={`p-2 border rounded text-center transition-all ${rsvp.fontFamily === tf.id
+                className={`p-2 border rounded-lg text-center transition-all ${rsvp.fontFamily === tf.id
                     ? "border-primary bg-accent/40 text-primary font-bold"
                     : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
                   }`}
               >
                 <span className="block text-[11px] font-semibold">{tf.name}</span>
-                <span className="block text-[7px] opacity-60 font-mono tracking-widest">{tf.desc}</span>
+                <span className="block text-[7px] opacity-60 font-sans tracking-widest">{tf.desc}</span>
               </button>
             ))}
           </div>
@@ -74,7 +74,7 @@ export function RsvpSettingsForm() {
         {/* Toggle glowing ORP */}
         <div className="flex items-center justify-between py-3 border-t border-border/10">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">ORP spotlight glow</label>
+            <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">ORP spotlight glow</label>
             <p className="text-[9px] text-muted-foreground mt-0.5">Adds ambient luminous blur under the focus letter anchor point.</p>
           </div>
           <button
@@ -88,7 +88,7 @@ export function RsvpSettingsForm() {
         {/* Toggle focus lines */}
         <div className="flex items-center justify-between py-3 border-t border-border/10">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Visual guide lines</label>
+            <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Visual guide lines</label>
             <p className="text-[9px] text-muted-foreground mt-0.5">Show central horizontal and vertical lines as reading anchor points.</p>
           </div>
           <button
@@ -102,7 +102,7 @@ export function RsvpSettingsForm() {
         {/* Unmarked Letter Opacity */}
         <div className="py-3 border-t border-border/10 transition-all duration-300">
           <div className="flex justify-between items-end mb-2">
-            <label className="block text-xs font-mono uppercase tracking-wider text-foreground font-semibold">Unmarked text opacity</label>
+            <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Unmarked text opacity</label>
             <span className="text-[10px] font-mono text-primary font-semibold">{Math.round(rsvp.unmarkedOpacity * 100)}%</span>
           </div>
           <input

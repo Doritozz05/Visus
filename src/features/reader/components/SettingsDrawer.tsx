@@ -76,7 +76,7 @@ export function SettingsDrawer({
         </div>
 
         <div
-          className="flex-1 overflow-y-auto scrollbar-none py-2 -my-2"
+          className="flex-1 overflow-y-auto scrollbar-none py-2 -my-2 px-4 -mx-4"
           style={{
             maskImage: "linear-gradient(to bottom, transparent 0%, black 16px, black calc(100% - 24px), transparent 100%)",
             WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 16px, black calc(100% - 24px), transparent 100%)",
