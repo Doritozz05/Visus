@@ -166,8 +166,8 @@ export function GeneralSettingsForm() {
                   })}
                   onContextMenu={(e) => onThemeContextMenu(e, { ...t, isPreset: true })}
                   className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between liquid-glass ${theme === t.id
-                    ? "border-primary bg-accent/65 shadow-[0_0_15px_rgba(var(--primary),0.1)]"
-                    : "border-border/30 bg-card hover:border-border/60"
+                    ? "!border-primary !bg-primary/10 shadow-[0_0_15px_rgba(var(--primary),0.1)]"
+                    : "!border-border/30 hover:!border-primary/50 hover:!bg-accent/10"
                     }`}
                 >
                   <div className="flex items-center justify-between mb-2 w-full">
@@ -192,8 +192,8 @@ export function GeneralSettingsForm() {
                 onClick={() => updateGeneralSettings({ theme: t.id })}
                 onContextMenu={(e) => onThemeContextMenu(e, t)}
                 className={`p-2.5 border rounded-lg text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer group liquid-glass ${theme === t.id
-                  ? "border-primary bg-accent/65 shadow-[0_0_15px_rgba(var(--primary),0.1)]"
-                  : "border-border/30 bg-card hover:border-border/60"
+                  ? "!border-primary !bg-primary/10 shadow-[0_0_15px_rgba(var(--primary),0.1)]"
+                  : "!border-border/30 hover:!border-primary/50 hover:!bg-accent/10"
                   }`}
               >
                 <div className="flex items-center justify-between mb-2 w-full">
