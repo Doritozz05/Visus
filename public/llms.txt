@@ -1,0 +1,25 @@
+# Visus - Speed Reading PWA
+
+Visus is a high-performance, privacy-focused speed-reading platform built as a Progressive Web App (PWA). It enables users to consume text-based content (EPUB, PDF, TXT) at high speeds (up to 1200+ WPM) using advanced RSVP and Cluster reading techniques.
+
+## Core Capabilities
+- **RSVP Reading**: Rapid Serial Visual Presentation with Optimal Recognition Point (ORP) centering.
+- **Cluster Reading**: Visual grouping of 2-5 words to expand peripheral vision.
+- **Offline First**: Runs completely in-browser via Service Workers and local storage.
+- **Privacy Centric**: No user data or documents leave the local environment.
+- **Multi-Format Support**: Native parsing for `.epub`, `.pdf`, and raw text.
+- **Customizable Experience**: Fine-grained control over WPM, font-family (including OpenDyslexic), and color themes (Sepia, Nordic, Dark).
+
+## Technical Architecture
+- **Framework**: Next.js 15+ (App Router).
+- **Language**: TypeScript (Strict mode).
+- **Styling**: Tailwind CSS 3.4+ / 4.0.
+- **Storage**: Supabase (Sync) / LocalStorage (Persistence).
+- **UI Components**: Radix UI + Framer Motion for high-fidelity interactions.
+
+## Key Algorithms
+- **RSVP Engine**: Located in `src/core/algorithms/rsvp.ts`. Handles timing, punctuation delays, and ORP calculation.
+- **Cluster Engine**: Located in `src/core/algorithms/clusters.ts`. Handles semantic word grouping.
+- **Parser Pipeline**: Found in `src/lib/parser/`. Includes specialized logic for EPUB zip structures and PDF text extraction.
+
+---
