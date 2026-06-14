@@ -32,31 +32,34 @@ export const BUILTIN_FONTS: BuiltInFont[] = [
     name: "Outfit",
     desc: "Geometric",
     description: "Modern, warm geometric design",
-    type: "ui",
-    familyStyle: "'Outfit', var(--font-heading), sans-serif"
+    type: "both",
+    familyStyle: "'Outfit', var(--font-heading), sans-serif",
+    readerClass: "font-sans antialiased text-justify"
   },
   {
     id: "hanken",
     name: "Hanken Grotesk",
     desc: "Grotesk",
     description: "Sophisticated grotesque typeface",
-    type: "ui",
-    familyStyle: "'Hanken Grotesk', var(--font-hanken), sans-serif"
+    type: "both",
+    familyStyle: "'Hanken Grotesk', var(--font-hanken), sans-serif",
+    readerClass: "font-sans antialiased text-justify"
   },
   {
     id: "system-ui",
     name: "System default",
     desc: "System UI",
     description: "Default operating system font stack",
-    type: "ui",
-    familyStyle: "system-ui, -apple-system, sans-serif"
+    type: "both",
+    familyStyle: "system-ui, -apple-system, sans-serif",
+    readerClass: "antialiased text-justify"
   },
   {
     id: "serif",
     name: "Lora Serif",
     desc: "Book Classic",
     description: "Classic book typeface for long reading sessions",
-    type: "reader",
+    type: "both",
     familyStyle: "'Lora', var(--font-serif), Georgia, serif",
     readerClass: "font-serif antialiased text-justify tracking-normal text-foreground/90"
   },
@@ -65,7 +68,7 @@ export const BUILTIN_FONTS: BuiltInFont[] = [
     name: "Atkinson",
     desc: "Hyperlegible",
     description: "Optimized for visual recognition",
-    type: "reader",
+    type: "both",
     familyStyle: "'Atkinson Hyperlegible', sans-serif",
     readerClass: "font-sans antialiased text-justify tracking-wide font-medium"
   },
@@ -74,7 +77,7 @@ export const BUILTIN_FONTS: BuiltInFont[] = [
     name: "Dyslexic",
     desc: "Accessibility",
     description: "Accessibility design for reading assistance",
-    type: "reader",
+    type: "both",
     familyStyle: "'OpenDyslexic', sans-serif",
     readerClass: "font-sans antialiased text-justify tracking-wide font-normal"
   },
@@ -92,7 +95,7 @@ export const BUILTIN_FONTS: BuiltInFont[] = [
     name: "Sans-Serif",
     desc: "Standard Sans",
     description: "Standard sans-serif font stack",
-    type: "reader",
+    type: "both",
     familyStyle: "sans-serif",
     readerClass: "antialiased text-justify"
   }

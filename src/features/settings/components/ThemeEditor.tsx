@@ -149,7 +149,6 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
       cardRadius: preset.cardRadius,
       cardShadow: preset.cardShadow,
       overrideSidebar: false,
-      overrideReader: false,
       bgType: "solid"
     }));
   };

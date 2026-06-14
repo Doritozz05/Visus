@@ -39,9 +39,8 @@ export function FontSelector({
   const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>({});
 
   const filteredBuiltins = React.useMemo(() => {
-    if (!filterType || filterType === "both") return BUILTIN_FONTS;
-    return BUILTIN_FONTS.filter(f => f.type === filterType || f.type === "both");
-  }, [filterType]);
+    return BUILTIN_FONTS;
+  }, []);
 
   const selectedFont = React.useMemo(() => {
     const builtin = BUILTIN_FONTS.find(f => f.id === value);

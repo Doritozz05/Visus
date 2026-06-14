@@ -1,8 +1,9 @@
 import * as React from "react";
-import { Eye, Play, Pause, Plus, Minus, Settings2, BarChart2, Flame, Search } from "lucide-react";
+import { Eye, Plus, Minus, Settings2, BarChart2, Flame, Search } from "lucide-react";
 import type { CustomTheme } from "@/core/entities/settings";
 import { resolveColor, hexToRgba } from "@/lib/color-utils";
-import { getFontFamilyStyle, hexToRgb, PRESETS_TEMPLATES, scopeCss } from "./utils";
+import { hexToRgb, PRESETS_TEMPLATES, scopeCss } from "./utils";
+import { getFontFamilyStyle } from "@/lib/typography";
 
 interface ThemePreviewSandboxProps {
   themeState: CustomTheme;
@@ -17,50 +18,11 @@ export function ThemePreviewSandbox({
   setPreviewDevice,
   applyPresetTemplate,
 }: ThemePreviewSandboxProps) {
-  const [activeLayout, setActiveLayout] = React.useState<"library" | "reader" | "performance" | "settings">("library");
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const [wpm, setWpm] = React.useState(350);
-  const [readerMode, setReaderMode] = React.useState<"rsvp" | "cluster">("rsvp");
-  const [currentWordIdx, setCurrentWordIdx] = React.useState(0);
+  const [activeLayout, setActiveLayout] = React.useState<"library" | "performance" | "settings">("library");
   const [selectedBook, setSelectedBook] = React.useState<number | null>(null);
   const [mockSync, setMockSync] = React.useState(false);
   const [streakActive, setStreakActive] = React.useState(true);
   const [showFontPopover, setShowFontPopover] = React.useState(false);
-
-  // Sample text for reader simulator
-  const rsvpWords = React.useMemo(() => [
-    "Visus", "allows", "you", "to", "read", "at", "incredible",
-    "speeds", "using", "RSVP", "and", "visual", "clustering", "techniques."
-  ], []);
-
-  // Words flashing loop
-  React.useEffect(() => {
-    if (!isPlaying) return;
-    const intervalTime = (60 * 1000) / wpm;
-    const interval = setInterval(() => {
-      setCurrentWordIdx((prev) => (prev + 1) % rsvpWords.length);
-    }, intervalTime);
-    return () => clearInterval(interval);
-  }, [isPlaying, wpm, rsvpWords]);
-
-  // ORP letter computation helper
-  const getOrpParts = (word: string) => {
-    if (!word) return { left: "", middle: "", right: "" };
-    let orpIdx = 0;
-    if (word.length <= 4) {
-      orpIdx = 1;
-    } else if (word.length <= 8) {
-      orpIdx = 2;
-    } else if (word.length <= 12) {
-      orpIdx = 3;
-    } else {
-      orpIdx = 4;
-    }
-    const left = word.substring(0, orpIdx);
-    const middle = word.charAt(orpIdx);
-    const right = word.substring(orpIdx + 1);
-    return { left, middle, right };
-  };
 
   // Mock book catalog database
   const mockBooks = [
@@ -181,140 +143,6 @@ export function ThemePreviewSandbox({
                   </div>
                 );
               })}
-            </div>
-          </div>
-        );
-      case "reader":
-        return (
-          <div className="flex flex-col flex-1 overflow-hidden gap-2">
-            {/* Main reading text sheet */}
-            <div 
-              className="flex-1 border flex flex-col items-center justify-center p-4 min-h-[140px] transition-all duration-300 relative overflow-hidden"
-              style={{
-                backgroundColor: themeState.overrideReader ? themeState.readerBackground : themeState.background,
-                color: themeState.overrideReader ? themeState.readerForeground : themeState.foreground,
-                borderColor: themeState.overrideReader ? themeState.readerBorder : themeState.border,
-                borderRadius: cardRadius
-              }}
-            >
-              <span className="absolute top-2 left-2 text-[7px] font-mono uppercase opacity-55">
-                {readerMode === "rsvp" ? "RSVP mode" : "Cluster mode"}
-              </span>
-
-              {readerMode === "rsvp" ? (
-                <div className="text-center">
-                  {isPlaying ? (
-                    (() => {
-                      const word = rsvpWords[currentWordIdx];
-                      const { left, middle, right } = getOrpParts(word);
-                      return (
-                        <div 
-                          className="font-mono text-sm font-bold flex items-center justify-center tracking-tight"
-                          style={{ fontFamily: getFontFamilyStyle(themeState.readerFont) }}
-                        >
-                          <span className="text-right flex-1 select-none opacity-60">{left}</span>
-                          <span style={{ color: themeState.accent }} className="px-px select-none">{middle}</span>
-                          <span className="text-left flex-1 select-none opacity-60">{right}</span>
-                        </div>
-                      );
-                    })()
-                  ) : (
-                    <div className="text-[10px] font-serif italic opacity-60">
-                      Click play to start reading
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div 
-                  className="text-[9px] font-serif leading-relaxed text-justify px-1"
-                  style={{ fontFamily: getFontFamilyStyle(themeState.readerFont) }}
-                >
-                  {rsvpWords.map((word, idx) => {
-                    const isHighlighted = isPlaying && (idx === currentWordIdx || idx === (currentWordIdx + 1) % rsvpWords.length);
-                    return (
-                      <span 
-                        key={idx} 
-                        className="mr-1 py-0.5 px-0.5 rounded transition-all duration-150 inline-block"
-                        style={{
-                          backgroundColor: isHighlighted ? themeState.accent : "transparent",
-                          color: isHighlighted ? themeState.accentForeground : "inherit",
-                          opacity: isHighlighted ? 1 : (isPlaying ? 0.45 : 1)
-                        }}
-                      >
-                        {word}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Playback speed controller */}
-            <div 
-              className="p-2 border flex flex-col gap-1.5 shrink-0"
-              style={{
-                backgroundColor: glassBg,
-                backdropFilter: glassBlur,
-                border: glassBorder,
-                boxShadow: getShadowStyle(themeState.cardShadow),
-                color: themeState.cardForeground,
-                borderRadius: cardRadius
-              }}
-            >
-              <div className="flex justify-between items-center text-[7.5px] font-mono">
-                <span className="font-bold uppercase">Speed controller</span>
-                <span className="font-bold" style={{ color: themeState.accent }}>{wpm} WPM</span>
-              </div>
-              
-              <div className="flex justify-between items-center gap-2">
-                <button
-                  onClick={() => setReaderMode(m => m === "rsvp" ? "cluster" : "rsvp")}
-                  className="px-2 py-1 border rounded-lg text-[7.5px] font-bold font-mono uppercase transition-all"
-                  style={{
-                    backgroundColor: themeState.muted || "rgba(0,0,0,0.05)",
-                    borderColor: themeState.border,
-                    color: themeState.mutedForeground || themeState.cardForeground
-                  }}
-                >
-                  {readerMode === "rsvp" ? "RSVP" : "Cluster"}
-                </button>
-
-                <button 
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="flex-1 py-1 rounded-lg text-[8px] font-bold uppercase transition-all flex items-center justify-center gap-1 hover:brightness-110 active:scale-[0.98]"
-                  style={{
-                    backgroundColor: themeState.accent,
-                    color: themeState.accentForeground
-                  }}
-                >
-                  {isPlaying ? (
-                    <>
-                      <Pause className="w-2.5 h-2.5" /> Pause
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-2.5 h-2.5 fill-current" /> Play
-                    </>
-                  )}
-                </button>
-
-                <div className="flex items-center gap-0.5 border rounded-lg p-0.5" style={{ backgroundColor: themeState.muted || "rgba(0,0,0,0.05)", borderColor: themeState.border }}>
-                  <button 
-                    onClick={() => setWpm(w => Math.max(100, w - 50))}
-                    className="p-1 rounded transition-all"
-                    style={{ color: themeState.mutedForeground }}
-                  >
-                    <Minus className="w-2.5 h-2.5" />
-                  </button>
-                  <button 
-                    onClick={() => setWpm(w => Math.min(1000, w + 50))}
-                    className="p-1 rounded transition-all"
-                    style={{ color: themeState.mutedForeground }}
-                  >
-                    <Plus className="w-2.5 h-2.5" />
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         );
@@ -526,7 +354,6 @@ export function ThemePreviewSandbox({
         <div className="flex bg-card/60 border border-border/30 rounded-lg p-0.5 text-[9px] font-mono uppercase tracking-wider shrink-0 select-none">
           {[
             { id: "library", label: "Library" },
-            { id: "reader", label: "Reader room" },
             { id: "performance", label: "Performance" },
             { id: "settings", label: "Settings" }
           ].map((tab) => (
@@ -534,7 +361,6 @@ export function ThemePreviewSandbox({
               key={tab.id}
               onClick={() => {
                 setActiveLayout(tab.id as any);
-                setIsPlaying(false);
               }}
               className={`flex-1 py-1 rounded text-center transition-all ${
                 activeLayout === tab.id 
@@ -623,7 +449,6 @@ export function ThemePreviewSandbox({
                   <nav className="flex-1 space-y-1">
                     {[
                       { id: "library", label: "Library" },
-                      { id: "reader", label: "Reader room" },
                       { id: "performance", label: "Performance" },
                       { id: "settings", label: "Settings" }
                     ].map((item) => {
@@ -633,7 +458,6 @@ export function ThemePreviewSandbox({
                           key={item.id}
                           onClick={() => {
                             setActiveLayout(item.id as any);
-                            setIsPlaying(false);
                           }}
                           className={`p-1.5 rounded cursor-pointer font-mono text-[7px] uppercase tracking-wider font-bold transition-all border-l-2 ${
                             isActive ? "border-l-primary" : "border-l-transparent opacity-60 hover:opacity-100"
@@ -769,7 +593,6 @@ export function ThemePreviewSandbox({
               >
                 {[
                   { id: "library", label: "Library" },
-                  { id: "reader", label: "Reader" },
                   { id: "performance", label: "Stats" },
                   { id: "settings", label: "Settings" }
                 ].map((item) => {
@@ -779,7 +602,6 @@ export function ThemePreviewSandbox({
                       key={item.id}
                       onClick={() => {
                         setActiveLayout(item.id as any);
-                        setIsPlaying(false);
                       }}
                       className="flex flex-col items-center justify-center transition-all py-1 px-2 rounded-lg"
                       style={{ 

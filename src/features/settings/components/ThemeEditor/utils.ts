@@ -24,7 +24,6 @@ export const DEFAULT_NEW_THEME = (id: string): CustomTheme => ({
   uiAccent: "#e5e7eb",
   uiAccentForeground: "#8b5cf6",
   overrideSidebar: false,
-  overrideReader: false,
   bgType: "solid",
   glassmorphism: {
     enabled: false,
@@ -40,20 +39,6 @@ export const DEFAULT_NEW_THEME = (id: string): CustomTheme => ({
     blur: 15
   }
 });
-
-export const getFontFamilyStyle = (font?: string) => {
-  switch (font) {
-    case "inter": return "var(--font-sans), sans-serif";
-    case "outfit": return "var(--font-heading), sans-serif";
-    case "roboto": return "'Hanken Grotesk', sans-serif";
-    case "system-ui": return "system-ui, -apple-system, sans-serif";
-    case "serif": return "var(--font-serif), Georgia, serif";
-    case "atkinson": return "'Atkinson Hyperlegible', sans-serif";
-    case "dyslexic": return "'OpenDyslexic', sans-serif";
-    case "sans-serif": return "sans-serif";
-    default: return "inherit";
-  }
-};
 
 /**
  * Scopes custom CSS declarations by prefixing selectors with a wrapper selector.

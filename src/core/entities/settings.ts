@@ -5,7 +5,6 @@ export interface CustomTheme {
   
   // Custom Typography
   uiFont?: string;
-  readerFont?: string;
 
   // Core HSL Color Set (HEX strings)
   background: string;
@@ -40,12 +39,6 @@ export interface CustomTheme {
   sidebarBorder?: string;
   sidebarActiveBackground?: string;
   sidebarActiveForeground?: string;
-
-  // Reader Room Override Toggle & Colors
-  overrideReader: boolean;
-  readerBackground?: string;
-  readerForeground?: string;
-  readerBorder?: string;
 
   // Background Options (Solid, Gradient, Image)
   bgType: "solid" | "gradient" | "image";

@@ -115,15 +115,6 @@ export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseC
             onRefreshCustomFonts={refreshCustomFonts}
             filterType="ui"
           />
-
-          <FontSelector
-            label="Reader room font family"
-            value={themeState.readerFont || ""}
-            onChange={(val) => setThemeState(prev => ({ ...prev, readerFont: val || undefined }))}
-            customFonts={customFonts}
-            onRefreshCustomFonts={refreshCustomFonts}
-            filterType="reader"
-          />
         </div>
       </div>
     </div>

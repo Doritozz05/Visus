@@ -87,54 +87,6 @@ export function DecoupledSectionsTab({ themeState, setThemeState }: DecoupledSec
           </div>
         )}
       </div>
-
-      {/* Reader Component Override */}
-      <div className="p-4 border border-border/30 bg-accent/5 rounded-2xl">
-        <div className="flex items-center justify-between mb-2 pb-2 border-b border-border/20">
-          <div className="flex flex-col">
-            <span className="text-xs font-bold">Decoupled reader room styles</span>
-            <span className="text-[9px] text-muted-foreground">Apply custom parchment/screen backgrounds specifically inside the reading canvas</span>
-          </div>
-          <input
-            type="checkbox"
-            checked={themeState.overrideReader}
-            onChange={(e) => handleToggleOverride("overrideReader", e.target.checked)}
-            className="w-4 h-4 accent-primary rounded border border-border cursor-pointer"
-          />
-        </div>
-        <p className="text-[9px] text-muted-foreground mb-3 leading-normal">
-          Overrides the background, text, and border colors specifically when reading a book. Allows you to set a sepia or black page background while keeping the rest of the application light.
-        </p>
-
-        {themeState.overrideReader && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-scale-up">
-            {/* Reader background */}
-            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Reading page background</span>
-              <ColorSelector
-                value={themeState.readerBackground || themeState.background}
-                onChange={(color) => handleColorChange("readerBackground", color)}
-              />
-            </div>
-            {/* Reader foreground */}
-            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Reading text color</span>
-              <ColorSelector
-                value={themeState.readerForeground || themeState.foreground}
-                onChange={(color) => handleColorChange("readerForeground", color)}
-              />
-            </div>
-            {/* Reader border */}
-            <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
-              <span className="text-[11px] font-bold">Reading canvas border</span>
-              <ColorSelector
-                value={themeState.readerBorder || themeState.border}
-                onChange={(color) => handleColorChange("readerBorder", color)}
-              />
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
