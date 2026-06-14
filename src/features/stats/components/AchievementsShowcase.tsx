@@ -191,7 +191,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
       </div>
 
       {activeTab === "achievements" ? (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 overflow-y-auto custom-scrollbar max-h-[380px] px-4 py-4 -mx-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto custom-scrollbar max-h-[480px] px-4 py-4 -mx-2">
           {achievements.map((ach) => {
             const isUnlocked = !!ach.unlockedAt;
             const style = tierStyles[ach.tier];
@@ -199,7 +199,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
             return (
               <div
                 key={ach.id}
-                className={`border rounded-lg p-2.5 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden ${
+                className={`border rounded-xl p-4 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden min-h-[170px] ${
                   isUnlocked
                     ? `${style.glow} border-primary/30 hover:border-primary/60 hover:scale-[1.05] cursor-default`
                     : "bg-background/25 border-border/10 opacity-60 filter grayscale"
@@ -207,33 +207,37 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
               >
                 {/* Shine Overlay wrapper to avoid clipping external shadows */}
                 {isUnlocked && (
-                  <div className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none shine-overlay opacity-30" />
+                  <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none shine-overlay opacity-30" />
                 )}
 
-                {/* Badge Icon - Slightly smaller */}
-                <div className={`relative w-10 h-10 rounded-lg bg-background/50 border border-border/20 flex items-center justify-center shadow-inner mb-2 ${isUnlocked ? 'animate-achievement-shine' : ''}`}>
+                {/* Badge Icon - Premium sized */}
+                <div className={`relative w-14 h-14 rounded-xl bg-background/50 border border-border/20 flex items-center justify-center shadow-inner mb-3 ${isUnlocked ? 'animate-achievement-shine' : ''}`}>
                   {isUnlocked ? (
-                    React.cloneElement(style.icon as React.ReactElement<any>, { className: "w-5 h-5" })
+                    React.cloneElement(style.icon as React.ReactElement<any>, { className: "w-7 h-7" })
                   ) : (
-                    <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                    <Lock className="w-4 h-4 text-muted-foreground" />
                   )}
                 </div>
 
-                {/* Title & Desc - Tighter layout */}
-                <div className="min-w-0 relative z-10">
-                  <h4 className={`text-[10px] font-bold truncate ${isUnlocked ? style.textColor : 'text-foreground'}`}>{ach.title}</h4>
-                  <p className="text-[8px] text-muted-foreground mt-0.5 leading-tight line-clamp-2 font-medium">{ach.description}</p>
+                {/* Title & Desc - Improved typography */}
+                <div className="min-w-0 relative z-10 w-full mb-1">
+                  <h4 className={`text-xs font-bold truncate px-1 leading-tight ${isUnlocked ? style.textColor : 'text-foreground'}`}>
+                    {ach.title}
+                  </h4>
+                  <p className="text-[10px] text-muted-foreground mt-1 leading-tight line-clamp-2 font-medium px-1">
+                    {ach.description}
+                  </p>
                 </div>
 
-                {/* Progress - Smaller */}
-                <div className="w-full mt-2 relative z-10">
-                  <div className="flex justify-between items-center text-[7px] font-mono text-muted-foreground mb-1">
-                    <span className="opacity-70">Progress</span>
+                {/* Progress - Enhanced readability */}
+                <div className="w-full mt-auto pt-2 relative z-10">
+                  <div className="flex justify-between items-center text-[8px] font-mono text-muted-foreground mb-1.5 px-0.5">
+                    <span className="opacity-70 font-bold uppercase tracking-widest">Progress</span>
                     <span className="font-bold">
                       {isUnlocked ? "Done" : `${Math.min(ach.progress.current, ach.progress.target)}/${ach.progress.target}`}
                     </span>
                   </div>
-                  <div className="w-full bg-accent h-0.5 rounded-full overflow-hidden border border-border/5">
+                  <div className="w-full bg-accent/60 h-1.5 rounded-full overflow-hidden border border-border/5">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         isUnlocked ? "bg-primary shadow-[0_0_8px_rgba(var(--primary),0.4)]" : "bg-muted-foreground/40"
@@ -249,7 +253,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
           })}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 overflow-y-auto custom-scrollbar max-h-[380px] px-4 py-4 -mx-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto custom-scrollbar max-h-[480px] px-4 py-4 -mx-2">
           {STREAK_MILESTONES.map((milestone) => {
             const days = getMilestoneDays(milestone.id);
             const isUnlocked = currentStreak >= days;
@@ -258,7 +262,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
               <div
                 key={milestone.id}
                 onClick={() => isUnlocked && setSelectedMascot(milestone)}
-                className={`border rounded-lg p-2.5 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden ${
+                className={`border rounded-xl p-4 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden min-h-[170px] ${
                   isUnlocked
                     ? "shadow-[0_0_15px_rgba(79,70,229,0.15)] border-primary/30 hover:border-primary/60 hover:scale-[1.05] bg-primary/5 cursor-pointer"
                     : "bg-background/25 border-border/10 opacity-60 filter grayscale cursor-default"
@@ -266,27 +270,27 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
               >
                 {/* Shine Overlay wrapper to avoid clipping external shadows */}
                 {isUnlocked && (
-                  <div className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none shine-overlay opacity-30" />
+                  <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none shine-overlay opacity-30" />
                 )}
 
-                {/* Mascot Preview */}
-                <div className="relative w-16 h-16 flex items-center justify-center mb-2">
-                  <div className="w-12 h-12 flex items-center justify-center">
+                {/* Mascot Preview - Optimized for visibility */}
+                <div className="relative w-24 h-24 flex items-center justify-center mb-2">
+                  <div className="w-20 h-20 flex items-center justify-center">
                     {milestone.renderPreview(days)}
                   </div>
                   {!isUnlocked && (
-                    <div className="absolute inset-0 bg-background/60 backdrop-blur-md rounded-lg flex items-center justify-center overflow-hidden border border-border/5">
-                      <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                    <div className="absolute inset-0 bg-background/60 backdrop-blur-md rounded-xl flex items-center justify-center overflow-hidden border border-border/5">
+                      <Lock className="w-5 h-5 text-muted-foreground" />
                     </div>
                   )}
                 </div>
 
                 {/* Title & Desc */}
                 <div className="min-w-0 relative z-10 w-full">
-                  <h4 className={`text-[10px] font-bold truncate ${isUnlocked ? "text-primary" : "text-foreground"}`}>
+                  <h4 className={`text-xs font-bold truncate leading-tight ${isUnlocked ? "text-primary" : "text-foreground"}`}>
                     Day {days} mascot
                   </h4>
-                  <p className="text-[8px] text-muted-foreground mt-0.5 leading-tight line-clamp-2 font-medium">
+                  <p className="text-[10px] text-muted-foreground mt-1 leading-tight line-clamp-2 font-medium">
                     {isUnlocked ? "Click to view" : `Unlocks at ${days} days`}
                   </p>
                 </div>
