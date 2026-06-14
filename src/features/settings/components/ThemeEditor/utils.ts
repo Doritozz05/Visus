@@ -77,26 +77,7 @@ export function scopeCss(css: string, prefix: string): string {
 }
 
 export const PRESETS_TEMPLATES = BUILTIN_THEMES.map(t => ({
-  name: t.name,
-  isDark: t.isDark,
-  background: t.background,
-  foreground: t.foreground,
-  border: t.border,
-  cardBackground: t.cardBackground,
-  cardForeground: t.cardForeground,
-  cardBorder: t.cardBorder,
-  accent: t.accent,
-  accentForeground: t.accentForeground,
-  muted: t.muted,
-  mutedForeground: t.mutedForeground,
-  secondary: t.secondary,
-  secondaryForeground: t.secondaryForeground,
-  popover: t.popover,
-  popoverForeground: t.popoverForeground,
-  uiAccent: t.uiAccent,
-  uiAccentForeground: t.uiAccentForeground,
-  cardRadius: t.cardRadius,
-  cardShadow: t.cardShadow,
+  ...t,
   glassmorphism: t.glassmorphism || {
     enabled: false,
     blur: 12,

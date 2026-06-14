@@ -136,18 +136,9 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
   const applyPresetTemplate = (preset: any) => {
     updateThemeState(prev => ({
       ...prev,
-      isDark: preset.isDark,
-      background: preset.background,
-      foreground: preset.foreground,
-      border: preset.border,
-      cardBackground: preset.cardBackground,
-      cardForeground: preset.cardForeground,
-      accent: preset.accent,
-      accentForeground: preset.accentForeground,
-      muted: preset.muted,
-      mutedForeground: preset.mutedForeground,
-      cardRadius: preset.cardRadius,
-      cardShadow: preset.cardShadow,
+      ...preset,
+      id: prev.id, // Keep the same ID
+      name: prev.name, // Keep the current edited name
       overrideSidebar: false,
       bgType: "solid"
     }));
