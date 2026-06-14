@@ -309,7 +309,7 @@ export default function LibraryDashboard() {
         </motion.header>
 
           {/* Bento Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-visible pb-4">
             
             {/* Left Column: Ingestion Zone & Progress Stats */}
             <motion.div 
@@ -491,7 +491,7 @@ export default function LibraryDashboard() {
 
               {/* Book List Scrollable Grid Panel */}
               <div className="relative flex-1 min-h-[380px] max-h-[58vh]">
-                <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pr-1 pb-48">
+                <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pl-4 pr-4 -ml-4 -mr-4 pb-48">
                   {filteredBooks.length === 0 ? (
                     <div className="border border-dashed border-border/40 rounded-xl flex flex-col items-center justify-center p-12 text-center bg-card/10 h-full min-h-[300px]">
                       <VisiMascot variant="empty" size={90} className="mb-2" />

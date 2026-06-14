@@ -118,7 +118,7 @@ export default function SettingsClient() {
         })}
       </motion.div>
 
-      <div className="w-full overflow-hidden">
+      <div className="w-full overflow-visible">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
