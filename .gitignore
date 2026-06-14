@@ -98,3 +98,4 @@ desktop.ini
 *.log
 .eslintcache
 .cache/
+test-results/
