@@ -45,7 +45,7 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
         }
 
         const { currentLevel, factorId } = await authService.getAALStatus();
-        
+
         // If we are logged in but not at AAL2, and we have a verified factor, trigger MFA challenge.
         if (currentLevel !== 'aal2' && factorId) {
           setMfaFactorId(factorId);
@@ -59,7 +59,7 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast.error("Required fields", {
         description: "Please enter your email and password.",
@@ -79,10 +79,10 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
 
       // Step 1: Initial password sign in
       await authService.signInWithPassword(email, password);
-      
+
       // Check if MFA challenge is needed
       const { currentLevel, factorId } = await authService.getAALStatus();
-      
+
       if (currentLevel !== 'aal2' && factorId) {
         // MFA is enrolled but not yet verified for this session
         setMfaFactorId(factorId);
@@ -183,12 +183,12 @@ export function LoginForm({ onMfaStateChange }: LoginFormProps) {
           />
         </FormField>
 
-        <FormField 
-          label="Password" 
+        <FormField
+          label="Password"
           id="password"
           hint={
             <Link href="/reset-password" onClick={(e) => e.stopPropagation()} className="text-primary hover:underline float-right">
-              Forgot?
+              Forgot password?
             </Link> as any
           }
         >
