@@ -1,186 +1,145 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { Navbar } from "@/components/landing/Navbar";
-import { Hero3D } from "@/components/landing/Hero3D";
-
-const sectionFadeIn = {
-  initial: { opacity: 0, y: 30 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
-};
+import { Eye, ArrowRight } from "lucide-react";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { BentoFeatures } from "@/components/landing/BentoFeatures";
+import { MiniRSVP } from "@/components/landing/MiniRSVP";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { FaqSection } from "@/components/landing/FaqSection";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-[#fdfcf0] text-zinc-900 overflow-x-hidden selection:bg-zinc-900 selection:text-[#fdfcf0]">
-      {/* Texture Overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] z-50" />
-      
-      <Navbar />
+    <main className="min-h-screen bg-background text-foreground selection:bg-primary/30 overflow-clip relative font-sans">
+      {/* Background Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-20 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/50 to-emerald-500/50 rounded-full blur-[100px]" />
+      </div>
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center px-8 md:px-20 overflow-hidden pt-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center w-full max-w-7xl mx-auto z-10">
-          
-          {/* Text Content - Left Aligned */}
-          <div className="text-left space-y-8 max-w-2xl">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.2 }}
-              className="space-y-4"
-            >
-              <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-zinc-500 block mb-4">
-                Est. 2026 — Visus Digital Archive
-              </span>
-              <h1 className="text-6xl md:text-[100px] font-serif leading-[0.9] tracking-tighter text-zinc-950">
-                Reading <br />
-                <span className="italic font-normal">Reimagined.</span>
-              </h1>
-            </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.8 }}
-              className="text-lg md:text-xl text-zinc-600 font-medium leading-relaxed"
-            >
-              A high-performance sanctuary for the modern mind. Experience documents through advanced visual clusters and RSVP technology.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 1.2 }}
-              className="pt-4"
-            >
-              <Link 
-                href="/reader" 
-                className="inline-block border border-zinc-950 px-10 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-zinc-950 hover:text-[#fdfcf0] transition-all duration-500 shadow-sm"
-              >
-                Open the Reader
-              </Link>
-            </motion.div>
-          </div>
-
-          {/* 3D Visual - Right Aligned */}
-          <div className="relative h-[500px] md:h-[700px] w-full flex items-center justify-center pointer-events-none">
-            <div className="absolute inset-0 pointer-events-auto">
-              <Hero3D />
+      {/* Navbar */}
+      <div className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/60 border-b border-border/10 shadow-sm">
+        <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center shadow-lg shadow-primary/20">
+              <Eye className="w-5 h-5 text-white" />
             </div>
+            <span className="font-heading font-extrabold text-xl tracking-tight">Visus</span>
           </div>
-
-        </div>
-
-        {/* Scroll Indicator */}
-        <motion.div 
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute bottom-12 left-8 md:left-20 flex flex-col items-center gap-2 opacity-50"
-        >
-          <span className="text-[9px] uppercase tracking-widest font-bold">Scroll</span>
-          <div className="w-px h-12 bg-gradient-to-b from-zinc-950 to-transparent" />
-        </motion.div>
-      </section>
-
-      {/* Philosophy Section */}
-      <section className="py-32 px-6 max-w-7xl mx-auto border-t border-zinc-200">
-        <motion.div {...sectionFadeIn} className="grid md:grid-cols-2 gap-20 items-center">
-          <div className="space-y-8">
-            <h2 className="text-5xl font-serif tracking-tight leading-tight">
-              Crafted for those who <span className="italic underline decoration-1 underline-offset-8 text-zinc-400">value clarity</span> over noise.
-            </h2>
-            <p className="text-zinc-600 leading-relaxed text-lg">
-              In an age of endless scrolling, Visus offers a focused environment. We've stripped away the "AI slop" and focused on the core engineering of reading: visual span, fixation control, and comprehension at scale.
-            </p>
-          </div>
-          <div className="aspect-[4/5] bg-zinc-100 rounded-sm overflow-hidden relative group">
-             <div className="absolute inset-0 bg-gradient-to-br from-zinc-500/10 to-transparent" />
-             <div className="absolute inset-0 flex items-center justify-center p-12 text-center">
-                <p className="font-serif italic text-2xl text-zinc-400 opacity-50 select-none">
-                  "The art of reading is in great part that of acquiring a better understanding."
-                </p>
-             </div>
-             {/* Bento Grid Sub-element mockup */}
-             <div className="absolute bottom-8 left-8 right-8 border border-zinc-950/5 bg-white/50 backdrop-blur-md p-6 rounded-lg shadow-sm">
-                <div className="flex justify-between items-end">
-                   <div className="space-y-1">
-                      <div className="h-1 w-12 bg-zinc-950/10 rounded-full" />
-                      <div className="h-1 w-8 bg-zinc-950/10 rounded-full" />
-                   </div>
-                   <span className="text-[10px] font-mono opacity-30 uppercase tracking-tighter">RSVP Engine v2.0</span>
-                </div>
-             </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="py-32 bg-zinc-950 text-[#fdfcf0]">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div {...sectionFadeIn} className="mb-24 space-y-4">
-             <h3 className="text-[11px] uppercase tracking-[0.4em] font-bold opacity-40">Core Technology</h3>
-             <h2 className="text-6xl font-serif tracking-tight">Engineered Precision</h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-1px bg-zinc-800 border border-zinc-800">
-            {[
-              { title: "RSVP Engine", desc: "Rapid Serial Visual Presentation tuned for optimal retention and zero eye-strain." },
-              { title: "Visual Clusters", desc: "Break down complex documents into digestible cognitive nodes for faster mapping." },
-              { title: "Universal Parser", desc: "Seamless support for ePUB, PDF, and Raw Text with perfect formatting preservation." },
-              { title: "OLED Performance", desc: "Optimized for high-refresh rates and low-latency rendering on modern displays." },
-              { title: "Sync Protocol", desc: "Cloud-hybrid synchronization ensuring your library is available offline and globally." },
-              { title: "Privacy First", desc: "Local-first architecture. Your data never leaves your device unless you choose to sync." }
-            ].map((f, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-zinc-950 p-12 space-y-4 hover:bg-zinc-900 transition-colors duration-500"
+          <div className="flex items-center gap-6">
+            <Link href="/library" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
+              Library
+            </Link>
+            <Link href="/dashboard" className="hidden sm:block text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
+              Dashboard
+            </Link>
+            <a
+              href="https://github.com/Doritozz05/Visus"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
               >
-                <h4 className="text-xl font-serif italic text-zinc-100">{f.title}</h4>
-                <p className="text-zinc-500 leading-relaxed text-sm">{f.desc}</p>
-              </motion.div>
-            ))}
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+              </svg>
+              <span>GitHub</span>
+            </a>
+            <Link
+              href="/library"
+              className="text-sm font-bold bg-foreground text-background px-4 py-2 rounded-full hover:bg-foreground/90 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            >
+              Launch app
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
+        </nav>
+      </div>
+
+      {/* Hero Section (now showing the traditional saccades eye demo) */}
+      <HeroSection />
+
+      {/* RSVP Explanation Section (showing the original RSVP player underneath) */}
+      <section className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-border/10">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-extrabold font-heading mb-6 tracking-tight">
+            Read faster with <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">sequential word presentation.</span>
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            By flashing words sequentially at a single focal point (RSVP), Visus eliminates the mechanical sweep of your eyes and pauses to capture details. Test your capability with the player below.
+          </p>
         </div>
+
+        <div className="w-full max-w-2xl mx-auto relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+          <MiniRSVP />
+        </div>
+      </section>
+
+      {/* Bento grid features list (reverted to original standard features) */}
+      <div className="relative">
+        <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
+        <BentoFeatures />
+      </div>
+
+      {/* User testimonials */}
+      <Testimonials />
+
+      {/* Frequently asked questions */}
+      <FaqSection />
+
+      {/* CTA Section */}
+      <section className="relative z-10 px-6 py-32 max-w-4xl mx-auto text-center border-t border-border/10">
+        <div className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+        <h2 className="text-4xl md:text-5xl font-extrabold font-heading mb-6 tracking-tight relative z-10">
+          Ready to read at the speed of thought?
+        </h2>
+        <p className="text-xl text-muted-foreground mb-10 relative z-10 max-w-2xl mx-auto">
+          Join readers who are consuming knowledge faster, retaining more, and building better habits with Visus.
+        </p>
+        <Link
+          href="/library"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-lg px-10 py-5 rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(var(--primary),0.5)] group relative z-10"
+        >
+          Start reading now
+          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+        </Link>
       </section>
 
       {/* Footer */}
-      <footer className="py-20 px-6 border-t border-zinc-200">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
-          <div className="space-y-4">
-            <h4 className="text-2xl font-serif tracking-tighter">Visus</h4>
-            <p className="text-xs text-zinc-400 max-w-[240px] leading-relaxed">
-              Redefining the relationship between human cognition and digital text.
-            </p>
+      <footer className="border-t border-border/20 py-12 px-6 bg-card/50">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2 opacity-60">
+            <Eye className="w-5 h-5" />
+            <span className="font-heading font-bold tracking-tight">Visus &copy; {new Date().getFullYear()}</span>
           </div>
-          
-          <div className="flex flex-wrap gap-12">
-            <div className="space-y-4">
-               <h5 className="text-[10px] uppercase tracking-widest font-bold opacity-30">Platform</h5>
-               <ul className="space-y-2 text-sm">
-                  <li><Link href="/dashboard" className="hover:underline">Dashboard</Link></li>
-                  <li><Link href="/library" className="hover:underline">Library</Link></li>
-                  <li><Link href="/reader" className="hover:underline">Reader</Link></li>
-               </ul>
-            </div>
-            <div className="space-y-4">
-               <h5 className="text-[10px] uppercase tracking-widest font-bold opacity-30">Legal</h5>
-               <ul className="space-y-2 text-sm">
-                  <li><Link href="/privacy" className="hover:underline">Privacy</Link></li>
-                  <li><Link href="/terms" className="hover:underline">Terms</Link></li>
-               </ul>
-            </div>
+          <div className="flex items-center gap-6 text-sm text-muted-foreground font-medium">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy policy</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms of service</Link>
+            <a 
+              href="https://github.com/Doritozz05/Visus" 
+              target="_blank" 
+              rel="noreferrer" 
+              className="hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
+              >
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+              </svg>
+              <span>GitHub</span>
+            </a>
           </div>
-        </div>
-        <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-zinc-100 flex justify-between items-center">
-          <span className="text-[10px] font-mono opacity-20 tracking-tighter uppercase">Build 2026.06.11 / v0.2.0-Alpha</span>
-          <span className="text-[10px] font-mono opacity-20 tracking-tighter uppercase">Handcrafted with precision</span>
         </div>
       </footer>
     </main>
