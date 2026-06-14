@@ -31,6 +31,7 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
   const [isLoading, setIsLoading] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState<"achievements" | "mascots">("achievements");
   const [selectedMascot, setSelectedMascot] = React.useState<StreakMilestone | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = React.useState<AchievementWithStatus | null>(null);
 
   const getMilestoneDays = (id: string): number => {
     const match = id.match(/\d+/);
@@ -189,10 +190,11 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
             return (
               <div
                 key={ach.id}
-                className={`border rounded-xl p-4 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden min-h-[170px] ${
+                onClick={() => setSelectedAchievement(ach)}
+                className={`border rounded-xl p-4 flex flex-col items-center justify-between text-center transition-all relative group/item overflow-hidden min-h-[170px] cursor-pointer hover:scale-[1.05] ${
                   isUnlocked
-                    ? `${style.glow} border-primary/30 hover:border-primary/60 hover:scale-[1.05] cursor-default`
-                    : "bg-card border-border/10 opacity-60 filter grayscale liquid-glass"
+                    ? `${style.glow} border-primary/30 hover:border-primary/60`
+                    : "bg-card border-border/10 opacity-60 filter grayscale hover:opacity-80 hover:border-border/30 liquid-glass"
                 }`}
               >
                 {/* Shine Overlay wrapper to avoid clipping external shadows */}
@@ -319,6 +321,79 @@ export function AchievementsShowcase({ userId, currentStreak = 0 }: Achievements
 
             <button
               onClick={() => setSelectedMascot(null)}
+              className="w-full py-2 bg-primary text-primary-foreground rounded-lg text-xs font-mono uppercase tracking-wider font-bold shadow-md hover:brightness-110 transition-all z-10"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Achievement Detail Modal */}
+      {selectedAchievement && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div 
+            onClick={() => setSelectedAchievement(null)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity animate-in fade-in duration-300"
+          />
+          <div className="w-full max-w-sm bg-card border border-border/30 rounded-[calc(var(--radius)*1.3)] p-6 shadow-2xl relative z-10 liquid-glass overflow-hidden animate-in zoom-in-95 duration-300 text-center flex flex-col items-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent opacity-50"></div>
+            
+            {/* Medal Preview inside modal */}
+            <div className={`relative w-28 h-28 rounded-2xl bg-background border border-border/20 flex items-center justify-center shadow-inner mb-4 z-10 ${selectedAchievement.unlockedAt ? 'animate-achievement-shine' : 'opacity-60 filter grayscale'}`}>
+              {React.cloneElement(tierStyles[selectedAchievement.tier].icon as React.ReactElement<any>, { className: "w-14 h-14" })}
+              {!selectedAchievement.unlockedAt && (
+                <div className="absolute top-2 right-2 bg-background/80 border border-border/20 rounded-md p-1 backdrop-blur-sm shadow-sm">
+                  <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+
+            <div className="relative z-10 mb-6 w-full text-center">
+              <span className={`text-[9px] font-mono uppercase tracking-widest font-bold mb-1 block ${tierStyles[selectedAchievement.tier].textColor}`}>
+                {selectedAchievement.tier.charAt(0).toUpperCase() + selectedAchievement.tier.slice(1)} tier
+              </span>
+              <h3 className="text-xl font-extrabold font-heading text-foreground tracking-tight">
+                {selectedAchievement.title}
+              </h3>
+              <p className="text-xs text-muted-foreground font-sans mt-2 leading-relaxed px-2">
+                {selectedAchievement.description}
+              </p>
+
+              {/* Progress bar in modal */}
+              <div className="w-full mt-4 pt-4 border-t border-border/10">
+                <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mb-1.5 px-1">
+                  <span className="opacity-70 font-bold uppercase tracking-widest">Progress</span>
+                  <span className="font-bold text-foreground">
+                    {selectedAchievement.unlockedAt ? "Unlocked" : `${Math.min(selectedAchievement.progress.current, selectedAchievement.progress.target)}/${selectedAchievement.progress.target}`}
+                  </span>
+                </div>
+                <div className="w-full bg-accent/60 h-2 rounded-full overflow-hidden border border-border/5">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${
+                      selectedAchievement.unlockedAt ? "bg-primary shadow-[0_0_8px_rgba(var(--primary),0.4)]" : "bg-muted-foreground/40"
+                    }`}
+                    style={{
+                      width: `${Math.min(100, (selectedAchievement.progress.current / selectedAchievement.progress.target) * 100)}%`
+                    }}
+                  />
+                </div>
+                
+                {/* Unlocked date or locked helper text */}
+                {selectedAchievement.unlockedAt ? (
+                  <p className="text-[10px] text-muted-foreground mt-3 font-mono">
+                    Unlocked on {new Date(selectedAchievement.unlockedAt).toLocaleDateString()}
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-muted-foreground mt-3 font-mono">
+                    Unlock by meeting the criteria
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setSelectedAchievement(null)}
               className="w-full py-2 bg-primary text-primary-foreground rounded-lg text-xs font-mono uppercase tracking-wider font-bold shadow-md hover:brightness-110 transition-all z-10"
             >
               Close
