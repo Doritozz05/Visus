@@ -94,12 +94,13 @@ export function ColorSelector({
   // Source of truth for resolving the color: 
   // If 'value' is missing, we use the theme's primary color from THEME_DEFAULTS
   const resolvedHex = React.useMemo(() => {
-    if (value && value !== "primary" && value !== "foreground") return resolveColor(value);
+    if (value && value !== "primary" && value !== "foreground" && value !== "muted") return resolveColor(value);
     
     const themeId = settings.general.theme;
     const currentTheme = THEME_DEFAULTS[themeId];
     
     if (value === "foreground") return currentTheme?.fg || "#000000";
+    if (value === "muted") return currentTheme?.muted || "#94a3b8";
     return currentTheme?.primary || "#8b5cf6";
   }, [value, settings.general.theme]);
 
@@ -128,16 +129,23 @@ export function ColorSelector({
     const rect = triggerEl.getBoundingClientRect();
     const scrollY = window.scrollY;
     const scrollX = window.scrollX;
+    const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    const menuWidth = Math.max(280, rect.width);
+    const isDesktop = viewportWidth >= 640;
+    const menuWidth = isDesktop ? 460 : Math.max(300, rect.width);
+    
     const spaceBelow = viewportHeight - rect.bottom;
     const spaceAbove = rect.top;
-    const preferAbove = spaceBelow < 400 && spaceAbove > spaceBelow;
+    const preferAbove = spaceBelow < 320 && spaceAbove > spaceBelow;
+
+    // Clamp left so it doesn't run off-screen
+    const desiredLeft = rect.left;
+    const left = Math.max(8, Math.min(desiredLeft, viewportWidth - menuWidth - 8)) + scrollX;
 
     const style: React.CSSProperties = {
       position: "absolute", // Absolute relative to body
-      left: rect.left + scrollX,
+      left,
       width: menuWidth,
       zIndex: menuZIndex,
     };
@@ -168,17 +176,18 @@ export function ColorSelector({
       setIsOpen(false);
     };
 
-    // We only need to reposition on resize (absolute positioning handles scroll naturally)
-    const handleResize = () => {
+    const handleResizeOrScroll = () => {
       window.requestAnimationFrame(updateMenuPosition);
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResizeOrScroll);
+    window.addEventListener("scroll", handleResizeOrScroll, { capture: true, passive: true });
 
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleResizeOrScroll);
+      window.removeEventListener("scroll", handleResizeOrScroll, { capture: true });
     };
   }, [isOpen, updateMenuPosition]);
 
@@ -334,255 +343,230 @@ export function ColorSelector({
           onTouchEnd={handleInteractionEnd}
         >
           
-          {/* Custom HSL Sliders */}
-          <div className="space-y-3 p-3 bg-accent/5 rounded-xl border border-border/20">
-            {/* Hue Slider */}
-            <div>
-              <div className="flex justify-between text-[8px] font-mono uppercase text-muted-foreground mb-1">
-                <span>Hue</span>
-                <span>{h}°</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="360"
-                value={h}
-                onMouseDown={handleInteractionStart}
-                onTouchStart={handleInteractionStart}
-                onChange={(e) => handleHslSliderChange('h', parseInt(e.target.value))}
-                className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                style={{
-                  background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
-                }}
-              />
-            </div>
-
-            {/* Saturation Slider */}
-            <div>
-              <div className="flex justify-between text-[8px] font-mono uppercase text-muted-foreground mb-1">
-                <span>Saturation</span>
-                <span>{s}%</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={s}
-                onMouseDown={handleInteractionStart}
-                onTouchStart={handleInteractionStart}
-                onChange={(e) => handleHslSliderChange('s', parseInt(e.target.value))}
-                className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, ${hslToHex(h, 0, l)}, ${hslToHex(h, 100, l)})`
-                }}
-              />
-            </div>
-
-            {/* Lightness Slider */}
-            <div>
-              <div className="flex justify-between text-[8px] font-mono uppercase text-muted-foreground mb-1">
-                <span>Lightness</span>
-                <span>{l}%</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={l}
-                onMouseDown={handleInteractionStart}
-                onTouchStart={handleInteractionStart}
-                onChange={(e) => handleHslSliderChange('l', parseInt(e.target.value))}
-                className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, #000000, ${hslToHex(h, s, 50)}, #ffffff)`
-                }}
-              />
-            </div>
-          </div>
-
-          {/* HEX Input & Controls */}
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={hexInput}
-                onChange={handleHexChange}
-                placeholder="#HEXCODE"
-                className="w-full bg-accent/40 border border-border/30 focus:border-primary/50 focus:outline-none rounded-lg px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-foreground placeholder-muted-foreground/45"
-              />
-            </div>
-            
-            {/* Revert Button */}
-            {(initialValue ? value !== initialValue : false) && (
-              <button
-                type="button"
-                onClick={revertToInitial}
-                title="Revert to initial color"
-                className="p-2 border border-border/30 hover:border-primary hover:text-primary rounded-lg transition-colors bg-accent/20 shrink-0 text-muted-foreground flex items-center justify-center"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </button>
-            )}
-
-            {/* Hidden Input Color Picker */}
-            <input
-              type="color"
-              ref={fileInputRef}
-              value={resolvedHex.startsWith("#") ? resolvedHex : "#8b5cf6"}
-              onChange={handleNativePickerChange}
-              className="sr-only"
-            />
-            
-            <button
-              type="button"
-              onClick={triggerNativePicker}
-              title="Open full color spectrum picker"
-              className="p-2 border border-border/30 hover:border-primary hover:text-primary rounded-lg transition-colors bg-accent/20 shrink-0 text-muted-foreground flex items-center justify-center"
-            >
-              <Pipette className="h-4 w-4" />
-            </button>
-
-            {/* Save Custom Color Button */}
-            {!savedColors.includes(resolvedHex) && (
-              <button
-                type="button"
-                onClick={saveCurrentColor}
-                className="px-2.5 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-[10px] font-mono uppercase tracking-wider font-semibold transition-all shrink-0 flex items-center gap-1"
-              >
-                <Plus className="h-3.5 w-3.5" /> Save
-              </button>
-            )}
-          </div>
-
-          {/* Theme Specific Presets */}
-          <div className="flex flex-col gap-2">
-            <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Dynamic Theme Colors</span>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  onChange("primary");
-                  onChangeComplete?.("primary");
-                }}
-                className={`flex-1 flex items-center gap-2 p-1.5 border rounded-lg transition-all ${
-                  value === "primary" ? "border-primary bg-primary/10" : "border-border/30 hover:border-border/60"
-                }`}
-              >
-                <div className="w-4 h-4 rounded-full border border-border/40" style={{ backgroundColor: THEME_DEFAULTS[settings.general.theme]?.primary }} />
-                <span className="text-[9px] font-bold">Theme Accent</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onChange("foreground");
-                  onChangeComplete?.("foreground");
-                }}
-                className={`flex-1 flex items-center gap-2 p-1.5 border rounded-lg transition-all ${
-                  value === "foreground" ? "border-primary bg-primary/10" : "border-border/30 hover:border-border/60"
-                }`}
-              >
-                <div className="w-4 h-4 rounded-full border border-border/40" style={{ backgroundColor: THEME_DEFAULTS[settings.general.theme]?.fg }} />
-                <span className="text-[9px] font-bold">Theme Text</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Theme Specific Quick Picks */}
-          {themeColors.length > 0 && (
-            <div>
-              <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Current Theme Colors</span>
-              <div className="flex flex-wrap gap-2">
-                {themeColors.map((preset) => (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    onClick={() => {
-                      onChange(preset.hex);
-                      onChangeComplete?.(preset.hex);
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Left Column: Custom adjustments */}
+            <div className="space-y-4">
+              {/* Custom HSL Sliders */}
+              <div className="space-y-3 p-3 bg-accent/5 rounded-xl border border-border/20">
+                {/* Hue Slider */}
+                <div>
+                  <div className="flex justify-between text-[8px] font-mono uppercase text-muted-foreground mb-1">
+                    <span>Hue</span>
+                    <span>{h}°</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="360"
+                    value={h}
+                    onMouseDown={handleInteractionStart}
+                    onTouchStart={handleInteractionStart}
+                    onChange={(e) => handleHslSliderChange('h', parseInt(e.target.value))}
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                    style={{
+                      background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
                     }}
-                    style={{ backgroundColor: preset.hex }}
-                    className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-                      isActivePreset(preset.id, preset.hex)
-                        ? "border-foreground scale-110 shadow-md ring-2 ring-primary/45"
-                        : "border-transparent hover:scale-105"
-                    }`}
-                    title={preset.name}
+                  />
+                </div>
+
+                {/* Saturation Slider */}
+                <div>
+                  <div className="flex justify-between text-[8px] font-mono uppercase text-muted-foreground mb-1">
+                    <span>Saturation</span>
+                    <span>{s}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={s}
+                    onMouseDown={handleInteractionStart}
+                    onTouchStart={handleInteractionStart}
+                    onChange={(e) => handleHslSliderChange('s', parseInt(e.target.value))}
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, ${hslToHex(h, 0, l)}, ${hslToHex(h, 100, l)})`
+                    }}
+                  />
+                </div>
+
+                {/* Lightness Slider */}
+                <div>
+                  <div className="flex justify-between text-[8px] font-mono uppercase text-muted-foreground mb-1">
+                    <span>Lightness</span>
+                    <span>{l}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={l}
+                    onMouseDown={handleInteractionStart}
+                    onTouchStart={handleInteractionStart}
+                    onChange={(e) => handleHslSliderChange('l', parseInt(e.target.value))}
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, #000000, ${hslToHex(h, s, 50)}, #ffffff)`
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* HEX Input & Controls */}
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={hexInput}
+                    onChange={handleHexChange}
+                    placeholder="#HEXCODE"
+                    className="w-full bg-accent/40 border border-border/30 focus:border-primary/50 focus:outline-none rounded-lg px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-foreground placeholder-muted-foreground/45"
+                  />
+                </div>
+                
+                {/* Revert Button */}
+                {(initialValue ? value !== initialValue : false) && (
+                  <button
+                    type="button"
+                    onClick={revertToInitial}
+                    title="Revert to initial color"
+                    className="p-2 border border-border/30 hover:border-primary hover:text-primary rounded-lg transition-colors bg-accent/20 shrink-0 text-muted-foreground flex items-center justify-center"
                   >
-                    {isActivePreset(preset.id, preset.hex) && (
-                      <Check className="text-white h-3.5 w-3.5 stroke-[3] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
-                    )}
+                    <RotateCcw className="h-4 w-4" />
                   </button>
-                ))}
+                )}
+
+                {/* Hidden Input Color Picker */}
+                <input
+                  type="color"
+                  ref={fileInputRef}
+                  value={resolvedHex.startsWith("#") ? resolvedHex : "#8b5cf6"}
+                  onChange={handleNativePickerChange}
+                  className="sr-only"
+                />
+                
+                <button
+                  type="button"
+                  onClick={triggerNativePicker}
+                  title="Open full color spectrum picker"
+                  className="p-2 border border-border/30 hover:border-primary hover:text-primary rounded-lg transition-colors bg-accent/20 shrink-0 text-muted-foreground flex items-center justify-center"
+                >
+                  <Pipette className="h-4 w-4" />
+                </button>
+
+                {/* Save Custom Color Button */}
+                {!savedColors.includes(resolvedHex) && (
+                  <button
+                    type="button"
+                    onClick={saveCurrentColor}
+                    className="px-2.5 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-[10px] font-mono uppercase tracking-wider font-semibold transition-all shrink-0 flex items-center gap-1"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Save
+                  </button>
+                )}
               </div>
             </div>
-          )}
 
-          {/* Standard Presets */}
-          <div>
-            <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Default Presets</span>
-            <div className="flex flex-wrap gap-2">
-              {presetsList.map((preset) => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => {
-                    onChange(preset.id);
-                    onChangeComplete?.(preset.id);
-                  }}
-                  style={{ backgroundColor: preset.hex }}
-                  className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-                    isActivePreset(preset.id, preset.hex)
-                      ? "border-foreground scale-110 shadow-md ring-2 ring-primary/45"
-                      : "border-transparent hover:scale-105"
-                  }`}
-                  title={preset.name || preset.id}
-                >
-                  {isActivePreset(preset.id, preset.hex) && (
-                    <Check className="text-white h-3.5 w-3.5 stroke-[3] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+            {/* Right Column: Presets & Palettes */}
+            <div className="space-y-4">
+              {/* Theme Specific Quick Picks */}
+              {themeColors.length > 0 && (
+                <div>
+                  <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Current Theme Colors</span>
+                  <div className="flex flex-wrap gap-2">
+                    {themeColors.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          onChange(preset.id);
+                          onChangeComplete?.(preset.id);
+                        }}
+                        style={{ backgroundColor: preset.hex }}
+                        className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                          isActivePreset(preset.id, preset.hex)
+                            ? "border-foreground scale-110 shadow-md ring-2 ring-primary/45"
+                            : "border-transparent hover:scale-105"
+                        }`}
+                        title={preset.name}
+                      >
+                        {isActivePreset(preset.id, preset.hex) && (
+                          <Check className="text-white h-3.5 w-3.5 stroke-[3] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* Custom Saved Palette */}
-          {savedColors.length > 0 && (
-            <div>
-              <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Saved Palette</span>
-              <div className="flex flex-wrap gap-2">
-                {savedColors.map((color) => (
-                  <div key={color} className="relative group/color">
+              {/* Standard Presets */}
+              <div>
+                <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Default Presets</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {presetsList.map((preset) => (
                     <button
+                      key={preset.id}
                       type="button"
                       onClick={() => {
-                        onChange(color);
-                        onChangeComplete?.(color);
+                        onChange(preset.id);
+                        onChangeComplete?.(preset.id);
                       }}
-                      style={{ backgroundColor: color }}
+                      style={{ backgroundColor: preset.hex }}
                       className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-                        isActiveSaved(color)
+                        isActivePreset(preset.id, preset.hex)
                           ? "border-foreground scale-110 shadow-md ring-2 ring-primary/45"
                           : "border-transparent hover:scale-105"
                       }`}
-                      title={color}
+                      title={preset.name || preset.id}
                     >
-                      {isActiveSaved(color) && (
+                      {isActivePreset(preset.id, preset.hex) && (
                         <Check className="text-white h-3.5 w-3.5 stroke-[3] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
                       )}
                     </button>
-                    <button
-                      type="button"
-                      onClick={(e) => removeSavedColor(color, e)}
-                      className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center justify-center opacity-0 group-hover/color:opacity-100 transition-opacity duration-200"
-                      title="Remove saved color"
-                    >
-                      <X className="w-2.5 h-2.5 stroke-[2]" />
-                    </button>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+
+              {/* Custom Saved Palette */}
+              {savedColors.length > 0 && (
+                <div>
+                  <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Saved Palette</span>
+                  <div className="flex flex-wrap gap-2">
+                    {savedColors.map((color) => (
+                      <div key={color} className="relative group/color">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onChange(color);
+                            onChangeComplete?.(color);
+                          }}
+                          style={{ backgroundColor: color }}
+                          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                            isActiveSaved(color)
+                              ? "border-foreground scale-110 shadow-md ring-2 ring-primary/45"
+                              : "border-transparent hover:scale-105"
+                          }`}
+                          title={color}
+                        >
+                          {isActiveSaved(color) && (
+                            <Check className="text-white h-3.5 w-3.5 stroke-[3] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => removeSavedColor(color, e)}
+                          className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center justify-center opacity-0 group-hover/color:opacity-100 transition-opacity duration-200"
+                          title="Remove saved color"
+                        >
+                          <X className="w-2.5 h-2.5 stroke-[2]" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
         </div>,
         document.body

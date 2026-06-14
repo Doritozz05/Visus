@@ -95,17 +95,17 @@ export function FontSelector({
       setIsOpen(false);
     };
 
-    // Note: We don't need a scroll listener here because 'absolute' positioning
-    // in the body will naturally follow the document scroll.
-    const handleResize = () => {
+    const handleResizeOrScroll = () => {
       window.requestAnimationFrame(updateMenuPosition);
     };
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResizeOrScroll);
+    window.addEventListener("scroll", handleResizeOrScroll, { capture: true, passive: true });
     document.addEventListener("pointerdown", handlePointerDown);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleResizeOrScroll);
+      window.removeEventListener("scroll", handleResizeOrScroll, { capture: true });
       document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [isOpen, updateMenuPosition]);

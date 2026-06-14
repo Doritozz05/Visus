@@ -26,6 +26,16 @@ export function SettingsDrawer({
     }
   }, [isOpen, initialTab]);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      const originalStyle = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
