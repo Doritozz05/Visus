@@ -173,7 +173,10 @@ export function GeneralSettingsForm() {
                     {theme === t.id && <CheckCircle className="text-primary h-3.5 w-3.5" />}
                   </div>
                   <div className="flex gap-1.5 items-center">
-                    <div className={`w-4 h-4 rounded-full ${details?.preview} border border-border/40 shrink-0`}></div>
+                    <div 
+                      className="w-4 h-4 rounded-full border border-border/40 shrink-0 shadow-inner"
+                      style={{ backgroundColor: t.background }}
+                    ></div>
                     <span className="text-[8px] text-muted-foreground leading-tight truncate">{details?.desc}</span>
                   </div>
                 </button>
