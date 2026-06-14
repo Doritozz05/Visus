@@ -3,6 +3,7 @@ import { DynamicCluster } from "@/core/algorithms/clusters";
 import { ClusterSettings } from "@/core/entities/settings";
 import { useReadingStore } from "../../stores/reading-store";
 import { hexToRgba } from "@/lib/color-utils";
+import { BUILTIN_THEMES } from "@/core/config/themes";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { getFontFamilyStyle, getReaderFontClass } from "@/lib/typography";
 
@@ -15,8 +16,33 @@ export function ClusterVisualBox({
   clusterChunks,
   settings,
 }: ClusterVisualBoxProps) {
-  const { customFonts } = useSettings();
+  const { settings: globalSettings, customFonts } = useSettings();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  
+  // Resolve semantic colors based on current theme
+  const getThemeColor = (key: string) => {
+    const themeId = globalSettings.general.theme;
+    const customThemes = globalSettings.general.customThemes || [];
+    
+    // Check built-in themes first
+    const builtIn = BUILTIN_THEMES.find(t => t.id === themeId);
+    if (builtIn) {
+      if (key === "primary") return builtIn.accent;
+      if (key === "foreground") return builtIn.foreground;
+      if (key === "muted") return builtIn.mutedForeground;
+    }
+
+    // Check custom themes
+    const custom = customThemes.find(t => t.id === themeId);
+    if (custom) {
+      if (key === "primary") return custom.accent;
+      if (key === "foreground") return custom.foreground;
+      if (key === "muted") return custom.mutedForeground;
+    }
+
+    return key; // Fallback
+  };
+
   const wordIndex = useReadingStore((state) => state.wordIndex);
 
   // Normalize inputs (accepts both string arrays and DynamicCluster arrays)
@@ -108,8 +134,9 @@ export function ClusterVisualBox({
     fontFamily: getFontFamilyStyle(settings.fontFamily, customFonts),
   };
 
-  const isPreset = settings.activeColor in activeColors;
-  const activeColorClass = isPreset ? activeColors[settings.activeColor as keyof typeof activeColors] : "";
+  const resolvedActiveColor = settings.activeColor === "primary" ? getThemeColor("primary") : settings.activeColor;
+  const isPreset = resolvedActiveColor in activeColors;
+  const activeColorClass = isPreset ? activeColors[resolvedActiveColor as keyof typeof activeColors] : "";
   const readerFontClass = getReaderFontClass(settings.fontFamily);
 
   const visibleChunks = React.useMemo(() => {
@@ -170,9 +197,9 @@ export function ClusterVisualBox({
               if (!isPreset) {
                 highlightStyle = {
                   ...highlightStyle,
-                  color: settings.activeColor,
+                  color: resolvedActiveColor,
                   textShadow: settings.glowEffect !== "none"
-                    ? `0 0 12px ${hexToRgba(settings.activeColor, 0.55)}, 0 0 2px ${hexToRgba(settings.activeColor, 0.3)}`
+                    ? `0 0 12px ${hexToRgba(resolvedActiveColor, 0.55)}, 0 0 2px ${hexToRgba(resolvedActiveColor, 0.3)}`
                     : undefined
                 };
               }
@@ -181,9 +208,9 @@ export function ClusterVisualBox({
               if (!isPreset) {
                 highlightStyle = {
                   ...highlightStyle,
-                  color: settings.activeColor,
-                  backgroundColor: hexToRgba(settings.activeColor, 0.1),
-                  borderColor: hexToRgba(settings.activeColor, 0.2),
+                  color: resolvedActiveColor,
+                  backgroundColor: hexToRgba(resolvedActiveColor, 0.1),
+                  borderColor: hexToRgba(resolvedActiveColor, 0.2),
                   borderWidth: "1px",
                   borderStyle: "solid"
                 };
@@ -193,8 +220,8 @@ export function ClusterVisualBox({
               if (!isPreset) {
                 highlightStyle = {
                   ...highlightStyle,
-                  color: settings.activeColor,
-                  borderBottom: `2px solid ${settings.activeColor}`
+                  color: resolvedActiveColor,
+                  borderBottom: `2px solid ${resolvedActiveColor}`
                 };
               }
             } else if (settings.highlightStyle === "bold-only") {
@@ -204,7 +231,7 @@ export function ClusterVisualBox({
               if (!isPreset) {
                 highlightStyle = {
                   ...highlightStyle,
-                  color: settings.activeColor
+                  color: resolvedActiveColor
                 };
               }
             }

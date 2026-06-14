@@ -96,7 +96,7 @@ export interface GeneralSettings {
 export interface RsvpSettings {
   fontSize: number; // in px
   fontFamily: string;
-  orpColor: string; // "amber" | "orange" | "emerald" | "violet" | "indigo" | "rose" or custom hex
+  orpColor: string; // "primary" | "amber" | "orange" | "emerald" | "violet" | "indigo" | "rose" or custom hex
   orpGlow: boolean;
   showFocusGuides: boolean;
   unmarkedOpacity: number;
@@ -107,7 +107,7 @@ export interface ClusterSettings {
   fontSize: number; // in px
   fontFamily: string;
   highlightStyle: "spotlight" | "capsule" | "underline" | "bold-only" | "color-only";
-  activeColor: string; // "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue" | "white" or custom hex
+  activeColor: string; // "primary" | "indigo" | "violet" | "emerald" | "amber" | "rose" | "blue" | "white" or custom hex
   inactiveOpacity: number;
   blurAmount: string;
   glowEffect: string; // "indigo" | "amber" | "green" | "none" or custom hex / custom on/off
@@ -139,17 +139,17 @@ export const DEFAULT_SETTINGS: SettingsState = {
   rsvp: {
     fontSize: 48,
     fontFamily: "inter",
-    orpColor: "violet",
+    orpColor: "primary",
     orpGlow: true,
     showFocusGuides: false,
     unmarkedOpacity: 0.3,
-    unmarkedColor: "#0f1729",
+    unmarkedColor: "foreground",
   },
   cluster: {
     fontSize: 24,
     fontFamily: "inter",
     highlightStyle: "spotlight",
-    activeColor: "white",
+    activeColor: "primary",
     inactiveOpacity: 0.25,
     blurAmount: "0.5px",
     glowEffect: "indigo",

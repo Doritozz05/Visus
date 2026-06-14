@@ -3,6 +3,7 @@ import { RsvpSettings } from "@/core/entities/settings";
 import { RSVPWord } from "@/core/entities/text";
 import { useReadingStore } from "../../stores/reading-store";
 import { hexToRgba } from "@/lib/color-utils";
+import { BUILTIN_THEMES } from "@/core/config/themes";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { getFontFamilyStyle, getReaderFontClass } from "@/lib/typography";
 
@@ -15,8 +16,32 @@ export function RsvpVisualBox({
   rsvpSequence, 
   settings,
 }: RsvpVisualBoxProps) {
-  const { customFonts } = useSettings();
+  const { settings: globalSettings, customFonts } = useSettings();
   const localWordIndex = useReadingStore((state) => state.wordIndex);
+
+  // Resolve semantic colors based on current theme
+  const getThemeColor = (key: string) => {
+    const themeId = globalSettings.general.theme;
+    const customThemes = globalSettings.general.customThemes || [];
+    
+    // Check built-in themes first
+    const builtIn = BUILTIN_THEMES.find(t => t.id === themeId);
+    if (builtIn) {
+      if (key === "primary") return builtIn.accent;
+      if (key === "foreground") return builtIn.foreground;
+      if (key === "muted") return builtIn.mutedForeground;
+    }
+
+    // Check custom themes
+    const custom = customThemes.find(t => t.id === themeId);
+    if (custom) {
+      if (key === "primary") return custom.accent;
+      if (key === "foreground") return custom.foreground;
+      if (key === "muted") return custom.mutedForeground;
+    }
+
+    return key; // Fallback
+  };
 
   const currentWordObj = rsvpSequence[localWordIndex] || { text: "Ready", orpIndex: 1, delayMultiplier: 1.0 };
   const currentWordText = currentWordObj.text;
@@ -45,20 +70,25 @@ export function RsvpVisualBox({
 
   const readerFontClass = getReaderFontClass(settings.fontFamily);
   
-  const isPreset = settings.orpColor in orpColors;
-  const orpColorClass = isPreset ? orpColors[settings.orpColor as keyof typeof orpColors] : "";
-  const orpGlowClass = isPreset && settings.orpGlow ? orpGlows[settings.orpColor as keyof typeof orpGlows] : "";
+  const resolvedOrpColor = settings.orpColor === "primary" ? getThemeColor("primary") : settings.orpColor;
+  const isPreset = resolvedOrpColor in orpColors;
+  const orpColorClass = isPreset ? orpColors[resolvedOrpColor as keyof typeof orpColors] : "";
+  const orpGlowClass = isPreset && settings.orpGlow ? orpGlows[resolvedOrpColor as keyof typeof orpGlows] : "";
   
   const customOrpStyle: React.CSSProperties = !isPreset ? {
-    color: settings.orpColor,
+    color: resolvedOrpColor,
     textShadow: settings.orpGlow
-      ? `0 0 12px ${hexToRgba(settings.orpColor, 0.55)}, 0 0 2px ${hexToRgba(settings.orpColor, 0.3)}`
+      ? `0 0 12px ${hexToRgba(resolvedOrpColor, 0.55)}, 0 0 2px ${hexToRgba(resolvedOrpColor, 0.3)}`
       : undefined
   } : {};
 
+  const resolvedUnmarkedColor = settings.unmarkedColor === "foreground" 
+    ? getThemeColor("foreground") 
+    : (settings.unmarkedColor === "primary" ? getThemeColor("primary") : settings.unmarkedColor);
+
   const customUnmarkedStyle: React.CSSProperties = {
     opacity: settings.unmarkedOpacity,
-    color: settings.unmarkedColor,
+    color: resolvedUnmarkedColor,
   };
 
   const fontSizeStyle: React.CSSProperties = {

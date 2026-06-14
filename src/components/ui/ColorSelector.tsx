@@ -94,16 +94,22 @@ export function ColorSelector({
   // Source of truth for resolving the color: 
   // If 'value' is missing, we use the theme's primary color from THEME_DEFAULTS
   const resolvedHex = React.useMemo(() => {
-    if (value) return resolveColor(value);
+    if (value && value !== "primary" && value !== "foreground") return resolveColor(value);
+    
     const themeId = settings.general.theme;
-    return THEME_DEFAULTS[themeId]?.primary || "#8b5cf6";
+    const currentTheme = THEME_DEFAULTS[themeId];
+    
+    if (value === "foreground") return currentTheme?.fg || "#000000";
+    return currentTheme?.primary || "#8b5cf6";
   }, [value, settings.general.theme]);
 
   // Derive HSL for sliders
   const { h, s, l } = React.useMemo(() => {
     if (internalHsl) return internalHsl;
     try {
-      return hexToHsl(resolvedHex);
+      // Don't try to parse 'var()' or semantic keys directly in hexToHsl
+      const hex = resolvedHex.startsWith("#") ? resolvedHex : "#8b5cf6";
+      return hexToHsl(hex);
     } catch (e) {
       return { h: 0, s: 0, l: 100 };
     }
@@ -111,7 +117,7 @@ export function ColorSelector({
 
   // Sync state with value prop
   React.useEffect(() => {
-    setHexInput(resolvedHex);
+    setHexInput(resolvedHex.startsWith("#") ? resolvedHex : "");
   }, [resolvedHex]);
 
   // Logic to calculate position relative to the DOCUMENT (natural scrolling)
@@ -297,7 +303,9 @@ export function ColorSelector({
           />
           <div className="flex flex-col">
             <span className="font-semibold text-foreground capitalize">
-              {presetsList.find(p => p.id === value || p.hex === value)?.name || 
+              {value === "primary" ? "Theme Accent" : 
+               value === "foreground" ? "Theme Text" :
+               presetsList.find(p => p.id === value || p.hex === value)?.name || 
                (value && (value in COLOR_PRESETS) ? value : (!value ? "Theme Default" : "Custom Color"))}
             </span>
             <span className="text-[10px] text-muted-foreground uppercase">{resolvedHex}</span>
@@ -441,6 +449,39 @@ export function ColorSelector({
           </div>
 
           {/* Theme Specific Presets */}
+          <div className="flex flex-col gap-2">
+            <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Dynamic Theme Colors</span>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  onChange("primary");
+                  onChangeComplete?.("primary");
+                }}
+                className={`flex-1 flex items-center gap-2 p-1.5 border rounded-lg transition-all ${
+                  value === "primary" ? "border-primary bg-primary/10" : "border-border/30 hover:border-border/60"
+                }`}
+              >
+                <div className="w-4 h-4 rounded-full border border-border/40" style={{ backgroundColor: THEME_DEFAULTS[settings.general.theme]?.primary }} />
+                <span className="text-[9px] font-bold">Theme Accent</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onChange("foreground");
+                  onChangeComplete?.("foreground");
+                }}
+                className={`flex-1 flex items-center gap-2 p-1.5 border rounded-lg transition-all ${
+                  value === "foreground" ? "border-primary bg-primary/10" : "border-border/30 hover:border-border/60"
+                }`}
+              >
+                <div className="w-4 h-4 rounded-full border border-border/40" style={{ backgroundColor: THEME_DEFAULTS[settings.general.theme]?.fg }} />
+                <span className="text-[9px] font-bold">Theme Text</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Theme Specific Quick Picks */}
           {themeColors.length > 0 && (
             <div>
               <span className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground mb-2">Current Theme Colors</span>
