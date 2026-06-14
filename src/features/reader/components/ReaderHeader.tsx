@@ -4,6 +4,7 @@ import * as React from "react";
 import { Book, Bookmark } from "@/core/entities/book";
 import { TableOfContents } from "./TableOfContents";
 import { useReadingStore } from "../stores/reading-store";
+import { motion } from "framer-motion";
 import { 
   ArrowLeft, 
   ChevronLeft, 
@@ -190,46 +191,42 @@ export function ReaderHeader({
       {/* Right: Mode selector & Settings */}
       <div className="flex items-center justify-end gap-3 min-w-0">
         {/* Triple Mode Switcher */}
-        <div className="hidden md:flex border border-border/30 p-1 rounded-lg flex items-center shadow-sm liquid-glass">
-          <button
-            onClick={() => {
-              setIsPlaying(false);
-              setMode("normal");
-            }}
-            className={`px-3 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
-              mode === "normal"
-                ? "bg-accent text-primary font-bold shadow-sm"
-                : "text-muted-foreground hover:text-primary"
-            }`}
-          >
-            Reader
-          </button>
-          <button
-            onClick={() => {
-              setMode("rsvp");
-              setCompletedChapter(null);
-            }}
-            className={`px-3 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
-              mode === "rsvp"
-                ? "bg-accent text-primary font-bold shadow-sm"
-                : "text-muted-foreground hover:text-primary"
-            }`}
-          >
-            RSVP
-          </button>
-          <button
-            onClick={() => {
-              setMode("cluster");
-              setCompletedChapter(null);
-            }}
-            className={`px-3 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-all ${
-              mode === "cluster"
-                ? "bg-accent text-primary font-bold shadow-sm"
-                : "text-muted-foreground hover:text-primary"
-            }`}
-          >
-            Cluster
-          </button>
+        <div className="hidden md:flex border border-border/30 p-1 rounded-lg flex items-center shadow-sm liquid-glass relative">
+          {[
+            { id: "normal", label: "Reader" },
+            { id: "rsvp", label: "RSVP" },
+            { id: "cluster", label: "Cluster" }
+          ].map((m) => {
+            const isActive = mode === m.id;
+            return (
+              <button
+                key={m.id}
+                onClick={() => {
+                  if (m.id === "normal") {
+                    setIsPlaying(false);
+                    setMode("normal");
+                  } else {
+                    setMode(m.id as any);
+                    setCompletedChapter(null);
+                  }
+                }}
+                className={`px-3 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-all relative ${
+                  isActive
+                    ? "text-primary font-bold"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="active-reader-mode"
+                    className="absolute inset-0 bg-accent rounded shadow-sm"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{m.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Pomodoro Timer Toggle */}

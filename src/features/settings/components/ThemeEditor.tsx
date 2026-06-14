@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Palette, Sparkles, Layout, Type } from "lucide-react";
 import type { CustomTheme } from "@/core/entities/settings";
+import { motion } from "framer-motion";
 
 // Subcomponents
 import { ThemeEditorHeader } from "./ThemeEditor/ThemeEditorHeader";
@@ -226,15 +227,23 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
               { id: "advanced", label: "JSON & Custom CSS", icon: Type }
             ].map(tab => {
               const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-[10px] font-bold font-mono uppercase tracking-wider border-b-2 transition-all ${activeTab === tab.id ? "border-primary text-primary bg-card" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/5"}`}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-[10px] font-bold font-mono uppercase tracking-wider transition-all relative ${isActive ? "text-primary bg-card" : "text-muted-foreground hover:text-foreground hover:bg-accent/5"}`}
                 >
                   <Icon className="w-4.5 h-4.5" />
                   <span className="hidden md:inline">{tab.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-theme-tab"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                 </button>
               );
             })}
