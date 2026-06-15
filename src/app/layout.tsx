@@ -92,6 +92,7 @@ export const metadata: Metadata = {
     siteName: "Visus",
     title: "Visus - Advanced Speed Reading Platform",
     description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
+    url: "https://visuslabs.tech",
     images: [
       {
         url: "/opengraph-image",

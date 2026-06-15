@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     title: "How to double your speed reading speed | Visus",
     description: "Read 2x faster with full comprehension using the RSVP method.",
     url: "https://visuslabs.tech/speed-reading",
+    siteName: "Visus",
+    images: [{ url: "/opengraph-image" }],
+    locale: "en_US",
     type: "article",
   },
 };

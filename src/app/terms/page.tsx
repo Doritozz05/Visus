@@ -3,15 +3,17 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of service",
-  description: "Terms of service for the Visus speed reading platform.",
+  description: "Read the Terms of Service for Visus, the advanced speed reading platform. Learn about user responsibilities, legal guidelines, and our RSVP tools for efficient reading.",
   alternates: {
     canonical: "/terms",
   },
   openGraph: {
     title: "Terms of service | Visus",
-    description: "Read our terms for using the Visus platform and tools.",
+    description: "Read our comprehensive terms for using the Visus platform, including our RSVP reader and visual clustering tools. Understand your rights and responsibilities.",
     url: "https://visuslabs.tech/terms",
     siteName: "Visus",
+    images: [{ url: "/opengraph-image" }],
+    locale: "en_US",
     type: "website",
   },
 };

@@ -3,15 +3,17 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
-  description: "Learn how Visus handles your data. We are a privacy-first, local-focused speed reading platform.",
+  description: "Your privacy is our priority. Learn how Visus collects, uses, and protects your data while providing a local-first, secure speed reading experience with Google sync.",
   alternates: {
     canonical: "/privacy",
   },
   openGraph: {
     title: "Privacy policy | Visus",
-    description: "Your data stays on your device. Learn about our local-first privacy approach.",
+    description: "Learn about our local-first privacy approach. Your data stays on your device, and we only sync what is necessary for a seamless cross-device reading experience.",
     url: "https://visuslabs.tech/privacy",
     siteName: "Visus",
+    images: [{ url: "/opengraph-image" }],
+    locale: "en_US",
     type: "website",
   },
 };
