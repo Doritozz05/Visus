@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 
@@ -13,7 +13,9 @@ export default function LoginPage() {
       subtitle={isMfa ? "Protect your account with two-step verification" : "Sign in to continue reading where you left off"}
       showBackButton={!isMfa}
     >
-      <LoginForm onMfaStateChange={setIsMfa} />
+      <Suspense fallback={<div className="h-64 flex items-center justify-center">Loading...</div>}>
+        <LoginForm onMfaStateChange={setIsMfa} />
+      </Suspense>
     </AuthLayout>
   );
 }
