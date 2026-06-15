@@ -326,12 +326,12 @@ export function ThemePreviewSandbox({
   };
 
   return (
-    <section className="md:col-span-5 lg:col-span-5 bg-accent/10 border-r border-border/20 p-5 flex flex-col justify-between overflow-y-auto min-h-[400px]">
-      <div className="space-y-4 flex flex-col h-full">
+    <section className="bg-accent/10 md:border-r border-border/20 p-4 md:p-5 flex flex-col justify-between overflow-y-auto h-full">
+      <div className="space-y-4 flex flex-col h-full overflow-hidden">
         {/* Sandbox header navigation toggle */}
         <div className="flex justify-between items-center shrink-0">
           <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 select-none">
-            <Eye className="w-3.5 h-3.5 text-primary" /> Live preview sandbox
+            <Eye className="w-3.5 h-3.5 text-primary" /> Live preview
           </span>
           
           <div className="flex bg-card border border-border/30 rounded-lg p-0.5 text-[9px] select-none">
@@ -354,7 +354,7 @@ export function ThemePreviewSandbox({
         <div className="flex bg-card/60 border border-border/30 rounded-lg p-0.5 text-[9px] font-mono uppercase tracking-wider shrink-0 select-none">
           {[
             { id: "library", label: "Library" },
-            { id: "performance", label: "Performance" },
+            { id: "performance", label: "Stats" },
             { id: "settings", label: "Settings" }
           ].map((tab) => (
             <button
@@ -374,11 +374,12 @@ export function ThemePreviewSandbox({
         </div>
 
         {/* Mock Application Container Viewport - CENTERED VERTICALLY AND HORIZONTALLY */}
-        <div className="flex-1 flex items-center justify-center p-3 overflow-hidden bg-accent/5 rounded-2xl border border-border/20 min-h-[380px]">
+        <div className="flex-1 flex items-center justify-center p-2 md:p-3 overflow-hidden bg-accent/5 rounded-2xl border border-border/20">
+          <div className="scale-[0.85] sm:scale-100 transition-transform duration-300">
           {previewDevice === "desktop" ? (
             /* Desktop Mockup Screen */
             <div 
-              className={`preview-sandbox-root border border-border/30 rounded-2xl w-full h-[380px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-xl ${themeState.isDark ? "dark" : ""}`}
+              className={`preview-sandbox-root border border-border/30 rounded-2xl w-[320px] md:w-full h-[380px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-xl ${themeState.isDark ? "dark" : ""}`}
               style={{
                 backgroundColor: resolveColor(themeState.background),
                 fontFamily: getFontFamilyStyle(themeState.uiFont),
@@ -434,7 +435,7 @@ export function ThemePreviewSandbox({
               <div className="flex flex-1 h-full w-full relative z-10 text-[11px] overflow-hidden">
                 {/* Desktop mock sidebar */}
                 <aside 
-                  className="w-32 border-r flex flex-col p-2.5 transition-all duration-300 shrink-0 select-none"
+                  className="w-24 md:w-32 border-r flex flex-col p-2.5 transition-all duration-300 shrink-0 select-none"
                   style={{
                     backgroundColor: sidebarBg,
                     color: sidebarFg,
@@ -459,7 +460,7 @@ export function ThemePreviewSandbox({
                           onClick={() => {
                             setActiveLayout(item.id as any);
                           }}
-                          className={`p-1.5 rounded cursor-pointer font-mono text-[7px] uppercase tracking-wider font-bold transition-all border-l-2 ${
+                          className={`p-1.5 rounded cursor-pointer font-mono text-[7px] md:text-[8px] uppercase tracking-wider font-bold transition-all border-l-2 ${
                             isActive ? "border-l-primary" : "border-l-transparent opacity-60 hover:opacity-100"
                           }`}
                           style={{ 
@@ -486,9 +487,9 @@ export function ThemePreviewSandbox({
                 </aside>
 
                 {/* Content window */}
-                <main className="flex-1 p-3.5 flex flex-col gap-2.5 overflow-hidden">
+                <main className="flex-1 p-3 md:p-3.5 flex flex-col gap-2.5 overflow-hidden">
                   <div className="flex justify-between items-center shrink-0">
-                    <h4 className="font-bold text-[12px] font-heading uppercase tracking-wide" style={{ color: themeState.foreground }}>
+                    <h4 className="font-bold text-[10px] md:text-[12px] font-heading uppercase tracking-wide" style={{ color: themeState.foreground }}>
                       {activeLayout}
                     </h4>
                   </div>
@@ -501,7 +502,7 @@ export function ThemePreviewSandbox({
           ) : (
             /* Mobile Mockup Screen - Centered and Enlarged */
             <div 
-              className={`preview-sandbox-root border border-border/30 rounded-[2.2rem] w-[280px] h-[520px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-2xl ${themeState.isDark ? "dark" : ""}`}
+              className={`preview-sandbox-root border border-border/30 rounded-[2.2rem] w-[260px] md:w-[280px] h-[480px] md:h-[520px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-2xl ${themeState.isDark ? "dark" : ""}`}
               style={{
                 backgroundColor: resolveColor(themeState.background),
                 fontFamily: getFontFamilyStyle(themeState.uiFont),
@@ -623,13 +624,14 @@ export function ThemePreviewSandbox({
               </nav>
             </div>
           )}
+          </div>
         </div>
       </div>
 
       {/* Preset template Quick selector footer inside sidebar */}
       <div className="mt-4 pt-4 border-t border-border/20 space-y-2 shrink-0 select-none">
         <label className="block text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Load preset templates</label>
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 gap-1.5 max-h-[100px] md:max-h-none overflow-y-auto pr-1 scrollbar-thin">
           {PRESETS_TEMPLATES.map((p, idx) => (
             <button
               key={idx}

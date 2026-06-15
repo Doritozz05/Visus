@@ -27,6 +27,8 @@ interface ThemeEditorProps {
 
 export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEditorProps) {
   const [activeTab, setActiveTab] = React.useState<"colors" | "components" | "background" | "advanced">("colors");
+  const [mobileMode, setMobileMode] = React.useState<"preview" | "edit">("preview");
+  
   const [themeState, setThemeState] = React.useState<CustomTheme>(() => {
     if (themeToEdit) return deepCloneTheme(themeToEdit);
     const randId = `theme-custom-${Date.now()}`;
@@ -46,6 +48,13 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
   const [copied, setCopied] = React.useState(false);
   const [importJson, setImportJson] = React.useState("");
   const [importError, setImportError] = React.useState<string | null>(null);
+
+  // Automatically switch preview device to mobile if on mobile mode
+  React.useEffect(() => {
+    if (mobileMode === "preview") {
+      setPreviewDevice("mobile");
+    }
+  }, [mobileMode]);
 
   // Function to push to history (debounced or on important changes)
   const pushToHistory = (newState: CustomTheme) => {
@@ -195,6 +204,10 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
     }
   };
 
+  const toggleMobileMode = () => {
+    setMobileMode(prev => prev === "preview" ? "edit" : "preview");
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex flex-col font-sans animate-fade-in glass-surface">
       <ThemeEditorHeader
@@ -205,20 +218,24 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
         canUndo={historyIndex > 0}
         canRedo={historyIndex < history.length - 1}
         onClose={onClose}
+        mobileMode={mobileMode}
+        onToggleMobileMode={toggleMobileMode}
       />
 
       {/* Editor Main Content Area */}
       <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
         {/* Left Column: Dynamic App Preview Sandbox */}
-        <ThemePreviewSandbox
-          themeState={themeState}
-          previewDevice={previewDevice}
-          setPreviewDevice={setPreviewDevice}
-          applyPresetTemplate={applyPresetTemplate}
-        />
+        <section className={`md:col-span-5 lg:col-span-5 h-full flex-col overflow-hidden ${mobileMode === "preview" ? "flex" : "hidden md:flex"}`}>
+          <ThemePreviewSandbox
+            themeState={themeState}
+            previewDevice={previewDevice}
+            setPreviewDevice={setPreviewDevice}
+            applyPresetTemplate={applyPresetTemplate}
+          />
+        </section>
 
         {/* Right Column: Custom Styling Dashboard */}
-        <section className="md:col-span-7 lg:col-span-7 flex flex-col h-full overflow-hidden bg-card">
+        <section className={`md:col-span-7 lg:col-span-7 flex-col h-full overflow-hidden bg-card ${mobileMode === "edit" ? "flex" : "hidden md:flex"}`}>
           {/* Tab Navigation */}
           <FancyTabs
             tabs={[
@@ -235,7 +252,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
           />
 
           {/* Tab Content Panels */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
             {activeTab === "colors" && (
               <BaseColorsTab
                 themeState={themeState}
