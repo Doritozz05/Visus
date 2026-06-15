@@ -126,29 +126,50 @@ export default function RootLayout({
               "@graph": [
                 {
                   "@type": "WebSite",
-                  "name": "Visus",
+                  "@id": "https://visuslabs.tech/#website",
                   "url": "https://visuslabs.tech",
-                  "description": "Advanced Speed Reading Platform based on RSVP."
+                  "name": "Visus",
+                  "description": "Advanced Speed Reading Platform based on RSVP.",
+                  "publisher": { "@id": "https://visuslabs.tech/#organization" }
                 },
                 {
                   "@type": "Organization",
+                  "@id": "https://visuslabs.tech/#organization",
                   "name": "Visus Labs",
                   "url": "https://visuslabs.tech",
-                  "logo": "https://visuslabs.tech/icons/icon-512x512.png",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://visuslabs.tech/icons/icon-512x512.png",
+                    "width": "512",
+                    "height": "512"
+                  },
                   "sameAs": [
                     "https://github.com/visus-labs"
                   ]
                 },
                 {
-                  "@type": "SoftwareApplication",
+                  "@type": "WebApplication",
                   "name": "Visus",
-                  "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
                   "applicationCategory": "EducationApplication",
-                  "browserRequirements": "Requires JavaScript and a modern web browser",
+                  "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
+                  "author": { "@id": "https://visuslabs.tech/#organization" },
                   "offers": {
                     "@type": "Offer",
                     "price": "0",
                     "priceCurrency": "USD"
+                  },
+                  "review": {
+                    "@type": "Review",
+                    "reviewRating": {
+                      "@type": "Rating",
+                      "ratingValue": "5",
+                      "bestRating": "5"
+                    },
+                    "author": {
+                      "@type": "Person",
+                      "name": "Alex C."
+                    },
+                    "reviewBody": "I've doubled my reading speed in just a week. The RSVP engine is smooth and the typography choices are perfect for developers."
                   }
                 }
               ]
