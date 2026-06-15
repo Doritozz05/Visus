@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy policy",
+  title: "Privacy policy: Secure & local-first data",
   description: "Your privacy is our priority. Learn how Visus protects your data while providing a local-first, secure speed reading experience with Google sync.",
   alternates: {
     canonical: "/privacy",
