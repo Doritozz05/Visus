@@ -4,6 +4,7 @@ import * as React from "react";
 import { ReadingList } from "@/core/entities/reading-list";
 import { FolderHeart, Pencil, Trash2, ChevronRight, BookText } from "lucide-react";
 import { motion } from "framer-motion";
+import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
 
 interface ReadingListCardProps {
   list: ReadingList;
@@ -13,11 +14,42 @@ interface ReadingListCardProps {
 }
 
 export function ReadingListCard({ list, onClick, onEdit, onDelete }: ReadingListCardProps) {
+  const { showMenu } = useContextMenu();
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
       className="group cursor-pointer"
       onClick={onClick}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const items: ContextMenuItem[] = [
+          {
+            id: "open",
+            label: "Open Collection",
+            icon: <ChevronRight className="w-4 h-4" />,
+            onClick: onClick,
+          },
+          {
+            id: "edit",
+            label: "Rename Collection",
+            icon: <Pencil className="w-4 h-4" />,
+            onClick: () => onEdit(e as any),
+          },
+          { id: "divider", label: "", divider: true },
+          {
+            id: "delete",
+            label: "Delete Collection",
+            icon: <Trash2 className="w-4 h-4" />,
+            tone: "danger",
+            onClick: () => onDelete(e as any),
+          }
+        ];
+
+        showMenu(e, items);
+      }}
     >
       <div className="relative aspect-[4/3] w-full mb-3">
         {/* Stack effect layers */}

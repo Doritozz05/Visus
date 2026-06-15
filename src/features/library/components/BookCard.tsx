@@ -86,7 +86,7 @@ export function BookCard({
           },
           {
             id: "add-to-list",
-            label: "Gestionar listas",
+            label: "Add to List",
             icon: <ListPlus className="w-4 h-4" />,
             onClick: () => setShowAddToList(true),
           },

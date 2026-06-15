@@ -5,6 +5,7 @@ import { useReadingList } from "../context/reading-list-context";
 import { Book } from "@/core/entities/book";
 import { X, Check, ListPlus, FolderOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 
 interface AddToListDialogProps {
   book: Book;
@@ -14,37 +15,58 @@ interface AddToListDialogProps {
 
 export function AddToListDialog({ book, isOpen, onClose }: AddToListDialogProps) {
   const { lists, addBookToList, removeBookFromList } = useReadingList();
+  const [mounted, setMounted] = React.useState(false);
 
-  if (!isOpen) return null;
+  React.useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        onClick={onClose}
+        className="absolute inset-0 bg-black/60 transition-opacity animate-in fade-in duration-300"
+      />
+      
+      {/* Dialog Content */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="bg-card border border-border/40 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden liquid-glass"
+        className="bg-card border border-border/40 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden liquid-glass relative z-10 animate-scale-up"
       >
-        <div className="p-4 border-b border-border/10 flex justify-between items-center bg-accent/30">
-          <div className="flex items-center gap-2">
-            <ListPlus className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-bold font-heading">Add to List</h2>
+        {/* Visual Decoration */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none"></div>
+
+        <div className="p-6 border-b border-border/10 flex justify-between items-center bg-accent/30 relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <ListPlus className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold font-heading">Add to List</h2>
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider line-clamp-1">Organizing &quot;{book.title}&quot;</p>
+            </div>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-accent rounded-full transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-accent rounded-full transition-colors">
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 
-        <div className="p-4 flex flex-col gap-1 max-h-[300px] overflow-y-auto scrollbar-none">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-3 px-1">
-            Include <span className="text-foreground font-bold">&quot;{book.title}&quot;</span> in:
-          </p>
-          
+        <div className="p-6 flex flex-col gap-1 max-h-[300px] overflow-y-auto scrollbar-none relative z-10">
           {lists.length === 0 ? (
-            <div className="py-8 text-center flex flex-col items-center gap-2">
-              <FolderOpen className="w-8 h-8 text-muted-foreground/20" />
-              <p className="text-xs text-muted-foreground">You don&apos;t have any lists yet.</p>
-              <p className="text-[10px] text-muted-foreground/60">Create one in the sidebar to organize your library.</p>
+            <div className="py-8 text-center flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-accent/50 flex items-center justify-center">
+                <FolderOpen className="w-6 h-6 text-muted-foreground/30" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">No collections found</p>
+                <p className="text-[10px] text-muted-foreground/60 mt-1">Create one in the library to start grouping your books.</p>
+              </div>
             </div>
           ) : (
             lists.map((list) => {
@@ -53,18 +75,36 @@ export function AddToListDialog({ book, isOpen, onClose }: AddToListDialogProps)
                 <button
                   key={list.id}
                   onClick={() => isIncluded ? removeBookFromList(list.id, book.id) : addBookToList(list.id, book.id)}
-                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-accent/50 transition-all group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: list.color || 'var(--primary)' }} />
-                    <span className="text-xs font-medium text-foreground">{list.name}</span>
-                  </div>
-                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                  className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all group border mb-2 ${
                     isIncluded 
-                      ? "bg-primary border-primary text-primary-foreground" 
-                      : "border-border/60 group-hover:border-primary/50"
+                      ? "bg-primary/[0.03] border-primary/20 shadow-sm shadow-primary/5" 
+                      : "bg-accent/5 border-border/40 hover:border-primary/30 hover:bg-primary/[0.02]"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div 
+                      className="w-3 h-3 rounded-full shadow-inner ring-4 ring-background" 
+                      style={{ backgroundColor: list.color || 'var(--primary)' }} 
+                    />
+                    <div className="flex flex-col items-start">
+                      <span className={`text-xs font-bold transition-colors ${isIncluded ? "text-primary" : "text-foreground/80 group-hover:text-primary"}`}>
+                        {list.name}
+                      </span>
+                      <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-tighter">
+                        {list.bookIds.length} items
+                      </span>
+                    </div>
+                  </div>
+                  <div className={`w-6 h-6 rounded-xl border flex items-center justify-center transition-all duration-300 ${
+                    isIncluded 
+                      ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/30 scale-110" 
+                      : "border-border/60 group-hover:border-primary/50 group-hover:scale-105"
                   }`}>
-                    {isIncluded && <Check className="w-3 h-3" />}
+                    {isIncluded ? (
+                      <Check className="w-4 h-4" strokeWidth={3} />
+                    ) : (
+                      <div className="w-1.5 h-1.5 rounded-full bg-border/40 group-hover:bg-primary/40" />
+                    )}
                   </div>
                 </button>
               );
@@ -72,15 +112,16 @@ export function AddToListDialog({ book, isOpen, onClose }: AddToListDialogProps)
           )}
         </div>
 
-        <div className="p-4 bg-accent/10 border-t border-border/10 flex justify-end">
+        <div className="p-4 bg-accent/10 border-t border-border/10 flex justify-end relative z-10">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-bold font-mono uppercase tracking-wider hover:brightness-110 shadow-lg shadow-primary/20 transition-all"
+            className="w-full py-3 bg-primary text-primary-foreground rounded-2xl text-[10px] font-bold font-mono uppercase tracking-widest hover:brightness-110 shadow-lg shadow-primary/20 transition-all"
           >
             Done
           </button>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 }
