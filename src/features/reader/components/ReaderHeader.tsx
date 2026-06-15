@@ -21,7 +21,8 @@ import {
   Timer,
   BookOpen,
   Zap,
-  Layers
+  Layers,
+  Menu
 } from "lucide-react";
 
 interface ChapterItem {
@@ -119,27 +120,49 @@ export function ReaderHeader({
         title="Back to library bookshelf"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span className="hidden sm:inline">Bookshelf</span>
+        <span className="hidden md:inline">Bookshelf</span>
       </button>
 
       {/* Vertical divider */}
-      <div className="h-4 w-px bg-border/20 mx-1 shrink-0 hidden sm:block" />
+      <div className="h-4 w-px bg-border/20 mx-1 shrink-0 hidden md:block" />
+
+      {/* Mobile Utilities Dropdown (< 768px) */}
+      <div className="md:hidden shrink-0 flex items-center">
+        <FancyDropdown
+          value=""
+          onChange={(val) => {
+            if (val === "fullscreen") toggleFullscreen();
+            if (val === "focus") setIsFocusMode(true);
+          }}
+          options={[
+            { value: "focus", label: "Focus Mode", icon: <EyeOff className="w-4 h-4 text-muted-foreground" /> },
+            { value: "fullscreen", label: isFullscreen ? "Exit Fullscreen" : "Fullscreen", icon: isFullscreen ? <Minimize className="w-4 h-4 text-muted-foreground" /> : <Maximize className="w-4 h-4 text-muted-foreground" /> }
+          ]}
+          placeholder="Actions"
+          ariaLabel="Reading actions"
+          triggerClassName="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
+          menuClassName="min-w-[180px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass"
+          renderTrigger={() => <Menu className="w-4 h-4" />}
+        />
+      </div>
 
       {/* Layout Utilities (Glued next to bookshelf) */}
-      <button
-        onClick={toggleFullscreen}
-        className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
-        title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-      >
-        {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-      </button>
-      <button
-        onClick={() => setIsFocusMode(true)}
-        className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
-        title="Enter focus mode"
-      >
-        <EyeOff className="w-4 h-4" />
-      </button>
+      <div className="hidden md:flex items-center gap-1 md:gap-1.5">
+        <button
+          onClick={toggleFullscreen}
+          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
+          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        >
+          {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+        </button>
+        <button
+          onClick={() => setIsFocusMode(true)}
+          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
+          title="Enter focus mode"
+        >
+          <EyeOff className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 
@@ -148,7 +171,7 @@ export function ReaderHeader({
       {/* Mode Selector Dropdown (Mobile) / Tabs (Desktop) */}
       <div className="shrink-0 flex items-center">
         {/* Mobile Dropdown */}
-        <div className="sm:hidden">
+        <div className="lg:hidden">
           <FancyDropdown
             value={mode}
             onChange={(val) => {
@@ -178,7 +201,7 @@ export function ReaderHeader({
         </div>
 
         {/* Desktop Tabs */}
-        <div className="hidden sm:flex bg-card border border-border/40 p-0.5 rounded-lg items-center shadow-sm liquid-glass">
+        <div className="hidden lg:flex bg-card border border-border/40 p-0.5 rounded-lg items-center shadow-sm liquid-glass">
           {modeOptions.map((option) => (
             <button
               key={option.value}
@@ -208,7 +231,7 @@ export function ReaderHeader({
       {/* Pomodoro Timer Toggle */}
       <button
         onClick={() => setIsPomodoroOpen?.(!isPomodoroOpen)}
-        className={`hidden sm:flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm liquid-glass cursor-pointer ${
+        className={`hidden md:flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm liquid-glass cursor-pointer ${
           isPomodoroOpen
             ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(var(--primary),0.2)]"
             : "bg-card hover:bg-accent text-muted-foreground hover:text-primary"
