@@ -19,7 +19,7 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Learn</h4>
+          <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Learn</h3>
           <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary transition-colors">Speed reading guide</Link>
           <Link href="/rsvp-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">The RSVP method</Link>
           <Link href="/cluster-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">Cluster method</Link>
@@ -27,13 +27,13 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Legal</h4>
+          <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Legal</h3>
           <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy policy</Link>
           <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of service</Link>
         </div>
 
         <div className="flex flex-col gap-3">
-          <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Connect</h4>
+          <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Connect</h3>
           <a
             href="https://github.com/Doritozz05/Visus"
             target="_blank"
