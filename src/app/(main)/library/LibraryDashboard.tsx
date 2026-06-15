@@ -3,6 +3,7 @@
 import * as React from "react";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { useLibrary } from "@/features/library/context/library-context";
+import { useReadingList } from "@/features/library/context/reading-list-context";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { Book } from "@/core/entities/book";
 import { useRouter } from "next/navigation";
@@ -25,6 +26,8 @@ import { EditBookModal } from "@/features/library/components/EditBookModal";
 import { BookDetailsModal } from "@/features/library/components/BookDetailsModal";
 import { BookCard } from "@/features/library/components/BookCard";
 import { VisiMascot } from "@/components/ui/VisiMascot";
+
+import { ReadingListGrid } from "@/features/library/components/ReadingListGrid";
 
 // Extracted Hooks
 import { useBookIngestion } from "@/features/library/hooks/useBookIngestion";
@@ -61,6 +64,7 @@ const rightColumnVariants = {
 
 export default function LibraryDashboard() {
   const { books, addBook, updateBook, deleteBook, toggleCompleted, resetLibrary, setActiveBookId, isHydrated } = useLibrary();
+  const { lists, activeListId, setActiveListId } = useReadingList();
   const router = useRouter();
   const { user } = useAuth();
   const { settings, updateGeneralSettings } = useSettings();
@@ -134,10 +138,17 @@ export default function LibraryDashboard() {
 
   // State controls for UI
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [activeTab, setActiveTab] = React.useState<"active" | "completed" | "archived">("active");
+  const [activeTab, setActiveTab] = React.useState<"active" | "completed" | "lists">("active");
   const [activeGenre, setActiveGenre] = React.useState<string | null>(null);
   const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null);
   const [detailsBook, setDetailsBook] = React.useState<Book | null>(null);
+
+  // When a list is selected, switch to active tab and filter
+  React.useEffect(() => {
+    if (activeListId) {
+      setActiveTab("active");
+    }
+  }, [activeListId]);
 
   // Use custom hooks
   const {
@@ -239,21 +250,27 @@ export default function LibraryDashboard() {
       const matchesTab = book.status === activeTab;
       
       const matchesGenre = activeGenre ? book.genres?.includes(activeGenre) : true;
+
+      const activeList = lists.find(l => l.id === activeListId);
+      const matchesList = activeList ? activeList.bookIds.includes(book.id) : true;
       
-      return matchesSearch && matchesTab && matchesGenre;
+      return matchesSearch && matchesTab && matchesGenre && matchesList;
     });
-  }, [books, searchQuery, activeTab, activeGenre]);
+  }, [books, searchQuery, activeTab, activeGenre, activeListId, lists]);
 
   const handleResetFilters = React.useCallback(() => {
     setSearchQuery("");
     setActiveGenre(null);
     setActiveTab("active");
+    setActiveListId(null);
     setActiveDropdownId(null);
-  }, []);
+  }, [setActiveListId]);
 
   if (!isHydrated) {
     return <LoadingSpinner className="h-full" />;
   }
+
+  const activeList = lists.find(l => l.id === activeListId);
 
   return (
     <>
@@ -275,9 +292,9 @@ export default function LibraryDashboard() {
           className="border-b border-border/20 pb-4 mb-6 flex flex-col md:flex-row justify-between items-end gap-4 shrink-0"
         >
           <div>
-            <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Library &amp; archives</h1>
+            <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Your Library</h1>
             <div className="flex items-center gap-3 mt-1 mb-1">
-              <h2 className="text-xs font-mono uppercase tracking-widest text-primary">Digital assets</h2>
+              <h2 className="text-xs font-mono uppercase tracking-widest text-primary">Personal collection</h2>
               <div className="h-3 w-px bg-border/40"></div>
               <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{books.length} Objects indexed</span>
             </div>
@@ -431,14 +448,17 @@ export default function LibraryDashboard() {
                   <FancyTabs
                     tabs={[
                       { id: "active", label: "Active" },
-                      { id: "completed", label: "Completed" },
-                      { id: "archived", label: "Archived" }
+                      { id: "completed", label: "Done" },
+                      { id: "lists", label: "Lists" }
                     ]}
                     activeTab={activeTab}
-                    onChange={(id) => setActiveTab(id as any)}
+                    onChange={(id) => {
+                      setActiveTab(id as any);
+                      if (id === "lists") setActiveListId(null);
+                    }}
                     layoutId="active-library-tab"
                     variant="pill"
-                    className="flex-1 sm:flex-none min-w-0 w-full sm:w-auto"
+                    className="flex-1 min-w-0"
                   />
                   <button 
                     onClick={() => setIsAddModalOpen(true)}
@@ -450,8 +470,35 @@ export default function LibraryDashboard() {
                 </div>
               </div>
 
+              {/* Active List Sub-header (Medium Style) */}
+              <AnimatePresence>
+                {activeListId && activeList && activeTab !== "lists" && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-2xl px-6 py-4 mb-2 shadow-sm"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: activeList.color || 'var(--primary)' }} />
+                      <div>
+                        <h2 className="text-sm font-bold font-heading">{activeList.name}</h2>
+                        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Showing {filteredBooks.length} items from this collection</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setActiveListId(null)}
+                      className="text-[10px] font-mono font-bold text-primary hover:text-primary/70 uppercase tracking-widest flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-all"
+                    >
+                      <Eraser className="w-3.5 h-3.5" />
+                      Back to All
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Tags/Genres Filter */}
-              {availableGenres.length > 0 && (
+              {availableGenres.length > 0 && activeTab !== "lists" && (
                 <div className="flex gap-2 px-2 items-center flex-wrap w-full">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground shrink-0">Filter by tag:</span>
                   <div className="w-full sm:w-[20rem] md:w-[24rem] lg:w-[28rem] shrink-0">
@@ -485,15 +532,17 @@ export default function LibraryDashboard() {
                 </div>
               )}
 
-              {/* Book List Scrollable Grid Panel */}
-              <div className="relative flex-1 min-h-[380px] max-h-[58vh]">
-                <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pl-4 pr-4 -ml-4 -mr-4 pb-48">
-                  {filteredBooks.length === 0 ? (
+              {/* Main Content Scrollable Panel */}
+              <div className="relative flex-1 min-h-[380px] max-h-[58vh] mt-4">
+                <div className="max-h-[58vh] overflow-y-auto scrollbar-none scroll-fade-bottom pl-4 pr-4 -ml-4 -mr-4 pb-48 pt-6">
+                  {activeTab === "lists" ? (
+                    <ReadingListGrid />
+                  ) : filteredBooks.length === 0 ? (
                     <div className="border border-dashed border-border/40 rounded-xl flex flex-col items-center justify-center p-12 text-center bg-card/10 h-full min-h-[300px]">
                       <VisiMascot variant="empty" size={90} className="mb-2" />
                       <p className="text-sm font-semibold text-muted-foreground">No books found</p>
                       <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs leading-relaxed">
-                        Try adjusting your search criteria, switching tabs, or uploading a new file in the ingestion area.
+                        Try adjusting your search criteria, switching tabs, or uploading a new file.
                       </p>
                     </div>
                   ) : (

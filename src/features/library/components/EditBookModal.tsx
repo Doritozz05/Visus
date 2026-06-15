@@ -16,8 +16,8 @@ interface EditBookModalProps {
   setEditAuthor: (val: string) => void;
   editFormat: "PDF" | "EPUB" | "TXT" | "PHYSICAL";
   setEditFormat: (val: "PDF" | "EPUB" | "TXT" | "PHYSICAL") => void;
-  editStatus: "active" | "completed" | "archived";
-  setEditStatus: (val: "active" | "completed" | "archived") => void;
+  editStatus: "active" | "completed";
+  setEditStatus: (val: "active" | "completed") => void;
   editCurrentPage: number | "";
   setEditCurrentPage: (val: number | "") => void;
   editTotalPages: number | "";

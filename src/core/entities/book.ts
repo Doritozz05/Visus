@@ -33,7 +33,7 @@ export interface Book {
   format: "PDF" | "EPUB" | "TXT" | "PHYSICAL";
   progress: number; // Percentage complete (0 to 100)
   estimatedReadingTime: string; // Dynamic text, e.g., "2h 15m remaining"
-  status: "active" | "completed" | "archived";
+  status: "active" | "completed";
   createdAt: string;
   /** Exact chapter index the user was on when they last left the reader */
   lastChapterIndex?: number;

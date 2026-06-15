@@ -3,6 +3,7 @@
 import * as React from "react";
 import { SettingsProvider, useSettings } from "@/features/settings/context/settings-context";
 import { LibraryProvider } from "@/features/library/context/library-context";
+import { ReadingListProvider } from "@/features/library/context/reading-list-context";
 import { AuthProvider } from "@/features/auth/context/auth-context";
 import { Toaster } from "sonner";
 import { ContextMenuProvider } from "@/components/ui/ContextMenu";
@@ -311,32 +312,34 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <AuthProvider>
       <SettingsProvider>
         <LibraryProvider>
-          <ContextMenuProvider>
-            <ThemeProviderHelper>
-              {children}
-              <Toaster 
-                position="bottom-right" 
-                closeButton 
-                expand={true}
-                visibleToasts={5}
-                toastOptions={{
-                  className: "!bg-card !border-border !text-foreground",
-                  classNames: {
-                    toast: "!bg-card shadow-lg !border-border !text-foreground",
-                    title: "!text-foreground font-bold font-heading text-sm",
-                    description: "!text-muted-foreground font-sans text-xs",
-                    actionButton: "bg-primary text-primary-foreground hover:bg-primary/90",
-                    cancelButton: "bg-muted text-muted-foreground hover:bg-muted/90",
-                    closeButton: "text-muted-foreground hover:text-foreground bg-transparent border-0",
-                    success: "!border-primary/50 text-primary",
-                    error: "!border-destructive/50 text-destructive",
-                    warning: "!border-amber-500/50 text-amber-500",
-                    info: "!border-blue-500/50 text-blue-500"
-                  }
-                }}
-              />
-            </ThemeProviderHelper>
-          </ContextMenuProvider>
+          <ReadingListProvider>
+            <ContextMenuProvider>
+              <ThemeProviderHelper>
+                {children}
+                <Toaster 
+                  position="bottom-right" 
+                  closeButton 
+                  expand={true}
+                  visibleToasts={5}
+                  toastOptions={{
+                    className: "!bg-card !border-border !text-foreground",
+                    classNames: {
+                      toast: "!bg-card shadow-lg !border-border !text-foreground",
+                      title: "!text-foreground font-bold font-heading text-sm",
+                      description: "!text-muted-foreground font-sans text-xs",
+                      actionButton: "bg-primary text-primary-foreground hover:bg-primary/90",
+                      cancelButton: "bg-muted text-muted-foreground hover:bg-muted/90",
+                      closeButton: "text-muted-foreground hover:text-foreground bg-transparent border-0",
+                      success: "!border-primary/50 text-primary",
+                      error: "!border-destructive/50 text-destructive",
+                      warning: "!border-amber-500/50 text-amber-500",
+                      info: "!border-blue-500/50 text-blue-500"
+                    }
+                  }}
+                />
+              </ThemeProviderHelper>
+            </ContextMenuProvider>
+          </ReadingListProvider>
         </LibraryProvider>
       </SettingsProvider>
     </AuthProvider>

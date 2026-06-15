@@ -20,7 +20,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
       <div className="w-full max-w-4xl flex-1 flex flex-col justify-center gap-6 mt-4">
         <div className="text-center mb-4">
           <h2 className="text-2xl font-bold font-heading text-foreground">Active bookshelf</h2>
-          <p className="text-xs text-muted-foreground font-sans mt-1">Only active books are shown here. Archived and completed titles stay in the library.</p>
+          <p className="text-xs text-muted-foreground font-sans mt-1">Only active books are shown here. Completed titles stay in the library.</p>
         </div>
 
         {/* Scrollable Bookshelf Shelf */}
@@ -66,7 +66,7 @@ export function BookshelfSelector({ books, setActiveBookId }: BookshelfSelectorP
               <div className="max-w-md">
                 <h3 className="text-lg font-bold font-heading text-foreground">No active books available</h3>
                 <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  All your books are currently archived or completed. Open the library to reactivate one or import a new title to start reading.
+                  All your books are currently completed. Open the library to reactivate one or import a new title to start reading.
                 </p>
               </div>
               <div className="flex justify-center w-full max-w-sm">

@@ -11,7 +11,7 @@ export function useEditBookForm(
   const [editAuthor, setEditAuthor] = React.useState("");
   const [editFormat, setEditFormat] = React.useState<"PDF" | "EPUB" | "TXT" | "PHYSICAL">("EPUB");
   const [editProgress, setEditProgress] = React.useState(0);
-  const [editStatus, setEditStatus] = React.useState<"active" | "completed" | "archived">("active");
+  const [editStatus, setEditStatus] = React.useState<"active" | "completed">("active");
   const [editCurrentPage, setEditCurrentPage] = React.useState<number | "">("");
   const [editTotalPages, setEditTotalPages] = React.useState<number | "">("");
   const [titleError, setTitleError] = React.useState<string | undefined>(undefined);
@@ -26,7 +26,6 @@ export function useEditBookForm(
   const statusOptions = [
     { value: "active", label: "Active" },
     { value: "completed", label: "Completed" },
-    { value: "archived", label: "Archived" },
   ];
 
   const handleEditSubmit = (e: React.FormEvent) => {

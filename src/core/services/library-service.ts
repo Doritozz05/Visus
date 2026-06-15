@@ -88,7 +88,7 @@ export function calculateProgress(book: Book, updates: Partial<Book>): Book {
 
   if (updates.status) {
     mergedBook.status = updates.status;
-  } else if (mergedBook.status !== "archived") {
+  } else {
     mergedBook.status = naturalStatus;
   }
 

@@ -2,11 +2,12 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Book, Trash2, MoreVertical, Info, BookOpen, CheckCircle, Pencil, Archive, FolderPlus, Cloud, CloudOff, RefreshCw } from "lucide-react";
+import { Book, Trash2, MoreVertical, Info, BookOpen, CheckCircle, Pencil, Cloud, CloudOff, RefreshCw, ListPlus } from "lucide-react";
 import { Book as BookEntity } from "@/core/entities/book";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
+import { AddToListDialog } from "./AddToListDialog";
 
 interface BookCardProps {
   book: BookEntity;
@@ -37,6 +38,7 @@ export function BookCard({
 }: BookCardProps) {
   const menuRef = React.useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+  const [showAddToList, setShowAddToList] = React.useState(false);
   const { showMenu } = useContextMenu();
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -83,6 +85,12 @@ export function BookCard({
             onClick: () => onDetails(book),
           },
           {
+            id: "add-to-list",
+            label: "Gestionar listas",
+            icon: <ListPlus className="w-4 h-4" />,
+            onClick: () => setShowAddToList(true),
+          },
+          {
             id: "toggle-completed",
             label: book.status === "completed" ? "Marcar como activo" : "Marcar como completado",
             icon: book.status === "completed" ? <BookOpen className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />,
@@ -93,12 +101,6 @@ export function BookCard({
             label: "Editar detalles",
             icon: <Pencil className="w-4 h-4" />,
             onClick: () => onEdit(book),
-          },
-          {
-            id: "archive",
-            label: book.status === "archived" ? "Desarchivar libro" : "Archivar libro",
-            icon: book.status === "archived" ? <FolderPlus className="w-4 h-4" /> : <Archive className="w-4 h-4" />,
-            onClick: () => onUpdateBook(book.id, { status: book.status === "archived" ? "active" : "archived" }),
           },
           ...(book.format !== "PHYSICAL" && onToggleCloudSync ? [{
             id: "cloud-sync",
@@ -189,7 +191,7 @@ export function BookCard({
                   onEdit(book);
                   setActiveDropdownId(null);
                 }}
-                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors focus:outline-none focus:bg-accent/80"
+                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-b border-border/10 focus:outline-none focus:bg-accent/80"
               >
                 <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
                 Edit details
@@ -197,23 +199,19 @@ export function BookCard({
               <button
                 role="menuitem"
                 onClick={() => {
-                  onUpdateBook(book.id, { status: book.status === "archived" ? "active" : "archived" });
+                  setShowAddToList(true);
                   setActiveDropdownId(null);
                 }}
-                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors border-t border-border/10 focus:outline-none focus:bg-accent/80"
+                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors focus:outline-none focus:bg-accent/80"
               >
-                {book.status === "archived" ? (
-                  <FolderPlus className="w-3.5 h-3.5 text-muted-foreground" />
-                ) : (
-                  <Archive className="w-3.5 h-3.5 text-muted-foreground" />
-                )}
-                {book.status === "archived" ? "Unarchive book" : "Archive book"}
+                <ListPlus className="w-3.5 h-3.5 text-muted-foreground" />
+                Add to List
               </button>
             </div>
           )}
         </div>
 
-        {/* Cloud Sync Toggle */}
+                {/* Cloud Sync Toggle */}
         {book.format !== "PHYSICAL" && onToggleCloudSync && (
           <button
             onClick={(e) => {
@@ -321,6 +319,13 @@ export function BookCard({
         description={`This will permanently remove "${book.title}" and its reading progress from your local library.`}
         confirmLabel="Delete"
         variant="danger"
+      />
+
+      {/* Add to List Dialog */}
+      <AddToListDialog
+        book={book}
+        isOpen={showAddToList}
+        onClose={() => setShowAddToList(false)}
       />
     </div>
   );

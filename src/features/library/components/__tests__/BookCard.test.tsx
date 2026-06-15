@@ -5,6 +5,25 @@ import * as React from "react";
 import { BookCard } from "../BookCard";
 import { Book as BookEntity } from "@/core/entities/book";
 
+// Mock Supabase to avoid environment variable errors during tests
+vi.mock("@supabase/ssr", () => ({
+  createBrowserClient: vi.fn(() => ({})),
+}));
+
+vi.mock("@/lib/supabase", () => ({
+  createClient: vi.fn(() => ({})),
+  supabase: {},
+}));
+
+// Mock ReadingListContext since BookCard now depends on it via AddToListDialog
+vi.mock("@/features/library/context/reading-list-context", () => ({
+  useReadingList: () => ({
+    lists: [],
+    addBookToList: vi.fn(),
+    removeBookFromList: vi.fn(),
+  }),
+}));
+
 // Mock ContextMenu to avoid portal issues in simple unit tests
 vi.mock("@/components/ui/ContextMenu", () => ({
   useContextMenu: () => ({

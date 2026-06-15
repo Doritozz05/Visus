@@ -53,7 +53,7 @@ test.describe('Visus Sentence Casing Validation', () => {
     }
 
     // Header casing (target the specific Library page title heading)
-    const pageHeader = page.getByRole('heading', { name: 'Library & archives' });
+    const pageHeader = page.getByRole('heading', { name: 'Your Library' });
     await expect(pageHeader).toBeVisible();
 
     // Bento stats casing
