@@ -15,7 +15,11 @@ export function useCloudSync(books: Book[], updateBook: (id: string, updates: Pa
 
     try {
       const user = await authService.getUser();
-      if (!user) throw new Error("User must be logged in to sync to cloud.");
+      if (!user) {
+        setError("Please log in to sync your books to the cloud.");
+        setIsSyncing(false);
+        return;
+      }
 
       const cloudBooks = books.filter(b => b.isInCloud);
       if (cloudBooks.length >= MAX_CLOUD_SLOTS) {
@@ -78,7 +82,11 @@ export function useCloudSync(books: Book[], updateBook: (id: string, updates: Pa
 
     try {
       const user = await authService.getUser();
-      if (!user) throw new Error("User must be logged in.");
+      if (!user) {
+        setError("User must be logged in.");
+        setIsSyncing(false);
+        return;
+      }
 
       // 1. Delete from Supabase Storage
       await remoteStorageService.deleteBookFile(user.id, bookId);
