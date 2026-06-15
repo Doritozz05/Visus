@@ -8,9 +8,10 @@ interface BaseColorsTabProps {
   themeState: CustomTheme;
   setThemeState: (updater: CustomTheme | ((prev: CustomTheme) => CustomTheme), push?: boolean) => void;
   initialTheme: CustomTheme;
+  portalContainer?: HTMLElement | null;
 }
 
-export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseColorsTabProps) {
+export function BaseColorsTab({ themeState, setThemeState, initialTheme, portalContainer }: BaseColorsTabProps) {
   const { customFonts, refreshCustomFonts } = useSettings();
 
   const handleColorChange = (key: keyof CustomTheme, value: string, push: boolean = false) => {
@@ -93,6 +94,7 @@ export function BaseColorsTab({ themeState, setThemeState, initialTheme }: BaseC
                   initialValue={initialHexVal}
                   onChange={(color) => handleColorChange(field.key, color, false)}
                   onChangeComplete={(color) => handleColorChange(field.key, color, true)}
+                  portalContainer={portalContainer}
                 />
               </div>
             );

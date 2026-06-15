@@ -50,32 +50,45 @@ export function FontSelector({
     return null;
   }, [value, customFonts]);
 
-  // Logic to calculate position relative to the DOCUMENT (to allow natural scrolling without JS updates)
+  // Logic to calculate position relative to the VIEWPORT
   const updateMenuPosition = React.useCallback(() => {
     const triggerEl = triggerRef.current;
     if (!triggerEl) return;
 
     const rect = triggerEl.getBoundingClientRect();
-    const scrollY = window.scrollY;
-    const scrollX = window.scrollX;
+    const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
     const menuWidth = Math.max(280, rect.width);
-    const spaceBelow = viewportHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const preferAbove = spaceBelow < 300 && spaceAbove > spaceBelow;
+    const estimatedHeight = 320; // max-h-[320px] in the code
+
+    const spaceBelow = viewportHeight - rect.bottom - 16;
+    const spaceAbove = rect.top - 16;
+    
+    // Determine if we should open above or below based on available space
+    let preferAbove = false;
+    if (spaceBelow >= estimatedHeight) {
+      preferAbove = false;
+    } else if (spaceAbove >= estimatedHeight) {
+      preferAbove = true;
+    } else {
+      // Doesn't fit perfectly anywhere, pick the side with more space
+      preferAbove = spaceAbove > spaceBelow;
+    }
 
     const style: React.CSSProperties = {
-      position: "absolute", // Absolute relative to body/document
-      left: rect.left + scrollX,
+      position: "fixed",
+      left: Math.max(8, Math.min(rect.left, viewportWidth - menuWidth - 8)),
       width: menuWidth,
       zIndex: 200,
     };
 
     if (preferAbove) {
-      style.bottom = (viewportHeight - rect.top) - scrollY + 8;
+      style.bottom = (viewportHeight - rect.top) + 8;
+      style.maxHeight = viewportHeight - (viewportHeight - rect.top + 8) - 16;
     } else {
-      style.top = rect.bottom + scrollY + 8;
+      style.top = rect.bottom + 8;
+      style.maxHeight = viewportHeight - (rect.bottom + 8) - 16;
     }
 
     // Only update if something actually changed to prevent render loops

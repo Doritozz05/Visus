@@ -16,6 +16,7 @@ export interface ColorSelectorProps {
   presets?: Array<{ id: string; hex: string; name?: string }>;
   menuZIndex?: number;
   useFactoryDefaults?: boolean;
+  portalContainer?: HTMLElement | null;
 }
 
 // Helper to convert HSL to Hex
@@ -40,6 +41,7 @@ export function ColorSelector({
   presets,
   menuZIndex = 160,
   useFactoryDefaults = false,
+  portalContainer,
 }: ColorSelectorProps) {
   const { settings, updateGeneralSettings } = useSettings();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -121,41 +123,58 @@ export function ColorSelector({
     setHexInput(resolvedHex.startsWith("#") ? resolvedHex : "");
   }, [resolvedHex]);
 
-  // Logic to calculate position relative to the DOCUMENT (natural scrolling)
+  // Logic to calculate position relative to the VIEWPORT
   const updateMenuPosition = React.useCallback(() => {
     const triggerEl = triggerRef.current;
     if (!triggerEl) return;
 
     const rect = triggerEl.getBoundingClientRect();
-    const scrollY = window.scrollY;
-    const scrollX = window.scrollX;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
     const isDesktop = viewportWidth >= 640;
     const menuWidth = isDesktop ? 460 : Math.max(300, rect.width);
     
-    const spaceBelow = viewportHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const preferAbove = spaceBelow < 320 && spaceAbove > spaceBelow;
+    // Estimate menu height based on content
+    // Hue, Sat, Light sliders (~120px) + HEX area (~40px) + Presets (~80px) + Saved (~80px) + Padding (~40px)
+    const estimatedHeight = savedColors.length > 0 ? 460 : 380;
+    
+    const spaceBelow = viewportHeight - rect.bottom - 16;
+    const spaceAbove = rect.top - 16;
+    
+    // Determine if we should open above or below based on available space
+    let preferAbove = false;
+    if (spaceBelow >= estimatedHeight) {
+      preferAbove = false;
+    } else if (spaceAbove >= estimatedHeight) {
+      preferAbove = true;
+    } else {
+      // Doesn't fit perfectly anywhere, pick the side with more space
+      preferAbove = spaceAbove > spaceBelow;
+    }
 
     // Clamp left so it doesn't run off-screen
     const desiredLeft = rect.left;
-    const left = Math.max(8, Math.min(desiredLeft, viewportWidth - menuWidth - 8)) + scrollX;
+    const left = Math.max(8, Math.min(desiredLeft, viewportWidth - menuWidth - 8));
 
     const style: React.CSSProperties = {
-      position: "absolute", // Absolute relative to body
+      position: "fixed",
       left,
       width: menuWidth,
       zIndex: menuZIndex,
     };
 
     if (preferAbove) {
-      style.top = rect.top + scrollY - 8;
-      style.transform = "translateY(-100%)";
+      // If preferring above, we position the bottom of the menu near the top of the trigger
+      style.bottom = viewportHeight - rect.top + 8;
+      // Ensure we don't go off top
+      const maxPossibleHeight = viewportHeight - (viewportHeight - rect.top + 8) - 16;
+      style.maxHeight = maxPossibleHeight;
     } else {
-      style.top = rect.bottom + scrollY + 8;
-      style.transform = "none";
+      style.top = rect.bottom + 8;
+      // Ensure we don't go off bottom
+      const maxPossibleHeight = viewportHeight - (rect.bottom + 8) - 16;
+      style.maxHeight = maxPossibleHeight;
     }
 
     // Only update if something actually changed to prevent render loops
@@ -164,7 +183,7 @@ export function ColorSelector({
       return style;
     });
     setIsMenuPositioned(true);
-  }, [menuZIndex]);
+  }, [menuZIndex, savedColors.length]);
 
   React.useLayoutEffect(() => {
     if (!isOpen) return;
@@ -338,8 +357,9 @@ export function ColorSelector({
           style={{
             ...menuStyle,
             visibility: isMenuPositioned ? "visible" : "hidden",
+            overflowY: "auto",
           }}
-          className="p-4 bg-card border border-border/40 rounded-xl shadow-2xl animate-slide-in-top flex flex-col gap-4 liquid-glass"
+          className="p-4 bg-card border border-border/40 rounded-xl shadow-2xl animate-fade-in flex flex-col gap-4 liquid-glass"
           onMouseUp={handleInteractionEnd}
           onMouseLeave={handleInteractionEnd}
           onTouchEnd={handleInteractionEnd}
@@ -571,7 +591,7 @@ export function ColorSelector({
           </div>
 
         </div>,
-        document.body
+        portalContainer || document.body
       )}
     </div>
   );

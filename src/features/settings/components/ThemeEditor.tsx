@@ -26,6 +26,15 @@ interface ThemeEditorProps {
 }
 
 export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEditorProps) {
+  const editorRef = React.useRef<HTMLDivElement>(null);
+  const [containerEl, setContainerEl] = React.useState<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    if (editorRef.current) {
+      setContainerEl(editorRef.current);
+    }
+  }, []);
+
   const [activeTab, setActiveTab] = React.useState<"colors" | "components" | "background" | "advanced">("colors");
   const [mobileMode, setMobileMode] = React.useState<"preview" | "edit">("preview");
   
@@ -209,7 +218,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col font-sans animate-fade-in glass-surface">
+    <div ref={editorRef} className="fixed inset-0 z-[100] flex flex-col font-sans animate-fade-in glass-surface">
       <ThemeEditorHeader
         themeName={themeState.name}
         setThemeName={(name) => updateThemeState(prev => ({ ...prev, name }))}
@@ -248,7 +257,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
             onChange={(id) => setActiveTab(id as any)}
             layoutId="active-theme-tab"
             variant="line"
-            className="bg-accent/15 border-border/30"
+            className="bg-card border-border/30 relative z-[190]"
             fullWidth={true}
           />
 
@@ -259,6 +268,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
                 themeState={themeState}
                 setThemeState={updateThemeState}
                 initialTheme={initialTheme}
+                portalContainer={containerEl}
               />
             )}
 
@@ -266,6 +276,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
               <DecoupledSectionsTab
                 themeState={themeState}
                 setThemeState={updateThemeState}
+                portalContainer={containerEl}
               />
             )}
 
@@ -276,6 +287,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
                 initialTheme={initialTheme}
                 imageError={imageError}
                 handleImageUpload={handleImageUpload}
+                portalContainer={containerEl}
               />
             )}
 

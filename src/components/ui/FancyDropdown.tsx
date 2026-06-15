@@ -83,9 +83,22 @@ export function FancyDropdown({
 
     const rect = triggerEl.getBoundingClientRect();
     const menuEl = menuRef.current;
-    const menuWidth = menuEl ? menuEl.getBoundingClientRect().width : (align === "end" ? 220 : rect.width);
+    
+    // On first render, menuEl might not be fully measured yet
+    // If we have menuEl, use its real width, otherwise guess based on common patterns
+    let menuWidth = 0;
+    if (menuEl) {
+      menuWidth = menuEl.getBoundingClientRect().width;
+    }
+    
+    // Fallback if width is 0 (not yet laid out)
+    if (menuWidth === 0) {
+      menuWidth = align === "end" ? 220 : rect.width;
+    }
+
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+    
     const desiredLeft = align === "end" ? rect.right - menuWidth : rect.left;
     const left = Math.max(8, Math.min(desiredLeft, viewportWidth - menuWidth - 8));
 
@@ -103,7 +116,7 @@ export function FancyDropdown({
     const style: React.CSSProperties = {
       position: "fixed",
       left,
-      width: align === "end" ? undefined : rect.width,
+      width: align === "end" ? (menuEl ? undefined : 220) : rect.width,
       zIndex: menuZIndex,
     };
 
@@ -115,13 +128,23 @@ export function FancyDropdown({
 
     setMenuStyle(style);
     setIsMenuPositioned(true);
+
+    // If we didn't have a real menu width yet, trigger one more update next frame
+    if (!menuEl || menuEl.getBoundingClientRect().width === 0) {
+      window.requestAnimationFrame(updateMenuPosition);
+    }
   }, [align, menuZIndex, searchable]);
 
   React.useLayoutEffect(() => {
     if (!isOpen) return;
 
     setIsMenuPositioned(false);
+    
+    // Initial call
     updateMenuPosition();
+
+    // Secondary call after a tick to ensure DOM has settled
+    const timeoutId = setTimeout(updateMenuPosition, 0);
 
     if (searchable) {
       window.requestAnimationFrame(() => {
@@ -135,16 +158,31 @@ export function FancyDropdown({
       setIsOpen(false);
     };
 
-    const handleResizeOrScroll = () => updateMenuPosition();
+    const handleResize = () => {
+      setIsOpen(false);
+    };
+
+    const handleScroll = () => updateMenuPosition();
+
+    // Use ResizeObserver to catch size changes after initial render
+    const resizeObserver = new ResizeObserver(() => {
+      updateMenuPosition();
+    });
+
+    if (menuRef.current) {
+      resizeObserver.observe(menuRef.current);
+    }
 
     document.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("resize", handleResizeOrScroll);
-    window.addEventListener("scroll", handleResizeOrScroll, true);
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", handleScroll, true);
 
     return () => {
+      clearTimeout(timeoutId);
+      resizeObserver.disconnect();
       document.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("resize", handleResizeOrScroll);
-      window.removeEventListener("scroll", handleResizeOrScroll, true);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll, true);
     };
   }, [isOpen, searchable, updateMenuPosition]);
 

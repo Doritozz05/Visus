@@ -11,6 +11,7 @@ interface BackgroundEffectsTabProps {
   initialTheme: CustomTheme;
   imageError: string | null;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  portalContainer?: HTMLElement | null;
 }
 
 export function BackgroundEffectsTab({
@@ -19,6 +20,7 @@ export function BackgroundEffectsTab({
   initialTheme,
   imageError,
   handleImageUpload,
+  portalContainer,
 }: BackgroundEffectsTabProps) {
   const updateGlow = (updates: Partial<NonNullable<CustomTheme['glowSettings']>>, push: boolean = false) => {
     setThemeState(prev => ({
@@ -74,6 +76,7 @@ export function BackgroundEffectsTab({
                 initialValue={initialTheme.bgGradientStart || "#ffffff"}
                 onChange={(color) => setThemeState(prev => ({ ...prev, bgGradientStart: color }), false)}
                 onChangeComplete={(color) => setThemeState(prev => ({ ...prev, bgGradientStart: color }), true)}
+                portalContainer={portalContainer}
               />
             </div>
             <div className="flex items-center justify-between p-2.5 bg-card border border-border/30 rounded-xl">
@@ -83,6 +86,7 @@ export function BackgroundEffectsTab({
                 initialValue={initialTheme.bgGradientEnd || "#eaeaea"}
                 onChange={(color) => setThemeState(prev => ({ ...prev, bgGradientEnd: color }), false)}
                 onChangeComplete={(color) => setThemeState(prev => ({ ...prev, bgGradientEnd: color }), true)}
+                portalContainer={portalContainer}
               />
             </div>
           </div>
@@ -201,6 +205,7 @@ export function BackgroundEffectsTab({
               <ColorSelector
                 value={themeState.bgImageOverlay || "#000000"}
                 onChange={(color) => setThemeState(prev => ({ ...prev, bgImageOverlay: color }))}
+                portalContainer={portalContainer}
               />
             </div>
             {/* Overlay Opacity */}
@@ -300,6 +305,7 @@ export function BackgroundEffectsTab({
                   initialValue={initialTheme.glowSettings?.color || initialTheme.accent}
                   onChange={(color) => updateGlow({ color }, false)}
                   onChangeComplete={(color) => updateGlow({ color }, true)}
+                  portalContainer={portalContainer}
                 />
               </div>
 
