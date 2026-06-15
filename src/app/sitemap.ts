@@ -4,7 +4,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://visuslabs.tech').replace(/\/$/, '')
   return [
     {
-      url: `${baseUrl}/`,
+      url: `${baseUrl}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,

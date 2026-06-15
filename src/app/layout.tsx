@@ -76,6 +76,9 @@ export const metadata: Metadata = {
     icon: "/icons/icon-192x192.png",
     apple: "/icons/icon-192x192.png",
   },
+  alternates: {
+    canonical: "/",
+  },
   verification: {
     google: 'kQS_aofbtHE0ifRmQCFFVqQrcntk7oF-A2l6RVbk_eA',
   },
