@@ -13,11 +13,11 @@ export function Footer() {
             <span className="font-heading font-bold text-xl tracking-tight">Visus</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Advanced speed reading platform utilizing RSVP and semantic clustering. 
+            Advanced speed reading platform utilizing RSVP and semantic clustering.
             Open source and privacy-focused.
           </p>
         </div>
-        
+
         <div className="flex flex-col gap-3">
           <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Learn</h4>
           <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary transition-colors">Speed reading guide</Link>
@@ -34,10 +34,10 @@ export function Footer() {
 
         <div className="flex flex-col gap-3">
           <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Connect</h4>
-          <a 
-            href="https://github.com/Doritozz05/Visus" 
-            target="_blank" 
-            rel="noreferrer" 
+          <a
+            href="https://github.com/Doritozz05/Visus"
+            target="_blank"
+            rel="noreferrer"
             className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
           >
             GitHub (open source)
