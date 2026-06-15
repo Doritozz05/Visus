@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const faqs = [
+const defaultFaqs = [
   {
     question: "What is RSVP reading?",
     answer: "RSVP stands for Rapid Serial Visual Presentation. Instead of moving your eyes across a page, Visus flashes words sequentially at a fixed point on your screen. This eliminates the time your eyes spend moving (saccades) and reduces subvocalization, allowing you to read much faster.",
@@ -28,7 +28,18 @@ const faqs = [
   },
 ];
 
-export function FaqSection() {
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+interface FaqSectionProps {
+  items?: FaqItem[];
+  title?: string;
+  className?: string;
+}
+
+export function FaqSection({ items = defaultFaqs, title = "Frequently asked questions", className }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggle = (index: number) => {
@@ -36,13 +47,13 @@ export function FaqSection() {
   };
 
   return (
-    <section className="py-24 px-6 max-w-3xl mx-auto border-t border-border/10">
+    <section className={cn("py-24 px-6 max-w-3xl mx-auto border-t border-border/10", className)}>
       <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-extrabold font-heading mb-4 tracking-tight">Frequently asked questions</h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold font-heading mb-4 tracking-tight">{title}</h2>
       </div>
 
       <div className="flex flex-col gap-4">
-        {faqs.map((faq, i) => {
+        {items.map((faq, i) => {
           const isOpen = openIndex === i;
           const faqId = `faq-content-${i}`;
           const buttonId = `faq-button-${i}`;

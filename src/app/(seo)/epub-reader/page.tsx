@@ -48,8 +48,8 @@ export default function EpubReaderPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">Parsing happens locally. We do not have servers that store your EPUB files.</p>
             </div>
             <div className="p-8 bg-card rounded-2xl border border-border/50 shadow-sm flex flex-col h-full">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
-                <WifiOff className="w-5 h-5 text-emerald-500" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
+                <WifiOff className="w-5 h-5 text-primary" />
               </div>
               <h3 className="font-bold text-lg mb-3">Works offline</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">Once loaded, you can disconnect from the internet and read anywhere.</p>

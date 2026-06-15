@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Navbar } from "@/components/landing/Navbar";
 
 export const viewport: Viewport = {
   themeColor: "#6366f1",
@@ -134,7 +134,10 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
-        <Providers>{children}</Providers>
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
         <Analytics />
         <SpeedInsights />
       </body>
