@@ -61,9 +61,9 @@ export default function EpubReaderPage() {
                 <h3 className="font-bold text-xl mb-3 font-heading">Works Offline</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">Once loaded, your book stays in your browser cache. Disconnect from the web and keep reading anywhere.</p>
               </div>
-              <div className="group p-8 bg-card rounded-3xl border border-border/50 shadow-sm hover:border-indigo-500/30 transition-all duration-300">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <FileText className="w-6 h-6 text-indigo-500" />
+              <div className="group p-8 bg-card rounded-3xl border border-border/50 shadow-sm hover:border-indigo-600/30 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <FileText className="w-6 h-6 text-indigo-600" />
                 </div>
                 <h3 className="font-bold text-xl mb-3 font-heading">Multi-format</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">Beyond EPUB, Visus supports PDF and raw text files with perfect, clean formatting extraction.</p>
@@ -78,7 +78,7 @@ export default function EpubReaderPage() {
                 Built for power users.
               </p>
               <p className="text-muted-foreground max-w-3xl mx-auto">
-                Unlike basic EPUB readers that just show you a static page, Visus integrates seamlessly with our <Link href="/rsvp-method" className="text-primary font-bold hover:underline">RSVP engine</Link> and <Link href="/speed-reading" className="text-primary font-bold hover:underline">speed reading guide</Link>. Toggle between traditional pagination and high-speed RSVP mode instantly.
+                Unlike basic EPUB readers that just show you a static page, Visus integrates seamlessly with our <Link href="/rsvp-method" className="text-primary font-bold underline hover:opacity-80">RSVP engine</Link> and <Link href="/speed-reading" className="text-primary font-bold underline hover:opacity-80">speed reading guide</Link>. Toggle between traditional pagination and high-speed RSVP mode instantly.
               </p>
             </div>
           </section>

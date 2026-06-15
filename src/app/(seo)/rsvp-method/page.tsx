@@ -97,9 +97,9 @@ export default function RsvpMethodPage() {
                 <h3 className="font-bold text-xl mb-3 font-heading">Total focus</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">The software controls the pace, which stops your mind from wandering and forces a state of flow.</p>
               </div>
-              <div className="group p-8 bg-card rounded-3xl border border-border/50 shadow-sm hover:border-indigo-500/30 transition-all duration-300">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <BookOpen className="w-6 h-6 text-indigo-500" />
+              <div className="group p-8 bg-card rounded-3xl border border-border/50 shadow-sm hover:border-indigo-600/30 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <BookOpen className="w-6 h-6 text-indigo-600" />
                 </div>
                 <h3 className="font-bold text-xl mb-3 font-heading">Accessibility</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">For individuals with Dyslexia, the isolation of single words reduces visual crowding and improves clarity.</p>

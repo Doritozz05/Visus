@@ -115,21 +115,21 @@ export default function SpeedReadingPage() {
                 <h3 className="font-bold text-xl mb-3 font-heading">2. Stop tracking</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">Minimize fixations and saccades. Instead of reading line by line, let the text come to you.</p>
               </div>
-              <div className="group p-8 bg-card rounded-3xl border border-border/50 shadow-sm hover:border-indigo-500/30 transition-all duration-300">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <TrendingUp className="w-6 h-6 text-indigo-500" />
+              <div className="group p-8 bg-card rounded-3xl border border-border/50 shadow-sm hover:border-indigo-600/30 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <TrendingUp className="w-6 h-6 text-indigo-600" />
                 </div>
                 <h3 className="font-bold text-xl mb-3 font-heading">3. Use RSVP</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">Software can present words sequentially at a single focal point, eliminating eye movement completely.</p>
               </div>
-            </div>
-          </section>
+              </div>
+              </section>
 
-          <section>
-            <h2 className="text-3xl md:text-4xl font-extrabold font-heading tracking-tight mb-6">The Visus approach to speed reading</h2>
-            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <section>
+              <h2 className="text-3xl md:text-4xl font-extrabold font-heading tracking-tight mb-6">The Visus approach to speed reading</h2>
+              <div className="prose prose-lg dark:prose-invert max-w-none">
               <p className="text-xl text-foreground/80 font-medium leading-relaxed mb-6">
-                Visus implements the <Link href="/rsvp-method" className="text-primary font-bold hover:underline">RSVP (Rapid Serial Visual Presentation)</Link> method.
+                Visus implements the <Link href="/rsvp-method" className="text-primary font-bold underline hover:opacity-80">RSVP (Rapid Serial Visual Presentation)</Link> method.
               </p>
               <p className="text-muted-foreground">
                 By flashing words at a precise &quot;Optimal Recognition Point&quot; on the screen, your eyes stay perfectly still. You spend 100% of your time comprehending text, and 0% moving your eyes.

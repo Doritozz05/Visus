@@ -99,9 +99,9 @@ export default function ClusterMethodPage() {
                 <h3 className="font-bold text-xl mb-3 font-heading">Contextual flow</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">By keeping prepositions and articles with their subjects, the natural &quot;melody&quot; of the sentence is preserved.</p>
               </div>
-              <div className="group p-8 bg-card rounded-3xl border border-border/50 shadow-sm hover:border-indigo-500/30 transition-all duration-300">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Cpu className="w-6 h-6 text-indigo-500" />
+              <div className="group p-8 bg-card rounded-3xl border border-border/50 shadow-sm hover:border-indigo-600/30 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Cpu className="w-6 h-6 text-indigo-600" />
                 </div>
                 <h3 className="font-bold text-xl mb-3 font-heading">Cognitive load</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">Fewer visual interruptions mean less cognitive overhead, allowing for longer reading sessions without fatigue.</p>
