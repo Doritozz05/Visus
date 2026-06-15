@@ -4,7 +4,7 @@ import { ArrowRight, Focus, Timer, BookOpen } from "lucide-react";
 import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
-  title: "RSVP reading: Rapid serial visual presentation | Visus",
+  title: "RSVP reading: Rapid serial visual presentation",
   description: "Discover the RSVP reading method. Learn how rapid serial visual presentation eliminates eye tracking and saccades to boost reading speed.",
   keywords: ["RSVP reading method", "Rapid Serial Visual Presentation", "eye saccades", "reading focus", "optimal recognition point"],
   alternates: {

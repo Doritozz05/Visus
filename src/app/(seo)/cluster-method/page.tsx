@@ -4,7 +4,7 @@ import { ArrowRight, Layers, Cpu, Eye } from "lucide-react";
 import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
-  title: "Visual semantic clustering speed reading | Visus",
+  title: "Visual semantic clustering speed reading",
   description: "Discover semantic clustering. Learn how Visus groups words into logical units to maximize peripheral vision and increase reading comprehension.",
   keywords: ["semantic clustering", "visual word grouping", "speed reading technique", "peripheral vision training", "cognitive reading"],
   alternates: {

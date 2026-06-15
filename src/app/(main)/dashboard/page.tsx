@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import DashboardClient from "./DashboardClient";
 
 export const metadata: Metadata = {
-  title: "Dashboard | Visus",
+  title: "Dashboard",
   description: "View your reading telemetries and performance stats.",
 };
 

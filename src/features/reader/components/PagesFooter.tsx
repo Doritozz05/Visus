@@ -41,21 +41,22 @@ export function PagesFooter({
         data-testid="prev-page-button"
         onClick={handlePrev}
         disabled={!isPaginationReady || (currentPageIndex === 0 && currentChapterIndex === 0)}
-        className="flex items-center gap-1.5 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none z-20"
+        className="flex items-center gap-1 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none z-20 text-xs sm:text-sm"
       >
-        <ChevronLeft className="h-3.5 w-3.5" />
-        {showPrevChapter ? "Previous Chapter" : "Previous Page"}
+        <ChevronLeft className="h-3.5 w-3.5 shrink-0" />
+        <span className="hidden sm:inline">{showPrevChapter ? "Previous Chapter" : "Previous Page"}</span>
+        <span className="inline sm:hidden">{showPrevChapter ? "Prev. Ch." : "Prev"}</span>
       </button>
 
       {/* Page indicator & Slider */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 min-w-[120px]">
+      <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 min-w-[100px] sm:min-w-[120px]">
         {!isFullPaginationReady ? (
           <div className="text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/50 animate-pulse pointer-events-none leading-none py-2">
             Calculating pages...
           </div>
         ) : (
           <>
-            <div className="text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60 pointer-events-none leading-none">
+            <div className="text-[9px] sm:text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/60 pointer-events-none leading-none">
               Page {globalPageDetails.current} of {globalPageDetails.total}
             </div>
             {allBookPages.length > 0 && (
@@ -78,7 +79,7 @@ export function PagesFooter({
                     setWordIndex(targetPage.startWordIndex);
                   }
                 }}
-                className="w-32 accent-primary h-1 bg-border/40 hover:bg-border/60 rounded-lg appearance-none cursor-pointer transition-colors z-30 disabled:opacity-30 disabled:pointer-events-none"
+                className="w-20 sm:w-32 accent-primary h-1 bg-border/40 hover:bg-border/60 rounded-lg appearance-none cursor-pointer transition-colors z-30 disabled:opacity-30 disabled:pointer-events-none"
                 title={`Page ${globalPageDetails.current} of ${globalPageDetails.total}`}
               />
             )}
@@ -90,21 +91,23 @@ export function PagesFooter({
         data-testid="next-page-button"
         onClick={handleNext}
         disabled={!isPaginationReady}
-        className={`flex items-center gap-1.5 transition-all z-20 hover:text-primary disabled:opacity-30 disabled:pointer-events-none ${
+        className={`flex items-center gap-1 transition-all z-20 hover:text-primary disabled:opacity-30 disabled:pointer-events-none text-xs sm:text-sm ${
           showCompleteBook
-            ? "text-primary font-extrabold bg-primary/10 border border-primary/30 px-3 py-1 rounded hover:bg-primary hover:text-primary-foreground shadow-md shadow-primary/10"
+            ? "text-primary font-extrabold bg-primary/10 border border-primary/30 px-2 py-0.5 sm:px-3 sm:py-1 rounded hover:bg-primary hover:text-primary-foreground shadow-md shadow-primary/10"
             : ""
         }`}
       >
         {showCompleteBook ? (
           <>
-            Complete Book
-            <CheckCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">Complete Book</span>
+            <span className="inline sm:hidden">Complete</span>
+            <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
           </>
         ) : (
           <>
-            {showNextChapter ? "Next Chapter" : "Next Page"}
-            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{showNextChapter ? "Next Chapter" : "Next Page"}</span>
+            <span className="inline sm:hidden">{showNextChapter ? "Next Ch." : "Next"}</span>
+            <ChevronRight className="h-3.5 w-3.5 shrink-0" />
           </>
         )}
       </button>

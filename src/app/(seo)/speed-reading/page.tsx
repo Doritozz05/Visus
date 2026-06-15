@@ -4,7 +4,7 @@ import { ArrowRight, Zap, Brain, TrendingUp } from "lucide-react";
 import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
-  title: "How to double your speed reading speed | Visus",
+  title: "How to double your speed reading speed",
   description: "Learn the science behind speed reading, how to eliminate subvocalization, and read 2x faster with full comprehension using the RSVP method.",
   keywords: ["how to speed read", "eliminate subvocalization", "reading comprehension", "fast reading techniques", "speed reading guide"],
   alternates: {

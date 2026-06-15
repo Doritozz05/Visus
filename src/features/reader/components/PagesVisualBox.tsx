@@ -265,7 +265,7 @@ export function PagesVisualBox({
   const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter;
 
   return (
-    <div className="w-full bg-card border border-border/20 rounded-2xl px-5 pb-4 pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl relative overflow-hidden transition-opacity duration-300 flex flex-col h-[660px] min-h-[660px] max-h-[660px]">
+    <div className="w-full bg-card border border-border/20 rounded-2xl px-5 pb-4 pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl relative overflow-hidden transition-opacity duration-300 flex flex-col h-full md:h-[660px] min-h-0">
       
       <ReaderEpubStyles />
 

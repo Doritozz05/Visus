@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export const metadata: Metadata = {
-  title: "Settings | Visus",
+  title: "Settings",
   description: "Configure your global visual engine parameters and account.",
 };
 

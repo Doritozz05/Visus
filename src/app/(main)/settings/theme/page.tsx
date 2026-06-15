@@ -3,7 +3,7 @@ import { ThemePageClient } from "./ThemePageClient";
 import React, { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Theme Designer | Visus",
+  title: "Theme designer",
   description: "Customize and design premium visual themes for Visus.",
 };
 

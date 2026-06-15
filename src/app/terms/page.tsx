@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of service | Visus",
+  title: "Terms of service",
   description: "Terms of service for the Visus speed reading platform.",
   alternates: {
     canonical: "/terms",
