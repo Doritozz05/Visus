@@ -253,15 +253,15 @@ export default function DashboardClient() {
       </div>
 
       {/* Main Bento Box Grid (Visuals) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
 
         {/* Box 1: Radar Chart */}
-        <div className="lg:col-span-5 h-full">
+        <div className="md:col-span-5 lg:col-span-5 h-full">
           <RadarChart logs={logs} books={books} />
         </div>
 
         {/* Box 2: Heatmap Chart */}
-        <div className="lg:col-span-7 h-full">
+        <div className="md:col-span-7 lg:col-span-7 h-full">
           <Heatmap logs={logs} />
         </div>
 

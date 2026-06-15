@@ -313,14 +313,14 @@ export default function LibraryDashboard() {
         </motion.header>
 
           {/* Bento Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-visible pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 overflow-visible pb-4">
             
             {/* Left Column: Ingestion Zone & Progress Stats */}
             <motion.div 
               variants={leftColumnVariants}
               initial="hidden"
               animate="visible"
-              className="lg:col-span-4 flex flex-col gap-6"
+              className="md:col-span-5 lg:col-span-4 flex flex-col gap-6"
             >
               
               {/* Drag & Drop Upload Panel */}
@@ -412,7 +412,7 @@ export default function LibraryDashboard() {
               variants={rightColumnVariants}
               initial="hidden"
               animate="visible"
-              className="lg:col-span-8 flex flex-col gap-6"
+              className="md:col-span-7 lg:col-span-8 flex flex-col gap-6"
             >
               
               {/* Search, Filter Tabs & Add Button */}

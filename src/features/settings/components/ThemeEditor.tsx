@@ -208,7 +208,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
       />
 
       {/* Editor Main Content Area */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
         {/* Left Column: Dynamic App Preview Sandbox */}
         <ThemePreviewSandbox
           themeState={themeState}
@@ -218,7 +218,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
         />
 
         {/* Right Column: Custom Styling Dashboard */}
-        <section className="lg:col-span-7 flex flex-col h-full overflow-hidden bg-card">
+        <section className="md:col-span-7 lg:col-span-7 flex flex-col h-full overflow-hidden bg-card">
           {/* Tab Navigation */}
           <FancyTabs
             tabs={[

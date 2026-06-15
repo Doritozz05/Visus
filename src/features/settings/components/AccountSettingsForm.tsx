@@ -44,7 +44,7 @@ export function AccountSettingsForm() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 pb-12">
       
       {/* Profile & Sync Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         {/* Profile Card */}
         <section className="bg-card border border-border/20 rounded-2xl p-6 shadow-md liquid-glass relative overflow-hidden flex flex-col h-full">

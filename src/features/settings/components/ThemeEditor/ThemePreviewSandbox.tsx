@@ -326,7 +326,7 @@ export function ThemePreviewSandbox({
   };
 
   return (
-    <section className="lg:col-span-5 bg-accent/10 border-r border-border/20 p-5 flex flex-col justify-between overflow-y-auto min-h-[400px]">
+    <section className="md:col-span-5 lg:col-span-5 bg-accent/10 border-r border-border/20 p-5 flex flex-col justify-between overflow-y-auto min-h-[400px]">
       <div className="space-y-4 flex flex-col h-full">
         {/* Sandbox header navigation toggle */}
         <div className="flex justify-between items-center shrink-0">
