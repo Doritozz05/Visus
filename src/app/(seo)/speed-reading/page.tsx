@@ -4,16 +4,16 @@ import { ArrowRight, Zap, Brain, TrendingUp } from "lucide-react";
 import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
-  title: "How to Double Your Speed Reading Speed | Visus",
+  title: "How to double your speed reading speed | Visus",
   description: "Learn the science behind speed reading, how to eliminate subvocalization, and read 2x faster with full comprehension using the RSVP method.",
   keywords: ["how to speed read", "eliminate subvocalization", "reading comprehension", "fast reading techniques", "speed reading guide"],
   alternates: {
     canonical: "/speed-reading",
   },
   openGraph: {
-    title: "How to Double Your Speed Reading Speed | Visus",
+    title: "How to double your speed reading speed | Visus",
     description: "Read 2x faster with full comprehension using the RSVP method.",
-    url: "/speed-reading",
+    url: "https://visuslabs.tech/speed-reading",
     type: "article",
   },
 };
@@ -148,18 +148,18 @@ export default function SpeedReadingPage() {
           </section>
 
           <section className="border-t border-border/10 pt-24">
-            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Related Guides</h2>
+            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Related guides</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link href="/rsvp-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">The RSVP Method</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">The RSVP method</h3>
                 <p className="text-sm text-muted-foreground">Deep dive into the technology behind Rapid Serial Visual Presentation.</p>
               </Link>
               <Link href="/cluster-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Semantic Clustering</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Semantic clustering</h3>
                 <p className="text-sm text-muted-foreground">Learn how to group words to maximize your peripheral vision.</p>
               </Link>
               <Link href="/epub-reader" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">EPUB Web Reader</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">EPUB web reader</h3>
                 <p className="text-sm text-muted-foreground">Secure and private ebook reading directly in your browser.</p>
               </Link>
             </div>

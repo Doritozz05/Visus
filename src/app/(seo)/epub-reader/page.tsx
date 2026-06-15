@@ -3,11 +3,26 @@ import Link from "next/link";
 import { ArrowRight, Lock, FileText, WifiOff, ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Fast EPUB Reader Online: 100% Private & Offline Capable",
+  title: "Fast EPUB reader online: 100% private & offline capable",
   description: "Read EPUB files online at high speeds. Visus is a secure, local-first EPUB reader that works offline and never uploads your books to the cloud.",
   keywords: ["online epub reader", "private ebook reader", "offline epub viewer", "web epub reader", "browser epub reader"],
   alternates: {
     canonical: "/epub-reader",
+  },
+  openGraph: {
+    title: "Fast EPUB reader online: 100% private & offline capable",
+    description: "Read EPUB files online at high speeds. Visus is a secure, local-first EPUB reader that works offline.",
+    url: "https://visuslabs.tech/epub-reader",
+    siteName: "Visus",
+    images: [{ url: "/opengraph-image" }],
+    locale: "en_US",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Fast EPUB reader online: 100% private & offline capable",
+    description: "Read EPUB files online at high speeds. Visus is a secure, local-first EPUB reader that works offline.",
+    images: ["/twitter-image"],
   },
 };
 
@@ -88,18 +103,18 @@ export default function EpubReaderPage() {
           </section>
 
           <section className="border-t border-border/10 pt-24">
-            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Reading Resources</h2>
+            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Reading resources</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link href="/rsvp-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">The RSVP Method</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">The RSVP method</h3>
                 <p className="text-sm text-muted-foreground">Learn how to read one word at a time without moving your eyes.</p>
               </Link>
               <Link href="/speed-reading" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Speed Reading Guide</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Speed reading guide</h3>
                 <p className="text-sm text-muted-foreground">The science and techniques to double your reading speed today.</p>
               </Link>
               <Link href="/cluster-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Semantic Clustering</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Semantic clustering</h3>
                 <p className="text-sm text-muted-foreground">Process groups of words for a more natural reading flow.</p>
               </Link>
             </div>

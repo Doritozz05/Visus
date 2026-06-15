@@ -4,14 +4,14 @@ import { ArrowRight, Layers, Cpu, Eye } from "lucide-react";
 import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
-  title: "Visual Semantic Clustering Speed Reading | Visus",
-  description: "Discover Semantic Clustering. Learn how Visus groups words into logical units to maximize peripheral vision and increase reading comprehension.",
+  title: "Visual semantic clustering speed reading | Visus",
+  description: "Discover semantic clustering. Learn how Visus groups words into logical units to maximize peripheral vision and increase reading comprehension.",
   keywords: ["semantic clustering", "visual word grouping", "speed reading technique", "peripheral vision training", "cognitive reading"],
   alternates: {
     canonical: "/cluster-method",
   },
   openGraph: {
-    title: "Visual Semantic Clustering | Visus",
+    title: "Visual semantic clustering | Visus",
     description: "Learn how to process logical units of text instead of single words.",
     url: "https://visuslabs.tech/cluster-method",
     siteName: "Visus",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Visual Semantic Clustering | Visus",
+    title: "Visual semantic clustering | Visus",
     description: "The evolution of the RSVP reading method.",
     images: ["/twitter-image"],
   },
@@ -56,7 +56,7 @@ export default function ClusterMethodPage() {
             <Layers className="w-3 h-3" /> Advanced Technique
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold font-heading tracking-tight mb-8 leading-[1.1]">
-            Visual <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">Semantic Clustering</span>
+            Visual <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">semantic clustering</span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
             Beyond word-by-word reading. Experience Cluster Mode in the Reading Room to match the speed of thought.
@@ -65,7 +65,7 @@ export default function ClusterMethodPage() {
 
         <div className="space-y-24">
           <section>
-            <h2 className="text-3xl md:text-4xl font-extrabold font-heading tracking-tight mb-6 text-center text-primary">Cluster Mode in action</h2>
+            <h2 className="text-3xl md:text-4xl font-extrabold font-heading tracking-tight mb-6 text-center text-primary">Cluster mode in action</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p className="text-xl text-foreground/80 font-medium leading-relaxed mb-6 text-center">
                 Your brain doesn&apos;t think in words; it thinks in concepts.
@@ -126,18 +126,18 @@ export default function ClusterMethodPage() {
           </section>
 
           <section className="border-t border-border/10 pt-24">
-            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Master More Reading Techniques</h2>
+            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Master more reading techniques</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link href="/rsvp-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">The RSVP Method</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">The RSVP method</h3>
                 <p className="text-sm text-muted-foreground">The core technology behind our high-speed reading engine.</p>
               </Link>
               <Link href="/speed-reading" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Speed Reading Guide</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Speed reading guide</h3>
                 <p className="text-sm text-muted-foreground">Fundamental tips and science to double your reading speed.</p>
               </Link>
               <Link href="/epub-reader" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">EPUB Web Reader</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">EPUB web reader</h3>
                 <p className="text-sm text-muted-foreground">Load your own books and apply clustering modes instantly.</p>
               </Link>
             </div>

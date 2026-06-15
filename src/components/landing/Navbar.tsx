@@ -6,25 +6,25 @@ import { NavbarClient } from "./NavbarClient";
 export function Navbar() {
   const guideOptions = [
     {
-      title: "Read Faster",
+      title: "Read faster",
       description: "Master the art of speed reading.",
       href: "/speed-reading",
       icon: <Zap className="w-4 h-4" />
     },
     {
-      title: "RSVP Method",
+      title: "RSVP method",
       description: "The science of focus points.",
       href: "/rsvp-method",
       icon: <Focus className="w-4 h-4" />
     },
     {
-      title: "Cluster Method",
+      title: "Cluster method",
       description: "Group words for deep flow.",
       href: "/cluster-method",
       icon: <Layers className="w-4 h-4" />
     },
     {
-      title: "EPUB Reader",
+      title: "EPUB reader",
       description: "Secure, local-first reading.",
       href: "/epub-reader",
       icon: <BookOpen className="w-4 h-4" />

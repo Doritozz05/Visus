@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Visus",
-  description: "Terms of Service for the Visus speed reading platform.",
+  title: "Terms of service | Visus",
+  description: "Terms of service for the Visus speed reading platform.",
+  alternates: {
+    canonical: "/terms",
+  },
   openGraph: {
-    title: "Terms of Service | Visus",
+    title: "Terms of service | Visus",
     description: "Read our terms for using the Visus platform and tools.",
     url: "https://visuslabs.tech/terms",
     siteName: "Visus",

@@ -28,8 +28,8 @@ export function Footer() {
 
         <div className="flex flex-col gap-3">
           <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Legal</h4>
-          <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
+          <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy policy</Link>
+          <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of service</Link>
         </div>
 
         <div className="flex flex-col gap-3">
@@ -40,7 +40,7 @@ export function Footer() {
             rel="noreferrer" 
             className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
           >
-            GitHub (Open Source)
+            GitHub (open source)
           </a>
         </div>
       </div>

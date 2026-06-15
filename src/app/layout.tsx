@@ -48,7 +48,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://visuslabs.tech"),
   title: {
-    default: "Visus - Read Faster, Retain More & Boost Your Reading Focus",
+    default: "Visus - Read faster, retain more & boost your reading focus",
     template: "%s | Visus",
   },
   description: "Double your reading speed and improve focus with Visus. The advanced speed reading platform for EPUBs and PDFs. Free, open-source, and privacy-first.",

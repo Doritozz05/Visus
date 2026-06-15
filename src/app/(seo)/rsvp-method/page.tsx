@@ -4,14 +4,14 @@ import { ArrowRight, Focus, Timer, BookOpen } from "lucide-react";
 import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
-  title: "RSVP Reading: Rapid Serial Visual Presentation | Visus",
-  description: "Discover the RSVP reading method. Learn how Rapid Serial Visual Presentation eliminates eye tracking and saccades to boost reading speed.",
+  title: "RSVP reading: Rapid serial visual presentation | Visus",
+  description: "Discover the RSVP reading method. Learn how rapid serial visual presentation eliminates eye tracking and saccades to boost reading speed.",
   keywords: ["RSVP reading method", "Rapid Serial Visual Presentation", "eye saccades", "reading focus", "optimal recognition point"],
   alternates: {
     canonical: "/rsvp-method",
   },
   openGraph: {
-    title: "The RSVP Reading Method Explained | Visus",
+    title: "The RSVP reading method explained | Visus",
     description: "Deep dive into the science of focus points and rapid serial visual presentation.",
     url: "https://visuslabs.tech/rsvp-method",
     siteName: "Visus",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "The RSVP Reading Method | Visus",
+    title: "The RSVP reading method | Visus",
     description: "Eliminate eye tracking and boost reading speed.",
     images: ["/twitter-image"],
   },
@@ -56,7 +56,7 @@ export default function RsvpMethodPage() {
             <Focus className="w-3 h-3" /> Technical Deep Dive
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold font-heading tracking-tight mb-8 leading-[1.1]">
-            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">RSVP Method</span> Explained
+            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">RSVP method</span> explained
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
             Rapid Serial Visual Presentation (RSVP) is a reading paradigm that displays text one word at a time, eliminating the need for eye movement.
@@ -139,18 +139,18 @@ export default function RsvpMethodPage() {
           </section>
 
           <section className="border-t border-border/10 pt-24">
-            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Continue Learning</h2>
+            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Continue learning</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link href="/speed-reading" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Speed Reading Guide</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Speed reading guide</h3>
                 <p className="text-sm text-muted-foreground">Master the fundamental principles of rapid text processing.</p>
               </Link>
               <Link href="/cluster-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Semantic Clustering</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Semantic clustering</h3>
                 <p className="text-sm text-muted-foreground">Go beyond word-by-word with our advanced grouping algorithm.</p>
               </Link>
               <Link href="/epub-reader" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
-                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">EPUB Web Reader</h3>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">EPUB web reader</h3>
                 <p className="text-sm text-muted-foreground">Privacy-first reading for all your personal ebook collections.</p>
               </Link>
             </div>

@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Visus",
+  title: "Privacy policy | Visus",
   description: "Learn how Visus handles your data. We are a privacy-first, local-focused speed reading platform.",
+  alternates: {
+    canonical: "/privacy",
+  },
   openGraph: {
-    title: "Privacy Policy | Visus",
+    title: "Privacy policy | Visus",
     description: "Your data stays on your device. Learn about our local-first privacy approach.",
     url: "https://visuslabs.tech/privacy",
     siteName: "Visus",
