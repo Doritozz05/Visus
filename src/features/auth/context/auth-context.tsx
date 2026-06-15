@@ -18,8 +18,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isMfaPending, setIsMfaPending] = React.useState(false);
   const [isRedirecting, setIsRedirecting] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
+    setIsMounted(true);
     // Initial check
     const initAuth = async () => {
       try {
@@ -86,8 +88,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsMfaPending(false);
   };
 
-  if (isLoading || isRedirecting) {
-    return null; // Or a loading spinner if you prefer
+  // On the server, we MUST render children to allow SEO crawlers to see the content.
+  // The loading/redirecting state should only block rendering on the client.
+  if (isMounted && (isLoading || isRedirecting)) {
+    // If it's a protected route, we can show null/spinner, 
+    // but for the landing page (which is public), we should ideally show the content.
+    // To be safe for SEO, we only block if we are SURE we are on a protected route.
+    const protectedPaths = ['/library', '/settings', '/dashboard', '/reader'];
+    const isProtectedRoute = typeof window !== 'undefined' && protectedPaths.some(path => window.location.pathname.startsWith(path));
+    
+    if (isProtectedRoute) {
+      return null;
+    }
   }
 
   return (

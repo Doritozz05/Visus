@@ -1,3 +1,4 @@
+import React from "react";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -192,7 +193,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
         <Providers>
-          <Navbar />
+          <React.Suspense fallback={null}>
+            <Navbar />
+          </React.Suspense>
           {children}
         </Providers>
         <Analytics />
