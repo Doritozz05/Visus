@@ -115,7 +115,7 @@ export function ReaderHeader({
     <div className="flex items-center justify-start gap-1 md:gap-1.5 min-w-0 flex-1">
       <button
         onClick={() => setActiveBookId(null)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border/40 hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer"
         title="Back to library bookshelf"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -128,63 +128,90 @@ export function ReaderHeader({
       {/* Layout Utilities (Glued next to bookshelf) */}
       <button
         onClick={toggleFullscreen}
-        className="hidden sm:flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-accent/70 hover:text-primary transition-all cursor-pointer select-none shrink-0"
+        className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
         title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
       >
-        {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
+        {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
       </button>
       <button
         onClick={() => setIsFocusMode(true)}
-        className="hidden sm:flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-accent/70 hover:text-primary transition-all cursor-pointer select-none shrink-0"
+        className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
         title="Enter focus mode"
       >
-        <EyeOff className="w-3.5 h-3.5" />
+        <EyeOff className="w-4 h-4" />
       </button>
     </div>
   );
 
   const rightControls = (
     <div className="flex items-center justify-end gap-1.5 sm:gap-2 flex-1">
-      {/* Mode Selector Dropdown */}
-      <div className="shrink-0">
-        <FancyDropdown
-          value={mode}
-          onChange={(val) => {
-            if (val === "normal") {
-              setIsPlaying(false);
-              setMode("normal");
-            } else {
-              setMode(val as any);
-              setCompletedChapter(null);
-            }
-          }}
-          options={modeOptions}
-          placeholder="Select mode"
-          ariaLabel="Select reading mode"
-          triggerClassName="group flex h-8 items-center justify-center gap-1 rounded-lg border border-border/40 bg-card px-2 text-xs font-mono font-bold text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-accent focus:outline-none liquid-glass cursor-pointer shrink-0"
-          menuClassName="min-w-[200px] max-w-[260px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass"
-          align="end"
-          renderTrigger={(selectedOption, isOpen) => (
-            <div className="flex items-center gap-1">
-              <span className="w-4 h-4 shrink-0 flex items-center justify-center">
-                {selectedOption?.icon}
-              </span>
-              <span className="hidden sm:inline text-[10px] uppercase tracking-wider font-semibold pr-1">
-                {selectedOption?.label}
-              </span>
-              <ChevronDown className={`h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-            </div>
-          )}
-        />
+      {/* Mode Selector Dropdown (Mobile) / Tabs (Desktop) */}
+      <div className="shrink-0 flex items-center">
+        {/* Mobile Dropdown */}
+        <div className="sm:hidden">
+          <FancyDropdown
+            value={mode}
+            onChange={(val) => {
+              if (val === "normal") {
+                setIsPlaying(false);
+                setMode("normal");
+              } else {
+                setMode(val as any);
+                setCompletedChapter(null);
+              }
+            }}
+            options={modeOptions}
+            placeholder="Select mode"
+            ariaLabel="Select reading mode"
+            triggerClassName="group flex h-8 items-center justify-center gap-1 rounded-lg border border-border/40 bg-card px-2 text-xs font-mono font-bold text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-accent focus:outline-none liquid-glass cursor-pointer shrink-0"
+            menuClassName="min-w-[200px] max-w-[260px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass"
+            align="end"
+            renderTrigger={(selectedOption, isOpen) => (
+              <div className="flex items-center gap-1">
+                <span className="w-4 h-4 shrink-0 flex items-center justify-center">
+                  {selectedOption?.icon}
+                </span>
+                <ChevronDown className={`h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+              </div>
+            )}
+          />
+        </div>
+
+        {/* Desktop Tabs */}
+        <div className="hidden sm:flex bg-card border border-border/40 p-0.5 rounded-lg items-center shadow-sm liquid-glass">
+          {modeOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => {
+                if (option.value === "normal") {
+                  setIsPlaying(false);
+                  setMode("normal");
+                } else {
+                  setMode(option.value as any);
+                  setCompletedChapter(null);
+                }
+              }}
+              className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
+                mode === option.value
+                  ? "bg-accent text-primary font-bold shadow-sm"
+                  : "text-muted-foreground hover:text-primary hover:bg-accent/50"
+              }`}
+              title={option.description}
+            >
+              {option.icon}
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Pomodoro Timer Toggle (Tablet / Desktop only) */}
+      {/* Pomodoro Timer Toggle */}
       <button
         onClick={() => setIsPomodoroOpen?.(!isPomodoroOpen)}
         className={`hidden sm:flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm liquid-glass cursor-pointer ${
           isPomodoroOpen
             ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(var(--primary),0.2)]"
-            : "hover:bg-accent text-muted-foreground hover:text-primary"
+            : "bg-card hover:bg-accent text-muted-foreground hover:text-primary"
         }`}
         title="Toggle Pomodoro timer"
       >
@@ -195,7 +222,7 @@ export function ReaderHeader({
       <button
         data-testid="desktop-settings-button"
         onClick={openQuickSettings}
-        className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer"
+        className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer"
         title="Open settings"
       >
         <Settings className="w-4 h-4 animate-spin-slow" />
