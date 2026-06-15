@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "validate": "npm run lint && npm run typecheck && npm run test",
     "postinstall": "node scripts/copy-worker.js"
   },
   "dependencies": {
