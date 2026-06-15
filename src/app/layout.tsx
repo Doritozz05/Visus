@@ -82,9 +82,9 @@ export const metadata: Metadata = {
   verification: {
     google: 'kQS_aofbtHE0ifRmQCFFVqQrcntk7oF-A2l6RVbk_eA',
   },
-  locale: "en_US",
   openGraph: {
     type: "website",
+    locale: "en_US",
     siteName: "Visus",
     title: "Visus - Advanced Speed Reading Platform",
     description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
