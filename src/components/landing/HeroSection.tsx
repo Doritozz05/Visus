@@ -4,18 +4,6 @@ import { ArrowRight } from "lucide-react";
 import { HeroClient } from "./HeroClient";
 
 export function HeroSection() {
-  const title = (
-    <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight font-heading leading-[1.05]">
-      <span className="block">Read faster.</span>
-      <span className="block">Retain more.</span>
-      <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/70 to-primary bg-[length:200%_auto] animate-gradient block">
-        Advanced Speed Reading Platform
-      </span>
-    </h1>
-  );
-
-  const description = "Visus uses advanced RSVP and semantic clustering to train your peripheral vision and double your reading speed, all without leaving your browser.";
-
   const cta = (
     <>
       <Link
@@ -36,7 +24,18 @@ export function HeroSection() {
 
   return (
     <section className="relative z-10 flex flex-col items-center justify-center text-center px-4 pt-32 pb-24 md:pt-40 md:pb-32 w-full max-w-5xl mx-auto">
-      <HeroClient title={title} description={description} cta={cta} />
+      <HeroClient cta={cta}>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight font-heading leading-[1.05] mb-6">
+          <span className="block">Read faster.</span>
+          <span className="block">Retain more.</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/70 to-primary bg-[length:200%_auto] animate-gradient block">
+            Advanced Speed Reading Platform
+          </span>
+        </h1>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+          Visus uses advanced RSVP and semantic clustering to train your peripheral vision and double your reading speed, all without leaving your browser.
+        </p>
+      </HeroClient>
     </section>
   );
 }

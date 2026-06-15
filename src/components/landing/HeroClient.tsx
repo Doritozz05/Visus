@@ -6,12 +6,11 @@ import { Zap } from "lucide-react";
 import { TraditionalDemo } from "./TraditionalDemo";
 
 interface HeroClientProps {
-  title: React.ReactNode;
-  description: string;
+  children: React.ReactNode;
   cta: React.ReactNode;
 }
 
-export function HeroClient({ title, description, cta }: HeroClientProps) {
+export function HeroClient({ children, cta }: HeroClientProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -40,13 +39,9 @@ export function HeroClient({ title, description, cta }: HeroClientProps) {
         <span>The next generation of reading</span>
       </motion.div>
 
-      <div className="mb-6">
-        {title}
-      </div>
-
-      <motion.p variants={itemVariants} className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-        {description}
-      </motion.p>
+      <motion.div variants={itemVariants} className="w-full">
+        {children}
+      </motion.div>
 
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-4 mb-20 w-full justify-center">
         {cta}
