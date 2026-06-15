@@ -5,6 +5,7 @@ import { BentoFeatures } from "@/components/landing/BentoFeatures";
 import { MiniRSVP } from "@/components/landing/MiniRSVP";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { FaqSection } from "@/components/landing/FaqSection";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground selection:bg-primary/30 overflow-clip relative font-sans">
@@ -62,7 +63,7 @@ export default function Home() {
             <h3 className="text-2xl font-bold mb-4 font-heading">Breaking the subvocalization habit</h3>
             <p className="text-muted-foreground leading-relaxed">
               Most readers internally &quot;hear&quot; words, capping speed at ~250 WPM. Visus trains your brain to process word shapes as pure concepts, bypassing the inner voice to shatter your speed limits.
-              <Link href="/speed-reading" className="inline-flex items-center gap-1 text-primary hover:underline mt-4 font-semibold text-sm">
+              <Link href="/speed-reading" className="inline-flex items-center gap-1 text-primary underline hover:opacity-80 mt-4 font-semibold text-sm">
                 Learn about speed reading <ArrowRight className="w-4 h-4" />
               </Link>
             </p>
@@ -74,7 +75,7 @@ export default function Home() {
             </div>
             <h3 className="text-2xl font-bold mb-4 font-heading">Eliminating saccades and eye fatigue</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Traditional reading requires mechanical eye jumps (saccades) that cause fatigue. Our <Link href="/rsvp-method" className="text-primary hover:underline">RSVP method</Link> presents text at a fixed point, keeping your eyes still and your focus laser-sharp.
+              Traditional reading requires mechanical eye jumps (saccades) that cause fatigue. Our <Link href="/rsvp-method" className="text-primary underline hover:opacity-80">RSVP method</Link> presents text at a fixed point, keeping your eyes still and your focus laser-sharp.
             </p>
           </div>
 
@@ -84,7 +85,7 @@ export default function Home() {
             </div>
             <h3 className="text-2xl font-bold mb-4 font-heading">Privacy-first document processing</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Visus operates entirely in your browser. Whether using our <Link href="/epub-reader" className="text-primary hover:underline">EPUB reader</Link> or loading PDFs, your files never leave your device. 100% private, 100% offline.
+              Visus operates entirely in your browser. Whether using our <Link href="/epub-reader" className="text-primary underline hover:opacity-80">EPUB reader</Link> or loading PDFs, your files never leave your device. 100% private, 100% offline.
             </p>
           </div>
         </div>
@@ -122,28 +123,27 @@ export default function Home() {
           </div>
           
           <div className="flex flex-col gap-3">
-            <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Learn</h4>
-            <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary transition-colors">Speed reading guide</Link>
-            <Link href="/rsvp-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">The RSVP method</Link>
-            <Link href="/cluster-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">Cluster method</Link>
-            <Link href="/epub-reader" className="text-sm text-muted-foreground hover:text-primary transition-colors">Free EPUB reader</Link>
+            <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Learn</h3>
+            <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">Speed Reading Guide</Link>
+            <Link href="/rsvp-method" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">The RSVP Method</Link>
+            <Link href="/epub-reader" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">Free EPUB Reader</Link>
           </div>
 
           <div className="flex flex-col gap-3">
-            <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Legal</h4>
-            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy policy</Link>
-            <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of service</Link>
+            <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Legal</h3>
+            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">Terms of Service</Link>
           </div>
 
           <div className="flex flex-col gap-3">
-            <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Connect</h4>
+            <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Connect</h3>
             <a 
               href="https://github.com/Doritozz05/Visus" 
               target="_blank" 
               rel="noreferrer" 
-              className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+              className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors flex items-center gap-1.5"
             >
-              GitHub (Open source)
+              GitHub (Open Source)
             </a>
           </div>
         </div>

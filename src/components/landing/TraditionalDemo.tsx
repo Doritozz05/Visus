@@ -33,7 +33,7 @@ export function TraditionalDemo() {
           <EyeOff className="w-4.5 h-4.5" />
         </div>
         <div>
-          <h3 className="text-sm font-bold font-heading text-foreground">How you currently read</h3>
+          <h2 className="text-sm font-bold font-heading text-foreground">How you currently read</h2>
           <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Saccadic eye jumps & regressions</p>
         </div>
       </div>

@@ -109,9 +109,9 @@ export function BentoFeatures() {
               Our local parser handles massive EPUB files instantly. It extracts semantic chapters, generates crisp covers, and sanitizes HTML for a flawless, distraction-free reading experience.
             </p>
             <div className="flex gap-4">
-              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold">Fast</span>
-              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold">Accurate</span>
-              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold">Semantic</span>
+              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-700 text-xs font-bold">Fast</span>
+              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-700 text-xs font-bold">Accurate</span>
+              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-700 text-xs font-bold">Semantic</span>
             </div>
           </div>
         </SpotlightCard>
