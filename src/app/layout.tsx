@@ -82,6 +82,7 @@ export const metadata: Metadata = {
   verification: {
     google: 'kQS_aofbtHE0ifRmQCFFVqQrcntk7oF-A2l6RVbk_eA',
   },
+  locale: "en_US",
   openGraph: {
     type: "website",
     siteName: "Visus",
