@@ -8,6 +8,8 @@
 [![PWA](https://img.shields.io/badge/PWA-Support-6366F1?style=for-the-badge&logo=progressive-web-apps&logoColor=white)](https://web.dev/progressive-web-apps/)
 [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
+![Visus UI Screenshot](public/images/2.png)
+
 Visus is a speed-reading web application and Progressive Web App (PWA) designed to help you read faster and train your vision. It supports RSVP (word-by-word) and Cluster (grouping words) reading modes, runs completely offline, and respects your privacy by keeping your texts in your browser.
 
 ---
