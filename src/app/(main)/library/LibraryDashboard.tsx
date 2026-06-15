@@ -7,7 +7,7 @@ import { useReadingList } from "@/features/library/context/reading-list-context"
 import { useSettings } from "@/features/settings/context/settings-context";
 import { Book } from "@/core/entities/book";
 import { useRouter } from "next/navigation";
-import { Eraser, Search, Plus, Library, Flame, Pencil, BookOpen, ChevronRight } from "lucide-react";
+import { Eraser, Search, Plus, Library, Flame, Pencil, BookOpen, ChevronRight, Cloud } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -297,6 +297,22 @@ export default function LibraryDashboard() {
               <h2 className="text-xs font-mono uppercase tracking-widest text-primary">Personal collection</h2>
               <div className="h-3 w-px bg-border/40"></div>
               <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{books.length} Objects indexed</span>
+              <div className="h-3 w-px bg-border/40"></div>
+              
+              {/* Cloud Sync Status Pill */}
+              <div 
+                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg border shadow-sm liquid-glass transition-all hover:bg-accent/50 cursor-help ${
+                  cloudSlotsUsed > maxSlots 
+                    ? "bg-rose-500/10 border-rose-500/20 text-rose-500" 
+                    : "bg-primary/5 border-primary/20 text-primary"
+                }`}
+                title={`Cloud Storage: ${cloudSlotsUsed} of ${maxSlots} slots used. This library is synchronized across all your devices.`}
+              >
+                <Cloud className={`w-3 h-3 ${isSyncing ? "animate-pulse" : ""}`} />
+                <span className="text-[9px] font-bold font-mono uppercase tracking-tight">
+                  {cloudSlotsUsed}/{maxSlots} Cloud
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -352,21 +368,6 @@ export default function LibraryDashboard() {
 
               {/* Combined Info Panel (Compact) */}
               <div className="flex flex-col gap-4">
-                {/* Cloud Storage Slots */}
-                <div className="bg-card rounded-xl border border-border/20 p-4 shadow-lg liquid-glass relative overflow-hidden group shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
-                  <div className="flex justify-between items-center mb-2 relative z-10">
-                    <h2 className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Cloud Storage</h2>
-                    <span className="text-[10px] font-mono text-primary font-bold">{cloudSlotsUsed} / {maxSlots}</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-background rounded-full overflow-hidden relative z-10 border border-border/10">
-                    <div 
-                      className="h-full bg-gradient-to-r from-primary to-blue-500 rounded-full transition-all duration-500" 
-                      style={{ width: `${(cloudSlotsUsed / maxSlots) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-
                 {/* Dynamic Reading Stats (Compact) */}
                 <div className="bg-card rounded-xl border border-border/20 p-4 shadow-lg liquid-glass relative overflow-hidden group shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
