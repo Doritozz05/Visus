@@ -31,9 +31,10 @@ export default function SeoLayout({
           
           <div className="flex flex-col gap-3">
             <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Learn</h4>
-            <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary transition-colors">Speed Reading Guide</Link>
-            <Link href="/rsvp-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">The RSVP Method</Link>
-            <Link href="/epub-reader" className="text-sm text-muted-foreground hover:text-primary transition-colors">Free EPUB Reader</Link>
+            <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary transition-colors">Speed reading guide</Link>
+            <Link href="/rsvp-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">The RSVP method</Link>
+            <Link href="/cluster-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">Cluster method</Link>
+            <Link href="/epub-reader" className="text-sm text-muted-foreground hover:text-primary transition-colors">Free EPUB reader</Link>
           </div>
 
           <div className="flex flex-col gap-3">

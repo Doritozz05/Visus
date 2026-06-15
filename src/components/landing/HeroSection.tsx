@@ -39,8 +39,8 @@ export function HeroSection() {
         <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight font-heading leading-[1.05] mb-6">
           Read faster. <br className="hidden sm:block" />
           Retain more. <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-emerald-400 to-primary bg-[length:200%_auto] animate-gradient">
-            Entirely private.
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/70 to-primary bg-[length:200%_auto] animate-gradient">
+            Accelerate your learning
           </span>
         </motion.h1>
 

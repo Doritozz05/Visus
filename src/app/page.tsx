@@ -79,8 +79,8 @@ export default function Home() {
           </div>
 
           <div className="group p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Lock className="w-6 h-6 text-indigo-500" />
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Lock className="w-6 h-6 text-primary" />
             </div>
             <h3 className="text-2xl font-bold mb-4 font-heading">Privacy-first document processing</h3>
             <p className="text-muted-foreground leading-relaxed">
@@ -125,6 +125,7 @@ export default function Home() {
             <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Learn</h4>
             <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary transition-colors">Speed reading guide</Link>
             <Link href="/rsvp-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">The RSVP method</Link>
+            <Link href="/cluster-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">Cluster method</Link>
             <Link href="/epub-reader" className="text-sm text-muted-foreground hover:text-primary transition-colors">Free EPUB reader</Link>
           </div>
 

@@ -10,7 +10,7 @@ export function BentoFeatures() {
     <section className="relative z-10 px-6 py-32 max-w-7xl mx-auto border-t border-border/10">
       <div className="text-center mb-20">
         <h2 className="text-4xl md:text-5xl font-extrabold font-heading mb-6 tracking-tight">
-          Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">master reading.</span>
+          Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">master reading.</span>
         </h2>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
           Visus is built like a modern developer tool: blazingly fast, entirely offline-capable, and obsessively focused on typography and performance.
@@ -52,17 +52,17 @@ export function BentoFeatures() {
         </SpotlightCard>
 
         {/* Card 2: Offline PWA */}
-        <SpotlightCard className="p-8 flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.15)">
+        <SpotlightCard className="p-8 flex flex-col justify-between" spotlightColor="hsl(var(--primary) / 0.15)">
           <div>
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6">
-              <Shield className="w-6 h-6 text-emerald-500" />
+            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
+              <Shield className="w-6 h-6 text-primary" />
             </div>
             <h3 className="text-2xl font-bold font-heading mb-3 tracking-tight">Your data, your device.</h3>
             <p className="text-muted-foreground">
               Visus runs completely in your browser. Install it as a PWA to read offline. Nothing is sent to our servers unless you opt-in to cloud sync.
             </p>
           </div>
-          <div className="mt-8 pt-6 border-t border-border/50 flex items-center gap-3 text-sm font-bold text-emerald-500">
+          <div className="mt-8 pt-6 border-t border-border/50 flex items-center gap-3 text-sm font-bold text-primary">
             <Smartphone className="w-5 h-5" />
             Offline ready
           </div>

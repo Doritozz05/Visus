@@ -1,11 +1,14 @@
 "use client";
 
+import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Eye, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Eye, ArrowRight, ChevronDown, Zap, Focus, Layers, BookOpen } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
+  const [isGuidesOpen, setIsGuidesOpen] = useState(false);
 
   // Define routes where the landing navbar should be hidden (app routes)
   const isAppRoute = pathname.startsWith("/library") || 
@@ -14,6 +17,33 @@ export function Navbar() {
                      pathname.startsWith("/settings");
 
   if (isAppRoute) return null;
+
+  const guideOptions = [
+    {
+      title: "Read Faster",
+      description: "Master the art of speed reading.",
+      href: "/speed-reading",
+      icon: <Zap className="w-4 h-4" />
+    },
+    {
+      title: "RSVP Method",
+      description: "The science of focus points.",
+      href: "/rsvp-method",
+      icon: <Focus className="w-4 h-4" />
+    },
+    {
+      title: "Cluster Method",
+      description: "Group words for deep flow.",
+      href: "/cluster-method",
+      icon: <Layers className="w-4 h-4" />
+    },
+    {
+      title: "EPUB Reader",
+      description: "Secure, local-first reading.",
+      href: "/epub-reader",
+      icon: <BookOpen className="w-4 h-4" />
+    }
+  ];
 
   return (
     <div className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/60 border-b border-border/10 shadow-sm">
@@ -28,12 +58,49 @@ export function Navbar() {
         <div className="flex items-center gap-4 md:gap-8">
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/speed-reading" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
-              Guide
-            </Link>
-            <Link href="/rsvp-method" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
-              RSVP
-            </Link>
+            <div 
+              className="relative"
+              onMouseEnter={() => setIsGuidesOpen(true)}
+              onMouseLeave={() => setIsGuidesOpen(false)}
+            >
+              <button 
+                className={`flex items-center gap-1 text-sm font-semibold transition-colors ${isGuidesOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Guides
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isGuidesOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              <AnimatePresence>
+                {isGuidesOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, x: "-50%", scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+                    exit={{ opacity: 0, y: 10, x: "-50%", scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="absolute top-full left-1/2 pt-4 w-64"
+                  >
+                    <div className="bg-card border border-border/40 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden liquid-glass p-2">
+                      {guideOptions.map((option) => (
+                        <Link 
+                          key={option.href}
+                          href={option.href}
+                          className="flex items-start gap-3 p-3 rounded-xl hover:bg-primary/5 group transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                            {option.icon}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{option.title}</span>
+                            <span className="text-xs text-muted-foreground">{option.description}</span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <Link href="/dashboard" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
               Dashboard
             </Link>
