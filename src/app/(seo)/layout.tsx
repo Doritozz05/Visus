@@ -10,7 +10,7 @@ export default function SeoLayout({
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 relative font-sans">
       {/* Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-full max-h-[600px] opacity-20 pointer-events-none [mask-image:linear-gradient(to_bottom,white,transparent)]">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[100vw] h-full max-h-[600px] opacity-20 pointer-events-none [mask-image:linear-gradient(to_bottom,white,transparent)] px-[100px]">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/50 to-primary/30 rounded-full blur-[100px]" />
       </div>
 

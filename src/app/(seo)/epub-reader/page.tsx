@@ -52,7 +52,7 @@ export default function EpubReaderPage() {
       <article className="max-w-4xl mx-auto">
         <header className="mb-20 text-center relative">
           {/* Background Decor - Adaptive to header size with breathing room */}
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[1000px] h-[calc(100%+120px)] opacity-25 pointer-events-none [mask-image:linear-gradient(to_bottom,white,transparent)] -z-10">
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[100vw] h-[calc(100%+120px)] opacity-25 pointer-events-none [mask-image:linear-gradient(to_bottom,white,transparent)] -z-10 px-[100px]">
             <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/50 rounded-full blur-[100px]" />
           </div>
 
