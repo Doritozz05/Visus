@@ -4,14 +4,14 @@ import { ArrowRight, Lock, FileText, WifiOff, ShieldCheck } from "lucide-react";
 import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
-  title: "Fast EPUB reader online: 100% private & offline capable",
+  title: "Fast EPUB reader: Private & offline capable",
   description: "Read EPUB files online at high speeds. Visus is a secure, local-first EPUB reader that works offline and never uploads your books to the cloud.",
   keywords: ["online epub reader", "private ebook reader", "offline epub viewer", "web epub reader", "browser epub reader"],
   alternates: {
     canonical: "/epub-reader",
   },
   openGraph: {
-    title: "Fast EPUB reader online: 100% private & offline capable",
+    title: "Fast EPUB reader: Private & offline capable",
     description: "Read EPUB files online at high speeds. Visus is a secure, local-first EPUB reader that works offline.",
     url: "https://visuslabs.tech/epub-reader",
     siteName: "Visus",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fast EPUB reader online: 100% private & offline capable",
+    title: "Fast EPUB reader: Private & offline capable",
     description: "Read EPUB files online at high speeds. Visus is a secure, local-first EPUB reader that works offline.",
     images: ["/twitter-image"],
   },
