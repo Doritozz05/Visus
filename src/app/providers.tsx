@@ -242,7 +242,7 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--font-sans-override", resolvedUiFont);
     }
     
-    // Total sync: inyectamos la misma fuente en todas las familias de la UI para evitar inconsistencias
+    // Total sync: inject the same font into all UI families to avoid inconsistencies
     root.style.setProperty("--font-heading-override", resolvedUiFont);
     root.style.setProperty("--font-mono-override", resolvedUiFont);
     root.style.setProperty("--font-serif-override", resolvedUiFont);

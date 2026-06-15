@@ -13,13 +13,13 @@ describe("ConfirmDialog", () => {
     isOpen: true,
     onClose: vi.fn(),
     onConfirm: vi.fn(),
-    title: "Delete Item",
+    title: "Delete item",
     description: "Are you sure?",
   };
 
   it("renders correctly when open", () => {
     render(<ConfirmDialog {...defaultProps} />);
-    expect(screen.getByText("Delete Item")).toBeDefined();
+    expect(screen.getByText("Delete item")).toBeDefined();
     expect(screen.getByText("Are you sure?")).toBeDefined();
     expect(screen.getByText("Confirm")).toBeDefined();
     expect(screen.getByText("Cancel")).toBeDefined();
@@ -27,7 +27,7 @@ describe("ConfirmDialog", () => {
 
   it("does not render when closed", () => {
     render(<ConfirmDialog {...defaultProps} isOpen={false} />);
-    expect(screen.queryByText("Delete Item")).toBeNull();
+    expect(screen.queryByText("Delete item")).toBeNull();
   });
 
   it("calls onClose when cancel is clicked", () => {

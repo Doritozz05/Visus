@@ -74,37 +74,37 @@ export function BookCard({
         const items: ContextMenuItem[] = [
           ...(book.format !== "PHYSICAL" ? [{
             id: "read",
-            label: "Leer libro",
+            label: "Read book",
             icon: <BookOpen className="w-4 h-4" />,
             onClick: () => onRead(book.id),
           }] : []),
           {
             id: "details",
-            label: "Ver detalles",
+            label: "View details",
             icon: <Info className="w-4 h-4" />,
             onClick: () => onDetails(book),
           },
           {
             id: "add-to-list",
-            label: "Add to List",
+            label: "Add to list",
             icon: <ListPlus className="w-4 h-4" />,
             onClick: () => setShowAddToList(true),
           },
           {
             id: "toggle-completed",
-            label: book.status === "completed" ? "Marcar como activo" : "Marcar como completado",
+            label: book.status === "completed" ? "Mark as active" : "Mark as completed",
             icon: book.status === "completed" ? <BookOpen className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />,
             onClick: () => onToggleCompleted(book.id),
           },
           {
             id: "edit",
-            label: "Editar detalles",
+            label: "Edit details",
             icon: <Pencil className="w-4 h-4" />,
             onClick: () => onEdit(book),
           },
           ...(book.format !== "PHYSICAL" && onToggleCloudSync ? [{
             id: "cloud-sync",
-            label: book.isInCloud ? "Quitar de la nube" : "Sincronizar en la nube",
+            label: book.isInCloud ? "Remove from cloud" : "Sync to cloud",
             icon: book.isInCloud ? <CloudOff className="w-4 h-4" /> : <Cloud className="w-4 h-4" />,
             onClick: () => onToggleCloudSync(book.id),
             disabled: isSyncing,
@@ -112,7 +112,7 @@ export function BookCard({
           { id: "divider-delete", label: "", divider: true },
           {
             id: "delete",
-            label: "Eliminar libro",
+            label: "Delete book",
             icon: <Trash2 className="w-4 h-4" />,
             tone: "danger",
             onClick: () => setShowDeleteConfirm(true),
@@ -205,7 +205,7 @@ export function BookCard({
                 className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-accent/80 flex items-center gap-2.5 hover:text-primary transition-colors focus:outline-none focus:bg-accent/80"
               >
                 <ListPlus className="w-3.5 h-3.5 text-muted-foreground" />
-                Add to List
+                Add to list
               </button>
             </div>
           )}
@@ -224,7 +224,7 @@ export function BookCard({
                 ? "text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20" 
                 : "text-muted-foreground/30 hover:bg-accent hover:text-foreground border border-transparent"
             }`}
-            title={book.isInCloud ? "Remove from Cloud" : "Sync to Cloud (3 slots max)"}
+            title={book.isInCloud ? "Remove from cloud" : "Sync to cloud (3 slots max)"}
           >
             {isSyncing ? (
               <RefreshCw className="w-3 h-3 animate-spin" />

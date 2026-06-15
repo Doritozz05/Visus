@@ -73,21 +73,21 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
     const items: ContextMenuItem[] = [
       {
         id: "back",
-        label: "Atrás",
+        label: "Back",
         icon: <ArrowLeft className="w-4 h-4" />,
         onClick: () => window.history.back(),
         shortcut: "Alt + ←",
       },
       {
         id: "forward",
-        label: "Adelante",
+        label: "Forward",
         icon: <ArrowRight className="w-4 h-4" />,
         onClick: () => window.history.forward(),
         shortcut: "Alt + →",
       },
       {
         id: "reload",
-        label: "Recargar",
+        label: "Reload",
         icon: <RotateCcw className="w-4 h-4" />,
         onClick: () => window.location.reload(),
         shortcut: "Ctrl + R",
@@ -102,14 +102,14 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
       },
       {
         id: "library",
-        label: "Biblioteca",
+        label: "Library",
         icon: <Library className={`w-4 h-4 ${isLibrary ? "text-primary" : ""}`} />,
         onClick: () => router.push("/library"),
         disabled: isLibrary,
       },
       {
         id: "settings",
-        label: "Ajustes",
+        label: "Settings",
         icon: <Settings className={`w-4 h-4 ${isSettings ? "text-primary" : ""}`} />,
         onClick: () => router.push("/settings"),
         disabled: isSettings,
@@ -121,7 +121,7 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
         { id: "divider-reader", label: "", divider: true },
         {
           id: "exit-reader",
-          label: "Salir del Lector",
+          label: "Exit reader",
           icon: <ExternalLink className="w-4 h-4" />,
           onClick: () => router.push("/library"),
           tone: "danger",
@@ -134,7 +134,7 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
       items.unshift(
         {
           id: "copy",
-          label: "Copiar",
+          label: "Copy",
           icon: <Copy className="w-4 h-4" />,
           onClick: () => {
             const text = window.getSelection()?.toString();
@@ -144,7 +144,7 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
         },
         {
           id: "search",
-          label: "Buscar en Google",
+          label: "Search on Google",
           icon: <Search className="w-4 h-4" />,
           onClick: () => {
             const text = window.getSelection()?.toString();

@@ -28,20 +28,20 @@ export function ReadingListCard({ list, onClick, onEdit, onDelete }: ReadingList
         const items: ContextMenuItem[] = [
           {
             id: "open",
-            label: "Open Collection",
+            label: "Open collection",
             icon: <ChevronRight className="w-4 h-4" />,
             onClick: onClick,
           },
           {
             id: "edit",
-            label: "Rename Collection",
+            label: "Rename collection",
             icon: <Pencil className="w-4 h-4" />,
             onClick: () => onEdit(e as any),
           },
           { id: "divider", label: "", divider: true },
           {
             id: "delete",
-            label: "Delete Collection",
+            label: "Delete collection",
             icon: <Trash2 className="w-4 h-4" />,
             tone: "danger",
             onClick: () => onDelete(e as any),
@@ -117,7 +117,7 @@ export function CreateListCard({ onClick }: { onClick: () => void }) {
       <div className="w-12 h-12 rounded-full bg-accent/50 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
         <FolderHeart className="w-6 h-6 opacity-40 group-hover:opacity-100" />
       </div>
-      <span className="text-xs font-bold font-mono uppercase tracking-widest">Create New List</span>
+      <span className="text-xs font-bold font-mono uppercase tracking-widest">Create new list</span>
     </motion.button>
   );
 }

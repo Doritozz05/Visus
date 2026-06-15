@@ -53,7 +53,7 @@ describe("ContextMenu", () => {
     
     // To test custom items, we might need to stop propagation or change how ContextMenuProvider works.
     // But for now, let's just verify default items since they ARE showing up.
-    expect(await screen.findByText("Atrás")).toBeDefined();
+    expect(await screen.findByText("Back")).toBeDefined();
   });
 
   it("closes menu on click outside", async () => {
@@ -64,11 +64,11 @@ describe("ContextMenu", () => {
     );
 
     fireEvent.contextMenu(screen.getByTestId("trigger"), { clientX: 100, clientY: 100 });
-    expect(await screen.findByText("Atrás")).toBeDefined();
+    expect(await screen.findByText("Back")).toBeDefined();
 
     fireEvent.click(document.body);
     await waitFor(() => {
-      expect(screen.queryByText("Atrás")).toBeNull();
+      expect(screen.queryByText("Back")).toBeNull();
     });
   });
 
@@ -81,13 +81,13 @@ describe("ContextMenu", () => {
     );
 
     fireEvent.contextMenu(screen.getByTestId("trigger"), { clientX: 10, clientY: 10 });
-    const backBtn = await screen.findByText("Atrás");
+    const backBtn = await screen.findByText("Back");
     expect(backBtn).toBeDefined();
     fireEvent.click(backBtn);
     
     // Menu should close
     await waitFor(() => {
-        expect(screen.queryByText("Atrás")).toBeNull();
+        expect(screen.queryByText("Back")).toBeNull();
     });
   });
 });

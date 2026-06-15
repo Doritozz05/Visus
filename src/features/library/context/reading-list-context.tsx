@@ -48,9 +48,9 @@ export function ReadingListProvider({ children }: { children: React.ReactNode })
     try {
       const newList = await ReadingListService.createList(name, ownerId, color);
       setLists((prev) => [...prev, newList]);
-      toast.success(`Lista "${name}" creada.`);
+      toast.success(`List "${name}" created.`);
     } catch (err) {
-      toast.error("Error al crear la lista.");
+      toast.error("Error creating list.");
     }
   };
 
@@ -59,7 +59,7 @@ export function ReadingListProvider({ children }: { children: React.ReactNode })
       await ReadingListService.updateList(list);
       setLists((prev) => prev.map((l) => (l.id === list.id ? list : l)));
     } catch (err) {
-      toast.error("Error al actualizar la lista.");
+      toast.error("Error updating list.");
     }
   };
 
@@ -68,9 +68,9 @@ export function ReadingListProvider({ children }: { children: React.ReactNode })
       await ReadingListService.deleteList(id);
       setLists((prev) => prev.filter((l) => l.id !== id));
       if (activeListId === id) setActiveListId(null);
-      toast.success("Lista eliminada.");
+      toast.success("List deleted.");
     } catch (err) {
-      toast.error("Error al eliminar la lista.");
+      toast.error("Error deleting list.");
     }
   };
 
@@ -78,9 +78,9 @@ export function ReadingListProvider({ children }: { children: React.ReactNode })
     try {
       await ReadingListService.addBookToList(listId, bookId);
       await loadLists(); // Refresh to get updated bookIds
-      toast.success("Libro añadido a la lista.");
+      toast.success("Book added to list.");
     } catch (err) {
-      toast.error("Error al añadir libro a la lista.");
+      toast.error("Error adding book to list.");
     }
   };
 
@@ -88,9 +88,9 @@ export function ReadingListProvider({ children }: { children: React.ReactNode })
     try {
       await ReadingListService.removeBookFromList(listId, bookId);
       await loadLists(); // Refresh
-      toast.success("Libro eliminado de la lista.");
+      toast.success("Book removed from list.");
     } catch (err) {
-      toast.error("Error al eliminar libro de la lista.");
+      toast.error("Error removing book from list.");
     }
   };
 

@@ -9,5 +9,5 @@ export const createClient = () =>
     supabaseAnonKey
   )
 
-// Cliente para uso directo en componentes de cliente
+// Client for direct use in client components
 export const supabase = createClient()

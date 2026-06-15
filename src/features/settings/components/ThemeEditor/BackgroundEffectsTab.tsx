@@ -243,11 +243,11 @@ export function BackgroundEffectsTab({
               onChange={(val) => setThemeState(prev => ({ ...prev, cardRadius: val as any }))}
               options={[
                 { value: "0px", label: "Sharp 0px", description: "Completely flat corner layout" },
-                { value: "4px", label: "Extra Small 4px", description: "Subtle corner rounding" },
+                { value: "4px", label: "Extra small 4px", description: "Subtle corner rounding" },
                 { value: "8px", label: "Small 8px", description: "Compact card corner styling" },
                 { value: "12px", label: "Standard 12px", description: "Visus default container rounding" },
                 { value: "16px", label: "Large 16px", description: "Soft organic container corners" },
-                { value: "24px", label: "Extra Large 24px", description: "Pronounced aesthetic curves" },
+                { value: "24px", label: "Extra large 24px", description: "Pronounced aesthetic curves" },
               ]}
             />
           </div>
@@ -258,7 +258,7 @@ export function BackgroundEffectsTab({
             <FancyDropdown
               ariaLabel="Box shadow (card depth)"
               value={themeState.cardShadow || "none"}
-              placeholder="Flat (None)"
+              placeholder="Flat (none)"
               menuZIndex={150}
               onChange={(val) => {
                 setThemeState(prev => ({
@@ -278,11 +278,11 @@ export function BackgroundEffectsTab({
                 }));
               }}
               options={[
-                { value: "none", label: "Flat (None)", description: "No elevation shadow outline" },
+                { value: "none", label: "Flat (none)", description: "No elevation shadow outline" },
                 { value: "sm", label: "Subtle shadow (sm)", description: "Thin, clean card bottom edge shadow" },
                 { value: "md", label: "Modern elevation (md)", description: "Balanced depth drop shadow" },
                 { value: "lg", label: "Heavy drop shadow (lg)", description: "Deep visual layered shadow" },
-                { value: "glow", label: "Accent Glow", description: "Neon backlight primary shadow effect" },
+                { value: "glow", label: "Accent glow", description: "Neon backlight primary shadow effect" },
                 { value: "retro", label: "Borders offset", description: "Thick lines offsets for retro layouts" },
               ]}
             />

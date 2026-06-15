@@ -179,7 +179,7 @@ export default function ReaderClient() {
 
   const currentChapter = React.useMemo(() => {
     const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
-    const ch = chaptersData[safeIdx] || { title: "No Book Loaded", content: "" };
+    const ch = chaptersData[safeIdx] || { title: "No book loaded", content: "" };
     const wordsArr = ch.content ? ch.content.split(/\s+/).filter((w: string) => w.trim() !== "") : [];
     return { ...ch, words: wordsArr, index: safeIdx };
   }, [chaptersData, activeChapterIndex]);
@@ -225,7 +225,7 @@ export default function ReaderClient() {
         <button
           onClick={() => setIsFocusMode(false)}
           className="fixed top-6 right-6 z-[60] flex items-center justify-center w-10 h-10 rounded-full border border-border/40 bg-card text-muted-foreground hover:text-primary transition-all shadow-lg hover:scale-110 liquid-glass"
-          title="Exit Focus Mode"
+          title="Exit focus mode"
         >
           <Eye className="w-5 h-5" />
         </button>

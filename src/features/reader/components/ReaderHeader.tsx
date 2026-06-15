@@ -135,7 +135,7 @@ export function ReaderHeader({
             if (val === "focus") setIsFocusMode(true);
           }}
           options={[
-            { value: "focus", label: "Focus Mode", icon: <EyeOff className="w-4 h-4 text-muted-foreground" /> },
+            { value: "focus", label: "Focus mode", icon: <EyeOff className="w-4 h-4 text-muted-foreground" /> },
             { value: "fullscreen", label: isFullscreen ? "Exit Fullscreen" : "Fullscreen", icon: isFullscreen ? <Minimize className="w-4 h-4 text-muted-foreground" /> : <Maximize className="w-4 h-4 text-muted-foreground" /> }
           ]}
           placeholder="Actions"
