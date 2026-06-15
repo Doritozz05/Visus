@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/speed-reading",
   },
+  openGraph: {
+    title: "How to Double Your Speed Reading Speed | Visus",
+    description: "Read 2x faster with full comprehension using the RSVP method.",
+    url: "/speed-reading",
+    type: "article",
+  },
 };
 
 const speedReadingFaqs = [

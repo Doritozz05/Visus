@@ -37,13 +37,17 @@ export function HeroSection() {
         </motion.div>
 
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight font-heading leading-[1.05] mb-6">
-          <motion.span variants={itemVariants} className="block">Read faster.</motion.span>
-          <motion.span variants={itemVariants} className="block">Retain more.</motion.span>
+          <motion.span variants={itemVariants} className="block">
+            Read faster.
+          </motion.span>
+          <motion.span variants={itemVariants} className="block">
+            Retain more.
+          </motion.span>
           <motion.span
             variants={itemVariants}
             className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/70 to-primary bg-[length:200%_auto] animate-gradient block"
           >
-            Advanced Speed Reading
+            Advanced Speed Reading Platform
           </motion.span>
         </h1>
 

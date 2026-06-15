@@ -70,35 +70,39 @@ export function Navbar() {
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isGuidesOpen ? "rotate-180" : ""}`} />
               </button>
 
-              <AnimatePresence>
-                {isGuidesOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, x: "-50%", scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
-                    exit={{ opacity: 0, y: 10, x: "-50%", scale: 0.95 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="absolute top-full left-1/2 pt-4 w-64"
-                  >
-                    <div className="bg-card border border-border/40 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden liquid-glass p-2">
-                      {guideOptions.map((option) => (
-                        <Link 
-                          key={option.href}
-                          href={option.href}
-                          className="flex items-start gap-3 p-3 rounded-xl hover:bg-primary/5 group transition-colors"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                            {option.icon}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{option.title}</span>
-                            <span className="text-xs text-muted-foreground">{option.description}</span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <motion.div
+                initial={false}
+                animate={{ 
+                  opacity: isGuidesOpen ? 1 : 0,
+                  y: isGuidesOpen ? 0 : 10,
+                  scale: isGuidesOpen ? 1 : 0.95,
+                  pointerEvents: isGuidesOpen ? "auto" : "none",
+                }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="absolute top-full left-1/2 pt-4 w-64 -translate-x-1/2"
+                style={{ 
+                  visibility: isGuidesOpen ? "visible" : "hidden",
+                  left: "50%"
+                }}
+              >
+                <div className="bg-card border border-border/40 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden liquid-glass p-2">
+                  {guideOptions.map((option) => (
+                    <Link 
+                      key={option.href}
+                      href={option.href}
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-primary/5 group transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        {option.icon}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{option.title}</span>
+                        <span className="text-xs text-muted-foreground">{option.description}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
             </div>
 
             <Link href="/dashboard" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">

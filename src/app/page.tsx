@@ -5,6 +5,7 @@ import { BentoFeatures } from "@/components/landing/BentoFeatures";
 import { MiniRSVP } from "@/components/landing/MiniRSVP";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { FaqSection } from "@/components/landing/FaqSection";
+import { Footer } from "@/components/landing/Footer";
 
 export default function Home() {
   return (
@@ -112,48 +113,7 @@ export default function Home() {
         </Link>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/20 py-16 px-6 bg-card/50">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <Eye className="w-6 h-6 text-primary" />
-              <span className="font-heading font-bold text-xl tracking-tight">Visus</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Advanced speed reading platform utilizing RSVP and semantic clustering.
-            </p>
-          </div>
-          
-          <div className="flex flex-col gap-3">
-            <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Learn</h3>
-            <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">Speed Reading Guide</Link>
-            <Link href="/rsvp-method" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">The RSVP Method</Link>
-            <Link href="/epub-reader" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">Free EPUB Reader</Link>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Legal</h3>
-            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors">Terms of Service</Link>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Connect</h3>
-            <a 
-              href="https://github.com/Doritozz05/Visus" 
-              target="_blank" 
-              rel="noreferrer" 
-              className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors flex items-center gap-1.5"
-            >
-              GitHub (Open Source)
-            </a>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-border/10 flex items-center justify-between text-xs text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Visus Labs. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

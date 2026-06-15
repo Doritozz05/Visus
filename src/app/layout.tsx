@@ -64,9 +64,6 @@ export const metadata: Metadata = {
     "open source speed reader"
   ],
   manifest: "/manifest.json",
-  alternates: {
-    canonical: "/",
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -86,7 +83,6 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Visus",
-    url: "https://visuslabs.tech",
     title: "Visus - Advanced Speed Reading Platform",
     description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
     images: [
@@ -130,7 +126,8 @@ export default function RootLayout({
                   "@type": "SoftwareApplication",
                   "name": "Visus",
                   "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
-                  "applicationCategory": "EducationalApplication",
+                  "applicationCategory": "EducationApplication",
+                  "browserRequirements": "Requires JavaScript and a modern web browser",
                   "offers": {
                     "@type": "Offer",
                     "price": "0",
