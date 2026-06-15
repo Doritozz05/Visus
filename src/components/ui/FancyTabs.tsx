@@ -28,7 +28,7 @@ export function FancyTabs({
   className = "",
 }: FancyTabsProps) {
   return (
-    <div className={`flex items-center ${variant === "pill" ? "bg-background/20 border border-border/30 p-1 rounded-lg shadow-sm" : "border-b border-border/10"} ${className}`}>
+    <div className={`flex items-center overflow-x-auto scrollbar-none ${variant === "pill" ? "bg-background/20 border border-border/30 p-1 rounded-lg shadow-sm" : "border-b border-border/10"} ${className}`}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         const Icon = tab.icon;
@@ -37,11 +37,15 @@ export function FancyTabs({
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`flex items-center justify-center gap-2 px-4 py-2 transition-all relative z-10 shrink-0 ${
+            className={`flex items-center justify-center gap-2 transition-all relative z-10 shrink-0 ${
               isActive
                 ? "text-primary font-bold"
                 : "text-muted-foreground hover:text-foreground"
-            } ${variant === "line" ? "px-6 py-3 text-xs uppercase tracking-wider font-sans" : "rounded-md text-[10px] font-mono uppercase tracking-wider"}`}
+            } ${
+              variant === "line"
+                ? "px-4 sm:px-6 py-2 sm:py-3 text-xs uppercase tracking-wider font-sans"
+                : "rounded-md px-2.5 sm:px-4 py-1.5 sm:py-2 text-[10px] font-mono uppercase tracking-wider"
+            }`}
           >
             {Icon && <Icon className="w-4 h-4" />}
             <span className="relative z-20 whitespace-nowrap">{tab.label}</span>

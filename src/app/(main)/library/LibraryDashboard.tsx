@@ -438,6 +438,7 @@ export default function LibraryDashboard() {
                     onChange={(id) => setActiveTab(id as any)}
                     layoutId="active-library-tab"
                     variant="pill"
+                    className="flex-1 sm:flex-none min-w-0 w-full sm:w-auto"
                   />
                   <button 
                     onClick={() => setIsAddModalOpen(true)}
