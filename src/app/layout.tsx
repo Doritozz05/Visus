@@ -48,7 +48,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://visuslabs.tech"),
   title: {
-    default: "Visus - Read Faster, Retain More",
+    default: "Visus - Read Faster, Retain More & Boost Your Reading Focus",
     template: "%s | Visus",
   },
   description: "Double your reading speed and improve focus with Visus. The advanced speed reading platform for EPUBs and PDFs. Free, open-source, and privacy-first.",
@@ -78,6 +78,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
+    languages: {
+      "en-US": "/",
+    },
   },
   verification: {
     google: 'kQS_aofbtHE0ifRmQCFFVqQrcntk7oF-A2l6RVbk_eA',
@@ -124,6 +127,15 @@ export default function RootLayout({
                   "name": "Visus",
                   "url": "https://visuslabs.tech",
                   "description": "Advanced Speed Reading Platform based on RSVP."
+                },
+                {
+                  "@type": "Organization",
+                  "name": "Visus Labs",
+                  "url": "https://visuslabs.tech",
+                  "logo": "https://visuslabs.tech/icons/icon-512x512.png",
+                  "sameAs": [
+                    "https://github.com/visus-labs"
+                  ]
                 },
                 {
                   "@type": "SoftwareApplication",
