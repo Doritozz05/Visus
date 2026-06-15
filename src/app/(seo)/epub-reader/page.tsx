@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Lock, FileText, WifiOff, ShieldCheck } from "lucide-react";
+import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
   title: "Fast EPUB reader online: 100% private & offline capable",
@@ -25,6 +26,25 @@ export const metadata: Metadata = {
     images: ["/twitter-image"],
   },
 };
+
+const epubFaqs = [
+  {
+    question: "Is this online EPUB reader free to use?",
+    answer: "Yes, Visus is a completely free and open-source EPUB reader. There are no subscriptions, no hidden fees, and no account requirements to start reading your books.",
+  },
+  {
+    question: "Do I need to upload my books to a server?",
+    answer: "No. Unlike other online readers, Visus processes your EPUB files entirely in your browser using local JavaScript. Your books never leave your device, ensuring 100% privacy.",
+  },
+  {
+    question: "Does it work on mobile and offline?",
+    answer: "Yes. Visus is a Progressive Web App (PWA). You can install it on your phone or desktop and use it to read your ebooks even when you don't have an internet connection.",
+  },
+  {
+    question: "Which file formats are supported?",
+    answer: "Visus currently supports EPUB, PDF, and TXT files. It includes an intelligent parser that extracts text and formatting locally for a distraction-free reading experience.",
+  },
+];
 
 export default function EpubReaderPage() {
   return (
@@ -121,6 +141,8 @@ export default function EpubReaderPage() {
           </section>
         </div>
 
+        <FaqSection items={epubFaqs} title="EPUB reader FAQ" className="mt-32 border-t border-border/10" />
+
         <div className="mt-32 relative group">
           <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-2/3 bg-primary/20 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
           <div className="relative p-8 md:py-12 md:px-16 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-[2.5rem] border border-primary/20 text-center not-prose shadow-2xl shadow-primary/5 overflow-hidden">
@@ -142,6 +164,25 @@ export default function EpubReaderPage() {
           </div>
         </div>
       </article>
+
+      {/* JSON-LD for FAQ */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": epubFaqs.map(faq => ({
+              "@type": "Question",
+              "name": faq.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.answer
+              }
+            }))
+          })
+        }}
+      />
     </main>
   );
 }
