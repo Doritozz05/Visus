@@ -31,7 +31,7 @@ export function HeroSection() {
         animate="visible"
         className="flex flex-col items-center w-full"
       >
-        <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-widest mb-8 backdrop-blur-sm">
+        <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-8 backdrop-blur-sm">
           <Zap className="w-4 h-4" />
           <span>The next generation of reading</span>
         </motion.div>

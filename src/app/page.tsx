@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Eye, ArrowRight } from "lucide-react";
+import { Eye, ArrowRight, Brain, Zap, Lock } from "lucide-react";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { BentoFeatures } from "@/components/landing/BentoFeatures";
 import { MiniRSVP } from "@/components/landing/MiniRSVP";
@@ -92,32 +92,52 @@ export default function Home() {
       {/* Frequently asked questions */}
       <FaqSection />
 
-      {/* Deep Dive & SEO Content Section */}
-      <section className="relative z-10 py-24 px-6 max-w-4xl mx-auto border-t border-border/10">
-        <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-center mb-8">The Science Behind Faster Reading</h2>
-          <p className="lead text-center text-muted-foreground mb-12">
-            Visus isn't just a simple document viewer. It's a platform engineered around cognitive science to help you process text faster and retain more information.
+      {/* Deep dive & SEO content section */}
+      <section className="relative z-10 py-32 px-6 max-w-7xl mx-auto border-t border-border/10">
+        <div className="text-center mb-20">
+          <h2 className="text-3xl md:text-5xl font-extrabold font-heading mb-6 tracking-tight">The science behind faster reading</h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Visus is more than a document viewer. It is a cognitive training platform engineered to help you process text faster while improving retention.
           </p>
-          
-          <h3>Breaking the Subvocalization Habit</h3>
-          <p>
-            When most people read, they internally "hear" the words in their head. This habit, known as subvocalization, physically limits your reading speed to your speaking speed (around 250 words per minute). To truly <Link href="/speed-reading" className="text-primary hover:underline">double your speed reading pace</Link>, you must break this habit. Visus forces your brain to process word shapes as pure concepts rather than sounds, dramatically increasing your WPM limit.
-          </p>
+        </div>
 
-          <h3>Eliminating Saccades and Eye Fatigue</h3>
-          <p>
-            Traditional reading requires your eyes to jump mechanically across a page in movements called saccades. During these jumps, your brain stops processing visual data. Visus uses the <Link href="/rsvp-method" className="text-primary hover:underline">RSVP (Rapid Serial Visual Presentation) method</Link> to present text sequentially at a fixed focal point. Your eyes stay completely still, eliminating muscular fatigue and maximizing the time your brain spends comprehending the text.
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="group p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Brain className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 font-heading">Breaking the subvocalization habit</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Most readers internally &quot;hear&quot; words, capping speed at ~250 WPM. Visus trains your brain to process word shapes as pure concepts, bypassing the inner voice to shatter your speed limits.
+              <Link href="/speed-reading" className="inline-flex items-center gap-1 text-primary hover:underline mt-4 font-semibold text-sm">
+                Learn about speed reading <ArrowRight className="w-4 h-4" />
+              </Link>
+            </p>
+          </div>
 
-          <h3>Privacy-First Document Processing</h3>
-          <p>
-            Unlike many cloud-based services, Visus operates entirely within your browser. Whether you are using it as an <Link href="/epub-reader" className="text-primary hover:underline">online EPUB reader</Link> or loading sensitive PDF documents, your files are never uploaded to a remote server. The local-first architecture ensures that your data remains 100% private and accessible even when you are completely offline.
-          </p>
+          <div className="group p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Zap className="w-6 h-6 text-emerald-500" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 font-heading">Eliminating saccades and eye fatigue</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Traditional reading requires mechanical eye jumps (saccades) that cause fatigue. Our <Link href="/rsvp-method" className="text-primary hover:underline">RSVP method</Link> presents text at a fixed point, keeping your eyes still and your focus laser-sharp.
+            </p>
+          </div>
+
+          <div className="group p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Lock className="w-6 h-6 text-indigo-500" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 font-heading">Privacy-first document processing</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Visus operates entirely in your browser. Whether using our <Link href="/epub-reader" className="text-primary hover:underline">EPUB reader</Link> or loading PDFs, your files never leave your device. 100% private, 100% offline.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA section */}
       <section className="relative z-10 px-6 py-32 max-w-4xl mx-auto text-center border-t border-border/10">
         <div className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
         <h2 className="text-4xl md:text-5xl font-extrabold font-heading mb-6 tracking-tight relative z-10">
@@ -150,15 +170,15 @@ export default function Home() {
           
           <div className="flex flex-col gap-3">
             <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Learn</h4>
-            <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary transition-colors">Speed Reading Guide</Link>
-            <Link href="/rsvp-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">The RSVP Method</Link>
-            <Link href="/epub-reader" className="text-sm text-muted-foreground hover:text-primary transition-colors">Free EPUB Reader</Link>
+            <Link href="/speed-reading" className="text-sm text-muted-foreground hover:text-primary transition-colors">Speed reading guide</Link>
+            <Link href="/rsvp-method" className="text-sm text-muted-foreground hover:text-primary transition-colors">The RSVP method</Link>
+            <Link href="/epub-reader" className="text-sm text-muted-foreground hover:text-primary transition-colors">Free EPUB reader</Link>
           </div>
 
           <div className="flex flex-col gap-3">
             <h4 className="font-bold text-sm uppercase tracking-wider text-foreground">Legal</h4>
-            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy policy</Link>
+            <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of service</Link>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -169,7 +189,7 @@ export default function Home() {
               rel="noreferrer" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
             >
-              GitHub (Open Source)
+              GitHub (Open source)
             </a>
           </div>
         </div>

@@ -44,6 +44,8 @@ export function FaqSection() {
       <div className="flex flex-col gap-4">
         {faqs.map((faq, i) => {
           const isOpen = openIndex === i;
+          const faqId = `faq-content-${i}`;
+          const buttonId = `faq-button-${i}`;
 
           return (
             <div
@@ -54,7 +56,10 @@ export function FaqSection() {
               )}
             >
               <button
+                id={buttonId}
                 onClick={() => toggle(i)}
+                aria-expanded={isOpen}
+                aria-controls={faqId}
                 className="flex items-center justify-between w-full p-6 text-left focus:outline-none focus-visible:bg-muted/50"
               >
                 <span className="font-bold text-lg">{faq.question}</span>
@@ -69,6 +74,9 @@ export function FaqSection() {
               <AnimatePresence initial={false}>
                 {isOpen && (
                   <motion.div
+                    id={faqId}
+                    role="region"
+                    aria-labelledby={buttonId}
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}

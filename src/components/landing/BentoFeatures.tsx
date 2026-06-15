@@ -27,26 +27,26 @@ export function BentoFeatures() {
             </div>
             <h3 className="text-3xl font-extrabold font-heading mb-4 tracking-tight">Tailored to your eyes.</h3>
             <p className="text-muted-foreground text-lg mb-6">
-              Choose from highly legible typography including Inter, Lora, and OpenDyslexic. Switch instantly between Dark, Light, Sepia, and Mono themes.
+              Choose from highly legible typography including Inter, Lora, and OpenDyslexic. Switch instantly between dark, light, sepia, and mono themes.
             </p>
           </div>
 
           <div className="w-full md:w-72 grid grid-cols-2 gap-4 shrink-0">
             <div className="bg-background rounded-2xl border border-border/50 p-6 text-center shadow-lg transition-transform hover:scale-105">
               <span className="font-sans text-3xl font-bold text-foreground block">Aa</span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest mt-3 block">Inter</span>
+              <span className="text-[10px] text-muted-foreground mt-3 block">Inter</span>
             </div>
             <div className="bg-[#f4ecd8] rounded-2xl border border-[#e5d8b8] p-6 text-center shadow-lg transition-transform hover:scale-105">
               <span className="font-serif text-3xl font-bold text-[#5c4b37] block">Aa</span>
-              <span className="text-[10px] text-[#8a7b66] uppercase tracking-widest mt-3 block">Sepia</span>
+              <span className="text-[10px] text-[#8a7b66] mt-3 block">Sepia</span>
             </div>
             <div className="bg-[#1e1e2e] rounded-2xl border border-[#313244] p-6 text-center shadow-lg transition-transform hover:scale-105">
               <span className="font-mono text-3xl font-bold text-[#cdd6f4] block">Aa</span>
-              <span className="text-[10px] text-[#a6adc8] uppercase tracking-widest mt-3 block">Mono</span>
+              <span className="text-[10px] text-[#a6adc8] mt-3 block">Mono</span>
             </div>
             <div className="bg-background rounded-2xl border border-border/50 p-6 text-center flex flex-col items-center justify-center shadow-lg transition-transform hover:scale-105">
               <span className="font-serif text-3xl font-bold text-foreground block italic">Aa</span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest mt-3 block">Lora</span>
+              <span className="text-[10px] text-muted-foreground mt-3 block">Lora</span>
             </div>
           </div>
         </SpotlightCard>
@@ -64,7 +64,7 @@ export function BentoFeatures() {
           </div>
           <div className="mt-8 pt-6 border-t border-border/50 flex items-center gap-3 text-sm font-bold text-emerald-500">
             <Smartphone className="w-5 h-5" />
-            Offline Ready
+            Offline ready
           </div>
         </SpotlightCard>
 
@@ -109,9 +109,9 @@ export function BentoFeatures() {
               Our local parser handles massive EPUB files instantly. It extracts semantic chapters, generates crisp covers, and sanitizes HTML for a flawless, distraction-free reading experience.
             </p>
             <div className="flex gap-4">
-              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold uppercase tracking-wider">Fast</span>
-              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold uppercase tracking-wider">Accurate</span>
-              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold uppercase tracking-wider">Semantic</span>
+              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold">Fast</span>
+              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold">Accurate</span>
+              <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold">Semantic</span>
             </div>
           </div>
         </SpotlightCard>
