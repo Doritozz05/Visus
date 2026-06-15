@@ -2,7 +2,7 @@
 
 ### Simple & powerful speed-reading platform for web & PWA
 
-[![Next.js](https://img.shields.io/badge/Next.js-14.2-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![PWA](https://img.shields.io/badge/PWA-Support-6366F1?style=for-the-badge&logo=progressive-web-apps&logoColor=white)](https://web.dev/progressive-web-apps/)
@@ -47,13 +47,16 @@ visus/
 ├── public/                       # Static assets, manifest, and service worker for PWA
 ├── src/
 │   ├── app/                      # Next.js App Router (Layouts & Pages)
-│   │   ├── dashboard/            # Reading analytics page
-│   │   ├── library/              # Upload and book list page
-│   │   ├── reader/               # RSVP & Cluster reader page
-│   │   └── settings/             # Font and speed settings page
-│   ├── components/               # Reusable UI components (like the Sidebar)
-│   ├── context/                  # Global react contexts
+│   │   ├── (main)/               # Main application pages (grouped)
+│   │   │   ├── dashboard/        # Reading analytics page
+│   │   │   ├── library/          # Upload and book list page
+│   │   │   ├── reader/           # RSVP & Cluster reader page
+│   │   │   └── settings/         # Font and speed settings page
+│   │   ├── (auth)/               # Authentication pages
+│   │   └── (seo)/                # SEO-optimized landing pages
+│   ├── components/               # Reusable UI components
 │   ├── core/                     # Core reading algorithms (RSVP & chunking)
+│   ├── features/                 # Feature-specific logic and components
 │   ├── hooks/                    # Reusable React hooks
 │   └── lib/                      # Helper utilities and file parsers
 ├── components.json               # Shadcn UI path setup

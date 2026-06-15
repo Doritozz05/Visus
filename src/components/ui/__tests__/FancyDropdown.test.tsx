@@ -7,6 +7,14 @@ describe("FancyDropdown", () => {
   beforeEach(() => {
     cleanup();
     vi.clearAllMocks();
+    
+    // Mock ResizeObserver
+    class ResizeObserverMock {
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
+    }
+    global.ResizeObserver = ResizeObserverMock as any;
   });
 
   const options = [
