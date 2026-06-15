@@ -81,6 +81,27 @@ export default function EpubReaderPage() {
               <p className="text-muted-foreground max-w-3xl mx-auto">
                 Unlike basic EPUB readers that just show you a static page, Visus integrates seamlessly with our <Link href="/rsvp-method" className="text-primary font-bold underline hover:opacity-80">RSVP engine</Link> and <Link href="/speed-reading" className="text-primary font-bold underline hover:opacity-80">speed reading guide</Link>. Toggle between traditional pagination and high-speed RSVP mode instantly.
               </p>
+              <p className="text-muted-foreground mt-4">
+                Our parser supports multiple text encodings and intelligently identifies chapter breaks, providing a navigation experience that rivals dedicated desktop software while running entirely in a browser tab.
+              </p>
+            </div>
+          </section>
+
+          <section className="border-t border-border/10 pt-24">
+            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Reading Resources</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link href="/rsvp-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">The RSVP Method</h3>
+                <p className="text-sm text-muted-foreground">Learn how to read one word at a time without moving your eyes.</p>
+              </Link>
+              <Link href="/speed-reading" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Speed Reading Guide</h3>
+                <p className="text-sm text-muted-foreground">The science and techniques to double your reading speed today.</p>
+              </Link>
+              <Link href="/cluster-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Semantic Clustering</h3>
+                <p className="text-sm text-muted-foreground">Process groups of words for a more natural reading flow.</p>
+              </Link>
             </div>
           </section>
         </div>

@@ -135,6 +135,27 @@ export default function SpeedReadingPage() {
               <p className="text-muted-foreground">
                 By flashing words at a precise &quot;Optimal Recognition Point&quot; on the screen, your eyes stay perfectly still. You spend 100% of your time comprehending text, and 0% moving your eyes.
               </p>
+              <p className="text-muted-foreground mt-4">
+                This focus allows for deeper immersion in the text, as your brain isn&apos;t constantly context-switching between the mechanics of scanning and the cognitive load of understanding.
+              </p>
+            </div>
+          </section>
+
+          <section className="border-t border-border/10 pt-24">
+            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Related Guides</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link href="/rsvp-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">The RSVP Method</h3>
+                <p className="text-sm text-muted-foreground">Deep dive into the technology behind Rapid Serial Visual Presentation.</p>
+              </Link>
+              <Link href="/cluster-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Semantic Clustering</h3>
+                <p className="text-sm text-muted-foreground">Learn how to group words to maximize your peripheral vision.</p>
+              </Link>
+              <Link href="/epub-reader" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">EPUB Web Reader</h3>
+                <p className="text-sm text-muted-foreground">Secure and private ebook reading directly in your browser.</p>
+              </Link>
             </div>
           </section>
         </div>

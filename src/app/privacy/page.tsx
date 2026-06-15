@@ -3,7 +3,14 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Visus",
-  description: "Privacy Policy for Visus - Advanced Speed Reading Platform",
+  description: "Learn how Visus handles your data. We are a privacy-first, local-focused speed reading platform.",
+  openGraph: {
+    title: "Privacy Policy | Visus",
+    description: "Your data stays on your device. Learn about our local-first privacy approach.",
+    url: "https://visuslabs.tech/privacy",
+    siteName: "Visus",
+    type: "website",
+  },
 };
 
 export default function PrivacyPolicy() {
@@ -64,6 +71,7 @@ export default function PrivacyPolicy() {
               <li>Synchronize your library and reading stats across multiple devices.</li>
               <li>Analyze platform performance and improve our RSVP and clustering algorithms.</li>
               <li>Communicate with you regarding support or critical platform updates.</li>
+              <li>Improve security and prevent unauthorized access.</li>
             </ul>
           </section>
 
@@ -88,6 +96,16 @@ export default function PrivacyPolicy() {
               <br />
               <span className="text-foreground font-medium">support.visus@gmail.com</span>
             </p>
+          </section>
+
+          <section className="pt-8 border-t border-border/20">
+            <h3 className="text-lg font-bold mb-4">Explore Visus</h3>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <Link href="/speed-reading" className="text-primary hover:underline">Speed Reading Guide</Link>
+              <Link href="/rsvp-method" className="text-primary hover:underline">RSVP Method</Link>
+              <Link href="/epub-reader" className="text-primary hover:underline">EPUB Reader</Link>
+              <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>
+            </div>
           </section>
         </div>
       </div>

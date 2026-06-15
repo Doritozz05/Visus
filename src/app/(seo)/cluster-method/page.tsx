@@ -4,10 +4,26 @@ import { ArrowRight, Layers, Cpu, Eye } from "lucide-react";
 import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
-  title: "Visual Semantic Clustering: The Future of Speed Reading | Visus",
-  description: "Discover Semantic Clustering. Learn how Visus groups words into logical units to maximize peripheral vision and increase reading comprehension at high speeds.",
+  title: "Visual Semantic Clustering Speed Reading | Visus",
+  description: "Discover Semantic Clustering. Learn how Visus groups words into logical units to maximize peripheral vision and increase reading comprehension.",
+  keywords: ["semantic clustering", "visual word grouping", "speed reading technique", "peripheral vision training", "cognitive reading"],
   alternates: {
     canonical: "/cluster-method",
+  },
+  openGraph: {
+    title: "Visual Semantic Clustering | Visus",
+    description: "Learn how to process logical units of text instead of single words.",
+    url: "https://visuslabs.tech/cluster-method",
+    siteName: "Visus",
+    images: [{ url: "/opengraph-image" }],
+    locale: "en_US",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Visual Semantic Clustering | Visus",
+    description: "The evolution of the RSVP reading method.",
+    images: ["/twitter-image"],
   },
 };
 
@@ -106,6 +122,24 @@ export default function ClusterMethodPage() {
                 <h3 className="font-bold text-xl mb-3 font-heading">Cognitive load</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">Fewer visual interruptions mean less cognitive overhead, allowing for longer reading sessions without fatigue.</p>
               </div>
+            </div>
+          </section>
+
+          <section className="border-t border-border/10 pt-24">
+            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Master More Reading Techniques</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link href="/rsvp-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">The RSVP Method</h3>
+                <p className="text-sm text-muted-foreground">The core technology behind our high-speed reading engine.</p>
+              </Link>
+              <Link href="/speed-reading" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Speed Reading Guide</h3>
+                <p className="text-sm text-muted-foreground">Fundamental tips and science to double your reading speed.</p>
+              </Link>
+              <Link href="/epub-reader" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">EPUB Web Reader</h3>
+                <p className="text-sm text-muted-foreground">Load your own books and apply clustering modes instantly.</p>
+              </Link>
             </div>
           </section>
         </div>

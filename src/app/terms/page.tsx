@@ -3,7 +3,14 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of Service | Visus",
-  description: "Terms of Service for Visus - Advanced Speed Reading Platform",
+  description: "Terms of Service for the Visus speed reading platform.",
+  openGraph: {
+    title: "Terms of Service | Visus",
+    description: "Read our terms for using the Visus platform and tools.",
+    url: "https://visuslabs.tech/terms",
+    siteName: "Visus",
+    type: "website",
+  },
 };
 
 export default function TermsOfService() {
@@ -85,6 +92,16 @@ export default function TermsOfService() {
             <p className="text-muted-foreground mt-2">
               These Terms shall be governed by and construed in accordance with the laws of your jurisdiction, without regard to its conflict of law provisions.
             </p>
+          </section>
+
+          <section className="pt-8 border-t border-border/20">
+            <h3 className="text-lg font-bold mb-4">Explore Visus</h3>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <Link href="/speed-reading" className="text-primary hover:underline">Speed Reading Guide</Link>
+              <Link href="/rsvp-method" className="text-primary hover:underline">RSVP Method</Link>
+              <Link href="/epub-reader" className="text-primary hover:underline">EPUB Reader</Link>
+              <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+            </div>
           </section>
         </div>
       </div>

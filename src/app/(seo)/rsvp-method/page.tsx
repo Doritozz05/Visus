@@ -4,11 +4,26 @@ import { ArrowRight, Focus, Timer, BookOpen } from "lucide-react";
 import { FaqSection } from "@/components/landing/FaqSection";
 
 export const metadata: Metadata = {
-  title: "What is RSVP Reading? The Rapid Serial Visual Presentation Method",
-  description: "Discover the RSVP reading method. Learn how Rapid Serial Visual Presentation eliminates eye tracking and saccades to boost reading speed and focus.",
+  title: "RSVP Reading: Rapid Serial Visual Presentation | Visus",
+  description: "Discover the RSVP reading method. Learn how Rapid Serial Visual Presentation eliminates eye tracking and saccades to boost reading speed.",
   keywords: ["RSVP reading method", "Rapid Serial Visual Presentation", "eye saccades", "reading focus", "optimal recognition point"],
   alternates: {
     canonical: "/rsvp-method",
+  },
+  openGraph: {
+    title: "The RSVP Reading Method Explained | Visus",
+    description: "Deep dive into the science of focus points and rapid serial visual presentation.",
+    url: "https://visuslabs.tech/rsvp-method",
+    siteName: "Visus",
+    images: [{ url: "/opengraph-image" }],
+    locale: "en_US",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The RSVP Reading Method | Visus",
+    description: "Eliminate eye tracking and boost reading speed.",
+    images: ["/twitter-image"],
   },
 };
 
@@ -117,6 +132,27 @@ export default function RsvpMethodPage() {
               <p className="text-muted-foreground">
                 Instead of always showing one word, Visus can intelligently group short phrases (like &quot;of the&quot; or &quot;in a&quot;) together. This utilizes your peripheral vision to process context faster, providing a much smoother reading experience than raw word-by-word flashing.
               </p>
+              <p className="text-muted-foreground mt-4">
+                This adaptive engine ensures that the cognitive rhythm of the sentence is preserved, preventing the robotic feel of some older RSVP tools while maintaining extreme speed.
+              </p>
+            </div>
+          </section>
+
+          <section className="border-t border-border/10 pt-24">
+            <h2 className="text-3xl font-extrabold font-heading tracking-tight mb-8">Continue Learning</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link href="/speed-reading" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Speed Reading Guide</h3>
+                <p className="text-sm text-muted-foreground">Master the fundamental principles of rapid text processing.</p>
+              </Link>
+              <Link href="/cluster-method" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">Semantic Clustering</h3>
+                <p className="text-sm text-muted-foreground">Go beyond word-by-word with our advanced grouping algorithm.</p>
+              </Link>
+              <Link href="/epub-reader" className="p-6 rounded-2xl border border-border/50 hover:border-primary/50 bg-card/50 transition-colors group">
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">EPUB Web Reader</h3>
+                <p className="text-sm text-muted-foreground">Privacy-first reading for all your personal ebook collections.</p>
+              </Link>
             </div>
           </section>
         </div>
