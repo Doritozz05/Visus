@@ -128,7 +128,7 @@ class DbService {
 
       request.onblocked = () => {
         console.warn("[DbService] Database upgrade blocked by other open tabs. Please close other Visus tabs.");
-        toast.warning("Actualización bloqueada: por favor, cierra otras pestañas de la aplicación.");
+        toast.warning("Update blocked: please close other application tabs.");
       };
     });
 

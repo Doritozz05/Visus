@@ -95,7 +95,7 @@ export function ReadingListGrid() {
               <button
                 onClick={onConfirm}
                 disabled={!inputVal.trim()}
-                className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-2xl text-xs font-bold font-mono uppercase tracking-widest hover:brightness-110 shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
+                className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-2xl text-xs font-bold font-mono uppercase tracking-widest hover:brightness-110 transition-all disabled:opacity-50"
               >
                 {confirmLabel}
               </button>

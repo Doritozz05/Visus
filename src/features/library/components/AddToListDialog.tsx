@@ -83,7 +83,7 @@ export function AddToListDialog({ book, isOpen, onClose }: AddToListDialogProps)
                 >
                   <div className="flex items-center gap-4">
                     <div 
-                      className="w-3 h-3 rounded-full shadow-inner ring-4 ring-background" 
+                      className="w-2.5 h-2.5 rounded-full" 
                       style={{ backgroundColor: list.color || 'var(--primary)' }} 
                     />
                     <div className="flex flex-col items-start">
@@ -97,13 +97,11 @@ export function AddToListDialog({ book, isOpen, onClose }: AddToListDialogProps)
                   </div>
                   <div className={`w-6 h-6 rounded-xl border flex items-center justify-center transition-all duration-300 ${
                     isIncluded 
-                      ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/30 scale-110" 
-                      : "border-border/60 group-hover:border-primary/50 group-hover:scale-105"
+                      ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110" 
+                      : "border-border/40 group-hover:border-primary/50 group-hover:scale-105 bg-transparent"
                   }`}>
-                    {isIncluded ? (
-                      <Check className="w-4 h-4" strokeWidth={3} />
-                    ) : (
-                      <div className="w-1.5 h-1.5 rounded-full bg-border/40 group-hover:bg-primary/40" />
+                    {isIncluded && (
+                      <Check className="w-3.5 h-3.5" strokeWidth={3.5} />
                     )}
                   </div>
                 </button>
