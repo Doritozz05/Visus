@@ -72,6 +72,11 @@ export async function saveCustomFont(name: string, file: File): Promise<CustomFo
 
 export async function getCustomFonts(): Promise<CustomFont[]> {
   try {
+    // Avoid SSR issues
+    if (typeof window === "undefined") {
+      return [];
+    }
+
     const db = await getDB();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(STORE_NAME, "readonly");
@@ -87,7 +92,11 @@ export async function getCustomFonts(): Promise<CustomFont[]> {
       };
     });
   } catch (err) {
-    console.warn("Could not load custom fonts from IndexedDB:", err);
+    // Don't log if it's just a missing IndexedDB in a test environment (noise reduction)
+    const isMissingIndexedDB = err instanceof Error && err.message.includes("IndexedDB is only available in browser");
+    if (process.env.NODE_ENV !== "test" || !isMissingIndexedDB) {
+      console.warn("Could not load custom fonts from IndexedDB:", err);
+    }
     return [];
   }
 }

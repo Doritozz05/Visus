@@ -16,7 +16,11 @@ export class StatsService {
       const logs = await dbService.getAllLogs();
       return logs || [];
     } catch (err) {
-      console.warn("Could not retrieve reading logs from IndexedDB:", err);
+      // Don't log if it's just a missing IndexedDB in a test environment (noise reduction)
+      const isMissingIndexedDB = err instanceof Error && err.message.includes("IndexedDB is only available in browser");
+      if (process.env.NODE_ENV !== "test" || !isMissingIndexedDB) {
+        console.warn("Could not retrieve reading logs from IndexedDB:", err);
+      }
       return [];
     }
   }
@@ -95,7 +99,9 @@ export class StatsService {
           window.dispatchEvent(new CustomEvent("stats-updated"));
         }
       } catch (err) {
-        console.warn("Could not save or sync reading log:", err);
+        if (process.env.NODE_ENV !== "test") {
+          console.warn("Could not save or sync reading log:", err);
+        }
       }
     }
     return newLog;
