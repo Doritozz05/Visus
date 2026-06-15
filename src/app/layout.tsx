@@ -48,17 +48,17 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://visuslabs.tech"),
   title: {
-    default: "Visus - Advanced Speed Reading Platform",
+    default: "Visus - Read Faster, Retain More",
     template: "%s | Visus",
   },
-  description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
+  description: "Double your reading speed and improve focus with Visus. The advanced speed reading platform for EPUBs and PDFs. Free, open-source, and privacy-first.",
   keywords: [
     "speed reading",
-    "RSVP reading",
-    "visual semantic clustering",
     "read faster",
     "online epub reader",
+    "improve reading focus",
     "speed reading trainer",
+    "RSVP reading",
     "cognitive enhancement",
     "focus tools",
     "open source speed reader"
