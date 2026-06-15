@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of service",
-  description: "Read the Terms of Service for Visus, the advanced speed reading platform. Learn about user responsibilities, legal guidelines, and our RSVP tools for efficient reading.",
+  description: "Read the Visus Terms of Service. Learn about user responsibilities, legal guidelines, and our RSVP tools for an efficient, secure reading experience.",
   alternates: {
     canonical: "/terms",
   },
