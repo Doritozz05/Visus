@@ -31,6 +31,7 @@ interface FancyDropdownProps {
   searchInputClassName?: string;
   keepSelectedVisibleWhenFiltered?: boolean;
   menuZIndex?: number;
+  renderTrigger?: (selectedOption: DropdownOption | undefined, isOpen: boolean) => React.ReactNode;
 }
 
 export function FancyDropdown({
@@ -50,6 +51,7 @@ export function FancyDropdown({
   searchInputClassName,
   keepSelectedVisibleWhenFiltered = true,
   menuZIndex = 60,
+  renderTrigger,
 }: FancyDropdownProps) {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -80,11 +82,12 @@ export function FancyDropdown({
     if (!triggerEl) return;
 
     const rect = triggerEl.getBoundingClientRect();
-    const width = rect.width;
+    const menuEl = menuRef.current;
+    const menuWidth = menuEl ? menuEl.getBoundingClientRect().width : (align === "end" ? 220 : rect.width);
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const desiredLeft = align === "end" ? rect.right - width : rect.left;
-    const left = Math.max(8, Math.min(desiredLeft, viewportWidth - width - 8));
+    const desiredLeft = align === "end" ? rect.right - menuWidth : rect.left;
+    const left = Math.max(8, Math.min(desiredLeft, viewportWidth - menuWidth - 8));
 
     const spaceBelow = viewportHeight - rect.bottom - 16;
     const spaceAbove = rect.top - 16;
@@ -100,7 +103,7 @@ export function FancyDropdown({
     const style: React.CSSProperties = {
       position: "fixed",
       left,
-      width,
+      width: align === "end" ? undefined : rect.width,
       zIndex: menuZIndex,
     };
 
@@ -166,8 +169,17 @@ export function FancyDropdown({
           "group flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-border/40 bg-card px-3.5 text-left text-sm text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 liquid-glass"
         }
       >
-        <span className="min-w-0 flex-1 truncate text-sm">{selectedOption?.label ?? placeholder}</span>
-        <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+        {renderTrigger ? (
+          renderTrigger(selectedOption, isOpen)
+        ) : (
+          <>
+            <span className="min-w-0 flex-1 truncate text-sm flex items-center gap-1.5">
+              {selectedOption?.icon && <span className="shrink-0 flex items-center justify-center">{selectedOption.icon}</span>}
+              <span className="truncate">{selectedOption?.label ?? placeholder}</span>
+            </span>
+            <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+          </>
+        )}
       </button>
 
       {isOpen && typeof document !== "undefined"

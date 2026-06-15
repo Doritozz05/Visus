@@ -219,7 +219,7 @@ export default function ReaderClient() {
   }
 
   return (
-    <div className="h-screen overflow-hidden overscroll-none flex flex-col items-center justify-between relative transition-all duration-300 bg-[hsl(var(--reader-background))] text-[hsl(var(--reader-foreground))]">
+    <div className="h-dvh w-full overflow-hidden overscroll-none flex flex-col items-center justify-between relative transition-all duration-300 bg-[hsl(var(--reader-background))] text-[hsl(var(--reader-foreground))]">
       {/* Focus Mode Exit Button */}
       {isFocusMode && (
         <button
@@ -235,9 +235,7 @@ export default function ReaderClient() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className={`flex-1 flex flex-col items-center justify-between relative w-full p-6 pt-4 pb-8 overflow-hidden overscroll-none transition-all duration-300 ${
-          isFocusMode ? "h-screen" : "h-[calc(100vh-64px)] md:h-screen"
-        }`}
+        className="flex-1 flex flex-col items-center justify-between relative w-full p-3 pt-2 pb-4 sm:p-6 sm:pt-4 sm:pb-8 overflow-hidden overscroll-none transition-all duration-300 h-dvh md:h-screen"
       >
         <ReaderHeader
           activeBook={activeBook}
@@ -295,11 +293,11 @@ export default function ReaderClient() {
 
       {/* Pomodoro Timer - Rendered constantly to keep timer running, toggled via CSS */}
       <div 
-        className={`absolute bottom-6 left-6 z-50 w-64 md:block hidden transition-all duration-300 ${
+        className={`fixed z-50 w-[240px] xs:w-60 transition-all duration-300 ${
           isPomodoroOpen 
-            ? "opacity-100 translate-y-0 pointer-events-auto" 
-            : "opacity-0 translate-y-4 pointer-events-none"
-        }`}
+            ? "opacity-100 scale-100 pointer-events-auto" 
+            : "opacity-0 scale-95 pointer-events-none"
+        } top-20 right-4 md:top-auto md:right-auto md:bottom-6 md:left-6`}
       >
         <PomodoroTimer />
       </div>
@@ -308,6 +306,8 @@ export default function ReaderClient() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         initialTab={drawerTab}
+        isPomodoroOpen={isPomodoroOpen}
+        setIsPomodoroOpen={setIsPomodoroOpen}
       />
 
       <CompletionModal

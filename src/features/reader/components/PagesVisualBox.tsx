@@ -265,7 +265,7 @@ export function PagesVisualBox({
   const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter;
 
   return (
-    <div className="w-full bg-card border border-border/20 rounded-2xl px-5 pb-4 pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl relative overflow-hidden transition-opacity duration-300 flex flex-col h-full md:h-[660px] min-h-0">
+    <div className="w-full bg-card border border-border/20 rounded-2xl px-3.5 pb-3 pt-5 sm:px-5 sm:pb-4 sm:pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl relative overflow-hidden transition-opacity duration-300 flex flex-col h-full md:h-[660px] min-h-0">
       
       <ReaderEpubStyles />
 
@@ -281,7 +281,7 @@ export function PagesVisualBox({
         onUpdateBookmarkName={onUpdateBookmarkName}
       />
 
-      <div className="flex justify-between items-start gap-4 text-[10px] font-mono tracking-widest text-muted-foreground uppercase pb-4 border-b border-border/10 mb-4 shrink-0">
+      <div className="hidden sm:flex justify-between items-start gap-4 text-[10px] font-mono tracking-widest text-muted-foreground uppercase pb-4 border-b border-border/10 mb-4 shrink-0">
         <span className="shrink-0">Visus Reader &bull; Pro</span>
         <span className="text-primary font-bold text-right break-words whitespace-normal max-w-[70%] leading-normal tracking-wide">
           {currentChapter.title}
@@ -290,7 +290,7 @@ export function PagesVisualBox({
 
       <div 
         ref={canvasWrapperRef}
-        className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start"
+        className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start min-h-0"
       >
         {!isPaginationReady && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-xl">

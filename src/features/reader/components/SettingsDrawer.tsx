@@ -1,24 +1,47 @@
 "use client";
 
 import * as React from "react";
-import { Settings, Sliders, X, Zap, Columns, BookOpen } from "lucide-react";
+import { Settings, Sliders, X, Zap, Columns, BookOpen, Maximize, Minimize, EyeOff, Timer } from "lucide-react";
 import { GeneralSettingsForm } from "@/features/settings/components/GeneralSettingsForm";
 import { RsvpSettingsForm } from "@/features/settings/components/RsvpSettingsForm";
 import { ClusterSettingsForm } from "@/features/settings/components/ClusterSettingsForm";
 import { ReaderSettingsForm } from "@/features/settings/components/ReaderSettingsForm";
+import { useReadingStore } from "@/features/reader/stores/reading-store";
 
 interface SettingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   initialTab?: "general" | "rsvp" | "cluster" | "normal";
+  isPomodoroOpen?: boolean;
+  setIsPomodoroOpen?: (open: boolean) => void;
 }
 
 export function SettingsDrawer({
   isOpen,
   onClose,
   initialTab = "general",
+  isPomodoroOpen = false,
+  setIsPomodoroOpen,
 }: SettingsDrawerProps) {
   const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster" | "normal">(initialTab);
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const setIsFocusMode = useReadingStore((state) => state.setIsFocusMode);
+
+  React.useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   React.useEffect(() => {
     if (isOpen) {
@@ -57,6 +80,47 @@ export function SettingsDrawer({
             className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground border border-border/20 transition-all"
           >
             <X className="h-[18px] w-[18px]" />
+          </button>
+        </div>
+
+        {/* Mobile-only Quick Actions (Fullscreen, Focus Mode, Pomodoro) */}
+        <div className="sm:hidden grid grid-cols-3 gap-2 border-b border-border/10 pb-4 mb-6">
+          {/* Fullscreen Toggle */}
+          <button
+            onClick={toggleFullscreen}
+            className={`flex flex-col items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer select-none ${
+              isFullscreen
+                ? "border-primary bg-primary/10 text-primary font-bold shadow-[0_0_10px_rgba(var(--primary),0.1)]"
+                : "border-border/30 bg-card/50 hover:bg-accent/65 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+            <span className="text-[9px] truncate w-full text-center">Screen</span>
+          </button>
+
+          {/* Focus Mode Toggle */}
+          <button
+            onClick={() => {
+              setIsFocusMode(true);
+              onClose();
+            }}
+            className="flex flex-col items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-border/30 bg-card/50 hover:bg-accent/65 text-muted-foreground hover:text-foreground text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer select-none"
+          >
+            <EyeOff className="h-4 w-4" />
+            <span className="text-[9px] truncate w-full text-center">Focus</span>
+          </button>
+
+          {/* Pomodoro Timer Toggle */}
+          <button
+            onClick={() => setIsPomodoroOpen?.(!isPomodoroOpen)}
+            className={`flex flex-col items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer select-none ${
+              isPomodoroOpen
+                ? "border-primary bg-primary/10 text-primary font-bold shadow-[0_0_10px_rgba(var(--primary),0.1)]"
+                : "border-border/30 bg-card/50 hover:bg-accent/65 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Timer className="h-4 w-4" />
+            <span className="text-[9px] truncate w-full text-center">Pomodoro</span>
           </button>
         </div>
 

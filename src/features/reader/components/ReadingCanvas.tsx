@@ -76,7 +76,7 @@ export function ReadingCanvas({
           : mode === "normal"
             ? "max-w-5xl"
             : "max-w-2xl"
-      } px-6 md:px-0 flex-1 flex flex-col items-center justify-center relative z-10 transition-opacity duration-300`}
+      } px-6 md:px-0 flex-1 flex flex-col items-center justify-center relative z-10 transition-opacity duration-300 min-h-0`}
     >
       {completedChapter && mode !== "normal" ? (
         activeQuiz ? (
