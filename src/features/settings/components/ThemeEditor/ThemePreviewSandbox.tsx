@@ -81,6 +81,8 @@ export function ThemePreviewSandbox({
 
   // Content Layout switcher
   const renderLayoutContent = () => {
+    const isDesktop = previewDevice === "desktop";
+
     switch (activeLayout) {
       case "library":
         return (
@@ -104,7 +106,10 @@ export function ThemePreviewSandbox({
             </div>
 
             {/* Books catalog grid */}
-            <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5 max-h-[290px] scrollbar-none">
+            <div 
+              className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5 scrollbar-none"
+              style={{ maxHeight: isDesktop ? "none" : "290px" }}
+            >
               {mockBooks.map((book, idx) => {
                 const isSelected = selectedBook === idx;
                 return (
@@ -168,7 +173,7 @@ export function ThemePreviewSandbox({
               
               <div 
                 onClick={() => setStreakActive(!streakActive)}
-                className="p-2 border flex items-center gap-2 cursor-pointer transition-all duration-300 select-none"
+                className="p-2 border items-center gap-2 cursor-pointer transition-all duration-300 select-none hidden sm:flex"
                 style={{ 
                   backgroundColor: glassBg, 
                   backdropFilter: glassBlur,
@@ -188,14 +193,15 @@ export function ThemePreviewSandbox({
 
             {/* CSS weekly activity chart */}
             <div 
-              className="p-3 border flex flex-col gap-2 flex-1 min-h-[140px] max-h-[180px]"
+              className="p-3 border flex flex-col gap-2 flex-1 min-h-[140px]"
               style={{
                 backgroundColor: glassBg,
                 backdropFilter: glassBlur,
                 border: glassBorder,
                 boxShadow: getShadowStyle(themeState.cardShadow),
                 borderRadius: cardRadius,
-                color: themeState.cardForeground
+                color: themeState.cardForeground,
+                maxHeight: isDesktop ? "none" : "180px"
               }}
             >
               <div className="flex justify-between items-center text-[7.5px] font-mono text-muted-foreground shrink-0 border-b pb-1.5" style={{ borderColor: themeState.border }}>
@@ -234,14 +240,15 @@ export function ThemePreviewSandbox({
         return (
           <div className="flex flex-col flex-1 overflow-hidden gap-2">
             <div 
-              className="p-3 border flex flex-col gap-3 flex-1 overflow-y-auto max-h-[300px]"
+              className="p-3 border flex flex-col gap-3 flex-1 overflow-y-auto"
               style={{
                 backgroundColor: glassBg,
                 backdropFilter: glassBlur,
                 border: glassBorder,
                 boxShadow: getShadowStyle(themeState.cardShadow),
                 borderRadius: cardRadius,
-                color: themeState.cardForeground
+                color: themeState.cardForeground,
+                maxHeight: isDesktop ? "none" : "300px"
               }}
             >
               <div className="text-[7.5px] font-mono uppercase text-muted-foreground border-b pb-1" style={{ borderColor: themeState.border, color: themeState.mutedForeground }}>
@@ -375,11 +382,11 @@ export function ThemePreviewSandbox({
 
         {/* Mock Application Container Viewport - CENTERED VERTICALLY AND HORIZONTALLY */}
         <div className="flex-1 flex items-center justify-center p-2 md:p-3 overflow-hidden bg-accent/5 rounded-2xl border border-border/20">
-          <div className="scale-[0.85] sm:scale-100 transition-transform duration-300">
+          <div className="scale-[0.85] sm:scale-100 transition-all duration-300 w-full h-full flex items-center justify-center">
           {previewDevice === "desktop" ? (
             /* Desktop Mockup Screen */
             <div 
-              className={`preview-sandbox-root border border-border/30 rounded-2xl w-[320px] md:w-full h-[380px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-xl ${themeState.isDark ? "dark" : ""}`}
+              className={`preview-sandbox-root border border-border/30 rounded-2xl w-[320px] md:w-full h-[380px] md:h-full md:max-h-[580px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-xl ${themeState.isDark ? "dark" : ""}`}
               style={{
                 backgroundColor: resolveColor(themeState.background),
                 fontFamily: getFontFamilyStyle(themeState.uiFont),
