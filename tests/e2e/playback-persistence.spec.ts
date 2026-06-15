@@ -78,6 +78,8 @@ test.describe('Visus Playback and Progress Persistence E2E', () => {
     }
 
     // 4. Navigate away to the library page (this triggers hook unmount / autosave)
+    // The sidebar is hidden while reading a book, so we click the Bookshelf button to exit the book first
+    await page.locator('button', { hasText: 'Bookshelf' }).first().click();
     await page.locator('a[href="/library"]').first().click();
     await page.waitForURL('**/library');
     await page.waitForLoadState('networkidle');
@@ -156,26 +158,32 @@ test.describe('Visus Playback and Progress Persistence E2E', () => {
     await page.waitForSelector('.epub-content');
 
     // Switch to RSVP mode
-    const rsvpModeButton = page.locator('button', { hasText: 'RSVP' }).first();
-    await expect(rsvpModeButton).toBeVisible();
-    await rsvpModeButton.click();
+    const modeDropdownTrigger = page.getByLabel('Select reading mode').first();
+    await expect(modeDropdownTrigger).toBeVisible();
+    await modeDropdownTrigger.click();
+
+    const rsvpModeOption = page.locator('[role="option"]', { hasText: 'RSVP' }).first();
+    await expect(rsvpModeOption).toBeVisible();
+    await rsvpModeOption.click();
 
     // Verify player control bar appears
     const playerBar = page.locator('button[title="Play"], button[title="Pause"]').first();
     await expect(playerBar).toBeVisible();
 
     // Switch to Cluster mode
-    const clusterModeButton = page.locator('button', { hasText: 'Cluster' }).first();
-    await expect(clusterModeButton).toBeVisible();
-    await clusterModeButton.click();
+    await modeDropdownTrigger.click();
+    const clusterModeOption = page.locator('[role="option"]', { hasText: 'Cluster' }).first();
+    await expect(clusterModeOption).toBeVisible();
+    await clusterModeOption.click();
 
     // Verify player control bar is still present
     await expect(playerBar).toBeVisible();
 
     // Switch back to Pages (normal) mode
-    const pagesModeButton = page.locator('button', { hasText: 'Reader' }).first();
-    await expect(pagesModeButton).toBeVisible();
-    await pagesModeButton.click();
+    await modeDropdownTrigger.click();
+    const pagesModeOption = page.locator('[role="option"]', { hasText: 'Reader' }).first();
+    await expect(pagesModeOption).toBeVisible();
+    await pagesModeOption.click();
 
     // Verify player control bar is hidden
     await expect(playerBar).toBeHidden();

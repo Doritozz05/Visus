@@ -12,17 +12,18 @@ test.describe('Visus Sentence Casing Validation', () => {
     await expect(mainHeading).toBeVisible();
 
     const heroHeading = page.locator('h1');
-    await expect(heroHeading).toContainText('Read Faster. Retain More.');
+    await expect(heroHeading).toContainText('Read faster.');
+    await expect(heroHeading).toContainText('Retain more.');
 
     const links = page.locator('a');
     const linkTexts = await links.allTextContents();
 
     // Check key link buttons
-    const startReadingLink = linkTexts.find(t => t.includes('Start Reading Now'));
+    const startReadingLink = linkTexts.find(t => t.includes('Start reading now'));
     expect(startReadingLink).toBeDefined();
 
-    const libraryLink = linkTexts.find(t => t === 'Library');
-    expect(libraryLink).toBeDefined();
+    const launchAppLink = linkTexts.find(t => t.includes('Launch app'));
+    expect(launchAppLink).toBeDefined();
 
     const dashboardLink = linkTexts.find(t => t === 'Dashboard');
     expect(dashboardLink).toBeDefined();
