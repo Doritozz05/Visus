@@ -5,6 +5,7 @@ import { ArrowRight, Lock, FileText, WifiOff, ShieldCheck } from "lucide-react";
 export const metadata: Metadata = {
   title: "Fast EPUB Reader Online: 100% Private & Offline Capable",
   description: "Read EPUB files online at high speeds. Visus is a secure, local-first EPUB reader that works offline and never uploads your books to the cloud.",
+  keywords: ["online epub reader", "private ebook reader", "offline epub viewer", "web epub reader", "browser epub reader"],
   alternates: {
     canonical: "/epub-reader",
   },

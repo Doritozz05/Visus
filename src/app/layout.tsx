@@ -52,6 +52,17 @@ export const metadata: Metadata = {
     template: "%s | Visus",
   },
   description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
+  keywords: [
+    "speed reading",
+    "RSVP reading",
+    "visual semantic clustering",
+    "read faster",
+    "online epub reader",
+    "speed reading trainer",
+    "cognitive enhancement",
+    "focus tools",
+    "open source speed reader"
+  ],
   manifest: "/manifest.json",
   alternates: {
     canonical: "/",

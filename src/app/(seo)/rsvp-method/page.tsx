@@ -6,6 +6,7 @@ import { FaqSection } from "@/components/landing/FaqSection";
 export const metadata: Metadata = {
   title: "What is RSVP Reading? The Rapid Serial Visual Presentation Method",
   description: "Discover the RSVP reading method. Learn how Rapid Serial Visual Presentation eliminates eye tracking and saccades to boost reading speed and focus.",
+  keywords: ["RSVP reading method", "Rapid Serial Visual Presentation", "eye saccades", "reading focus", "optimal recognition point"],
   alternates: {
     canonical: "/rsvp-method",
   },

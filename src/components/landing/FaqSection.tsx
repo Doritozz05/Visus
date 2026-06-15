@@ -48,6 +48,24 @@ export function FaqSection({ items = defaultFaqs, title = "Frequently asked ques
 
   return (
     <section className={cn("py-24 px-6 max-w-3xl mx-auto border-t border-border/10", className)}>
+      {/* FAQ Schema for Google Rich Snippets */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": items.map((item) => ({
+              "@type": "Question",
+              "name": item.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": item.answer,
+              },
+            })),
+          }),
+        }}
+      />
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-extrabold font-heading mb-4 tracking-tight">{title}</h2>
       </div>
