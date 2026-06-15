@@ -249,6 +249,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
             layoutId="active-theme-tab"
             variant="line"
             className="bg-accent/15 border-border/30"
+            fullWidth={true}
           />
 
           {/* Tab Content Panels */}

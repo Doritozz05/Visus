@@ -17,6 +17,7 @@ interface FancyTabsProps {
   layoutId: string;
   variant?: "line" | "pill";
   className?: string;
+  fullWidth?: boolean;
 }
 
 export function FancyTabs({
@@ -26,9 +27,10 @@ export function FancyTabs({
   layoutId,
   variant = "pill",
   className = "",
+  fullWidth = false,
 }: FancyTabsProps) {
   return (
-    <div className={`flex items-center overflow-x-auto scrollbar-none ${variant === "pill" ? "bg-background/20 border border-border/30 p-1 rounded-lg shadow-sm" : "border-b border-border/10"} ${className}`}>
+    <div className={`flex items-center ${fullWidth ? "w-full" : "overflow-x-auto scrollbar-none"} ${variant === "pill" ? "bg-background/20 border border-border/30 p-1 rounded-lg shadow-sm" : "border-b border-border/10"} ${className}`}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         const Icon = tab.icon;
@@ -37,7 +39,7 @@ export function FancyTabs({
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`flex items-center justify-center gap-2 transition-all relative z-10 shrink-0 ${
+            className={`flex items-center justify-center gap-2 transition-all relative z-10 ${fullWidth ? "flex-1" : "shrink-0"} ${
               isActive
                 ? "text-primary font-bold"
                 : "text-muted-foreground hover:text-foreground"
