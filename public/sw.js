@@ -3,7 +3,7 @@
  * Provides offline support and intelligent caching strategy.
  */
 
-const CACHE_NAME = "visus-cache-v2"; // Increment version to bust old cache
+const CACHE_NAME = "visus-cache-v3"; // Increment version to bust old cache
 const ASSETS_TO_CACHE = [
   "/",
   "/manifest.json",

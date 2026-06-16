@@ -274,35 +274,44 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (
       process.env.NODE_ENV === "production" &&
       typeof window !== "undefined" &&
-      "serviceWorker" in navigator &&
-      (window as any).workbox === undefined
+      "serviceWorker" in navigator
     ) {
-      navigator.serviceWorker
-        .register("/sw.js")
-        .then((reg) => {
+      const registerSW = async () => {
+        try {
+          const reg = await navigator.serviceWorker.register("/sw.js");
           console.log("Visus Service Worker successfully registered. Scope:", reg.scope);
-          
-          // Check for updates periodically or on registration
+
+          // Force update check on every page load
+          reg.update();
+
+          // Check for updates periodically (every 10 minutes)
+          setInterval(() => {
+            reg.update();
+          }, 10 * 60 * 1000);
+
           reg.addEventListener('updatefound', () => {
             const newWorker = reg.installing;
             newWorker?.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // At this point, the old service worker is still in control, 
-                // but a new one is waiting. SkipWaiting in sw.js will trigger controllerchange.
                 console.log("New content available, preparing to update...");
+                // The new SW is ready. sw.js has skipWaiting(), so it will 
+                // activate and trigger 'controllerchange' automatically.
               }
             });
           });
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error("Error registering Visus Service Worker:", error);
-        });
+        }
+      };
+
+      registerSW();
 
       // Handle the refresh when the new service worker takes control
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (refreshing) return;
         refreshing = true;
+        console.log("Service Worker updated, reloading page...");
         window.location.reload();
       });
     }
