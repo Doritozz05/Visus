@@ -82,7 +82,7 @@ export function useDomPagination({
       const { setAllBookPages } = useReadingStore.getState();
       const totalChapters = chaptersData.length;
       
-      const pagesByChapter: BookVisualPage[][] = new Array(totalChapters).fill([]);
+      const pagesByChapter: BookVisualPage[][] = Array.from({ length: totalChapters }, () => []);
 
       // Atomic Update Strategy: Don't clear the store. 
       // We will replace the entire state once the active chapter (at least) is ready.
@@ -96,23 +96,46 @@ export function useDomPagination({
       }
 
       const updateStore = () => {
-        let absoluteIndexCounter = 0;
-        const incrementalPages: BookVisualPage[] = [];
-        const map = new Map<string, number>();
+        const currentPagesInStore = useReadingStore.getState().allBookPages;
+        
+        // Merge strategy: keep what we already have for other chapters, 
+        // and update with the newly computed chapters from pagesByChapter.
+        const mergedPagesByChapter: BookVisualPage[][] = Array.from({ length: totalChapters }, () => []);
+        
+        // 1. Fill with current store data
+        currentPagesInStore.forEach(p => {
+          if (p.chapterIndex < totalChapters) {
+            mergedPagesByChapter[p.chapterIndex].push(p);
+          }
+        });
+        
+        // 2. Overwrite with latest results from this run
         for (let i = 0; i < totalChapters; i++) {
-          const chapterPages = pagesByChapter[i];
+          if (pagesByChapter[i] && pagesByChapter[i].length > 0) {
+            mergedPagesByChapter[i] = pagesByChapter[i];
+          }
+        }
+
+        let absoluteIndexCounter = 0;
+        const finalPages: BookVisualPage[] = [];
+        const map = new Map<string, number>();
+        
+        for (let i = 0; i < totalChapters; i++) {
+          const chapterPages = mergedPagesByChapter[i];
           if (!chapterPages) continue;
           for (const page of chapterPages) {
-            incrementalPages.push({
+            const pageObj = {
               ...page,
               absolutePageIndex: absoluteIndexCounter
-            });
+            };
+            finalPages.push(pageObj);
             map.set(`${page.chapterIndex}_${page.pageIndex}`, absoluteIndexCounter);
             absoluteIndexCounter++;
           }
         }
+        
         pageIndexMapRef.current = map;
-        setAllBookPages(incrementalPages);
+        setAllBookPages(finalPages);
       };
       
       const checkActive = () => active;
@@ -172,14 +195,13 @@ export function useDomPagination({
         
         if (!active) return;
         
-        updateStore();
-        
         // Yield to allow UI updates and not block the main thread
         await new Promise((resolve) => setTimeout(resolve, 0));
       }
 
-      // Mark full pagination completed once the loop concludes
+      // Final atomic update once all chapters are ready
       if (active) {
+        updateStore();
         setIsFullPaginationReady(true);
       }
     };
@@ -189,8 +211,17 @@ export function useDomPagination({
     return () => {
       active = false;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chaptersData, scaledFontSize, readerFontClass, containerDimensions, wordsPerPage, columnGap, activeChapterIndex]);
+  }, [
+    chaptersData,
+    scaledFontSize,
+    readerFontClass,
+    containerDimensions,
+    wordsPerPage,
+    columnGap,
+    activeChapterIndex,
+    latestRestoreTargetRef,
+    hiddenPaginatorRef,
+  ]);
 
   return {
     isPaginationReady,

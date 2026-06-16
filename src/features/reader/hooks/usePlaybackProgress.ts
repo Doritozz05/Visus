@@ -84,6 +84,9 @@ export function usePlaybackProgress({
       updatePayload.lastLocalPageIndex = finalLocalPageIdx;
     }
 
+    // Set the guard timestamp BEFORE updating the book state to ensure 
+    // any immediate "echo" events from the remote sync are ignored.
+    useReadingStore.getState().setLastLocalSaveTimestamp(Date.now());
     updateBook(bookId, updatePayload);
   }, [chaptersData, updateBook, mode, allBookPages, activeBookRef]);
 

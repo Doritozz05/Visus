@@ -101,6 +101,13 @@ export function useReaderStateSync({
       const remoteChapter = activeBook.lastChapterIndex ?? 0;
       const remoteWord = activeBook.lastWordIndex ?? 0;
 
+      // GUARD: If we recently saved locally (within 3s), ignore remote updates 
+      // as they are likely "echoes" of our own save or stale data.
+      const lastSaveTime = state.lastLocalSaveTimestamp;
+      if (Date.now() - lastSaveTime < 3000) {
+        return;
+      }
+
       if (remoteChapter !== state.activeChapterIndex || remoteWord !== state.wordIndex) {
         if (remoteChapter !== state.activeChapterIndex) {
           useReadingStore.getState().setActiveChapterIndex(remoteChapter);

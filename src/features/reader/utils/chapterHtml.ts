@@ -9,7 +9,16 @@ export interface ChapterHtmlData {
   words?: string[];
 }
 
+// Simple LRU-style cache for processed chapter HTML to avoid heavy re-processing on the main thread.
+const processedHtmlCache = new Map<string, string>();
+const MAX_CACHE_SIZE = 10;
+
 export function prepareChapterHtml(chapter: ChapterHtmlData): string {
+  const cacheKey = `${chapter.index}_${chapter.htmlContent ? "html" : "text"}_${chapter.content.length}`;
+  if (processedHtmlCache.has(cacheKey)) {
+    return processedHtmlCache.get(cacheKey)!;
+  }
+
   let rawHtml = "";
   if (chapter.htmlContent) {
     rawHtml = chapter.htmlContent;
@@ -27,7 +36,7 @@ export function prepareChapterHtml(chapter: ChapterHtmlData): string {
 
   let finalHtml = rawHtml;
 
-  // Clean trailing empty elements
+  // Clean trailing empty elements and sanitize in one go if possible
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(`<div>${rawHtml}</div>`, "text/html");
@@ -64,13 +73,21 @@ export function prepareChapterHtml(chapter: ChapterHtmlData): string {
     console.warn("Failed to sanitize/trim trailing empty tags:", e);
   }
 
-  // Harden DOMPurify configuration to prevent rendering of potentially dangerous tags like iframes, objects, scripts, and forms.
-  // This provides defense in depth against XSS and malicious media injection in EPUB contents.
+  // Harden DOMPurify configuration to prevent rendering of potentially dangerous tags.
   finalHtml = DOMPurify.sanitize(finalHtml, {
     FORBID_TAGS: ['iframe', 'object', 'embed', 'script', 'form', 'input', 'button', 'textarea', 'select', 'base', 'link'],
     FORBID_ATTR: ['formaction', 'on*']
   });
 
   const tagged = tagHtmlBlocksWithWordIndices(finalHtml);
-  return tagged.html;
+  const result = tagged.html;
+
+  // Cache management
+  if (processedHtmlCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = processedHtmlCache.keys().next().value;
+    if (firstKey !== undefined) processedHtmlCache.delete(firstKey);
+  }
+  processedHtmlCache.set(cacheKey, result);
+
+  return result;
 }

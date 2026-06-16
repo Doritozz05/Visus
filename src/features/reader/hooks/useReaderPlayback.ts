@@ -156,7 +156,7 @@ export function useReaderPlayback({
     rsvpSequence,
     clusterChunks,
     activeClusterIndex: 0,
-    subscribeToPlayback: (callback: (idx: number) => void) => {
+    subscribeToPlayback: React.useCallback((callback: (idx: number) => void) => {
       let lastWordIndex = useReadingStore.getState().wordIndex;
       return useReadingStore.subscribe((state) => {
         if (state.wordIndex !== lastWordIndex) {
@@ -164,6 +164,6 @@ export function useReaderPlayback({
           callback(state.wordIndex);
         }
       });
-    },
+    }, []),
   };
 }

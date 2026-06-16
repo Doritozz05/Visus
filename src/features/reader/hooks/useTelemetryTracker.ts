@@ -92,11 +92,16 @@ export function useTelemetryTracker({
   }, [activeBookId, bookTitle, mode, isPlaying, wordIndex, activeChapterIndex, allBookPages, settings, wpm]);
 
   // Core flush logic (declared at the top to prevent temporal hoisting warnings in useEffects)
-  const flushSession = React.useCallback(async (forced = false) => {
-    const session = sessionRef.current;
+  const flushSession = React.useCallback(async (forced = false, snapshotOverride?: any) => {
+    // Use either the provided snapshot (for atomic splits) or the current ref
+    const session = snapshotOverride || { ...sessionRef.current };
+    
     if (!session.isActiveSession || !session.bookId) return;
 
-    session.isActiveSession = false; // Mark inactive immediately to prevent concurrency double-flushes
+    // If we're using the live ref, mark it inactive immediately
+    if (!snapshotOverride) {
+      sessionRef.current.isActiveSession = false;
+    }
 
     const state = stateRef.current;
     const duration = session.activeSeconds;
@@ -382,7 +387,10 @@ export function useTelemetryTracker({
         // Automatic 30-minute session flush to prevent massive log payloads
         if (session.activeSeconds >= 1800) {
           console.log("[Telemetry] Session time reached 30m limit. Splitting logs.");
-          flushSession();
+          
+          // CRITICAL: Take a deep copy snapshot before resetting the live reference
+          const snapshot = { ...session };
+          flushSession(false, snapshot);
           
           // Re-initialize tracking metadata for the continuation session
           session.id = `log-${crypto.randomUUID()}`;

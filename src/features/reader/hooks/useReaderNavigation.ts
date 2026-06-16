@@ -46,8 +46,10 @@ export function useReaderNavigation({
     if (direction === "prev") {
       if (activePage.absolutePageIndex > 0) {
         const prevPageObj = allBookPages[activePage.absolutePageIndex - 1];
-        useReadingStore.getState().setActiveChapterIndex(prevPageObj.chapterIndex);
-        useReadingStore.getState().setWordIndex(prevPageObj.startWordIndex);
+        useReadingStore.setState({ 
+          activeChapterIndex: prevPageObj.chapterIndex, 
+          wordIndex: prevPageObj.startWordIndex 
+        });
         saveProgressForBook(activeBookVal.id, prevPageObj.chapterIndex, prevPageObj.startWordIndex);
       }
     } else {
@@ -86,8 +88,10 @@ export function useReaderNavigation({
         setIsCompletionModalOpen(true);
       } else {
         const nextPageObj = allBookPages[activePage.absolutePageIndex + 1];
-        useReadingStore.getState().setActiveChapterIndex(nextPageObj.chapterIndex);
-        useReadingStore.getState().setWordIndex(nextPageObj.startWordIndex);
+        useReadingStore.setState({
+          activeChapterIndex: nextPageObj.chapterIndex,
+          wordIndex: nextPageObj.startWordIndex
+        });
         saveProgressForBook(activeBookVal.id, nextPageObj.chapterIndex, nextPageObj.startWordIndex);
       }
     }
@@ -107,12 +111,13 @@ export function useReaderNavigation({
             return Math.max(0, count - 1);
           })();
       
-      useReadingStore.getState().setIsPlaying(false);
-      useReadingStore.getState().setCompletedChapter(null);
       const activeBookVal = activeBookRef.current;
-      
-      useReadingStore.getState().setActiveChapterIndex(prevChapterIdx);
-      useReadingStore.getState().setWordIndex(lastWordIdx);
+      useReadingStore.setState({
+        isPlaying: false,
+        completedChapter: null,
+        activeChapterIndex: prevChapterIdx,
+        wordIndex: lastWordIdx
+      });
       
       if (activeBookVal) {
         saveProgressForBook(activeBookVal.id, prevChapterIdx, lastWordIdx);
@@ -125,12 +130,13 @@ export function useReaderNavigation({
     if (activeChapterIndex < chaptersData.length - 1) {
       const nextChapterIdx = activeChapterIndex + 1;
       
-      useReadingStore.getState().setIsPlaying(false);
-      useReadingStore.getState().setCompletedChapter(null);
       const activeBookVal = activeBookRef.current;
-      
-      useReadingStore.getState().setActiveChapterIndex(nextChapterIdx);
-      useReadingStore.getState().setWordIndex(0);
+      useReadingStore.setState({
+        isPlaying: false,
+        completedChapter: null,
+        activeChapterIndex: nextChapterIdx,
+        wordIndex: 0
+      });
       
       if (activeBookVal) {
         saveProgressForBook(activeBookVal.id, nextChapterIdx, 0);
@@ -141,8 +147,7 @@ export function useReaderNavigation({
   }, [chaptersData.length, saveProgressForBook, handlePageChange, activeBookRef]);
 
   const handleRewind = React.useCallback(() => {
-    const { wordIndex, activeChapterIndex, chapterWordCounts, setCompletedChapter, setIsPlaying, setActiveChapterIndex, setWordIndex } = useReadingStore.getState();
-    setCompletedChapter(null);
+    const { wordIndex, activeChapterIndex, chapterWordCounts } = useReadingStore.getState();
     
     if (wordIndex === 0) {
       if (activeChapterIndex > 0) {
@@ -150,37 +155,44 @@ export function useReaderNavigation({
         const count = (chapterWordCounts && chapterWordCounts[prevChapterIdx]) || 1;
         const lastWordIdx = Math.max(0, count - 1);
         
-        setIsPlaying(false);
-        setActiveChapterIndex(prevChapterIdx);
-        setWordIndex(lastWordIdx);
-        
         const activeBookVal = activeBookRef.current;
+        useReadingStore.setState({
+          completedChapter: null,
+          isPlaying: false,
+          activeChapterIndex: prevChapterIdx,
+          wordIndex: lastWordIdx
+        });
+        
         if (activeBookVal) {
           saveProgressForBook(activeBookVal.id, prevChapterIdx, lastWordIdx);
         }
       }
     } else {
       const nextIdx = Math.max(0, wordIndex - 10);
-      setWordIndex(nextIdx);
+      useReadingStore.setState({
+        completedChapter: null,
+        wordIndex: nextIdx
+      });
     }
   }, [activeBookRef, saveProgressForBook]);
 
   const handleSkip = React.useCallback(() => {
-    const { wordIndex, activeChapterIndex, chapterWordCounts, setWordIndex } = useReadingStore.getState();
+    const { wordIndex, activeChapterIndex, chapterWordCounts } = useReadingStore.getState();
     const safeIdx = Math.min(Math.max(0, activeChapterIndex), chaptersData.length - 1);
     const count = (chapterWordCounts && chapterWordCounts[safeIdx]) || 1;
     const nextIdx = Math.min(Math.max(0, count - 1), wordIndex + 10);
-    setWordIndex(nextIdx);
+    useReadingStore.setState({ wordIndex: nextIdx });
   }, [chaptersData.length]);
 
   const handleChapterChange = React.useCallback((chapterIndex: number) => {
-    useReadingStore.getState().setIsPlaying(false);
-    useReadingStore.getState().setCompletedChapter(null);
-    
     const activeBookVal = activeBookRef.current;
     
-    useReadingStore.getState().setActiveChapterIndex(chapterIndex);
-    useReadingStore.getState().setWordIndex(0);
+    useReadingStore.setState({
+      isPlaying: false,
+      completedChapter: null,
+      activeChapterIndex: chapterIndex,
+      wordIndex: 0
+    });
     
     if (activeBookVal) {
       saveProgressForBook(activeBookVal.id, chapterIndex, 0);

@@ -222,6 +222,9 @@ export function PagesVisualBox({
     if (!wrapper) return;
 
     const updateDimensions = () => {
+      const wrapper = canvasWrapperRef.current;
+      if (!wrapper) return;
+
       const availableWidth = wrapper.clientWidth;
       const targetW = Math.round(800 * densityRatio);
       const widthVal = Math.floor(Math.min(availableWidth, targetW));
@@ -240,12 +243,22 @@ export function PagesVisualBox({
 
     updateDimensions();
 
+    let timeoutId: NodeJS.Timeout;
+    let isMounted = true;
+
     const observer = new ResizeObserver(() => {
-      updateDimensions();
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (isMounted) updateDimensions();
+      }, 150);
     });
     observer.observe(wrapper);
 
-    return () => observer.disconnect();
+    return () => {
+      isMounted = false;
+      observer.disconnect();
+      clearTimeout(timeoutId);
+    };
   }, [densityRatio]);
 
   // Bookmark alignments relative to current page boundaries
@@ -330,9 +343,9 @@ export function PagesVisualBox({
           )}
         </AnimatePresence>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           <motion.div
-            key={`${currentChapter.index}_${currentPageIndex}`}
+            key={currentChapter.index}
             initial={{ opacity: 0, x: 12 }}
             animate={{ opacity: isReady ? 1 : 0, x: 0 }}
             exit={{ opacity: 0, x: -12 }}

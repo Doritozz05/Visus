@@ -26,6 +26,7 @@ export interface ReadingState {
     accuracy: number | null;
     wordsCount: number;
   } | null;
+  lastLocalSaveTimestamp: number;
 
   // Actions
   setWordIndex: (wordIndex: number) => void;
@@ -39,6 +40,7 @@ export interface ReadingState {
   setIsCompletionModalOpen: (isOpen: boolean) => void;
   setIsFocusMode: (isFocus: boolean) => void;
   setSessionStats: (stats: { speedWpm: number; durationSeconds: number; accuracy: number | null; wordsCount: number; } | null) => void;
+  setLastLocalSaveTimestamp: (timestamp: number) => void;
   initBook: (
     bookId: string,
     chapterIndex: number,
@@ -90,6 +92,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   isCompletionModalOpen: false,
   isFocusMode: false,
   sessionStats: null,
+  lastLocalSaveTimestamp: 0,
 
   setWordIndex: (wordIndex) =>
     set((state) => {
@@ -122,6 +125,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   setIsCompletionModalOpen: (isCompletionModalOpen) => set({ isCompletionModalOpen }),
   setIsFocusMode: (isFocusMode) => set({ isFocusMode }),
   setSessionStats: (sessionStats) => set({ sessionStats }),
+  setLastLocalSaveTimestamp: (lastLocalSaveTimestamp) => set({ lastLocalSaveTimestamp }),
 
   initBook: (bookId, chapterIndex, wordIndex, wpm, mode, chapters) =>
     set(() => {
@@ -150,6 +154,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
         isCompletionModalOpen: false,
         isFocusMode: false,
         sessionStats: null,
+        lastLocalSaveTimestamp: 0,
       };
     }),
 }));
