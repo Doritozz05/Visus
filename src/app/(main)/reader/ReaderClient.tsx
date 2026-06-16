@@ -311,15 +311,13 @@ export default function ReaderClient() {
         </motion.div>
 
         {mode !== "normal" && (
-          <motion.div variants={playerVariants} className="w-full flex justify-center">
-            <ReaderPlayer
-              onRewind={handleRewind}
-              onSkip={handleSkip}
-              onPrevPage={() => handlePageChange("prev")}
-              onNextPage={() => handlePageChange("next")}
-              allBookPages={allBookPages}
-            />
-          </motion.div>
+          <ReaderPlayer
+            onRewind={handleRewind}
+            onSkip={handleSkip}
+            onPrevPage={() => handlePageChange("prev")}
+            onNextPage={() => handlePageChange("next")}
+            allBookPages={allBookPages}
+          />
         )}
       </motion.main>
 

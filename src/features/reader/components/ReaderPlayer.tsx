@@ -1,199 +1,171 @@
 import * as React from "react";
 import { BookVisualPage } from "@/lib/parser/paginator";
 import { useReadingStore } from "../stores/reading-store";
-import { ChevronLeft, ChevronRight, RotateCcw, RotateCw, Play, Pause, Zap } from "lucide-react";
-import { findPageForWordIndex, findFirstPageOfChapter } from "../utils/binarySearch";
+import { 
+  RotateCcw, 
+  RotateCw, 
+  Play, 
+  Pause, 
+  Settings2
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePlayerVisibility } from "../hooks/usePlayerVisibility";
+import { WpmScrubber } from "./WpmScrubber";
 
 interface ReaderPlayerProps {
   onRewind: () => void;
   onSkip: () => void;
-  onPrevPage?: () => void;
-  onNextPage?: () => void;
   allBookPages: BookVisualPage[];
 }
 
-export function ReaderPlayer({
+/**
+ * ReaderPlayer component for RSVP and Cluster reading modes.
+ * Handles playback controls, speed adjustment, and visibility logic.
+ * Note: This component is NOT rendered in 'normal' reading mode.
+ */
+export const ReaderPlayer = React.memo(({
   onRewind,
   onSkip,
-  onPrevPage,
-  onNextPage,
-  allBookPages,
-}: ReaderPlayerProps) {
-  const [showSlider, setShowSlider] = React.useState(false);
+}: ReaderPlayerProps) => {
+  const [isWpmExpanded, setIsWpmExpanded] = React.useState(false);
 
-  // Subscribe atomically to Zustand store properties
+  // Atomic selectors for performance
   const isPlaying = useReadingStore((state) => state.isPlaying);
   const wpm = useReadingStore((state) => state.wpm);
   const mode = useReadingStore((state) => state.mode);
   const isFocusMode = useReadingStore((state) => state.isFocusMode);
 
-  // Derive activePage ONLY in normal mode to prevent high-frequency re-renders during RSVP/Cluster playback
-  const activePage = useReadingStore((state) => {
-    if (state.mode !== "normal" || allBookPages.length === 0) return null;
-    const found = findPageForWordIndex(allBookPages, state.activeChapterIndex, state.wordIndex);
-    return (
-      found ||
-      findFirstPageOfChapter(allBookPages, state.activeChapterIndex) ||
-      allBookPages[0]
-    );
+  const setWpm = useReadingStore((state) => state.setWpm);
+  const setIsPlaying = useReadingStore((state) => state.setIsPlaying);
+
+  // Derived visibility state
+  const { isVisible, onPlayerMouseEnter, onPlayerMouseLeave } = usePlayerVisibility({ 
+    isPlaying, 
+    isFocusMode 
   });
 
-  const hasPrevPage = activePage ? activePage.absolutePageIndex > 0 : false;
-  const hasNextPage = activePage ? activePage.absolutePageIndex < allBookPages.length - 1 : false;
-
   const onPlayPauseToggle = React.useCallback(() => {
-    useReadingStore.getState().setIsPlaying(!isPlaying);
-  }, [isPlaying]);
-
-  const onWpmChange = React.useCallback((newWpm: number) => {
-    useReadingStore.getState().setWpm(newWpm);
-  }, []);
-
-  const adjustWpm = React.useCallback((amount: number) => {
-    useReadingStore.getState().setWpm(Math.max(100, Math.min(1200, wpm + amount)));
-  }, [wpm]);
-
-  const isNormalMode = mode === "normal";
+    setIsPlaying(!isPlaying);
+  }, [isPlaying, setIsPlaying]);
 
   return (
-    <div className={`w-full max-w-xl md:max-w-2xl mt-auto mb-4 bg-card/95 border border-border/20 shadow-xl rounded-xl z-20 overflow-hidden liquid-glass transition-all duration-300 ${
-      isFocusMode 
-        ? isPlaying 
-          ? 'opacity-0 translate-y-4 hover:opacity-100 hover:translate-y-0' 
-          : 'opacity-100 translate-y-0' 
-        : 'opacity-100 translate-y-0'
-    }`}>
-      
-      {/* Collapsible Speed Slider */}
-      <AnimatePresence>
-        {showSlider && !isNormalMode && (
-          <motion.div 
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden px-4 pb-3 pt-3 border-b border-border/10 flex items-center gap-3 w-full"
-          >
-            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground shrink-0">Fine tune:</span>
-            <input
-              className="flex-1 accent-primary h-1 bg-border/40 rounded-lg appearance-none cursor-pointer"
-              max="1200"
-              min="100"
-              step="25"
-              type="range"
-              value={wpm}
-              onChange={(e) => onWpmChange(Number(e.target.value))}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="flex items-center justify-between w-full h-14 px-3 sm:px-4">
-        {/* Left: Speed Adjuster or Reader Info */}
-        <div className="flex items-center gap-1.5 min-w-0">
-          {isNormalMode ? (
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Zap className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-mono uppercase tracking-wider font-semibold truncate max-w-[80px] xs:max-w-[120px]">Page view</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1">
+    <div 
+      onMouseEnter={onPlayerMouseEnter}
+      onMouseLeave={onPlayerMouseLeave}
+      className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50 pointer-events-none reader-player-container"
+    >
+      <motion.div
+        initial={false}
+        animate={{ 
+          y: isVisible ? 0 : 100,
+          opacity: isVisible ? 1 : 0,
+          scale: isVisible ? 1 : 0.98
+        }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 400, 
+          damping: 30,
+          opacity: { duration: 0.2 }
+        }}
+        className="relative pointer-events-auto origin-bottom"
+      >
+        <motion.div 
+          layout
+          transition={{
+            layout: { type: "spring", stiffness: 450, damping: 40, mass: 1 }
+          }}
+          className="liquid-glass flex flex-col gap-0 overflow-hidden shadow-[var(--card-shadow)] rounded-[calc(var(--radius)*2)] border border-border/30 bg-card/85 backdrop-blur-2xl w-[280px] xs:w-[320px] sm:w-[380px] !transition-none will-change-[transform,opacity]"
+        >
+          {/* Main Control Row */}
+          <div className="flex items-center h-14 px-4 sm:px-5">
+            
+            {/* Left Slot: Speed Toggle Indicator */}
+            <div className="flex-1 flex items-center justify-start">
               <button
-                onClick={() => adjustWpm(-25)}
-                className="w-7 h-7 rounded-lg border border-border/20 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-primary transition-colors cursor-pointer select-none"
-                title="Decrease speed -25 WPM"
+                onClick={() => setIsWpmExpanded(!isWpmExpanded)}
+                className={`
+                  group flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all border
+                  ${isWpmExpanded 
+                    ? "bg-primary/10 border-primary/40 text-primary" 
+                    : "bg-accent/30 border-border/20 text-muted-foreground hover:bg-accent hover:border-border/40"}
+                `}
               >
-                <span className="text-sm font-bold">-</span>
-              </button>
-              <button
-                onClick={() => setShowSlider(!showSlider)}
-                className={`px-2 py-0.5 h-7 flex items-center justify-center rounded-lg border font-mono text-[11px] font-bold transition-all cursor-pointer select-none ${
-                  showSlider 
-                    ? "border-primary bg-primary/10 text-primary shadow-[0_0_8px_rgba(var(--primary),0.1)]" 
-                    : "border-border/20 text-foreground hover:bg-accent"
-                }`}
-                title="Toggle WPM slider"
-              >
-                {wpm} <span className="text-[9px] text-muted-foreground/80 font-normal ml-0.5">WPM</span>
-              </button>
-              <button
-                onClick={() => adjustWpm(25)}
-                className="w-7 h-7 rounded-lg border border-border/20 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-primary transition-colors cursor-pointer select-none"
-                title="Increase speed +25 WPM"
-              >
-                <span className="text-sm font-bold">+</span>
+                <div className="flex flex-col items-start leading-none min-w-[2.5ch]">
+                  <span className="font-mono text-[11px] font-bold">{wpm}</span>
+                  <span className="text-[8px] uppercase tracking-tighter opacity-70 font-bold">WPM</span>
+                </div>
+                <Settings2 className={`w-3.5 h-3.5 transition-transform duration-500 ${isWpmExpanded ? 'rotate-180' : 'group-hover:rotate-45'}`} />
               </button>
             </div>
-          )}
-        </div>
 
-        {/* Center: Playback controls */}
-        <div className="flex items-center gap-3">
-          {isNormalMode ? (
-            <button
-              onClick={onPrevPage}
-              disabled={!hasPrevPage}
-              className="w-8 h-8 rounded-full border border-border/20 flex items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-              title="Previous Page"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              onClick={onRewind}
-              className="w-8 h-8 rounded-full border border-border/20 flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors cursor-pointer"
-              title="Rewind 10 words"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-          )}
+            {/* Center Slot: Core Playback Group */}
+            <div className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 bg-accent/20 p-1 rounded-2xl border border-border/10">
+              <button
+                onClick={onRewind}
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
+                title="Rewind 10 words"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
 
-          <button
-            onClick={onPlayPauseToggle}
-            className={`w-11 h-11 rounded-full text-primary-foreground flex items-center justify-center shadow-lg hover:scale-105 transition-all cursor-pointer ${
-              isNormalMode 
-                ? "bg-emerald-500 shadow-emerald-500/20" 
-                : "bg-primary shadow-primary/20"
-            }`}
-            title={isNormalMode ? "Start Speed Reading (RSVP)" : (isPlaying ? "Pause" : "Play")}
-          >
-            {isNormalMode ? (
-              <Zap className="w-5 h-5 fill-current" />
-            ) : isPlaying ? (
-              <Pause className="w-5 h-5 fill-current" />
-            ) : (
-              <Play className="w-5 h-5 fill-current ml-0.5" />
+              <button
+                onClick={onPlayPauseToggle}
+                className={`
+                  w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-lg
+                  ${isPlaying 
+                    ? "bg-primary/20 text-primary border border-primary/30" 
+                    : "bg-primary text-primary-foreground shadow-primary/20"}
+                `}
+                title={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? (
+                  <Pause className="w-5 h-5 fill-current" />
+                ) : (
+                  <Play className="w-5 h-5 fill-current ml-0.5" />
+                )}
+              </button>
+
+              <button
+                onClick={onSkip}
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
+                title="Skip 10 words"
+              >
+                <RotateCw className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Right Slot: Mode Chip */}
+            <div className="flex-1 flex items-center justify-end">
+              <div className="hidden xs:flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 bg-accent/30 px-2 py-1 rounded-lg border border-border/10">
+                <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-primary animate-pulse' : 'bg-muted-foreground/40'}`} />
+                {mode}
+              </div>
+            </div>
+          </div>
+
+          {/* Expandable Speed Scrubber */}
+          <AnimatePresence initial={false}>
+            {isWpmExpanded && (
+              <motion.div
+                key="wpm-scrubber"
+                layout
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ 
+                  height: { type: "spring", stiffness: 450, damping: 40 },
+                  opacity: { duration: 0.2 }
+                }}
+                className="overflow-hidden border-t border-border/10 px-6 pb-6 pt-3"
+              >
+                <WpmScrubber wpm={wpm} onWpmChange={setWpm} />
+              </motion.div>
             )}
-          </button>
-
-          {isNormalMode ? (
-            <button
-              onClick={onNextPage}
-              disabled={!hasNextPage}
-              className="w-8 h-8 rounded-full border border-border/20 flex items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-              title="Next Page"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              onClick={onSkip}
-              className="w-8 h-8 rounded-full border border-border/20 flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors cursor-pointer"
-              title="Skip 10 words"
-            >
-              <RotateCw className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        {/* Right: Mode indicator */}
-        <div className="flex items-center gap-1.5 select-none shrink-0">
-          <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/80 bg-accent/40 px-2 py-0.5 rounded border border-border/10">
-            {mode}
-          </span>
-        </div>
-      </div>
+          </AnimatePresence>
+        </motion.div>
+      </motion.div>
     </div>
   );
-}
+});
+
+ReaderPlayer.displayName = "ReaderPlayer";
