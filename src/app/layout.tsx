@@ -181,8 +181,8 @@ export default function RootLayout({
             __html: `
               try {
                 var stored = localStorage.getItem('visus_settings');
-                var theme = 'nord';
-                var isDark = true;
+                var theme = 'sepia';
+                var isDark = false;
                 if (stored) {
                   var parsed = JSON.parse(stored);
                   if (parsed && parsed.general && parsed.general.theme) {
