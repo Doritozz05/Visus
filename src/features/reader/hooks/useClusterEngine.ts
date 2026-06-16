@@ -92,6 +92,15 @@ export function useClusterEngine({
       }
 
       timeoutId = setTimeout(() => {
+        const latestIdx = useReadingStore.getState().wordIndex;
+        
+        // If the user manually changed the index (e.g. seeking) during the delay,
+        // abort the scheduled advance and restart from their new position.
+        if (latestIdx !== currentIdx) {
+          tick();
+          return;
+        }
+
         if (nextIndex >= currentChapter.words.length) {
           useReadingStore.getState().setIsPlaying(false);
           useReadingStore.getState().setCompletedChapter(currentChapter.title);
