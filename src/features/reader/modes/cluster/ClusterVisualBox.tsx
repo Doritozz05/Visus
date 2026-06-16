@@ -20,7 +20,7 @@ export function ClusterVisualBox({
   const { settings: globalSettings, customFonts } = useSettings();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollCanvasRef = React.useRef<HTMLDivElement>(null);
-  
+
   const wordIndex = useReadingStore((state) => state.wordIndex);
 
   // Normalize inputs
@@ -61,7 +61,7 @@ export function ClusterVisualBox({
   const containerHeight = 450;
   const paddingY = 225 - settings.fontSize / 2;
   const scrollCanvasHeight = scrollCanvasRef.current?.scrollHeight || 0;
-  
+
   // Focal point around 33% of the container (Top third)
   const focalPointY = containerHeight / 3;
 
@@ -74,11 +74,11 @@ export function ClusterVisualBox({
       const m = measurements[activeClusterIndex];
       // Target Y to position the active chunk at the focal point
       let targetY = -(m.offsetTop - focalPointY + (m.offsetHeight / 2));
-      
+
       // Keep within bounds
       const maxScroll = Math.max(0, scrollCanvasHeight - containerHeight);
       targetY = Math.max(-maxScroll, Math.min(0, targetY));
-      
+
       setTranslateY(targetY);
     }
   }, [activeClusterIndex, isMeasured, measurements, scrollCanvasHeight, focalPointY]);
@@ -113,7 +113,7 @@ export function ClusterVisualBox({
   };
 
   const sizeClass = `leading-relaxed md:leading-loose`;
-  
+
   const innerStyle: React.CSSProperties = {
     fontSize: `${settings.fontSize}px`,
     paddingTop: `${paddingY}px`,
@@ -133,9 +133,9 @@ export function ClusterVisualBox({
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-3xl h-[370px] md:h-[350px] lg:h-[450px] overflow-hidden border border-border/20 rounded-2xl bg-card relative shadow-xl"
+      className="w-full max-w-3xl h-[370px] md:h-[350px] lg:h-[500px] overflow-hidden border border-border/20 rounded-2xl bg-card relative shadow-xl"
     >
-      <div 
+      <div
         ref={scrollCanvasRef}
         style={innerStyle}
         className={`w-full relative px-8 text-center whitespace-normal break-words ${readerFontClass} ${sizeClass}`}
@@ -208,8 +208,8 @@ export function ClusterVisualBox({
             }
           }
 
-          const activePresetClass = isActive && isPreset && settings.highlightStyle !== "bold-only" 
-            ? activeColors[resolvedActiveColor as keyof typeof activeColors] 
+          const activePresetClass = isActive && isPreset && settings.highlightStyle !== "bold-only"
+            ? activeColors[resolvedActiveColor as keyof typeof activeColors]
             : "";
 
           return (
