@@ -69,11 +69,7 @@ export const ReaderPlayer = React.memo(({
         }}
         className="relative pointer-events-auto origin-bottom w-full"
       >
-        <motion.div 
-          layout
-          transition={{
-            layout: { type: "spring", stiffness: 380, damping: 32, mass: 0.9 }
-          }}
+        <div 
           className="liquid-glass flex flex-col gap-0 overflow-hidden shadow-[var(--card-shadow)] rounded-[calc(var(--radius)*2)] border border-border/30 bg-card/85 backdrop-blur-xl w-full"
         >
           {/* Expandable Speed Scrubber */}
@@ -164,7 +160,7 @@ export const ReaderPlayer = React.memo(({
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
     </div>
   );
