@@ -4,12 +4,34 @@ import * as React from "react";
 import { Library, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { VisiMascot } from "@/components/ui/VisiMascot";
+import { motion } from "framer-motion";
 
 interface EmptyLibraryStateProps {
   localFileInputRef: React.RefObject<HTMLInputElement | null>;
   handleLocalFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   triggerLocalFileBrowser: () => void;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  visible: { 
+    opacity: 1, 
+    scale: 1, 
+    y: 0,
+    transition: { 
+      type: "spring", 
+      stiffness: 260, 
+      damping: 20,
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    } 
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 }
+};
 
 export function EmptyLibraryState({
   localFileInputRef,
@@ -28,20 +50,26 @@ export function EmptyLibraryState({
         className="hidden"
       />
 
-      <div className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl liquid-glass relative overflow-hidden flex flex-col items-center justify-center gap-6">
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-md w-full bg-card border border-border/30 rounded-2xl p-8 text-center shadow-2xl liquid-glass relative overflow-hidden flex flex-col items-center justify-center gap-6"
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
-        <div className="relative z-10 flex flex-col items-center justify-center">
+        
+        <motion.div variants={itemVariants} className="relative z-10 flex flex-col items-center justify-center">
           <VisiMascot variant="empty" size={100} className="-mb-2" />
-        </div>
+        </motion.div>
 
-        <div className="relative z-10">
+        <motion.div variants={itemVariants} className="relative z-10">
           <h2 className="text-xl font-bold font-heading text-foreground mb-2">Reading room</h2>
           <p className="text-xs text-muted-foreground font-sans leading-relaxed max-w-xs mx-auto">
             Your speed reading center is ready, but your library is empty. Upload a PDF, EPUB, or TXT volume to begin reading.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full mt-2 relative z-10">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 w-full mt-2 relative z-10">
           <button
             onClick={() => router.push("/library")}
             className="flex-1 py-2.5 border border-border/30 rounded-lg text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent transition-all flex items-center justify-center gap-1.5"
@@ -56,8 +84,9 @@ export function EmptyLibraryState({
             <Upload className="h-3.5 w-3.5" />
             Browse book
           </button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
+

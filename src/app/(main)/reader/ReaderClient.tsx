@@ -224,7 +224,7 @@ export default function ReaderClient() {
       {isFocusMode && (
         <button
           onClick={() => setIsFocusMode(false)}
-          className="fixed top-6 right-6 z-[60] flex items-center justify-center w-10 h-10 rounded-full border border-border/40 bg-card text-muted-foreground hover:text-primary transition-all shadow-lg hover:scale-110 liquid-glass"
+          className="fixed top-6 left-6 z-[60] flex items-center justify-center w-10 h-10 rounded-full border border-border/40 bg-card text-muted-foreground hover:text-primary transition-all shadow-lg hover:scale-110 liquid-glass"
           title="Exit focus mode"
         >
           <Eye className="w-5 h-5" />

@@ -7,6 +7,8 @@ import { useReadingStore } from "../stores/reading-store";
 import { motion } from "framer-motion";
 import { FancyTabs } from "@/components/ui/FancyTabs";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
+import { useSettings } from "@/features/settings/context/settings-context";
+import { getFontFamilyStyle } from "@/lib/typography";
 import { 
   ArrowLeft, 
   ChevronLeft, 
@@ -67,11 +69,12 @@ export function ReaderHeader({
   const chapterBtnRef = React.useRef<HTMLButtonElement>(null);
   const [anchorPos, setAnchorPos] = React.useState<{ x: number; y: number } | null>(null);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const { settings: globalSettings, customFonts } = useSettings();
 
   const modeOptions = React.useMemo(() => [
-    { value: "normal", label: "Reader", description: "Traditional page reading", icon: <BookOpen className="w-4 h-4 text-primary" /> },
-    { value: "rsvp", label: "RSVP", description: "One word at a time", icon: <Zap className="w-4 h-4 text-amber-500" /> },
-    { value: "cluster", label: "Cluster", description: "Visual word groupings", icon: <Layers className="w-4 h-4 text-emerald-500" /> },
+    { id: "normal", label: "Reader", icon: BookOpen },
+    { id: "rsvp", label: "RSVP", icon: Zap },
+    { id: "cluster", label: "Cluster", icon: Layers },
   ], []);
 
   // Subscribe atomically to Zustand store properties
@@ -80,6 +83,20 @@ export function ReaderHeader({
   const mode = useReadingStore((state) => state.mode);
   const isFocusMode = useReadingStore((state) => state.isFocusMode);
   const setIsFocusMode = useReadingStore((state) => state.setIsFocusMode);
+
+  const currentModeOption = React.useMemo(() => 
+    modeOptions.find(opt => opt.id === mode) || modeOptions[0]
+  , [mode, modeOptions]);
+
+  const handleModeChange = (newMode: string) => {
+    if (newMode === "normal") {
+      setIsPlaying(false);
+      setMode("normal");
+    } else {
+      setMode(newMode as any);
+      setCompletedChapter(null);
+    }
+  };
 
   React.useEffect(() => {
     const handleFullscreenChange = () => {
@@ -116,7 +133,7 @@ export function ReaderHeader({
     <div className="flex items-center justify-start gap-1 md:gap-1.5 min-w-0 flex-1">
       <button
         onClick={() => setActiveBookId(null)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-xs font-mono text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border/40 bg-card hover:bg-accent text-[10px] font-mono uppercase tracking-widest text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer font-bold"
         title="Back to library bookshelf"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -174,57 +191,43 @@ export function ReaderHeader({
         <div className="lg:hidden">
           <FancyDropdown
             value={mode}
-            onChange={(val) => {
-              if (val === "normal") {
-                setIsPlaying(false);
-                setMode("normal");
-              } else {
-                setMode(val as any);
-                setCompletedChapter(null);
-              }
-            }}
-            options={modeOptions}
+            onChange={handleModeChange}
+            options={modeOptions.map(opt => {
+              const Icon = opt.icon;
+              return { 
+                value: opt.id, 
+                label: opt.label, 
+                icon: <Icon className="w-4 h-4" /> 
+              };
+            })}
             placeholder="Select mode"
             ariaLabel="Select reading mode"
             triggerClassName="group flex h-8 items-center justify-center gap-1 rounded-lg border border-border/40 bg-card px-2 text-xs font-mono font-bold text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-accent focus:outline-none liquid-glass cursor-pointer shrink-0"
             menuClassName="min-w-[200px] max-w-[260px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass"
             align="end"
-            renderTrigger={(selectedOption, isOpen) => (
-              <div className="flex items-center gap-1">
-                <span className="w-4 h-4 shrink-0 flex items-center justify-center">
-                  {selectedOption?.icon}
-                </span>
-                <ChevronDown className={`h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-              </div>
-            )}
+            renderTrigger={(selectedOption, isOpen) => {
+              const CurrentIcon = currentModeOption.icon as any;
+              return (
+                <div className="flex items-center gap-1">
+                  <span className="w-4 h-4 shrink-0 flex items-center justify-center text-primary">
+                    <CurrentIcon className="w-3.5 h-3.5" />
+                  </span>
+                  <ChevronDown className={`h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                </div>
+              );
+            }}
           />
         </div>
 
-        {/* Desktop Tabs */}
-        <div className="hidden lg:flex bg-card border border-border/40 p-0.5 rounded-lg items-center shadow-sm liquid-glass">
-          {modeOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => {
-                if (option.value === "normal") {
-                  setIsPlaying(false);
-                  setMode("normal");
-                } else {
-                  setMode(option.value as any);
-                  setCompletedChapter(null);
-                }
-              }}
-              className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
-                mode === option.value
-                  ? "bg-accent text-primary font-bold shadow-sm"
-                  : "text-muted-foreground hover:text-primary hover:bg-accent/50"
-              }`}
-              title={option.description}
-            >
-              {option.icon}
-              {option.label}
-            </button>
-          ))}
+        {/* Desktop Tabs using FancyTabs */}
+        <div className="hidden lg:block">
+          <FancyTabs
+            tabs={modeOptions}
+            activeTab={mode}
+            onChange={handleModeChange}
+            layoutId="reader-mode-tabs"
+            className="h-8"
+          />
         </div>
       </div>
 
@@ -233,7 +236,7 @@ export function ReaderHeader({
         onClick={() => setIsPomodoroOpen?.(!isPomodoroOpen)}
         className={`hidden md:flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm liquid-glass cursor-pointer ${
           isPomodoroOpen
-            ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(var(--primary),0.2)]"
+            ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(var(--primary),0.2)] border-primary"
             : "bg-card hover:bg-accent text-muted-foreground hover:text-primary"
         }`}
         title="Toggle Pomodoro timer"
@@ -262,7 +265,10 @@ export function ReaderHeader({
       {/* Center: Title & Chapter Selector */}
       <div className="flex flex-col items-center justify-center min-w-0 flex-1 gap-0.5">
         {/* Book Title (Centered above chapter) */}
-        <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-muted-foreground dark:text-foreground/75 font-bold truncate max-w-[120px] xs:max-w-[160px] sm:max-w-[220px] md:max-w-[280px]">
+        <span 
+          style={{ fontFamily: getFontFamilyStyle(globalSettings.general.readerFontFamily, customFonts) }}
+          className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-muted-foreground dark:text-foreground/75 font-bold truncate max-w-[120px] xs:max-w-[160px] sm:max-w-[220px] md:max-w-[280px]"
+        >
           {activeBook.title}
         </span>
 
@@ -285,6 +291,7 @@ export function ReaderHeader({
           <button
             ref={chapterBtnRef}
             onClick={handleToggleToc}
+            style={{ fontFamily: getFontFamilyStyle(globalSettings.general.readerFontFamily, customFonts) }}
             className="text-[10px] sm:text-xs text-primary/80 hover:text-primary font-semibold bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/45 px-2 py-0.5 rounded flex items-center gap-1 transition-all truncate max-w-[90px] xs:max-w-[140px] sm:max-w-[180px] md:max-w-[220px] liquid-glass cursor-pointer"
             title="Open table of contents / chapter index"
           >

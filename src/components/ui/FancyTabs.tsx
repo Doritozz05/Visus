@@ -39,7 +39,7 @@ export function FancyTabs({
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`flex items-center justify-center gap-2 transition-all relative z-10 shrink-0 ${fullWidth ? "md:flex-1 md:shrink-1" : ""} ${
+            className={`flex items-center justify-center transition-all relative shrink-0 ${fullWidth ? "md:flex-1 md:shrink-1" : ""} ${
               isActive
                 ? "text-primary font-bold"
                 : "text-muted-foreground hover:text-foreground"
@@ -49,13 +49,27 @@ export function FancyTabs({
                 : "rounded-md px-2.5 sm:px-4 py-1.5 sm:py-2 text-[10px] font-mono uppercase tracking-wider"
             }`}
           >
-            {Icon && <Icon className="w-4 h-4" />}
-            <span className="relative z-20 whitespace-nowrap">{tab.label}</span>
+            {/* Content Layer (Always Above) */}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 relative z-20 pointer-events-none">
+              {Icon && <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />}
+              <span className="whitespace-nowrap">{tab.label}</span>
+            </div>
+
+            {/* Background/Indicator Layer (Always Below) */}
             {isActive && (
               <motion.div
                 layoutId={layoutId}
-                className={`absolute ${variant === "pill" ? "inset-0 bg-accent rounded-md shadow-sm" : "bottom-0 left-0 right-0 h-0.5 bg-primary"} z-10`}
-                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                className={`absolute ${
+                  variant === "pill" 
+                    ? "inset-0 bg-accent rounded-md shadow-sm" 
+                    : "bottom-0 left-0 right-0 h-0.5 bg-primary"
+                } z-10`}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 400, 
+                  damping: 32,
+                  mass: 0.8
+                }}
               />
             )}
           </button>
