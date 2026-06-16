@@ -110,7 +110,7 @@ export function useTelemetryTracker({
     if (state.mode === "normal") {
       // Estimate words read in Normal Mode based on average WPM
       const avgWpm = session.speedHistory.length > 0
-        ? Math.round(session.speedHistory.reduce((s, h) => s + h.wpm, 0) / session.speedHistory.length)
+        ? Math.round(session.speedHistory.reduce((s: number, h: { wpm: number }) => s + h.wpm, 0) / session.speedHistory.length)
         : 280;
       wordsRead = Math.round((duration / 60) * avgWpm);
     }
@@ -124,7 +124,7 @@ export function useTelemetryTracker({
     // Compute final session averages
     let finalWpm = state.mode === "normal" ? 280 : state.wpm;
     if (session.speedHistory.length > 0) {
-      finalWpm = Math.round(session.speedHistory.reduce((s, h) => s + h.wpm, 0) / session.speedHistory.length);
+      finalWpm = Math.round(session.speedHistory.reduce((s: number, h: { wpm: number }) => s + h.wpm, 0) / session.speedHistory.length);
     }
 
     const themeFactor = themeRef.current === "light" ? 1.0 : 0.6;
