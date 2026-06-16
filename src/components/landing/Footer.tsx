@@ -40,15 +40,28 @@ export function Footer() {
             rel="noreferrer"
             className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
           >
-            GitHub (open source)
+            GitHub (Open Source)
+          </a>
+          <a
+            href="https://twitter.com/visus_labs"
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+          >
+            Twitter / X
+          </a>
+          <a
+            href="https://linkedin.com/company/visus-labs"
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+          >
+            LinkedIn
           </a>
         </div>
       </div>
       <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-border/10 flex items-center justify-between text-xs text-muted-foreground">
         <p>&copy; {new Date().getFullYear()} Visus Labs. All rights reserved.</p>
-        <div className="flex items-center gap-4">
-          <Link href="/sitemap.xml" className="hover:text-primary transition-colors">Sitemap</Link>
-        </div>
       </div>
     </footer>
   );

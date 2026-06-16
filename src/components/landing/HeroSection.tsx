@@ -33,7 +33,7 @@ export function HeroSection() {
           </span>
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-          Visus uses advanced RSVP and semantic clustering to train your peripheral vision and double your reading speed, all without leaving your browser.
+          Visus uses advanced RSVP and semantic clustering to boost your reading focus and double your speed, all while maintaining 100% privacy in your browser.
         </p>
       </HeroClient>
     </section>

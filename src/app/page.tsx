@@ -22,7 +22,7 @@ export default function Home() {
       <section className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-border/10">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-extrabold font-heading mb-6 tracking-tight">
-            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">Advanced Speed Reading Platform</span> you need.
+            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">Advanced Speed Reading Platform</span> to boost your reading focus.
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
             Stop moving your eyes and start processing ideas. Visus is a fast, open-source platform that uses Rapid Serial Visual Presentation (RSVP) to show you text one word at a time. This simple change cuts out the constant eye jumping and the inner voice that slows most readers down.
@@ -108,7 +108,7 @@ export default function Home() {
           href="/library"
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-lg px-10 py-5 rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(var(--primary),0.5)] group relative z-10"
         >
-          Start reading now
+          Open your library
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </Link>
       </section>

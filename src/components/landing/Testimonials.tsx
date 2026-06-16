@@ -42,7 +42,7 @@ export function Testimonials() {
         <h2 className="text-3xl md:text-4xl font-extrabold font-heading mb-4 tracking-tight">Loved by readers everywhere.</h2>
       </div>
 
-      <div className="flex w-full overflow-hidden">
+      <div className="flex w-full overflow-hidden py-10 -my-10">
         <motion.div
           className="flex gap-6 pr-6 w-max"
           animate={{ x: ["0%", "-50%"] }}
@@ -52,10 +52,30 @@ export function Testimonials() {
             ease: "linear",
           }}
         >
-          {/* We duplicate the array to create a seamless infinite loop */}
-          {[...testimonials, ...testimonials].map((t, i) => (
+          {/* Main set of testimonials */}
+          {testimonials.map((t, i) => (
             <div
-              key={i}
+              key={`main-${i}`}
+              className="w-[350px] md:w-[400px] shrink-0 bg-card border border-border/40 rounded-2xl p-8 flex flex-col justify-between hover:border-primary/30 transition-colors shadow-sm"
+            >
+              <p className="text-muted-foreground mb-6 leading-relaxed">&quot;{t.quote}&quot;</p>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center font-bold text-primary">
+                  {t.author.charAt(0)}
+                </div>
+                <div>
+                  <div className="font-bold text-foreground">{t.author}</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider">{t.role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {/* Duplicate set for infinite loop - marked aria-hidden for SEO/A11y */}
+          {testimonials.map((t, i) => (
+            <div
+              key={`dup-${i}`}
+              aria-hidden="true"
               className="w-[350px] md:w-[400px] shrink-0 bg-card border border-border/40 rounded-2xl p-8 flex flex-col justify-between hover:border-primary/30 transition-colors shadow-sm"
             >
               <p className="text-muted-foreground mb-6 leading-relaxed">&quot;{t.quote}&quot;</p>
