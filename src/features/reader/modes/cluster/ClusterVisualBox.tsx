@@ -182,17 +182,27 @@ export function ClusterVisualBox({
               highlightStyle.paddingBottom = "1px";
             } else if (settings.highlightStyle === "bold-only") {
               highlightStyle.color = resolvedActiveColor;
-              highlightStyle.fontWeight = "800";
+              // Simulate bold without layout shifts using sub-pixel strokes
+              highlightStyle.WebkitTextStroke = "0.04em currentColor";
+              highlightStyle.textShadow = "0.02em 0 0 currentColor, -0.02em 0 0 currentColor";
             } else if (settings.highlightStyle === "color-only") {
               highlightStyle.color = resolvedActiveColor;
             }
           } else {
             if (settings.highlightStyle === "capsule") {
-              highlightClass = "border border-transparent px-2 py-0.5 text-muted-foreground";
+              highlightClass = "text-muted-foreground";
+              highlightStyle.borderWidth = "1px";
+              highlightStyle.borderStyle = "solid";
+              highlightStyle.borderColor = "transparent";
+              highlightStyle.padding = "2px 6px";
+              highlightStyle.borderRadius = "6px";
             } else if (settings.highlightStyle === "underline") {
-              highlightClass = "border-b-2 border-transparent px-0.5 text-muted-foreground";
+              highlightClass = "text-muted-foreground";
+              highlightStyle.borderBottom = "2px solid transparent";
+              highlightStyle.paddingBottom = "1px";
             } else if (settings.highlightStyle === "bold-only") {
               highlightClass = "text-muted-foreground font-normal";
+              highlightStyle.fontWeight = "normal";
             } else {
               highlightClass = "text-muted-foreground";
             }
@@ -207,7 +217,7 @@ export function ClusterVisualBox({
               key={`chunk-${idx}`}
               data-chunk-index={idx}
               style={highlightStyle}
-              className={`inline-block whitespace-nowrap transition-all duration-150 ease-out mx-0.5 ${highlightClass} ${activePresetClass}`}
+              className={`inline-block whitespace-nowrap transition-all duration-150 ease-out mx-1 sm:mx-1.5 md:mx-2 ${highlightClass} ${activePresetClass}`}
             >
               {chunk.text}
             </span>

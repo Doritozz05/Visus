@@ -110,7 +110,14 @@ export function ClusterSettingsForm() {
                 </span>
               )},
               { id: "bold-only", render: () => (
-                <span style={{ color: resolvedColor }} className="font-extrabold">
+                <span 
+                  style={{ 
+                    color: resolvedColor, 
+                    WebkitTextStroke: "0.04em currentColor",
+                    textShadow: "0.02em 0 0 currentColor, -0.02em 0 0 currentColor" 
+                  }} 
+                  className="font-normal"
+                >
                   Bold text
                 </span>
               )},
