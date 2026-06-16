@@ -77,8 +77,10 @@ export function useClusterEngine({
       if (!currentChunk) return;
 
       const delayMultiplier = currentChunk.delayMultiplier || 1.0;
-      let finalDelay = baseDelayMs * currentChunk.wordCount * delayMultiplier;
-      const wordsToAdvance = currentChunk.wordCount;
+      let finalDelay = baseDelayMs * (currentChunk.wordCount || 1) * delayMultiplier;
+      
+      const activeRange = clusterOffsets[activeClusterIdx];
+      const nextIndex = activeRange ? activeRange.end : (currentIdx + (currentChunk.wordCount || 1));
 
       // Apply Warm-up Ramp (First 2 seconds = 2000ms)
       if (settings.cluster.warmupRamp && playbackStartTime.current) {
@@ -90,9 +92,6 @@ export function useClusterEngine({
       }
 
       timeoutId = setTimeout(() => {
-        const latestIdx = useReadingStore.getState().wordIndex;
-        const nextIndex = latestIdx + wordsToAdvance;
-
         if (nextIndex >= currentChapter.words.length) {
           useReadingStore.getState().setIsPlaying(false);
           useReadingStore.getState().setCompletedChapter(currentChapter.title);
