@@ -77,12 +77,12 @@ export function PagesVisualBox({
   // Compute currentPageIndex synchronously
   const currentPageIndex = React.useMemo(() => {
     if (!allBookPages || allBookPages.length === 0) return 0;
-    
+
     const page = findPageForWordIndex(allBookPages, currentChapter.index, wordIndex);
     if (page) {
       return page.pageIndex;
     }
-    
+
     // Fallback if out of bounds: 0 if before, last if after
     const firstPage = findFirstPageOfChapter(allBookPages, currentChapter.index);
     if (firstPage && wordIndex < firstPage.startWordIndex) return 0;
@@ -105,7 +105,7 @@ export function PagesVisualBox({
     const found = findPageForWordIndex(allBookPages, activeChapterIndex, wordIndex);
     return found || findFirstPageOfChapter(allBookPages, activeChapterIndex) || allBookPages[0];
   }, [allBookPages, activeChapterIndex, wordIndex]);
-  
+
   // Track visible container dimensions for offscreen DOM pagination
   const [containerDimensions, setContainerDimensions] = React.useState<{ width: number; height: number } | null>(null);
 
@@ -197,13 +197,13 @@ export function PagesVisualBox({
   React.useEffect(() => {
     const wrapper = canvasWrapperRef.current;
     if (!wrapper) return;
-    
+
     const updateDimensions = () => {
       const availableWidth = wrapper.clientWidth;
       const targetW = Math.round(800 * densityRatio);
       const widthVal = Math.floor(Math.min(availableWidth, targetW));
       const heightVal = wrapper.clientHeight;
-      
+
       setContainerDimensions((prev) => {
         if (prev && prev.width === widthVal && prev.height === heightVal) {
           return prev;
@@ -214,14 +214,14 @@ export function PagesVisualBox({
         };
       });
     };
-    
+
     updateDimensions();
-    
+
     const observer = new ResizeObserver(() => {
       updateDimensions();
     });
     observer.observe(wrapper);
-    
+
     return () => observer.disconnect();
   }, [densityRatio]);
 
@@ -246,9 +246,9 @@ export function PagesVisualBox({
     if (allBookPages.length === 0) {
       return { current: currentPageIndex + 1, total: totalPages };
     }
-    
+
     const absolutePageIndex = pageIndexMapRef.current.get(`${currentChapter.index}_${currentPageIndex}`);
-    
+
     return {
       current: absolutePageIndex !== undefined ? absolutePageIndex + 1 : currentPageIndex + 1,
       total: allBookPages.length,
@@ -267,7 +267,7 @@ export function PagesVisualBox({
 
   return (
     <div className="w-full bg-card border border-border/20 rounded-2xl px-3.5 pb-3 pt-5 sm:px-5 sm:pb-4 sm:pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl relative overflow-hidden transition-opacity duration-300 flex flex-col h-full md:h-[660px] min-h-0">
-      
+
       <ReaderEpubStyles />
 
       <BookmarkCorner
@@ -289,54 +289,54 @@ export function PagesVisualBox({
         </span>
       </div>
 
-        <div 
-          ref={canvasWrapperRef}
-          className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start min-h-0"
-        >
-          <AnimatePresence mode="wait">
-            {!isPaginationReady ? (
-              <motion.div 
-                key="loader"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-xl"
-              >
-                <LoadingSpinner message="Optimizing layout..." />
-              </motion.div>
-            ) : (
-              <motion.div 
-                key={`${currentChapter.index}_${currentPageIndex}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="h-full overflow-hidden relative"
+      <div
+        ref={canvasWrapperRef}
+        className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start min-h-0"
+      >
+        <AnimatePresence mode="wait">
+          {!isPaginationReady ? (
+            <motion.div
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-xl"
+            >
+              <LoadingSpinner message="Loading pages..." />
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`${currentChapter.index}_${currentPageIndex}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="h-full overflow-hidden relative"
+              style={{
+                width: containerDimensions ? `${containerDimensions.width}px` : "100%",
+                margin: "0 auto",
+                willChange: "opacity",
+              }}
+            >
+              <div
+                ref={columnsContainerRef}
+                className={`h-full epub-content ${readerFontClass}`}
                 style={{
-                  width: containerDimensions ? `${containerDimensions.width}px` : "100%",
-                  margin: "0 auto",
-                  willChange: "opacity",
+                  columnWidth: "100%",
+                  columnCount: 1,
+                  columnGap: `${columnGap}px`,
+                  columnFill: "auto",
+                  transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
+                  fontSize: `${scaledFontSize}px`,
+                  lineHeight: "1.75",
+                  fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
                 }}
-              >
-                <div
-                  ref={columnsContainerRef}
-                  className={`h-full epub-content ${readerFontClass}`}
-                  style={{
-                    columnWidth: "100%",
-                    columnCount: 1,
-                    columnGap: `${columnGap}px`,
-                    columnFill: "auto",
-                    transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
-                    fontSize: `${scaledFontSize}px`,
-                    lineHeight: "1.75",
-                    fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
-                  }}
-                  dangerouslySetInnerHTML={{ __html: formattedHtml }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                dangerouslySetInnerHTML={{ __html: formattedHtml }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       <PagesFooter
         isPaginationReady={isPaginationReady}
