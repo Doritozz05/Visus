@@ -289,50 +289,54 @@ export function PagesVisualBox({
         </span>
       </div>
 
-      <div 
-        ref={canvasWrapperRef}
-        className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start min-h-0"
-      >
-        <AnimatePresence>
-          {!isPaginationReady && (
-            <motion.div 
-              key="loader"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-xl"
-            >
-              <LoadingSpinner message="Optimizing layout..." />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <motion.div 
-          className="h-full overflow-hidden relative"
-          animate={{ opacity: isPaginationReady ? 1 : 0 }}
-          transition={{ duration: 0.4, ease: "easeIn" }}
-          style={{
-            width: containerDimensions ? `${containerDimensions.width}px` : "100%",
-            margin: "0 auto",
-          }}
+        <div 
+          ref={canvasWrapperRef}
+          className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start min-h-0"
         >
-          <div
-            ref={columnsContainerRef}
-            className={`h-full epub-content ${readerFontClass}`}
-            style={{
-              columnWidth: "100%",
-              columnCount: 1,
-              columnGap: `${columnGap}px`,
-              columnFill: "auto",
-              transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
-              fontSize: `${scaledFontSize}px`,
-              lineHeight: "1.75",
-              fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
-            }}
-            dangerouslySetInnerHTML={{ __html: formattedHtml }}
-          />
-        </motion.div>
-      </div>
+          <AnimatePresence mode="wait">
+            {!isPaginationReady ? (
+              <motion.div 
+                key="loader"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-xl"
+              >
+                <LoadingSpinner message="Optimizing layout..." />
+              </motion.div>
+            ) : (
+              <motion.div 
+                key={`${currentChapter.index}_${currentPageIndex}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="h-full overflow-hidden relative"
+                style={{
+                  width: containerDimensions ? `${containerDimensions.width}px` : "100%",
+                  margin: "0 auto",
+                  willChange: "opacity",
+                }}
+              >
+                <div
+                  ref={columnsContainerRef}
+                  className={`h-full epub-content ${readerFontClass}`}
+                  style={{
+                    columnWidth: "100%",
+                    columnCount: 1,
+                    columnGap: `${columnGap}px`,
+                    columnFill: "auto",
+                    transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
+                    fontSize: `${scaledFontSize}px`,
+                    lineHeight: "1.75",
+                    fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
+                  }}
+                  dangerouslySetInnerHTML={{ __html: formattedHtml }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
       <PagesFooter
         isPaginationReady={isPaginationReady}
