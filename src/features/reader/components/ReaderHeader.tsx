@@ -153,7 +153,7 @@ export function ReaderHeader({
           }}
           options={[
             { value: "focus", label: "Focus mode", icon: <EyeOff className="w-4 h-4 text-muted-foreground" /> },
-            { value: "fullscreen", label: isFullscreen ? "Exit Fullscreen" : "Fullscreen", icon: isFullscreen ? <Minimize className="w-4 h-4 text-muted-foreground" /> : <Maximize className="w-4 h-4 text-muted-foreground" /> }
+            { value: "fullscreen", label: isFullscreen ? "Exit fullscreen" : "Fullscreen", icon: isFullscreen ? <Minimize className="w-4 h-4 text-muted-foreground" /> : <Maximize className="w-4 h-4 text-muted-foreground" /> }
           ]}
           placeholder="Actions"
           ariaLabel="Reading actions"

@@ -30,7 +30,7 @@ export function FancyTabs({
   fullWidth = false,
 }: FancyTabsProps) {
   return (
-    <div className={`flex items-center overflow-x-auto scrollbar-none ${fullWidth ? "md:w-full" : ""} ${variant === "pill" ? "bg-background/20 border border-border/30 p-1 rounded-lg shadow-sm" : "border-b border-border/10"} ${className}`}>
+    <div className={`flex items-center overflow-x-auto scrollbar-none ${fullWidth ? "md:w-full" : ""} ${variant === "pill" ? "bg-card border border-border/30 p-1 rounded-lg shadow-sm" : "border-b border-border/10"} ${className}`}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         const Icon = tab.icon;
