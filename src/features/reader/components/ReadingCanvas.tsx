@@ -136,7 +136,8 @@ export function ReadingCanvas({
                 onClose={() => {
                   setActiveQuiz(null);
                   setCompletedChapter(null);
-                  setMode("normal");
+                  // Reset to start of chapter
+                  useReadingStore.getState().setWordIndex(0);
                 }}
                 onNextChapter={() => {
                   setActiveQuiz(null);
@@ -159,7 +160,8 @@ export function ReadingCanvas({
                 onTakeQuiz={(generated) => setActiveQuiz(generated)}
                 onBackToReader={() => {
                   setCompletedChapter(null);
-                  setMode("normal");
+                  // Reset to start of chapter
+                  useReadingStore.getState().setWordIndex(0);
                 }}
                 onSkipQuiz={() => {
                   setCompletedChapter(null);

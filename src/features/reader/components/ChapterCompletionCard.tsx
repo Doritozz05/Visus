@@ -56,7 +56,7 @@ export function ChapterCompletionCard({
             onClick={onBackToReader}
             className="flex-1 px-4 py-2.5 border border-border/30 rounded text-xs font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
           >
-            Back to reader
+            Back to chapter
           </button>
           <button
             onClick={onSkipQuiz}

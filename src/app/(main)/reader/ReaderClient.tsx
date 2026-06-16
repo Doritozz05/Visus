@@ -317,7 +317,7 @@ export default function ReaderClient() {
 
       </motion.main>
 
-      {mode !== "normal" && (
+      {mode !== "normal" && !activeQuiz && !completedChapter && (
         <ReaderPlayer
           onRewind={handleRewind}
           onSkip={handleSkip}
