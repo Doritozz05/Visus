@@ -78,10 +78,12 @@ self.addEventListener("fetch", (event) => {
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // Silent fail for background fetch
       });
 
+      // If we have a cached response, return it. The fetchPromise will continue 
+      // in the background (and fail silently if blocked, which is fine).
+      // If we DON'T have a cached response, we MUST return the fetchPromise 
+      // directly so the browser handles the network success/failure.
       return cachedResponse || fetchPromise;
     })
   );
