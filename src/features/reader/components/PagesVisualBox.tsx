@@ -15,7 +15,7 @@ import { PagesFooter } from "./PagesFooter";
 import { useDomPagination } from "../hooks/useDomPagination";
 import { usePageNavigation } from "../hooks/usePageNavigation";
 import { useReadingStore } from "../stores/reading-store";
-import { findPageForWordIndex, findFirstPageOfChapter } from "../utils/binarySearch";
+import { findPageForWordIndex, findFirstPageOfChapter, findLastPageOfChapter } from "../utils/binarySearch";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface PagesVisualBoxProps {
@@ -151,7 +151,6 @@ export function PagesVisualBox({
     return prepareChapterHtml(currentChapter);
   }, [currentChapter]);
 
-  // Consuming custom DOM pagination hook
   const { isPaginationReady, isFullPaginationReady, pageIndexMapRef } = useDomPagination({
     chaptersData,
     containerDimensions,
@@ -164,20 +163,22 @@ export function PagesVisualBox({
     initialReady: allBookPages.length > 0 && storeActiveBookId === activeBookId,
   });
 
+  // Synchronous source of truth: does the store actually have pages for this chapter?
+  const hasPagesForCurrentChapter = React.useMemo(() => {
+    return !!findFirstPageOfChapter(allBookPages, currentChapter.index);
+  }, [allBookPages, currentChapter.index]);
+
+  // Combined ready state that responds immediately to chapter changes
+  const isReady = isPaginationReady && hasPagesForCurrentChapter;
+
   // Source of truth for total pages in the current chapter
   const totalPagesInChapter = React.useMemo(() => {
-    if (isPaginationReady && allBookPages.length > 0) {
-      let maxIdx = -1;
-      for (let i = allBookPages.length - 1; i >= 0; i--) {
-        if (allBookPages[i].chapterIndex === currentChapter.index) {
-          maxIdx = allBookPages[i].pageIndex;
-          break;
-        }
-      }
-      if (maxIdx !== -1) return maxIdx + 1;
+    if (hasPagesForCurrentChapter) {
+      const lastPage = findLastPageOfChapter(allBookPages, currentChapter.index);
+      if (lastPage) return lastPage.pageIndex + 1;
     }
     return totalPages;
-  }, [isPaginationReady, allBookPages, currentChapter.index, totalPages]);
+  }, [hasPagesForCurrentChapter, allBookPages, currentChapter.index, totalPages]);
 
   // Consuming custom Page navigation hook
   const {
@@ -199,10 +200,12 @@ export function PagesVisualBox({
     onNextChapter,
   });
 
-  // Reset measured pages when chapter changes to prevent stale navigation logic
-  React.useEffect(() => {
+  // Reset measured pages IMMEDIATELY when chapter changes to prevent stale navigation logic
+  const [lastChapterIdx, setLastChapterIdx] = React.useState(currentChapter.index);
+  if (lastChapterIdx !== currentChapter.index) {
+    setLastChapterIdx(currentChapter.index);
     setTotalPages(1);
-  }, [currentChapter.index]);
+  }
 
   React.useLayoutEffect(() => {
     const el = columnsContainerRef.current;
@@ -314,7 +317,7 @@ export function PagesVisualBox({
         className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start min-h-0"
       >
         <AnimatePresence>
-          {!isPaginationReady && (
+          {!isReady && (
             <motion.div
               key="loader"
               initial={{ opacity: 0 }}
@@ -331,7 +334,7 @@ export function PagesVisualBox({
           <motion.div
             key={`${currentChapter.index}_${currentPageIndex}`}
             initial={{ opacity: 0, x: 12 }}
-            animate={{ opacity: isPaginationReady ? 1 : 0, x: 0 }}
+            animate={{ opacity: isReady ? 1 : 0, x: 0 }}
             exit={{ opacity: 0, x: -12 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="h-full w-full overflow-hidden relative"
@@ -361,7 +364,7 @@ export function PagesVisualBox({
       </div>
 
       <PagesFooter
-        isPaginationReady={isPaginationReady}
+        isPaginationReady={isReady}
         isFullPaginationReady={isFullPaginationReady}
         currentPageIndex={currentPageIndex}
         currentChapterIndex={currentChapter.index}
