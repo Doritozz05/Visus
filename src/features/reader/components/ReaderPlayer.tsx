@@ -110,7 +110,10 @@ export const ReaderPlayer = React.memo(({
                 `}
               >
                 <Settings2 className={`w-3 h-3 transition-transform duration-500 ${isWpmExpanded ? 'rotate-180' : 'group-hover:rotate-45'}`} />
-                <span className="font-mono text-[10px] font-bold">{wpm}</span>
+                <span className="font-mono text-[10px] font-bold flex items-baseline gap-0.5">
+                  {wpm}
+                  <span className="text-[7px] opacity-40 uppercase tracking-tighter">wpm</span>
+                </span>
               </button>
             </div>
 
