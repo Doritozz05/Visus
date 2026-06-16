@@ -49,7 +49,7 @@ export function PagesFooter({
       </button>
 
       {/* Page indicator & Slider */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 min-w-[100px] sm:min-w-[120px]">
+      <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-2.5 min-w-[100px] sm:min-w-[120px]">
         {!isFullPaginationReady ? (
           <div className="text-[10px] tracking-wider uppercase font-semibold text-muted-foreground/50 animate-pulse pointer-events-none leading-none py-2">
             Calculating pages...
