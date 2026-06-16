@@ -77,24 +77,21 @@ export const ReaderPlayer = React.memo(({
           className="liquid-glass flex flex-col gap-0 overflow-hidden shadow-[var(--card-shadow)] rounded-[calc(var(--radius)*2)] border border-border/30 bg-card/85 backdrop-blur-xl w-full"
         >
           {/* Main Control Row */}
-          <div className="grid grid-cols-[auto_1fr_auto] items-center h-14 px-3 sm:px-4 gap-2">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 px-3 sm:px-4 gap-2">
             
             {/* Left Slot: Speed Toggle Indicator */}
             <div className="flex items-center justify-start overflow-hidden">
               <button
                 onClick={() => setIsWpmExpanded(!isWpmExpanded)}
                 className={`
-                  group flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-xl transition-all border
+                  group flex items-center gap-2 px-3 py-1.5 rounded-full transition-all border
                   ${isWpmExpanded 
                     ? "bg-primary/10 border-primary/40 text-primary" 
                     : "bg-accent/30 border-border/20 text-muted-foreground hover:bg-accent hover:border-border/40"}
                 `}
               >
-                <div className="flex flex-col items-start leading-none min-w-[2.2ch] sm:min-w-[2.5ch]">
-                  <span className="font-mono text-[10px] sm:text-[11px] font-bold">{wpm}</span>
-                  <span className="text-[7px] sm:text-[8px] uppercase tracking-tighter opacity-70 font-bold">WPM</span>
-                </div>
-                <Settings2 className={`w-3 sm:w-3.5 h-3 sm:h-3.5 transition-transform duration-500 ${isWpmExpanded ? 'rotate-180' : 'group-hover:rotate-45'}`} />
+                <Settings2 className={`w-3.5 h-3.5 transition-transform duration-500 ${isWpmExpanded ? 'rotate-180' : 'group-hover:rotate-45'}`} />
+                <span className="font-mono text-[11px] font-bold">{wpm}</span>
               </button>
             </div>
 
@@ -133,14 +130,14 @@ export const ReaderPlayer = React.memo(({
                 >
                   <RotateCw className="w-3.5 h-3.5 sm:w-4 h-4" />
                 </button>
-                </div>
-                </div>
+              </div>
+            </div>
 
             {/* Right Slot: Mode Chip */}
             <div className="flex items-center justify-end overflow-hidden">
-              <div className="hidden xs:flex items-center gap-1 sm:gap-1.5 text-[7px] sm:text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 bg-accent/30 px-1.5 sm:px-2 py-1 rounded-lg border border-border/10 whitespace-nowrap">
-                <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${isPlaying ? 'bg-primary animate-pulse' : 'bg-muted-foreground/40'}`} />
-                {mode}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/20 bg-accent/30 text-muted-foreground/60 transition-all">
+                <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-primary animate-pulse' : 'bg-muted-foreground/40'}`} />
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider">{mode}</span>
               </div>
             </div>
           </div>

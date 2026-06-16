@@ -7,8 +7,6 @@ interface WpmScrubberProps {
   onWpmChange: (newWpm: number) => void;
 }
 
-const PRESETS = [250, 400, 600, 800];
-
 export const WpmScrubber = React.memo(({ wpm, onWpmChange }: WpmScrubberProps) => {
   const [isDragging, setIsDragging] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -57,21 +55,6 @@ export const WpmScrubber = React.memo(({ wpm, onWpmChange }: WpmScrubberProps) =
         <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/70 font-bold">
           Reading Speed
         </span>
-        <div className="flex items-center gap-1.5">
-          {PRESETS.map((p) => (
-            <button
-              key={p}
-              onClick={() => onWpmChange(p)}
-              className={`text-[9px] font-bold px-1.5 py-0.5 rounded transition-all ${
-                wpm === p 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-accent/50 text-muted-foreground hover:bg-accent hover:text-foreground"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
       </div>
 
       <div 
