@@ -62,11 +62,14 @@ export function useDomPagination({
 
     if (!isLayoutChange && hasPagesForActive) {
       setIsPaginationReady(true);
+    } else if (hasPagesForActive) {
+      // If we have pages for active chapter, keep them visible while re-paginating in background
+      setIsPaginationReady(true);
     } else {
       setIsPaginationReady(false);
     }
 
-    // Reset ready flag whenever we restart pagination (e.g. layout change or uncomputed chapter)
+    // Reset full ready flag whenever we restart pagination
     lastLayoutRef.current = currentLayoutKey;
     setIsFullPaginationReady(false);
 
@@ -81,17 +84,15 @@ export function useDomPagination({
       
       const pagesByChapter: BookVisualPage[][] = new Array(totalChapters).fill([]);
 
+      // Atomic Update Strategy: Don't clear the store. 
+      // We will replace the entire state once the active chapter (at least) is ready.
       if (!isLayoutChange) {
-        // Pre-fill with already computed pages
         for (const page of existingPages) {
           if (!pagesByChapter[page.chapterIndex]) {
             pagesByChapter[page.chapterIndex] = [];
           }
           pagesByChapter[page.chapterIndex].push(page);
         }
-      } else {
-        // Clear pages if layout changed
-        setAllBookPages([]);
       }
 
       const updateStore = () => {
