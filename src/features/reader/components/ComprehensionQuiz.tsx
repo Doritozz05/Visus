@@ -66,7 +66,7 @@ export function ComprehensionQuiz({
     const scorePercentage = Math.round(sum / 4);
 
     return (
-      <div className="w-full max-w-md bg-card border border-border/30 rounded-xl p-5 md:p-6 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center gap-4 transition-all duration-300">
+      <div className="w-full max-w-md mx-auto bg-card border border-border/30 rounded-xl p-5 md:p-6 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center gap-4 transition-all duration-300">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
         
         <div className="relative mb-1">
@@ -129,7 +129,7 @@ export function ComprehensionQuiz({
   }
 
   return (
-    <div className="w-full max-w-lg bg-card border border-border/30 rounded-xl p-4 md:p-5 shadow-2xl relative overflow-hidden flex flex-col gap-4 transition-all duration-300">
+    <div className="w-full max-w-lg mx-auto bg-card border border-border/30 rounded-xl p-4 md:p-5 shadow-2xl relative overflow-hidden flex flex-col gap-4 transition-all duration-300">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
       
       {/* Header / Progress bar */}

@@ -88,7 +88,7 @@ export function ReadingCanvas({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="w-full"
+              className="w-full flex items-center justify-center"
             >
               <ComprehensionQuiz
                 quiz={activeQuiz}
@@ -148,7 +148,7 @@ export function ReadingCanvas({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="w-full"
+              className="w-full flex items-center justify-center"
             >
               <ChapterCompletionCard
                 completedChapter={completedChapter}
