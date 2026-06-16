@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { ReadingList } from "@/core/entities/reading-list";
-import { FolderHeart, Pencil, Trash2, ChevronRight, BookText } from "lucide-react";
+import { FolderHeart, Pencil, Trash2, ChevronRight, BookText, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
 
@@ -56,16 +56,16 @@ export function ReadingListCard({ list, onClick, onEdit, onDelete }: ReadingList
         <div className="absolute inset-0 bg-primary/5 rounded-2xl translate-x-2 translate-y-2 border border-primary/10 group-hover:translate-x-3 group-hover:translate-y-3 transition-transform duration-300" />
         <div className="absolute inset-0 bg-card rounded-2xl border border-border/40 shadow-sm liquid-glass z-10 overflow-hidden flex flex-col p-5">
           <div className="flex justify-between items-start mb-auto">
-            <div 
+            <div
               className="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner"
               style={{ backgroundColor: `${list.color || 'var(--primary)'}20` }}
             >
-              <FolderHeart 
-                className="w-5 h-5" 
-                style={{ color: list.color || 'var(--primary)' }} 
+              <FolderHeart
+                className="w-5 h-5"
+                style={{ color: list.color || 'var(--primary)' }}
               />
             </div>
-            
+
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit(e); }}
@@ -109,15 +109,34 @@ export function ReadingListCard({ list, onClick, onEdit, onDelete }: ReadingList
 export function CreateListCard({ onClick }: { onClick: () => void }) {
   return (
     <motion.button
-      whileHover={{ scale: 0.98 }}
-      whileTap={{ scale: 0.96 }}
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="aspect-[4/3] w-full rounded-2xl border-2 border-dashed border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-3 group text-muted-foreground hover:text-primary"
+      className="group relative aspect-[4/3] w-full"
     >
-      <div className="w-12 h-12 rounded-full bg-accent/50 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-        <FolderHeart className="w-6 h-6 opacity-40 group-hover:opacity-100" />
+      {/* Background with dashed border and glass effect */}
+      <div className="absolute inset-0 rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5 group-hover:bg-primary/10 group-hover:border-primary/40 transition-all duration-300" />
+
+      {/* Main Content Card */}
+      <div className="relative h-full w-full rounded-2xl flex flex-col items-center justify-center gap-4 overflow-hidden z-10">
+        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-500">
+          <Plus className="w-7 h-7 text-primary opacity-60 group-hover:opacity-100 group-hover:rotate-90 transition-all duration-500 ease-in-out" />
+        </div>
+
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-sm font-bold font-heading text-primary/70 group-hover:text-primary transition-colors">
+            New Collection
+          </span>
+          <span className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest group-hover:text-muted-foreground/70 transition-colors">
+            Organize your library
+          </span>
+        </div>
+
+        {/* Decorative corner element */}
+        <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700" />
+        <div className="absolute -top-10 -left-10 w-24 h-24 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-700" />
       </div>
-      <span className="text-xs font-bold font-mono uppercase tracking-widest">Create new list</span>
     </motion.button>
   );
 }
+
