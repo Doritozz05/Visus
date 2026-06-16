@@ -76,6 +76,29 @@ export const ReaderPlayer = React.memo(({
           }}
           className="liquid-glass flex flex-col gap-0 overflow-hidden shadow-[var(--card-shadow)] rounded-[calc(var(--radius)*2)] border border-border/30 bg-card/85 backdrop-blur-xl w-full"
         >
+          {/* Expandable Speed Scrubber */}
+          <AnimatePresence initial={false}>
+            {isWpmExpanded && (
+              <motion.div
+                key="wpm-scrubber"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ 
+                  type: "spring",
+                  stiffness: 380,
+                  damping: 32,
+                  mass: 0.9
+                }}
+                className="overflow-hidden border-b border-border/10"
+              >
+                <div className="px-6 pt-6 pb-3">
+                  <WpmScrubber wpm={wpm} onWpmChange={setWpm} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Main Control Row */}
           <div className="grid grid-cols-[1fr_auto_1fr] items-center h-12 px-3 sm:px-4 gap-2">
             
@@ -141,27 +164,6 @@ export const ReaderPlayer = React.memo(({
               </div>
             </div>
           </div>
-
-          {/* Expandable Speed Scrubber */}
-          <AnimatePresence>
-            {isWpmExpanded && (
-              <motion.div
-                key="wpm-scrubber"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ 
-                  type: "spring",
-                  stiffness: 380,
-                  damping: 32,
-                  mass: 0.9
-                }}
-                className="overflow-hidden border-t border-border/10 px-6 pb-6 pt-3"
-              >
-                <WpmScrubber wpm={wpm} onWpmChange={setWpm} />
-              </motion.div>
-            )}
-          </AnimatePresence>
         </motion.div>
       </motion.div>
     </div>

@@ -50,14 +50,39 @@ export const WpmScrubber = React.memo(({ wpm, onWpmChange }: WpmScrubberProps) =
   const progress = (localWpm - 100) / 1100;
 
   return (
-    <div className="flex flex-col gap-3 w-full px-1">
-      <div className="flex items-center justify-between px-1">
+    <motion.div 
+      variants={{
+        exit: {
+          transition: {
+            staggerChildren: 0.05,
+            staggerDirection: -1
+          }
+        }
+      }}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="flex flex-col gap-3 w-full px-1"
+    >
+      <motion.div 
+        variants={{
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          exit: { opacity: 0, transition: { duration: 0.15 } }
+        }}
+        className="flex items-center justify-between px-1"
+      >
         <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/70 font-bold">
           Reading Speed
         </span>
-      </div>
+      </motion.div>
 
-      <div 
+      <motion.div 
+        variants={{
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          exit: { opacity: 0, transition: { duration: 0.2 } }
+        }}
         ref={containerRef}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -97,8 +122,8 @@ export const WpmScrubber = React.memo(({ wpm, onWpmChange }: WpmScrubberProps) =
             </div>
           )}
         </motion.div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 });
 
