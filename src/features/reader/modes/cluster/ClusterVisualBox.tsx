@@ -22,6 +22,23 @@ export function ClusterVisualBox({
   const scrollCanvasRef = React.useRef<HTMLDivElement>(null);
 
   const wordIndex = useReadingStore((state) => state.wordIndex);
+  const [actualContainerHeight, setActualContainerHeight] = React.useState(450);
+
+  // Measure the container's actual height
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect) {
+          setActualContainerHeight(entry.contentRect.height);
+        }
+      }
+    });
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Normalize inputs
   const normalizedChunks = React.useMemo(() => {
@@ -58,8 +75,8 @@ export function ClusterVisualBox({
   ]);
 
   // Render variables pre-calculated
-  const containerHeight = 450;
-  const paddingY = 225 - settings.fontSize / 2;
+  const containerHeight = actualContainerHeight;
+  const paddingY = (containerHeight / 2) - settings.fontSize / 2;
   const scrollCanvasHeight = scrollCanvasRef.current?.scrollHeight || 0;
 
   // Focal point around 33% of the container (Top third)
@@ -81,7 +98,7 @@ export function ClusterVisualBox({
 
       setTranslateY(targetY);
     }
-  }, [activeClusterIndex, isMeasured, measurements, scrollCanvasHeight, focalPointY]);
+  }, [activeClusterIndex, isMeasured, measurements, scrollCanvasHeight, focalPointY, containerHeight]);
 
   // Colors & Styling
   const getThemeColor = (key: string) => {
@@ -133,7 +150,7 @@ export function ClusterVisualBox({
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-3xl h-[370px] md:h-[350px] lg:h-[500px] overflow-hidden border border-border/20 rounded-2xl bg-card relative shadow-xl"
+      className="w-full max-w-3xl h-[360px] md:h-[380px] lg:h-[385px] overflow-hidden border border-border/20 rounded-2xl bg-card relative shadow-xl"
     >
       <div
         ref={scrollCanvasRef}

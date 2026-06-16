@@ -283,7 +283,12 @@ export default function ReaderClient() {
           />
         </motion.div>
 
-        <motion.div variants={canvasVariants} className="w-full flex-1 flex flex-col items-center justify-center min-h-0">
+        <motion.div 
+          variants={canvasVariants} 
+          className={`w-full flex-1 flex flex-col items-center min-h-0 ${
+            mode === "cluster" ? "justify-start md:justify-center" : "justify-center"
+          }`}
+        >
           <ReadingCanvas
             mode={mode}
             completedChapter={completedChapter}

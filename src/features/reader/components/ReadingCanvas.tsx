@@ -73,7 +73,7 @@ export function ReadingCanvas({
     <div
       className={`w-full ${
         mode === "cluster"
-          ? "max-w-4xl"
+          ? "max-w-3xl"
           : mode === "normal"
             ? "max-w-5xl"
             : "max-w-2xl"
@@ -222,7 +222,7 @@ export function ReadingCanvas({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="w-full flex items-center justify-center md:mb-[20vh] mt-[8vh] md:mt-0"
+            className="w-full flex items-center justify-center md:mb-[20vh] mt-4 md:mt-0"
           >
             <ClusterVisualBox clusterChunks={clusterChunks} settings={settings.cluster} />
           </motion.div>
