@@ -7,74 +7,77 @@ interface UsePlayerVisibilityProps {
 
 export function usePlayerVisibility({ isPlaying, isFocusMode }: UsePlayerVisibilityProps) {
   const [isVisible, setIsVisible] = useState(true);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isHoveringRef = useRef(false);
 
-  // Determine if device has hover capability (Desktop/Mouse)
+  // Refs que reflejan los props SIN causar que los callbacks cambien de identidad
+  const isPlayingRef = useRef(isPlaying);
+  const isFocusModeRef = useRef(isFocusMode);
+  
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+    isFocusModeRef.current = isFocusMode;
+  }, [isPlaying, isFocusMode]);
+
   const [hasHover, setHasHover] = useState(false);
 
   useEffect(() => {
     const mql = window.matchMedia("(hover: hover) and (pointer: fine)");
     setHasHover(mql.matches);
-    
     const handler = (e: MediaQueryListEvent) => setHasHover(e.matches);
     mql.addEventListener("change", handler);
     return () => mql.removeEventListener("change", handler);
   }, []);
 
+  // show/hide/restartTimer ahora son ESTABLES para siempre (deps vacías),
+  // porque leen isPlaying/isFocusMode desde los refs, no desde closures.
   const show = useCallback(() => {
-    setIsVisible(true);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsVisible((prev) => (prev ? prev : true));
   }, []);
 
   const hide = useCallback(() => {
-    if (isPlaying && isFocusMode && !isHoveringRef.current) {
+    if (isPlayingRef.current && isFocusModeRef.current && !isHoveringRef.current) {
       setIsVisible(false);
     }
-  }, [isPlaying, isFocusMode]);
+  }, []);
 
   const restartTimer = useCallback(() => {
     show();
-    if (isPlaying && isFocusMode) {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (isPlayingRef.current && isFocusModeRef.current) {
       timeoutRef.current = setTimeout(hide, 3000);
     }
-  }, [show, hide, isPlaying, isFocusMode]);
+  }, [show, hide]);
 
+  // Efecto único: reacciona SOLO a cambios reales de isPlaying/isFocusMode/hasHover.
+  // Como restartTimer/show/hide son estables, este efecto no se re-dispara por re-renders ajenos.
   useEffect(() => {
+    if (!isPlaying || !isFocusMode) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setIsVisible(true);
+      return;
+    }
+
     if (!hasHover) {
-      // TOUCH DEVICE: Tap to toggle logic
       const handleGlobalTap = (e: MouseEvent | TouchEvent) => {
-        // If we click on the reader content (not the player), toggle
         const target = e.target as HTMLElement;
         const isPlayerClick = target.closest(".reader-player-container");
-        
         if (!isPlayerClick) {
-          setIsVisible(prev => !prev);
+          setIsVisible((prev) => !prev);
         }
       };
-
-      // Only enable tap-to-toggle in focus mode + playing
-      if (isPlaying && isFocusMode) {
-        window.addEventListener("click", handleGlobalTap);
-        return () => window.removeEventListener("click", handleGlobalTap);
-      } else {
-        setIsVisible(true);
-      }
+      window.addEventListener("click", handleGlobalTap);
+      return () => window.removeEventListener("click", handleGlobalTap);
     } else {
-      // DESKTOP DEVICE: Inactivity logic
-      if (isPlaying && isFocusMode) {
-        restartTimer();
-        window.addEventListener("mousemove", restartTimer);
-        return () => {
-          window.removeEventListener("mousemove", restartTimer);
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        };
-      } else {
-        setIsVisible(true);
-      }
+      restartTimer();
+      window.addEventListener("mousemove", restartTimer);
+      return () => {
+        window.removeEventListener("mousemove", restartTimer);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      };
     }
-  }, [hasHover, isPlaying, isFocusMode, restartTimer]);
+  }, [isPlaying, isFocusMode, hasHover, restartTimer]);
 
   const onPlayerMouseEnter = useCallback(() => {
     isHoveringRef.current = true;
@@ -83,10 +86,8 @@ export function usePlayerVisibility({ isPlaying, isFocusMode }: UsePlayerVisibil
 
   const onPlayerMouseLeave = useCallback(() => {
     isHoveringRef.current = false;
-    if (isPlaying && isFocusMode) {
-      restartTimer();
-    }
-  }, [isPlaying, isFocusMode, restartTimer]);
+    restartTimer();
+  }, [restartTimer]);
 
   return {
     isVisible: isPlaying && isFocusMode ? isVisible : true,

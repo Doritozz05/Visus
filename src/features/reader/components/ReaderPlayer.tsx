@@ -63,18 +63,18 @@ export const ReaderPlayer = React.memo(({
         }}
         transition={{ 
           type: "spring", 
-          stiffness: 400, 
-          damping: 30,
-          opacity: { duration: 0.2 }
+          stiffness: 380, 
+          damping: 32,
+          mass: 0.9
         }}
         className="relative pointer-events-auto origin-bottom w-full"
       >
         <motion.div 
           layout
           transition={{
-            layout: { type: "spring", stiffness: 450, damping: 40, mass: 1 }
+            layout: { type: "spring", stiffness: 380, damping: 32, mass: 0.9 }
           }}
-          className="liquid-glass flex flex-col gap-0 overflow-hidden shadow-[var(--card-shadow)] rounded-[calc(var(--radius)*2)] border border-border/30 bg-card/85 backdrop-blur-2xl w-full !transition-none will-change-[transform,opacity]"
+          className="liquid-glass flex flex-col gap-0 overflow-hidden shadow-[var(--card-shadow)] rounded-[calc(var(--radius)*2)] border border-border/30 bg-card/85 backdrop-blur-xl w-full"
         >
           {/* Main Control Row */}
           <div className="grid grid-cols-[auto_1fr_auto] items-center h-14 px-3 sm:px-4 gap-2">
@@ -146,17 +146,18 @@ export const ReaderPlayer = React.memo(({
           </div>
 
           {/* Expandable Speed Scrubber */}
-          <AnimatePresence initial={false}>
+          <AnimatePresence>
             {isWpmExpanded && (
               <motion.div
                 key="wpm-scrubber"
-                layout
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ 
-                  height: { type: "spring", stiffness: 450, damping: 40 },
-                  opacity: { duration: 0.2 }
+                  type: "spring",
+                  stiffness: 380,
+                  damping: 32,
+                  mass: 0.9
                 }}
                 className="overflow-hidden border-t border-border/10 px-6 pb-6 pt-3"
               >
