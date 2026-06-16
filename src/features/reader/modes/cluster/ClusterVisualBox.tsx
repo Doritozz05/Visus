@@ -58,8 +58,8 @@ export function ClusterVisualBox({
   ]);
 
   // Render variables pre-calculated
-  const containerHeight = 280;
-  const paddingY = 140 - settings.fontSize / 2;
+  const containerHeight = 450;
+  const paddingY = 225 - settings.fontSize / 2;
   const scrollCanvasHeight = scrollCanvasRef.current?.scrollHeight || 0;
   
   // Focal point around 33% of the container (Top third)
@@ -133,7 +133,7 @@ export function ClusterVisualBox({
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-3xl h-[280px] overflow-hidden border border-border/20 rounded-2xl bg-card relative shadow-xl"
+      className="w-full max-w-3xl h-[370px] md:h-[350px] lg:h-[450px] overflow-hidden border border-border/20 rounded-2xl bg-card relative shadow-xl"
     >
       <div 
         ref={scrollCanvasRef}

@@ -77,7 +77,11 @@ export function ReadingCanvas({
           : mode === "normal"
             ? "max-w-5xl"
             : "max-w-2xl"
-      } px-6 md:px-0 flex-1 flex flex-col items-center justify-center relative z-10 transition-all duration-500 ease-in-out min-h-0`}
+      } px-6 md:px-0 flex-1 flex flex-col items-center ${
+        mode === "cluster" 
+          ? "justify-start pt-4 sm:pt-8 md:justify-center md:pt-0" 
+          : "justify-center"
+      } relative z-10 transition-all duration-500 ease-in-out min-h-0`}
     >
       <AnimatePresence mode="wait">
         {completedChapter && mode !== "normal" ? (
@@ -207,7 +211,7 @@ export function ReadingCanvas({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="w-full flex items-center justify-center -translate-y-16 md:-translate-y-24"
+            className="w-full flex items-center justify-center mb-[15vh] md:mb-[20vh]"
           >
             <RsvpVisualBox rsvpSequence={rsvpSequence} settings={settings.rsvp} />
           </motion.div>
@@ -218,7 +222,7 @@ export function ReadingCanvas({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="w-full flex items-center justify-center -translate-y-16 md:-translate-y-24"
+            className="w-full flex items-center justify-center md:mb-[20vh] mt-[8vh] md:mt-0"
           >
             <ClusterVisualBox clusterChunks={clusterChunks} settings={settings.cluster} />
           </motion.div>
