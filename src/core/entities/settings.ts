@@ -156,7 +156,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
     fontSize: 48,
     fontFamily: "inter",
     orpColor: "primary",
-    orpGlow: true,
+    orpGlow: false,
     showFocusGuides: false,
     unmarkedOpacity: 0.3,
     unmarkedColor: "foreground",

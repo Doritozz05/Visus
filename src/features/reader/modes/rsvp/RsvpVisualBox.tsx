@@ -97,7 +97,7 @@ export function RsvpVisualBox({
   };
 
   return (
-    <div className="w-full py-10 sm:py-16 md:py-20 border border-border/30 dark:border-border/15 relative flex items-center justify-center bg-card rounded-2xl overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] transition-all duration-300">
+    <div className="w-full max-w-3xl h-[280px] border border-border/30 dark:border-border/15 relative flex items-center justify-center bg-card rounded-2xl overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] transition-all duration-300">
       {settings.showFocusGuides && (
         <div className="absolute left-[42%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-32 pointer-events-none z-0">
           <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[2px] bg-primary/15" />
