@@ -6,9 +6,7 @@ import {
   RotateCw, 
   Play, 
   Pause, 
-  Settings2,
-  ChevronLeft,
-  ChevronRight
+  Settings2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePlayerVisibility } from "../hooks/usePlayerVisibility";
@@ -17,8 +15,6 @@ import { WpmScrubber } from "./WpmScrubber";
 interface ReaderPlayerProps {
   onRewind: () => void;
   onSkip: () => void;
-  onPrevPage: () => void;
-  onNextPage: () => void;
   allBookPages: BookVisualPage[];
 }
 
@@ -30,8 +26,6 @@ interface ReaderPlayerProps {
 export const ReaderPlayer = React.memo(({
   onRewind,
   onSkip,
-  onPrevPage,
-  onNextPage,
 }: ReaderPlayerProps) => {
   const [isWpmExpanded, setIsWpmExpanded] = React.useState(false);
 
@@ -108,16 +102,6 @@ export const ReaderPlayer = React.memo(({
             <div className="flex items-center justify-center">
               <div className="flex items-center gap-0.5 sm:gap-1 bg-accent/20 p-0.5 sm:p-1 rounded-2xl border border-border/10">
                 <button
-                  onClick={onPrevPage}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
-                  title="Previous Page"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-
-                <div className="w-[1px] h-4 bg-border/20 mx-0.5" />
-
-                <button
                   onClick={onRewind}
                   className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
                   title="Rewind 10 words"
@@ -149,18 +133,8 @@ export const ReaderPlayer = React.memo(({
                 >
                   <RotateCw className="w-3.5 h-3.5 sm:w-4 h-4" />
                 </button>
-
-                <div className="w-[1px] h-4 bg-border/20 mx-0.5" />
-
-                <button
-                  onClick={onNextPage}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
-                  title="Next Page"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+                </div>
+                </div>
 
             {/* Right Slot: Mode Chip */}
             <div className="flex items-center justify-end overflow-hidden">

@@ -314,8 +314,6 @@ export default function ReaderClient() {
           <ReaderPlayer
             onRewind={handleRewind}
             onSkip={handleSkip}
-            onPrevPage={() => handlePageChange("prev")}
-            onNextPage={() => handlePageChange("next")}
             allBookPages={allBookPages}
           />
         )}
