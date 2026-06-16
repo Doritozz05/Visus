@@ -31,7 +31,10 @@ describe("useRsvpEngine", () => {
       currentChapter: mockChapter as any,
       mode: "rsvp",
       wpm: 600,
-      settings: DEFAULT_SETTINGS
+      settings: {
+        ...DEFAULT_SETTINGS,
+        rsvp: { ...DEFAULT_SETTINGS.rsvp, warmupRamp: false }
+      }
     }));
 
     expect(result.current.rsvpSequence).toHaveLength(5);
@@ -45,7 +48,10 @@ describe("useRsvpEngine", () => {
       currentChapter: mockChapter as any,
       mode: "rsvp",
       wpm: 600, // 100ms per word base
-      settings: DEFAULT_SETTINGS
+      settings: {
+        ...DEFAULT_SETTINGS,
+        rsvp: { ...DEFAULT_SETTINGS.rsvp, warmupRamp: false }
+      }
     }));
 
     act(() => {
@@ -73,7 +79,10 @@ describe("useRsvpEngine", () => {
       currentChapter: mockChapter as any,
       mode: "rsvp",
       wpm: 600,
-      settings: DEFAULT_SETTINGS
+      settings: {
+        ...DEFAULT_SETTINGS,
+        rsvp: { ...DEFAULT_SETTINGS.rsvp, warmupRamp: false }
+      }
     }));
 
     act(() => {

@@ -98,7 +98,7 @@ export function calculatePunctuationDelay(word: string, options?: RsvpAlgorithmO
   const commaDelay = options?.algorithm === "custom" && options?.customDelays?.comma ? options.customDelays.comma : 1.5;
   const periodDelay = options?.algorithm === "custom" && options?.customDelays?.period ? options.customDelays.period : 2.2;
   // Fallback for exclamation/quotes slightly lower than period
-  const quoteDelay = Math.max(1.0, periodDelay - 0.4);
+  const quoteDelay = Math.max(1.0, Number((periodDelay - 0.4).toFixed(2)));
 
   // Refined regexes to handle ending punctuation potentially followed by closing quotes or parentheses
   if (/[.!?]['"”’»)}]*$/.test(word)) return periodDelay;  // End of sentence (extended pause)
@@ -126,7 +126,7 @@ export function calculateLengthDelay(word: string, options?: RsvpAlgorithmOption
   const shortWordDelay = options?.algorithm === "custom" && options?.customDelays?.shortWord ? options.customDelays.shortWord : 0.85;
 
   if (length > 12) return longWordDelay;  // Extremely long words (e.g., electrocardiogram)
-  if (length > 8) return Math.max(1.0, longWordDelay - 0.15);  // Long words (e.g., everything, compositions)
+  if (length > 8) return Math.max(1.0, Number((longWordDelay - 0.15).toFixed(2)));  // Long words (e.g., everything, compositions)
   if (length <= 3 && length > 0) return shortWordDelay; // Short stop words (e.g., the, a, of)
   return 1.0;
 }
