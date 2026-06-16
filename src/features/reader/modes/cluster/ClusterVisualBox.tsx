@@ -6,6 +6,7 @@ import { hexToRgba, resolveColor } from "@/lib/color-utils";
 import { BUILTIN_THEMES } from "@/core/config/themes";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { getFontFamilyStyle, getReaderFontClass } from "@/lib/typography";
+import { useClusterMeasurements } from "./useClusterMeasurements";
 
 interface ClusterVisualBoxProps {
   clusterChunks: string[] | DynamicCluster[];
@@ -18,34 +19,11 @@ export function ClusterVisualBox({
 }: ClusterVisualBoxProps) {
   const { settings: globalSettings, customFonts } = useSettings();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const scrollCanvasRef = React.useRef<HTMLDivElement>(null);
   
-  // Resolve semantic colors based on current theme
-  const getThemeColor = (key: string) => {
-    const themeId = globalSettings.general.theme;
-    const customThemes = globalSettings.general.customThemes || [];
-    
-    // Check built-in themes first
-    const builtIn = BUILTIN_THEMES.find(t => t.id === themeId);
-    if (builtIn) {
-      if (key === "primary") return builtIn.accent;
-      if (key === "foreground") return builtIn.foreground;
-      if (key === "muted") return builtIn.mutedForeground;
-    }
-
-    // Check custom themes
-    const custom = customThemes.find(t => t.id === themeId);
-    if (custom) {
-      if (key === "primary") return custom.accent;
-      if (key === "foreground") return custom.foreground;
-      if (key === "muted") return custom.mutedForeground;
-    }
-
-    return key; // Fallback
-  };
-
   const wordIndex = useReadingStore((state) => state.wordIndex);
 
-  // Normalize inputs (accepts both string arrays and DynamicCluster arrays)
+  // Normalize inputs
   const normalizedChunks = React.useMemo(() => {
     return clusterChunks.map((chunk) => {
       if (typeof chunk === "string") {
@@ -72,41 +50,57 @@ export function ClusterVisualBox({
     return getClusterIndexForWord(wordIndex);
   }, [wordIndex, getClusterIndexForWord]);
 
-  // Scroll position tracking ref
-  const lastScrollTopRef = React.useRef<number>(-1);
+  // Off-screen static measurements
+  const { measurements, isMeasured } = useClusterMeasurements(scrollCanvasRef, [
+    normalizedChunks,
+    settings.fontSize,
+    settings.fontFamily,
+  ]);
 
-  // Reset scroll tracker when the chapter chunks change
+  // Render variables pre-calculated
+  const containerHeight = 280;
+  const paddingY = 140 - settings.fontSize / 2;
+  const scrollCanvasHeight = scrollCanvasRef.current?.scrollHeight || 0;
+  
+  // Focal point around 33% of the container (Top third)
+  const focalPointY = containerHeight / 3;
+
+  const [translateY, setTranslateY] = React.useState(0);
+
+  // Discrete line-by-line scrolling
+  // Only triggers a scroll when the offsetTop (line position) changes
   React.useEffect(() => {
-    lastScrollTopRef.current = -1;
-  }, [clusterChunks]);
+    if (isMeasured && measurements[activeClusterIndex]) {
+      const m = measurements[activeClusterIndex];
+      // Target Y to position the active chunk at the focal point
+      let targetY = -(m.offsetTop - focalPointY + (m.offsetHeight / 2));
+      
+      // Keep within bounds
+      const maxScroll = Math.max(0, scrollCanvasHeight - containerHeight);
+      targetY = Math.max(-maxScroll, Math.min(0, targetY));
+      
+      setTranslateY(targetY);
+    }
+  }, [activeClusterIndex, isMeasured, measurements, scrollCanvasHeight, focalPointY]);
 
-  // Auto-scroll inside container to keep active line centered
-  React.useEffect(() => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    
-    const handleScroll = () => {
-      const activeChild = container.querySelector(`[data-active="true"]`) as HTMLElement;
-      if (activeChild) {
-        const containerHeight = container.clientHeight;
-        const childOffsetTop = activeChild.offsetTop;
-        const childHeight = activeChild.clientHeight;
-
-        const targetScrollTop = Math.max(0, childOffsetTop - containerHeight / 2 + childHeight / 2);
-
-        if (Math.abs(lastScrollTopRef.current - targetScrollTop) > 2) {
-          lastScrollTopRef.current = targetScrollTop;
-          container.scrollTo({
-            top: targetScrollTop,
-            behavior: "smooth",
-          });
-        }
-      }
-    };
-
-    const rafId = requestAnimationFrame(handleScroll);
-    return () => cancelAnimationFrame(rafId);
-  }, [activeClusterIndex]);
+  // Colors & Styling
+  const getThemeColor = (key: string) => {
+    const themeId = globalSettings.general.theme;
+    const customThemes = globalSettings.general.customThemes || [];
+    const builtIn = BUILTIN_THEMES.find(t => t.id === themeId);
+    if (builtIn) {
+      if (key === "primary") return builtIn.accent;
+      if (key === "foreground") return builtIn.foreground;
+      if (key === "muted") return builtIn.mutedForeground;
+    }
+    const custom = customThemes.find(t => t.id === themeId);
+    if (custom) {
+      if (key === "primary") return custom.accent;
+      if (key === "foreground") return custom.foreground;
+      if (key === "muted") return custom.mutedForeground;
+    }
+    return key;
+  };
 
   const activeColors = {
     indigo: "text-indigo-500 dark:text-indigo-400",
@@ -122,49 +116,32 @@ export function ClusterVisualBox({
   
   const innerStyle: React.CSSProperties = {
     fontSize: `${settings.fontSize}px`,
-    paddingTop: `${140 - settings.fontSize / 2}px`,
-    paddingBottom: `${140 - settings.fontSize / 2}px`,
+    paddingTop: `${paddingY}px`,
+    paddingBottom: `${paddingY}px`,
     fontFamily: getFontFamilyStyle(settings.fontFamily, customFonts),
+    transform: `translate3d(0, ${translateY}px, 0)`,
+    // Smooth discrete scrolling only when translating
+    transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    willChange: 'transform'
   };
 
   const resolvedActiveColor = settings.activeColor === "primary" ? getThemeColor("primary") : settings.activeColor;
   const resolvedGlowColor = settings.glowEffect === "none" ? "none" : (settings.glowEffect === "primary" ? getThemeColor("primary") : resolveColor(settings.glowEffect));
   const isPreset = resolvedActiveColor in activeColors;
-  const activeColorClass = isPreset ? activeColors[resolvedActiveColor as keyof typeof activeColors] : "";
   const readerFontClass = getReaderFontClass(settings.fontFamily);
-
-  const visibleChunks = React.useMemo(() => {
-    const WINDOW_SIZE = 15;
-    const start = Math.max(0, activeClusterIndex - WINDOW_SIZE);
-    const end = Math.min(normalizedChunks.length - 1, activeClusterIndex + WINDOW_SIZE);
-
-    return normalizedChunks.slice(start, end + 1).map((chunk, idx) => {
-      const absoluteIndex = start + idx;
-      return {
-        ...chunk,
-        absoluteIndex,
-        isActive: absoluteIndex === activeClusterIndex,
-      };
-    });
-  }, [normalizedChunks, activeClusterIndex]);
-
-  const maskStyle: React.CSSProperties = {
-    maskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
-    WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
-  };
 
   return (
     <div
       ref={containerRef}
-      style={maskStyle}
-      className="w-full max-w-3xl h-[280px] overflow-y-auto scrollbar-none border border-border/20 rounded-2xl px-8 py-0 bg-card relative transition-all duration-300 shadow-xl"
+      className="w-full max-w-3xl h-[280px] overflow-hidden border border-border/20 rounded-2xl bg-card relative shadow-xl"
     >
       <div 
+        ref={scrollCanvasRef}
         style={innerStyle}
-        className={`text-center whitespace-normal break-words w-full ${readerFontClass} ${sizeClass}`}
+        className={`w-full relative px-8 text-center whitespace-normal break-words ${readerFontClass} ${sizeClass}`}
       >
-        {visibleChunks.map((chunk) => {
-          const isActive = chunk.isActive;
+        {normalizedChunks.map((chunk, idx) => {
+          const isActive = idx === activeClusterIndex;
 
           const inactiveStyle: React.CSSProperties = {
             opacity: settings.inactiveOpacity,
@@ -176,53 +153,38 @@ export function ClusterVisualBox({
             opacity: 1,
             filter: "blur(0px)",
             transform: "scale(1.03)",
-            textShadow: settings.highlightStyle !== "bold-only"
+            textShadow: settings.highlightStyle !== "bold-only" && settings.highlightStyle !== "color-only"
               ? "0.2px 0 0 currentColor, -0.2px 0 0 currentColor"
               : undefined,
           };
 
           let highlightClass = "";
-          let highlightStyle: React.CSSProperties = isActive ? activeStyle : {};
+          let highlightStyle: React.CSSProperties = isActive ? { ...activeStyle } : { ...inactiveStyle };
 
           if (isActive) {
             if (settings.highlightStyle === "spotlight") {
-              highlightStyle = {
-                ...highlightStyle,
-                color: resolvedActiveColor,
-                textShadow: resolvedGlowColor !== "none"
-                  ? `0 0 12px ${hexToRgba(resolvedGlowColor, 0.55)}, 0 0 2px ${hexToRgba(resolvedGlowColor, 0.3)}`
-                  : undefined
-              };
+              highlightStyle.color = resolvedActiveColor;
+              if (resolvedGlowColor !== "none") {
+                highlightStyle.textShadow = `0 0 12px ${hexToRgba(resolvedGlowColor, 0.55)}, 0 0 2px ${hexToRgba(resolvedGlowColor, 0.3)}`;
+              }
             } else if (settings.highlightStyle === "capsule") {
-              highlightStyle = {
-                ...highlightStyle,
-                color: resolvedActiveColor,
-                backgroundColor: hexToRgba(resolvedActiveColor, 0.1),
-                borderColor: hexToRgba(resolvedActiveColor, 0.2),
-                borderWidth: "1px",
-                borderStyle: "solid",
-                boxShadow: `0 0 15px ${hexToRgba(resolvedActiveColor, 0.15)}`,
-                padding: "2px 6px",
-                borderRadius: "6px"
-              };
+              highlightStyle.color = resolvedActiveColor;
+              highlightStyle.backgroundColor = hexToRgba(resolvedActiveColor, 0.1);
+              highlightStyle.borderColor = hexToRgba(resolvedActiveColor, 0.2);
+              highlightStyle.borderWidth = "1px";
+              highlightStyle.borderStyle = "solid";
+              highlightStyle.boxShadow = `0 0 15px ${hexToRgba(resolvedActiveColor, 0.15)}`;
+              highlightStyle.padding = "2px 6px";
+              highlightStyle.borderRadius = "6px";
             } else if (settings.highlightStyle === "underline") {
-              highlightStyle = {
-                ...highlightStyle,
-                color: resolvedActiveColor,
-                borderBottom: `2px solid ${resolvedActiveColor}`,
-                paddingBottom: "1px"
-              };
+              highlightStyle.color = resolvedActiveColor;
+              highlightStyle.borderBottom = `2px solid ${resolvedActiveColor}`;
+              highlightStyle.paddingBottom = "1px";
             } else if (settings.highlightStyle === "bold-only") {
-              highlightStyle = {
-                ...highlightStyle,
-                color: resolvedActiveColor,
-                fontWeight: "800"
-              };
+              highlightStyle.color = resolvedActiveColor;
+              highlightStyle.fontWeight = "800";
             } else if (settings.highlightStyle === "color-only") {
-              highlightStyle = {
-                ...highlightStyle,
-                color: resolvedActiveColor
-              };
+              highlightStyle.color = resolvedActiveColor;
             }
           } else {
             if (settings.highlightStyle === "capsule") {
@@ -236,17 +198,19 @@ export function ClusterVisualBox({
             }
           }
 
+          const activePresetClass = isActive && isPreset && settings.highlightStyle !== "bold-only" 
+            ? activeColors[resolvedActiveColor as keyof typeof activeColors] 
+            : "";
+
           return (
-            <React.Fragment key={chunk.absoluteIndex}>
-              <span
-                data-active={isActive}
-                style={isActive ? highlightStyle : inactiveStyle}
-                className={`inline-block whitespace-nowrap transition-all duration-150 ease-out mx-0.5 ${highlightClass}`}
-              >
-                {chunk.text}
-              </span>
-              {" "}
-            </React.Fragment>
+            <span
+              key={`chunk-${idx}`}
+              data-chunk-index={idx}
+              style={highlightStyle}
+              className={`inline-block whitespace-nowrap transition-all duration-150 ease-out mx-0.5 ${highlightClass} ${activePresetClass}`}
+            >
+              {chunk.text}
+            </span>
           );
         })}
       </div>
