@@ -6,7 +6,9 @@ import {
   RotateCw, 
   Play, 
   Pause, 
-  Settings2
+  Settings2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePlayerVisibility } from "../hooks/usePlayerVisibility";
@@ -15,6 +17,8 @@ import { WpmScrubber } from "./WpmScrubber";
 interface ReaderPlayerProps {
   onRewind: () => void;
   onSkip: () => void;
+  onPrevPage: () => void;
+  onNextPage: () => void;
   allBookPages: BookVisualPage[];
 }
 
@@ -26,6 +30,8 @@ interface ReaderPlayerProps {
 export const ReaderPlayer = React.memo(({
   onRewind,
   onSkip,
+  onPrevPage,
+  onNextPage,
 }: ReaderPlayerProps) => {
   const [isWpmExpanded, setIsWpmExpanded] = React.useState(false);
 
@@ -52,7 +58,7 @@ export const ReaderPlayer = React.memo(({
     <div 
       onMouseEnter={onPlayerMouseEnter}
       onMouseLeave={onPlayerMouseLeave}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-[380px] z-50 pointer-events-none reader-player-container flex justify-center"
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-[420px] z-50 pointer-events-none reader-player-container flex justify-center"
     >
       <motion.div
         initial={false}
@@ -77,7 +83,7 @@ export const ReaderPlayer = React.memo(({
           className="liquid-glass flex flex-col gap-0 overflow-hidden shadow-[var(--card-shadow)] rounded-[calc(var(--radius)*2)] border border-border/30 bg-card/85 backdrop-blur-2xl w-full !transition-none will-change-[transform,opacity]"
         >
           {/* Main Control Row */}
-          <div className="grid grid-cols-3 items-center h-14 px-3 sm:px-5">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center h-14 px-3 sm:px-4 gap-2">
             
             {/* Left Slot: Speed Toggle Indicator */}
             <div className="flex items-center justify-start overflow-hidden">
@@ -100,7 +106,17 @@ export const ReaderPlayer = React.memo(({
 
             {/* Center Slot: Core Playback Group */}
             <div className="flex items-center justify-center">
-              <div className="flex items-center gap-1 sm:gap-2 bg-accent/20 p-0.5 sm:p-1 rounded-2xl border border-border/10">
+              <div className="flex items-center gap-0.5 sm:gap-1 bg-accent/20 p-0.5 sm:p-1 rounded-2xl border border-border/10">
+                <button
+                  onClick={onPrevPage}
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <div className="w-[1px] h-4 bg-border/20 mx-0.5" />
+
                 <button
                   onClick={onRewind}
                   className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
@@ -133,12 +149,22 @@ export const ReaderPlayer = React.memo(({
                 >
                   <RotateCw className="w-3.5 h-3.5 sm:w-4 h-4" />
                 </button>
+
+                <div className="w-[1px] h-4 bg-border/20 mx-0.5" />
+
+                <button
+                  onClick={onNextPage}
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
             {/* Right Slot: Mode Chip */}
             <div className="flex items-center justify-end overflow-hidden">
-              <div className="flex items-center gap-1 sm:gap-1.5 text-[7px] sm:text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 bg-accent/30 px-1.5 sm:px-2 py-1 rounded-lg border border-border/10 whitespace-nowrap">
+              <div className="hidden xs:flex items-center gap-1 sm:gap-1.5 text-[7px] sm:text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 bg-accent/30 px-1.5 sm:px-2 py-1 rounded-lg border border-border/10 whitespace-nowrap">
                 <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${isPlaying ? 'bg-primary animate-pulse' : 'bg-muted-foreground/40'}`} />
                 {mode}
               </div>
