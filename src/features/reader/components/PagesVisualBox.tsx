@@ -164,6 +164,21 @@ export function PagesVisualBox({
     initialReady: allBookPages.length > 0 && storeActiveBookId === activeBookId,
   });
 
+  // Source of truth for total pages in the current chapter
+  const totalPagesInChapter = React.useMemo(() => {
+    if (isPaginationReady && allBookPages.length > 0) {
+      let maxIdx = -1;
+      for (let i = allBookPages.length - 1; i >= 0; i--) {
+        if (allBookPages[i].chapterIndex === currentChapter.index) {
+          maxIdx = allBookPages[i].pageIndex;
+          break;
+        }
+      }
+      if (maxIdx !== -1) return maxIdx + 1;
+    }
+    return totalPages;
+  }, [isPaginationReady, allBookPages, currentChapter.index, totalPages]);
+
   // Consuming custom Page navigation hook
   const {
     getPageIndexForWord,
@@ -177,12 +192,17 @@ export function PagesVisualBox({
     containerDimensions,
     columnGap,
     currentPageIndex,
-    totalPages,
+    totalPages: totalPagesInChapter,
     setWordIndex,
     onSavePageProgress,
     onPrevChapter,
     onNextChapter,
   });
+
+  // Reset measured pages when chapter changes to prevent stale navigation logic
+  React.useEffect(() => {
+    setTotalPages(1);
+  }, [currentChapter.index]);
 
   React.useLayoutEffect(() => {
     const el = columnsContainerRef.current;
@@ -244,7 +264,7 @@ export function PagesVisualBox({
 
   const globalPageDetails = React.useMemo(() => {
     if (allBookPages.length === 0) {
-      return { current: currentPageIndex + 1, total: totalPages };
+      return { current: currentPageIndex + 1, total: totalPagesInChapter };
     }
 
     const absolutePageIndex = pageIndexMapRef.current.get(`${currentChapter.index}_${currentPageIndex}`);
@@ -253,7 +273,7 @@ export function PagesVisualBox({
       current: absolutePageIndex !== undefined ? absolutePageIndex + 1 : currentPageIndex + 1,
       total: allBookPages.length,
     };
-  }, [allBookPages, currentChapter.index, currentPageIndex, totalPages, pageIndexMapRef]);
+  }, [allBookPages, currentChapter.index, currentPageIndex, totalPagesInChapter, pageIndexMapRef]);
 
   const defaultBookmarkName = React.useMemo(() => {
     return `Page ${globalPageDetails.current} of ${globalPageDetails.total}`;
@@ -262,8 +282,8 @@ export function PagesVisualBox({
   const isLastChapter = currentChapter.index === chaptersData.length - 1;
 
   const showPrevChapter = currentPageIndex === 0;
-  const showCompleteBook = currentPageIndex === totalPages - 1 && isLastChapter;
-  const showNextChapter = currentPageIndex === totalPages - 1 && !isLastChapter;
+  const showCompleteBook = currentPageIndex === totalPagesInChapter - 1 && isLastChapter;
+  const showNextChapter = currentPageIndex === totalPagesInChapter - 1 && !isLastChapter;
 
   return (
     <div className="w-full bg-card border border-border/20 rounded-2xl px-3.5 pb-3 pt-5 sm:px-5 sm:pb-4 sm:pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl relative overflow-hidden transition-opacity duration-300 flex flex-col h-full md:h-[660px] min-h-0">
@@ -307,34 +327,37 @@ export function PagesVisualBox({
           )}
         </AnimatePresence>
 
-        <motion.div
-          key={`${currentChapter.index}_${currentPageIndex}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isPaginationReady ? 1 : 0 }}
-          transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="h-full overflow-hidden relative"
-          style={{
-            width: containerDimensions ? `${containerDimensions.width}px` : "100%",
-            margin: "0 auto",
-            willChange: "opacity",
-          }}
-        >
-          <div
-            ref={columnsContainerRef}
-            className={`h-full epub-content ${readerFontClass}`}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${currentChapter.index}_${currentPageIndex}`}
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: isPaginationReady ? 1 : 0, x: 0 }}
+            exit={{ opacity: 0, x: -12 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="h-full w-full overflow-hidden relative"
             style={{
-              columnWidth: "100%",
-              columnCount: 1,
-              columnGap: `${columnGap}px`,
-              columnFill: "auto",
-              transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
-              fontSize: `${scaledFontSize}px`,
-              lineHeight: "1.75",
-              fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
+              width: containerDimensions ? `${containerDimensions.width}px` : "100%",
+              margin: "0 auto",
+              willChange: "opacity, transform",
             }}
-            dangerouslySetInnerHTML={{ __html: formattedHtml }}
-          />
-        </motion.div>
+          >
+            <div
+              ref={columnsContainerRef}
+              className={`h-full epub-content ${readerFontClass}`}
+              style={{
+                columnWidth: "100%",
+                columnCount: 1,
+                columnGap: `${columnGap}px`,
+                columnFill: "auto",
+                transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
+                fontSize: `${scaledFontSize}px`,
+                lineHeight: "1.75",
+                fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
+              }}
+              dangerouslySetInnerHTML={{ __html: formattedHtml }}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <PagesFooter
