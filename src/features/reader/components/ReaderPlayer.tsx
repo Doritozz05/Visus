@@ -52,7 +52,7 @@ export const ReaderPlayer = React.memo(({
     <div 
       onMouseEnter={onPlayerMouseEnter}
       onMouseLeave={onPlayerMouseLeave}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-[420px] z-50 pointer-events-none reader-player-container flex justify-center"
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-[360px] z-50 pointer-events-none reader-player-container flex justify-center"
     >
       <motion.div
         initial={false}
@@ -77,39 +77,39 @@ export const ReaderPlayer = React.memo(({
           className="liquid-glass flex flex-col gap-0 overflow-hidden shadow-[var(--card-shadow)] rounded-[calc(var(--radius)*2)] border border-border/30 bg-card/85 backdrop-blur-xl w-full"
         >
           {/* Main Control Row */}
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 px-3 sm:px-4 gap-2">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-12 px-3 sm:px-4 gap-2">
             
             {/* Left Slot: Speed Toggle Indicator */}
             <div className="flex items-center justify-start overflow-hidden">
               <button
                 onClick={() => setIsWpmExpanded(!isWpmExpanded)}
                 className={`
-                  group flex items-center gap-2 px-3 py-1.5 rounded-full transition-all border
+                  group flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all border
                   ${isWpmExpanded 
                     ? "bg-primary/10 border-primary/40 text-primary" 
                     : "bg-accent/30 border-border/20 text-muted-foreground hover:bg-accent hover:border-border/40"}
                 `}
               >
-                <Settings2 className={`w-3.5 h-3.5 transition-transform duration-500 ${isWpmExpanded ? 'rotate-180' : 'group-hover:rotate-45'}`} />
-                <span className="font-mono text-[11px] font-bold">{wpm}</span>
+                <Settings2 className={`w-3 h-3 transition-transform duration-500 ${isWpmExpanded ? 'rotate-180' : 'group-hover:rotate-45'}`} />
+                <span className="font-mono text-[10px] font-bold">{wpm}</span>
               </button>
             </div>
 
             {/* Center Slot: Core Playback Group */}
             <div className="flex items-center justify-center">
-              <div className="flex items-center gap-0.5 sm:gap-1 bg-accent/20 p-0.5 sm:p-1 rounded-2xl border border-border/10">
+              <div className="flex items-center gap-0.5 sm:gap-1 bg-accent/20 p-0.5 rounded-2xl border border-border/10">
                 <button
                   onClick={onRewind}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
                   title="Rewind 10 words"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 sm:w-4 h-4" />
+                  <RotateCcw className="w-3 h-3 sm:w-3.5 h-3.5" />
                 </button>
 
                 <button
                   onClick={onPlayPauseToggle}
                   className={`
-                    w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-lg
+                    w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-lg
                     ${isPlaying 
                       ? "bg-primary/20 text-primary border border-primary/30" 
                       : "bg-primary text-primary-foreground shadow-primary/20"}
@@ -117,27 +117,27 @@ export const ReaderPlayer = React.memo(({
                   title={isPlaying ? "Pause" : "Play"}
                 >
                   {isPlaying ? (
-                    <Pause className="w-4.5 h-4.5 sm:w-5 sm:h-5 fill-current" />
+                    <Pause className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
                   ) : (
-                    <Play className="w-4.5 h-4.5 sm:w-5 sm:h-5 fill-current ml-0.5" />
+                    <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" />
                   )}
                 </button>
 
                 <button
                   onClick={onSkip}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-90"
                   title="Skip 10 words"
                 >
-                  <RotateCw className="w-3.5 h-3.5 sm:w-4 h-4" />
+                  <RotateCw className="w-3 h-3 sm:w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
             {/* Right Slot: Mode Chip */}
             <div className="flex items-center justify-end overflow-hidden">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/20 bg-accent/30 text-muted-foreground/60 transition-all">
-                <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-primary animate-pulse' : 'bg-muted-foreground/40'}`} />
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider">{mode}</span>
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-border/20 bg-accent/30 text-muted-foreground/60 transition-all">
+                <span className={`w-1 h-1 rounded-full ${isPlaying ? 'bg-primary animate-pulse' : 'bg-muted-foreground/40'}`} />
+                <span className="font-mono text-[9px] font-bold uppercase tracking-wider">{mode}</span>
               </div>
             </div>
           </div>
