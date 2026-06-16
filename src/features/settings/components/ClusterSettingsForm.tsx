@@ -222,6 +222,84 @@ export function ClusterSettingsForm() {
           </div>
         )}
 
+        {/* Warmup Ramp */}
+        <div className="flex items-center justify-between py-4 border-t border-border/10">
+          <div>
+            <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Warm-up Ramp</label>
+            <p className="text-[9px] text-muted-foreground mt-0.5">Gradually accelerates to target WPM over 2 seconds when starting.</p>
+          </div>
+          <button
+            onClick={() => updateClusterSettings({ warmupRamp: !cluster.warmupRamp })}
+            className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${cluster.warmupRamp ? "bg-primary" : "bg-accent"}`}
+          >
+            <div className={`w-4 h-4 rounded-full bg-background transition-transform duration-300 ${cluster.warmupRamp ? "translate-x-5" : "translate-x-0"}`} />
+          </button>
+        </div>
+
+        {/* Algorithm Profile */}
+        <div className="py-4 border-t border-border/10">
+          <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold mb-3">Pacing Rhythm</label>
+          <div className="flex gap-2 mb-4">
+            {[
+              { id: "metronome", label: "Metronome", desc: "Constant strict pacing" },
+              { id: "dynamic", label: "Dynamic", desc: "Natural cognitive pauses" },
+              { id: "custom", label: "Custom", desc: "User-defined delays" },
+            ].map((alg) => (
+              <button
+                key={alg.id}
+                onClick={() => updateClusterSettings({ algorithm: alg.id as any })}
+                className={`flex-1 p-2 border rounded-lg text-left transition-all ${
+                  cluster.algorithm === alg.id
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border/30 hover:border-border/60 text-muted-foreground bg-card"
+                }`}
+              >
+                <div className="text-[10px] font-bold uppercase">{alg.label}</div>
+                <div className="text-[8px] leading-tight mt-0.5 opacity-80">{alg.desc}</div>
+              </button>
+            ))}
+          </div>
+
+          {cluster.algorithm === "custom" && (
+            <div className="space-y-4 p-4 rounded-xl bg-background/50 border border-border/20">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-[10px] font-bold uppercase text-foreground">Custom Multipliers</span>
+                <button 
+                  onClick={() => updateClusterSettings({ customDelays: { shortWord: 0.85, longWord: 1.2, comma: 1.3, period: 1.6 } })}
+                  className="text-[9px] text-muted-foreground hover:text-primary underline"
+                >
+                  Reset Defaults
+                </button>
+              </div>
+              
+              {[
+                { key: "shortWord", label: "Short clusters", min: 0.5, max: 1.5, step: 0.05 },
+                { key: "longWord", label: "Complex words penalty", min: 1.0, max: 2.5, step: 0.05 },
+                { key: "comma", label: "Commas (,)", min: 1.0, max: 3.0, step: 0.1 },
+                { key: "period", label: "Periods (.)", min: 1.0, max: 4.0, step: 0.1 },
+              ].map((slider) => (
+                <div key={slider.key}>
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                    <span>{slider.label}</span>
+                    <span className="font-mono text-primary">{cluster.customDelays[slider.key as keyof typeof cluster.customDelays].toFixed(2)}x</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={slider.min}
+                    max={slider.max}
+                    step={slider.step}
+                    value={cluster.customDelays[slider.key as keyof typeof cluster.customDelays]}
+                    onChange={(e) => updateClusterSettings({ 
+                      customDelays: { ...cluster.customDelays, [slider.key]: Number(e.target.value) } 
+                    })}
+                    className="w-full h-1 bg-border rounded-full appearance-none accent-primary"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );

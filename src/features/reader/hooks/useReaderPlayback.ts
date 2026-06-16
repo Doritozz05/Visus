@@ -78,12 +78,14 @@ export function useReaderPlayback({
     currentChapter: currentChapterWithWords,
     mode,
     wpm,
+    settings,
   });
 
   const { clusterChunks } = useClusterEngine({
     currentChapter: currentChapterWithWords,
     mode,
     wpm,
+    settings,
   });
 
   // Consuming custom Autosave Hook

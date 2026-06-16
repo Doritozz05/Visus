@@ -67,47 +67,78 @@ export function calculateORP(word: string): number {
 
 
 /**
+ * Options for generating RSVP sequence to apply algorithmic settings.
+ */
+export interface RsvpAlgorithmOptions {
+  algorithm?: "dynamic" | "metronome" | "custom";
+  customDelays?: {
+    shortWord: number;
+    longWord: number;
+    comma: number;
+    period: number;
+  };
+}
+
+/**
  * Calculates the dynamic delay multiplier associated with punctuation characters.
  * Emulates mental reading rhythm by allocating more focus time for commas, periods, etc.
  *
  * @param word - Word being evaluated.
+ * @param options - Configurable delay multipliers.
  * @returns Time multiplier (1.0 = base, 1.5 = medium pause, 2.2 = long pause).
  */
-export function calculatePunctuationDelay(word: string): number {
+export function calculatePunctuationDelay(word: string, options?: RsvpAlgorithmOptions): number {
+  if (options?.algorithm === "metronome") return 1.0;
+
   const lowerWord = word.toLowerCase().trim();
   if (ABBREVIATIONS.has(lowerWord)) {
     return 1.0; // Ignore delays for abbreviations
   }
 
+  const commaDelay = options?.algorithm === "custom" && options?.customDelays?.comma ? options.customDelays.comma : 1.5;
+  const periodDelay = options?.algorithm === "custom" && options?.customDelays?.period ? options.customDelays.period : 2.2;
+  // Fallback for exclamation/quotes slightly lower than period
+  const quoteDelay = Math.max(1.0, periodDelay - 0.4);
+
   // Refined regexes to handle ending punctuation potentially followed by closing quotes or parentheses
-  if (/[.!?]['"”’»)}]*$/.test(word)) return 2.2;  // End of sentence (extended pause)
-  if (/[,;:—]['"”’»)}]*$/.test(word)) return 1.5; // Medium pause for structural breaks
-  if (/[?!)»'"”’]$/.test(word)) return 1.8;        // End of quote or exclamatory break
+  if (/[.!?]['"”’»)}]*$/.test(word)) return periodDelay;  // End of sentence (extended pause)
+  if (/[,;:—]['"”’»)}]*$/.test(word)) return commaDelay; // Medium pause for structural breaks
+  if (/[?!)»'"”’]$/.test(word)) return quoteDelay;        // End of quote or exclamatory break
   return 1.0;
 }
 
 /**
  * Calculates the dynamic delay multiplier based on word length.
  * Extremely long words receive a slight delay multiplier to aid cognitive decoding.
+ * Extremely short words (stop words) are slightly accelerated.
  *
  * @param word - Word being evaluated.
- * @returns Time multiplier (1.0 = base, 1.15 = long word, 1.3 = extremely long word).
+ * @param options - Configurable delay multipliers.
+ * @returns Time multiplier.
  */
-export function calculateLengthDelay(word: string): number {
+export function calculateLengthDelay(word: string, options?: RsvpAlgorithmOptions): number {
+  if (options?.algorithm === "metronome") return 1.0;
+
   const cleanWord = word.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
   const length = cleanWord.length;
-  if (length > 12) return 1.3;  // Extremely long words (e.g., electrocardiogram)
-  if (length > 8) return 1.15;  // Long words (e.g., everything, compositions)
+  
+  const longWordDelay = options?.algorithm === "custom" && options?.customDelays?.longWord ? options.customDelays.longWord : 1.3;
+  const shortWordDelay = options?.algorithm === "custom" && options?.customDelays?.shortWord ? options.customDelays.shortWord : 0.85;
+
+  if (length > 12) return longWordDelay;  // Extremely long words (e.g., electrocardiogram)
+  if (length > 8) return Math.max(1.0, longWordDelay - 0.15);  // Long words (e.g., everything, compositions)
+  if (length <= 3 && length > 0) return shortWordDelay; // Short stop words (e.g., the, a, of)
   return 1.0;
 }
 
 /**
  * Parses raw text content and generates the full sequence of RSVPWord structures ready for rendering.
  *
- * @param content - Raw text content.
+ * @param contentOrWords - Raw text content or array of words.
+ * @param options - Algorithmic overrides.
  * @returns An ordered array of RSVPWord objects.
  */
-export function generateRSVPSequence(contentOrWords: string | string[]): RSVPWord[] {
+export function generateRSVPSequence(contentOrWords: string | string[], options?: RsvpAlgorithmOptions): RSVPWord[] {
   if (!contentOrWords) return [];
   
   const rawWords = Array.isArray(contentOrWords)
@@ -115,8 +146,8 @@ export function generateRSVPSequence(contentOrWords: string | string[]): RSVPWor
     : contentOrWords.trim().split(/\s+/).filter(w => w.trim() !== "");
     
   return rawWords.map((word) => {
-    const puncDelay = calculatePunctuationDelay(word);
-    const lengthDelay = calculateLengthDelay(word);
+    const puncDelay = calculatePunctuationDelay(word, options);
+    const lengthDelay = calculateLengthDelay(word, options);
     return {
       text: word,
       orpIndex: calculateORP(word),

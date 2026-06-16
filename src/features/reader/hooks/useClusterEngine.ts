@@ -2,23 +2,30 @@ import * as React from "react";
 import { generateDynamicClusters, DynamicCluster } from "@/core/algorithms/clusters";
 import { ChapterHtmlData } from "@/features/reader/utils/chapterHtml";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
+import { SettingsState } from "@/core/entities/settings";
 
 interface UseClusterEngineProps {
   currentChapter: ChapterHtmlData & { words: string[] };
   mode: "rsvp" | "cluster" | "normal";
   wpm: number;
+  settings: SettingsState;
 }
 
 export function useClusterEngine({
   currentChapter,
   mode,
   wpm,
+  settings,
 }: UseClusterEngineProps) {
   const isPlaying = useReadingStore((state) => state.isPlaying);
+  const playbackStartTime = React.useRef<number | null>(null);
 
   const clusterChunks = React.useMemo(() => {
-    return generateDynamicClusters(currentChapter.words, 3);
-  }, [currentChapter.words]);
+    return generateDynamicClusters(currentChapter.words, 3, {
+      algorithm: settings.cluster.algorithm,
+      customDelays: settings.cluster.customDelays,
+    });
+  }, [currentChapter.words, settings.cluster.algorithm, settings.cluster.customDelays]);
 
   const clusterOffsets = React.useMemo(() => {
     let offset = 0;
@@ -29,6 +36,14 @@ export function useClusterEngine({
       return { start, end };
     });
   }, [clusterChunks]);
+
+  React.useEffect(() => {
+    if (isPlaying) {
+      playbackStartTime.current = Date.now();
+    } else {
+      playbackStartTime.current = null;
+    }
+  }, [isPlaying]);
 
   // Master speed reading playback timer loop for Cluster mode
   React.useEffect(() => {
@@ -62,8 +77,17 @@ export function useClusterEngine({
       if (!currentChunk) return;
 
       const delayMultiplier = currentChunk.delayMultiplier || 1.0;
-      const finalDelay = baseDelayMs * currentChunk.wordCount * delayMultiplier;
+      let finalDelay = baseDelayMs * currentChunk.wordCount * delayMultiplier;
       const wordsToAdvance = currentChunk.wordCount;
+
+      // Apply Warm-up Ramp (First 2 seconds = 2000ms)
+      if (settings.cluster.warmupRamp && playbackStartTime.current) {
+        const elapsed = Date.now() - playbackStartTime.current;
+        if (elapsed < 2000) {
+          const speedFactor = 0.3 + (0.7 * (elapsed / 2000));
+          finalDelay = finalDelay * (1 / speedFactor);
+        }
+      }
 
       timeoutId = setTimeout(() => {
         const latestIdx = useReadingStore.getState().wordIndex;
@@ -85,7 +109,7 @@ export function useClusterEngine({
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isPlaying, wpm, clusterChunks, clusterOffsets, mode, currentChapter]);
+  }, [isPlaying, wpm, clusterChunks, clusterOffsets, mode, currentChapter, settings.cluster.warmupRamp]);
 
   return {
     clusterChunks,

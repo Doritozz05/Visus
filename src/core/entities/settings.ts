@@ -101,6 +101,15 @@ export interface RsvpSettings {
   showFocusGuides: boolean;
   unmarkedOpacity: number;
   unmarkedColor: string; // "foreground" | "primary" | "muted" or custom color
+  algorithm: "dynamic" | "metronome" | "custom";
+  customDelays: {
+    shortWord: number;
+    longWord: number;
+    comma: number;
+    period: number;
+  };
+  warmupRamp: boolean;
+  focalWeighting: boolean;
 }
 
 export interface ClusterSettings {
@@ -111,7 +120,14 @@ export interface ClusterSettings {
   inactiveOpacity: number;
   blurAmount: string;
   glowEffect: string; // "indigo" | "amber" | "green" | "none" or custom hex / custom on/off
-  algorithm: "dynamic" | "static-2" | "static-3";
+  algorithm: "dynamic" | "metronome" | "custom";
+  customDelays: {
+    shortWord: number;
+    longWord: number;
+    comma: number;
+    period: number;
+  };
+  warmupRamp: boolean;
 }
 
 export interface SettingsState {
@@ -144,6 +160,15 @@ export const DEFAULT_SETTINGS: SettingsState = {
     showFocusGuides: false,
     unmarkedOpacity: 0.3,
     unmarkedColor: "foreground",
+    algorithm: "dynamic",
+    customDelays: {
+      shortWord: 0.85,
+      longWord: 1.3,
+      comma: 1.5,
+      period: 2.2,
+    },
+    warmupRamp: true,
+    focalWeighting: false,
   },
   cluster: {
     fontSize: 24,
@@ -154,5 +179,12 @@ export const DEFAULT_SETTINGS: SettingsState = {
     blurAmount: "0.5px",
     glowEffect: "indigo",
     algorithm: "dynamic",
+    customDelays: {
+      shortWord: 0.85,
+      longWord: 1.2,
+      comma: 1.3,
+      period: 1.6,
+    },
+    warmupRamp: true,
   },
 };

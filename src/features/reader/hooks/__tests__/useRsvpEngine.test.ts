@@ -2,6 +2,7 @@ import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useRsvpEngine } from "../useRsvpEngine";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
+import { DEFAULT_SETTINGS } from "@/core/entities/settings";
 
 describe("useRsvpEngine", () => {
   const mockChapter = {
@@ -29,7 +30,8 @@ describe("useRsvpEngine", () => {
     const { result } = renderHook(() => useRsvpEngine({
       currentChapter: mockChapter as any,
       mode: "rsvp",
-      wpm: 600
+      wpm: 600,
+      settings: DEFAULT_SETTINGS
     }));
 
     expect(result.current.rsvpSequence).toHaveLength(5);
@@ -42,7 +44,8 @@ describe("useRsvpEngine", () => {
     renderHook(() => useRsvpEngine({
       currentChapter: mockChapter as any,
       mode: "rsvp",
-      wpm: 600 // 100ms per word base
+      wpm: 600, // 100ms per word base
+      settings: DEFAULT_SETTINGS
     }));
 
     act(() => {
@@ -69,7 +72,8 @@ describe("useRsvpEngine", () => {
     renderHook(() => useRsvpEngine({
       currentChapter: mockChapter as any,
       mode: "rsvp",
-      wpm: 600
+      wpm: 600,
+      settings: DEFAULT_SETTINGS
     }));
 
     act(() => {

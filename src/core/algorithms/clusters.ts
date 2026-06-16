@@ -67,15 +67,33 @@ export interface DynamicCluster {
 }
 
 /**
+ * Options for generating Dynamic Clusters to apply algorithmic settings.
+ */
+export interface ClusterAlgorithmOptions {
+  algorithm?: "dynamic" | "metronome" | "custom";
+  customDelays?: {
+    shortWord: number;
+    longWord: number;
+    comma: number;
+    period: number;
+  };
+}
+
+/**
  * Groups text dynamically based on cognitive reading principles.
  * Controls visual length (parafoveal vision) and grammatical pauses,
  * assigning an adaptive delay factor to each block.
  *
  * @param paragraphOrWords - Text or words matrix to process.
  * @param targetChunkSize - Ideal words count per visual cluster.
+ * @param options - Algorithmic overrides.
  * @returns Structured list of dynamic clusters.
  */
-export function generateDynamicClusters(paragraphOrWords: string | string[], targetChunkSize: number = 3): DynamicCluster[] {
+export function generateDynamicClusters(
+  paragraphOrWords: string | string[], 
+  targetChunkSize: number = 3,
+  options?: ClusterAlgorithmOptions
+): DynamicCluster[] {
   if (!paragraphOrWords) return [];
 
   const words = Array.isArray(paragraphOrWords)
@@ -97,24 +115,31 @@ export function generateDynamicClusters(paragraphOrWords: string | string[], tar
 
     // Calculate cognitive delay multiplier
     let delayMultiplier = 1.0;
-    const lastWord = currentWords[currentWords.length - 1];
+    
+    if (options?.algorithm !== "metronome") {
+      const lastWord = currentWords[currentWords.length - 1];
+      const commaDelay = options?.algorithm === "custom" && options?.customDelays?.comma ? options.customDelays.comma : 1.3;
+      const periodDelay = options?.algorithm === "custom" && options?.customDelays?.period ? options.customDelays.period : 1.6;
+      const longWordDelayAdd = options?.algorithm === "custom" && options?.customDelays?.longWord ? (options.customDelays.longWord - 1.0) : 0.2;
+      const shortWordDelay = options?.algorithm === "custom" && options?.customDelays?.shortWord ? options.customDelays.shortWord : 0.85;
 
-    if (/[.?!]$/.test(lastWord)) {
-      delayMultiplier = 1.6; // Longer pause at sentence endings
-    } else if (/[,;:—]$/.test(lastWord)) {
-      delayMultiplier = 1.3; // Medium pause for commas and syntactic breaks
-    }
+      if (/[.?!]$/.test(lastWord)) {
+        delayMultiplier = periodDelay; // Longer pause at sentence endings
+      } else if (/[,;:—]$/.test(lastWord)) {
+        delayMultiplier = commaDelay; // Medium pause for commas and syntactic breaks
+      }
 
-    // Increase delay if it contains complex or long words (supports accented characters)
-    const hasLongWord = currentWords.some((w) => w.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜíïöëàèìòù]/g, "").length >= 9);
-    if (hasLongWord) {
-      delayMultiplier += 0.2;
-    }
+      // Increase delay if it contains complex or long words (supports accented characters)
+      const hasLongWord = currentWords.some((w) => w.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜíïöëàèìòù]/g, "").length >= 9);
+      if (hasLongWord) {
+        delayMultiplier += longWordDelayAdd;
+      }
 
-    // Accelerate if words are extremely short and simple
-    const avgLength = currentWords.reduce((sum, w) => sum + w.length, 0) / wordCount;
-    if (avgLength <= 3.5 && delayMultiplier === 1.0) {
-      delayMultiplier = 0.85;
+      // Accelerate if words are extremely short and simple
+      const avgLength = currentWords.reduce((sum, w) => sum + w.length, 0) / wordCount;
+      if (avgLength <= 3.5 && delayMultiplier === 1.0) {
+        delayMultiplier = shortWordDelay;
+      }
     }
 
     clusters.push({

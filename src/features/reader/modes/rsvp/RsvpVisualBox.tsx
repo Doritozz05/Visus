@@ -116,7 +116,7 @@ export function RsvpVisualBox({
         >
           <div
             style={customUnmarkedStyle}
-            className="absolute right-full pr-[0.08em] font-bold text-right whitespace-nowrap select-none pointer-events-none transition-opacity duration-350"
+            className={`absolute right-full pr-[0.08em] font-bold text-right whitespace-nowrap select-none pointer-events-none transition-opacity duration-350 ${settings.focalWeighting ? "font-extrabold" : ""}`}
           >
             {leftPart}
           </div>
@@ -132,7 +132,7 @@ export function RsvpVisualBox({
 
           <div
             style={customUnmarkedStyle}
-            className="absolute left-full pl-[0.08em] font-bold text-left whitespace-nowrap select-none pointer-events-none transition-opacity duration-350"
+            className={`absolute left-full pl-[0.08em] text-left whitespace-nowrap select-none pointer-events-none transition-opacity duration-350 ${settings.focalWeighting ? "font-normal opacity-50" : "font-bold"}`}
           >
             {rightPart}
           </div>
