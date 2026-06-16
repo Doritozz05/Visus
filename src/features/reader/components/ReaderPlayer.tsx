@@ -39,10 +39,15 @@ export const ReaderPlayer = React.memo(({
   const setIsPlaying = useReadingStore((state) => state.setIsPlaying);
 
   // Derived visibility state
-  const { isVisible, onPlayerMouseEnter, onPlayerMouseLeave } = usePlayerVisibility({ 
+  const { isVisible, onPlayerMouseEnter, onPlayerMouseLeave, show } = usePlayerVisibility({ 
     isPlaying, 
     isFocusMode 
   });
+
+  // Collapse scrubber when hidden
+  React.useEffect(() => {
+    if (!isVisible) setIsWpmExpanded(false);
+  }, [isVisible]);
 
   const onPlayPauseToggle = React.useCallback(() => {
     setIsPlaying(!isPlaying);
@@ -52,14 +57,30 @@ export const ReaderPlayer = React.memo(({
     <div 
       onMouseEnter={onPlayerMouseEnter}
       onMouseLeave={onPlayerMouseLeave}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-[360px] z-50 pointer-events-none reader-player-container flex justify-center"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-[360px] z-50 pointer-events-none reader-player-container flex flex-col items-center pb-1"
     >
+      {/* Floating Apple-style handle - Only visible when player is hidden */}
       <motion.div
-        initial={false}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ 
-          y: isVisible ? 0 : 100,
+          opacity: isVisible ? 0 : 1,
+          y: isVisible ? 40 : 0,
+          pointerEvents: isVisible ? "none" : "auto"
+        }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="absolute bottom-[10px] cursor-pointer group py-1 px-8"
+        onMouseEnter={show}
+        onClick={show}
+      >
+        <div className="w-32 h-1 rounded-full bg-primary/40 group-hover:bg-primary/70 group-hover:w-48 group-hover:h-1.5 transition-all duration-500 shadow-sm" />
+      </motion.div>
+
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ 
+          y: isVisible ? -24 : 150,
           opacity: isVisible ? 1 : 0,
-          scale: isVisible ? 1 : 0.98
+          scale: isVisible ? 1 : 0.95
         }}
         transition={{ 
           type: "spring", 
@@ -67,7 +88,7 @@ export const ReaderPlayer = React.memo(({
           damping: 32,
           mass: 0.9
         }}
-        className="relative pointer-events-auto origin-bottom w-full"
+        className="relative pointer-events-auto origin-bottom w-full mb-6"
       >
         <div 
           className="liquid-glass flex flex-col gap-0 overflow-hidden shadow-[var(--card-shadow)] rounded-[calc(var(--radius)*2)] border border-border/30 bg-card/85 backdrop-blur-xl w-full"
@@ -96,7 +117,7 @@ export const ReaderPlayer = React.memo(({
           </AnimatePresence>
 
           {/* Main Control Row */}
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-12 px-3 sm:px-4 gap-2">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 px-3 sm:px-4 gap-2">
             
             {/* Left Slot: Speed Toggle Indicator */}
             <div className="flex items-center justify-start overflow-hidden">

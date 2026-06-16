@@ -310,14 +310,15 @@ export default function ReaderClient() {
           />
         </motion.div>
 
-        {mode !== "normal" && (
-          <ReaderPlayer
-            onRewind={handleRewind}
-            onSkip={handleSkip}
-            allBookPages={allBookPages}
-          />
-        )}
       </motion.main>
+
+      {mode !== "normal" && (
+        <ReaderPlayer
+          onRewind={handleRewind}
+          onSkip={handleSkip}
+          allBookPages={allBookPages}
+        />
+      )}
 
 
       {/* Pomodoro Timer - Rendered constantly to keep timer running, toggled via CSS */}
