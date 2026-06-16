@@ -13,6 +13,7 @@ import { SettingsState } from "@/core/entities/settings";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
 import { DynamicCluster } from "@/core/algorithms/clusters";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ReadingCanvasProps {
   mode: "normal" | "rsvp" | "cluster";
@@ -76,106 +77,154 @@ export function ReadingCanvas({
           : mode === "normal"
             ? "max-w-5xl"
             : "max-w-2xl"
-      } px-6 md:px-0 flex-1 flex flex-col items-center justify-center relative z-10 transition-opacity duration-300 min-h-0`}
+      } px-6 md:px-0 flex-1 flex flex-col items-center justify-center relative z-10 transition-all duration-500 ease-in-out min-h-0`}
     >
-      {completedChapter && mode !== "normal" ? (
-        activeQuiz ? (
-          <ComprehensionQuiz
-            quiz={activeQuiz}
-            onComplete={(accuracy) => {
-              const chapterWords = currentChapter.words.length || 1;
-              const speedWpm = useReadingStore.getState().wpm || 600;
-              const FALLBACK_DURATION_SECONDS = 10;
-              const durationSeconds =
-                Math.round(chapterWords / (speedWpm / 60)) || FALLBACK_DURATION_SECONDS;
+      <AnimatePresence mode="wait">
+        {completedChapter && mode !== "normal" ? (
+          activeQuiz ? (
+            <motion.div
+              key="quiz"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="w-full"
+            >
+              <ComprehensionQuiz
+                quiz={activeQuiz}
+                onComplete={(accuracy) => {
+                  const chapterWords = currentChapter.words.length || 1;
+                  const speedWpm = useReadingStore.getState().wpm || 600;
+                  const FALLBACK_DURATION_SECONDS = 10;
+                  const durationSeconds =
+                    Math.round(chapterWords / (speedWpm / 60)) || FALLBACK_DURATION_SECONDS;
 
-              import("@/core/services/stats-service").then(({ StatsService }) => {
-                StatsService.recordSession({
-                  bookId: activeBook.id,
-                  bookTitle: `${activeBook.title} - ${completedChapter}`,
-                  mode: mode,
-                  speedWpm: speedWpm,
-                  durationSeconds: durationSeconds,
-                  accuracy: accuracy,
-                });
-              });
+                  import("@/core/services/stats-service").then(({ StatsService }) => {
+                    StatsService.recordSession({
+                      bookId: activeBook.id,
+                      bookTitle: `${activeBook.title} - ${completedChapter}`,
+                      mode: mode,
+                      speedWpm: speedWpm,
+                      durationSeconds: durationSeconds,
+                      accuracy: accuracy,
+                    });
+                  });
 
-              // Adaptive RSVP Calibration
-              if (accuracy === 100) {
-                toast.success(`🎯 Excellent retention! Score: 100%. We suggest increasing your speed by +25 WPM.`, {
-                  action: {
-                    label: "Increase",
-                    onClick: () => useReadingStore.getState().setWpm(speedWpm + 25),
-                  },
-                  duration: 8000,
-                });
-              } else if (accuracy < 70) {
-                toast.info(`⚠️ Low retention: ${accuracy}%. We suggest reducing your speed for better assimilation.`, {
-                  action: {
-                    label: "Decrease",
-                    onClick: () => useReadingStore.getState().setWpm(Math.max(100, speedWpm - 50)),
-                  },
-                  duration: 8000,
-                });
-              }
-            }}
-            onClose={() => {
-              setActiveQuiz(null);
-              setCompletedChapter(null);
-              setMode("normal");
-            }}
-            onNextChapter={() => {
-              setActiveQuiz(null);
-              setCompletedChapter(null);
-              handleNextChapter();
-            }}
-          />
+                  // Adaptive RSVP Calibration
+                  if (accuracy === 100) {
+                    toast.success(`🎯 Excellent retention! Score: 100%. We suggest increasing your speed by +25 WPM.`, {
+                      action: {
+                        label: "Increase",
+                        onClick: () => useReadingStore.getState().setWpm(speedWpm + 25),
+                      },
+                      duration: 8000,
+                    });
+                  } else if (accuracy < 70) {
+                    toast.info(`⚠️ Low retention: ${accuracy}%. We suggest reducing your speed for better assimilation.`, {
+                      action: {
+                        label: "Decrease",
+                        onClick: () => useReadingStore.getState().setWpm(Math.max(100, speedWpm - 50)),
+                      },
+                      duration: 8000,
+                    });
+                  }
+                }}
+                onClose={() => {
+                  setActiveQuiz(null);
+                  setCompletedChapter(null);
+                  setMode("normal");
+                }}
+                onNextChapter={() => {
+                  setActiveQuiz(null);
+                  setCompletedChapter(null);
+                  handleNextChapter();
+                }}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="completion"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="w-full"
+            >
+              <ChapterCompletionCard
+                completedChapter={completedChapter}
+                onTakeQuiz={(generated) => setActiveQuiz(generated)}
+                onBackToReader={() => {
+                  setCompletedChapter(null);
+                  setMode("normal");
+                }}
+                onSkipQuiz={() => {
+                  setCompletedChapter(null);
+                  handleNextChapter();
+                }}
+              />
+            </motion.div>
+          )
+        ) : mode === "normal" ? (
+          <motion.div
+            key="normal"
+            initial={{ opacity: 0, scale: 0.99 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.99 }}
+            transition={{ duration: 0.3 }}
+            className="w-full h-full flex flex-col items-center justify-center"
+          >
+            <ErrorBoundary>
+              <PagesVisualBox
+                key={activeBook.id}
+                activeBookId={activeBook.id}
+                currentChapter={currentChapter}
+                chaptersData={chaptersData}
+                savedLocalPageIndex={
+                  activeBook.lastChapterIndex === activeChapterIndex
+                    ? activeBook.lastLocalPageIndex
+                    : undefined
+                }
+                onSavePageProgress={(localPageIdx, wIdx) => {
+                  saveProgressForBook(activeBook.id, activeChapterIndex, wIdx, localPageIdx);
+                }}
+                readerFontClass={readerFontClass}
+                fontSize={settings.general.readerFontSize || 16}
+                wordsPerPage={wordsPerPage}
+                onPrevChapter={handlePrevChapter}
+                onNextChapter={handleNextChapter}
+                setActiveChapterIndex={handleChapterChange}
+                bookmarks={activeBook.bookmarks || []}
+                onAddBookmark={handleAddBookmark}
+                onRemoveBookmark={handleRemoveBookmark}
+                onUpdateBookmarkName={handleUpdateBookmarkName}
+              />
+            </ErrorBoundary>
+          </motion.div>
+        ) : mode === "rsvp" ? (
+          <motion.div
+            key="rsvp"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="w-full flex items-center justify-center"
+          >
+            <RsvpVisualBox rsvpSequence={rsvpSequence} settings={settings.rsvp} />
+          </motion.div>
         ) : (
-          <ChapterCompletionCard
-            completedChapter={completedChapter}
-            onTakeQuiz={(generated) => setActiveQuiz(generated)}
-            onBackToReader={() => {
-              setCompletedChapter(null);
-              setMode("normal");
-            }}
-            onSkipQuiz={() => {
-              setCompletedChapter(null);
-              handleNextChapter();
-            }}
-          />
-        )
-      ) : mode === "normal" ? (
-        <ErrorBoundary>
-          <PagesVisualBox
-            key={activeBook.id}
-            activeBookId={activeBook.id}
-            currentChapter={currentChapter}
-            chaptersData={chaptersData}
-            savedLocalPageIndex={
-              activeBook.lastChapterIndex === activeChapterIndex
-                ? activeBook.lastLocalPageIndex
-                : undefined
-            }
-            onSavePageProgress={(localPageIdx, wIdx) => {
-              saveProgressForBook(activeBook.id, activeChapterIndex, wIdx, localPageIdx);
-            }}
-            readerFontClass={readerFontClass}
-            fontSize={settings.general.readerFontSize || 16}
-            wordsPerPage={wordsPerPage}
-            onPrevChapter={handlePrevChapter}
-            onNextChapter={handleNextChapter}
-            setActiveChapterIndex={handleChapterChange}
-            bookmarks={activeBook.bookmarks || []}
-            onAddBookmark={handleAddBookmark}
-            onRemoveBookmark={handleRemoveBookmark}
-            onUpdateBookmarkName={handleUpdateBookmarkName}
-          />
-        </ErrorBoundary>
-      ) : mode === "rsvp" ? (
-        <RsvpVisualBox rsvpSequence={rsvpSequence} settings={settings.rsvp} />
-      ) : (
-        <ClusterVisualBox clusterChunks={clusterChunks} settings={settings.cluster} />
-      )}
+          <motion.div
+            key="cluster"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="w-full flex items-center justify-center"
+          >
+            <ClusterVisualBox clusterChunks={clusterChunks} settings={settings.cluster} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

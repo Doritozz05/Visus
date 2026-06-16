@@ -16,6 +16,7 @@ import { useDomPagination } from "../hooks/useDomPagination";
 import { usePageNavigation } from "../hooks/usePageNavigation";
 import { useReadingStore } from "../stores/reading-store";
 import { findPageForWordIndex, findFirstPageOfChapter } from "../utils/binarySearch";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PagesVisualBoxProps {
   activeBookId: string;
@@ -292,19 +293,27 @@ export function PagesVisualBox({
         ref={canvasWrapperRef}
         className="flex-1 w-full overflow-hidden relative my-2 flex flex-col justify-start min-h-0"
       >
-        {!isPaginationReady && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-xl">
-            <LoadingSpinner message="Rendering pages..." />
-          </div>
-        )}
+        <AnimatePresence>
+          {!isPaginationReady && (
+            <motion.div 
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-xl"
+            >
+              <LoadingSpinner message="Optimizing layout..." />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div 
+        <motion.div 
           className="h-full overflow-hidden relative"
+          animate={{ opacity: isPaginationReady ? 1 : 0 }}
+          transition={{ duration: 0.4, ease: "easeIn" }}
           style={{
             width: containerDimensions ? `${containerDimensions.width}px` : "100%",
             margin: "0 auto",
-            opacity: isPaginationReady ? 1 : 0,
-            transition: isPaginationReady ? "opacity 0.25s ease-in" : "none",
           }}
         >
           <div
@@ -322,7 +331,7 @@ export function PagesVisualBox({
             }}
             dangerouslySetInnerHTML={{ __html: formattedHtml }}
           />
-        </div>
+        </motion.div>
       </div>
 
       <PagesFooter

@@ -29,30 +29,42 @@ import { Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getReaderFontClass } from "@/lib/typography";
 
-const headerVariants = {
-  hidden: { opacity: 0, y: -30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { type: "spring", stiffness: 240, damping: 24 } 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    }
   }
 };
 
-const playerVariants = {
-  hidden: { opacity: 0, y: 30 },
+const headerVariants = {
+  hidden: { opacity: 0, y: -25 },
   visible: { 
     opacity: 1, 
     y: 0, 
-    transition: { type: "spring", stiffness: 240, damping: 24 } 
+    transition: { type: "spring", stiffness: 260, damping: 20 } 
   }
 };
 
 const canvasVariants = {
-  hidden: { opacity: 0, scale: 0.98 },
+  hidden: { opacity: 0, scale: 0.985, y: 10 },
   visible: { 
     opacity: 1, 
     scale: 1, 
-    transition: { type: "spring", stiffness: 200, damping: 25, delay: 0.05 } 
+    y: 0,
+    transition: { type: "spring", stiffness: 200, damping: 22 } 
+  }
+};
+
+const playerVariants = {
+  hidden: { opacity: 0, y: 25 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { type: "spring", stiffness: 260, damping: 20 } 
   }
 };
 
@@ -136,7 +148,19 @@ export default function ReaderClient() {
   });
 
   // --- 3. EFFECTS ---
+  // Ensure we keep loading state if we expect an active book but library hasn't settled
+  const [hasSettledBookId, setHasSettledBookId] = React.useState(false);
   React.useEffect(() => {
+    if (isHydrated) {
+      // Small debounce to ensure activeBookId is resolved from context/storage
+      const timer = setTimeout(() => setHasSettledBookId(true), 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isHydrated]);
+
+  React.useEffect(() => {
+    if (!isHydrated) return;
+    
     setIsInitializing(true);
     async function loadBinary() {
       if (!activeBookId) {
@@ -157,7 +181,7 @@ export default function ReaderClient() {
       }
     }
     loadBinary();
-  }, [activeBookId, activeBook?.isInCloud]);
+  }, [activeBookId, activeBook?.isInCloud, isHydrated]);
 
   React.useEffect(() => {
     if (isHydrated && !isLoadingContent) {
@@ -195,7 +219,9 @@ export default function ReaderClient() {
   }, [settings.general.readerFontFamily]);
 
   // --- 5. RENDER LOGIC ---
-  if (!isHydrated || isLoadingContent || isInitializing || (activeBook && !isStoreInitialized)) {
+  
+  // Wait for hydration and for the book ID to "settle" to prevent flashing the BookshelfSelector
+  if (!isHydrated || !hasSettledBookId || isLoadingContent || isInitializing || (activeBook && !isStoreInitialized)) {
     return <LoadingSpinner message={activeBook?.isInCloud && !bookBinary ? "Downloading from cloud..." : "Loading reader session..."} className="h-full" />;
   }
 
@@ -232,64 +258,71 @@ export default function ReaderClient() {
       )}
 
       <motion.main 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
         className="flex-1 flex flex-col items-center justify-between relative w-full p-3 pt-2 pb-4 sm:p-6 sm:pt-4 sm:pb-8 overflow-hidden overscroll-none transition-all duration-300 h-dvh md:h-screen"
       >
-        <ReaderHeader
-          activeBook={activeBook}
-          setActiveChapterIndex={handleChapterChange}
-          chaptersData={chaptersData}
-          setMode={setMode}
-          setIsPlaying={setIsPlaying}
-          setCompletedChapter={setCompletedChapter}
-          openQuickSettings={openQuickSettings}
-          setActiveBookId={setActiveBookId}
-          isTocOpen={isTocOpen}
-          setIsTocOpen={setIsTocOpen}
-          bookmarks={activeBook.bookmarks || []}
-          onGoToBookmark={handleGoToBookmark}
-          onDeleteBookmark={handleRemoveBookmark}
-          isPomodoroOpen={isPomodoroOpen}
-          setIsPomodoroOpen={setIsPomodoroOpen}
-        />
+        <motion.div variants={headerVariants} className="w-full">
+          <ReaderHeader
+            activeBook={activeBook}
+            setActiveChapterIndex={handleChapterChange}
+            chaptersData={chaptersData}
+            setMode={setMode}
+            setIsPlaying={setIsPlaying}
+            setCompletedChapter={setCompletedChapter}
+            openQuickSettings={openQuickSettings}
+            setActiveBookId={setActiveBookId}
+            isTocOpen={isTocOpen}
+            setIsTocOpen={setIsTocOpen}
+            bookmarks={activeBook.bookmarks || []}
+            onGoToBookmark={handleGoToBookmark}
+            onDeleteBookmark={handleRemoveBookmark}
+            isPomodoroOpen={isPomodoroOpen}
+            setIsPomodoroOpen={setIsPomodoroOpen}
+          />
+        </motion.div>
 
-        <ReadingCanvas
-          mode={mode}
-          completedChapter={completedChapter}
-          activeQuiz={activeQuiz}
-          setActiveQuiz={setActiveQuiz}
-          setCompletedChapter={setCompletedChapter}
-          setMode={setMode}
-          activeBook={activeBook}
-          currentChapter={currentChapter}
-          chaptersData={chaptersData}
-          activeChapterIndex={activeChapterIndex}
-          wordsPerPage={wordsPerPage}
-          readerFontClass={readerFontClass}
-          settings={settings}
-          rsvpSequence={rsvpSequence}
-          clusterChunks={clusterChunks}
-          handleNextChapter={handleNextChapter}
-          handlePrevChapter={handlePrevChapter}
-          handleChapterChange={handleChapterChange}
-          saveProgressForBook={saveProgressForBook}
-          handleAddBookmark={handleAddBookmark}
-          handleRemoveBookmark={handleRemoveBookmark}
-          handleUpdateBookmarkName={handleUpdateBookmarkName}
-        />
+        <motion.div variants={canvasVariants} className="w-full flex-1 flex flex-col items-center justify-center min-h-0">
+          <ReadingCanvas
+            mode={mode}
+            completedChapter={completedChapter}
+            activeQuiz={activeQuiz}
+            setActiveQuiz={setActiveQuiz}
+            setCompletedChapter={setCompletedChapter}
+            setMode={setMode}
+            activeBook={activeBook}
+            currentChapter={currentChapter}
+            chaptersData={chaptersData}
+            activeChapterIndex={activeChapterIndex}
+            wordsPerPage={wordsPerPage}
+            readerFontClass={readerFontClass}
+            settings={settings}
+            rsvpSequence={rsvpSequence}
+            clusterChunks={clusterChunks}
+            handleNextChapter={handleNextChapter}
+            handlePrevChapter={handlePrevChapter}
+            handleChapterChange={handleChapterChange}
+            saveProgressForBook={saveProgressForBook}
+            handleAddBookmark={handleAddBookmark}
+            handleRemoveBookmark={handleRemoveBookmark}
+            handleUpdateBookmarkName={handleUpdateBookmarkName}
+          />
+        </motion.div>
 
         {mode !== "normal" && (
-          <ReaderPlayer
-            onRewind={handleRewind}
-            onSkip={handleSkip}
-            onPrevPage={() => handlePageChange("prev")}
-            onNextPage={() => handlePageChange("next")}
-            allBookPages={allBookPages}
-          />
+          <motion.div variants={playerVariants} className="w-full flex justify-center">
+            <ReaderPlayer
+              onRewind={handleRewind}
+              onSkip={handleSkip}
+              onPrevPage={() => handlePageChange("prev")}
+              onNextPage={() => handlePageChange("next")}
+              allBookPages={allBookPages}
+            />
+          </motion.div>
         )}
       </motion.main>
+
 
       {/* Pomodoro Timer - Rendered constantly to keep timer running, toggled via CSS */}
       <div 
