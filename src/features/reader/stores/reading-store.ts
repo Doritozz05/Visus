@@ -117,7 +117,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
     }),
 
   setActiveBookId: (activeBookId) => set({ activeBookId }),
-  setIsPlaying: (isPlaying) => set({ isPlaying }),
+  setIsPlaying: (isPlaying) => set((state) => state.isPlaying === isPlaying ? state : { isPlaying }),
   setWpm: (wpm) => set({ wpm }),
   setMode: (mode) => set({ mode }),
   setCompletedChapter: (completedChapter) => set({ completedChapter }),
