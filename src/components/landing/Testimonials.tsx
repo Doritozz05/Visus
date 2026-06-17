@@ -25,7 +25,7 @@ const testimonials = [
     role: "Designer",
   },
   {
-    quote: "Visus handles massive technical EPUBs without breaking a sweat. It's an essential part of my learning stack now.",
+    quote: "Visus handles technical EPUBs without breaking a sweat. It's an essential part of my learning stack now.",
     author: "James H.",
     role: "Tech Lead",
   },
@@ -70,7 +70,7 @@ export function Testimonials() {
               </div>
             </div>
           ))}
-          
+
           {/* Duplicate set for infinite loop - marked aria-hidden for SEO/A11y */}
           {testimonials.map((t, i) => (
             <div

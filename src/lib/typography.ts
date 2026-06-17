@@ -109,7 +109,7 @@ export const getReaderFontClass = (fontId?: string): string => {
 
 export const getFontFamilyStyle = (fontId?: string, customFonts: CustomFont[] = []): string => {
   if (!fontId) return "inherit";
-  
+
   const builtin = BUILTIN_FONTS.find(f => f.id === fontId);
   if (builtin) return builtin.familyStyle;
 

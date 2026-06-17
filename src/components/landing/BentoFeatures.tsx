@@ -13,7 +13,7 @@ export function BentoFeatures() {
           Read on your terms, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">at your speed.</span>
         </h2>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Visus is designed to make reading effortless. Whether you're catching up on technical docs or diving into a novel, we've built the tools to help you stay focused.
+          Visus is designed to make reading effortless. Whether you&apos;re catching up on technical docs or diving into a novel, we&apos;ve built the tools to help you stay focused.
         </p>
       </div>
 
@@ -27,7 +27,7 @@ export function BentoFeatures() {
             </div>
             <h3 className="text-3xl font-extrabold font-heading mb-4 tracking-tight">Built for your focus.</h3>
             <p className="text-muted-foreground text-lg mb-6">
-              Reading shouldn't be a chore. Switch between fonts and themes designed to reduce eye strain and keep you immersed in the text for hours.
+              Reading shouldn&apos;t be a chore. Switch between fonts and themes designed to reduce eye strain and keep you immersed in the text for hours.
             </p>
           </div>
 
@@ -110,7 +110,7 @@ export function BentoFeatures() {
             </div>
             <h3 className="text-3xl font-extrabold font-heading mb-4 tracking-tight">Intelligent library parsing.</h3>
             <p className="text-muted-foreground text-lg mb-8">
-              Our local parser handles massive EPUB files instantly. It extracts semantic chapters, generates crisp covers, and sanitizes HTML for a flawless, distraction-free reading experience.
+              Our local parser handles EPUB files instantly. It extracts semantic chapters, generates  covers, and sanitizes HTML for a flawless, distraction-free reading experience.
             </p>
             <div className="flex gap-4">
               <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-700 text-xs font-bold">Fast</span>
