@@ -20,17 +20,21 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
   const [isGuidesOpen, setIsGuidesOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Define routes where the landing navbar should be hidden (app routes)
-  const isAppRoute = pathname.startsWith("/library") || 
-                     pathname.startsWith("/reader") || 
-                     pathname.startsWith("/dashboard") || 
-                     pathname.startsWith("/settings");
+  // Define routes where the landing navbar should be hidden (app and auth routes)
+  const isExcludedRoute = pathname.startsWith("/library") || 
+                          pathname.startsWith("/reader") || 
+                          pathname.startsWith("/dashboard") || 
+                          pathname.startsWith("/settings") ||
+                          pathname.startsWith("/login") ||
+                          pathname.startsWith("/register") ||
+                          pathname.startsWith("/reset-password") ||
+                          pathname.startsWith("/update-password");
 
-  if (isAppRoute) return null;
+  if (isExcludedRoute) return null;
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/60 border-b border-border/10 shadow-sm">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-secondary text-secondary-foreground border-b border-border/10 shadow-sm transition-colors">
         <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
           <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
             <span className="font-heading font-extrabold text-xl tracking-tight">Visus</span>
@@ -45,7 +49,7 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
                 onMouseLeave={() => setIsGuidesOpen(false)}
               >
                 <button 
-                  className={`flex items-center gap-1 text-sm font-semibold transition-colors ${isGuidesOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  className={`flex items-center gap-1 text-sm font-semibold transition-colors ${isGuidesOpen ? "text-primary" : "text-secondary-foreground/70 hover:text-secondary-foreground"}`}
                 >
                   Guides
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isGuidesOpen ? "rotate-180" : ""}`} />
@@ -90,7 +94,7 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
                 href="https://github.com/Doritozz05/Visus"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-1.5 text-sm font-semibold text-secondary-foreground/70 hover:text-secondary-foreground transition-colors"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -110,7 +114,7 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
             {/* Action Button */}
             <Link
               href="/library"
-              className="text-sm font-bold bg-foreground text-background px-5 py-2.5 rounded-full hover:bg-foreground/90 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+              className="text-sm font-bold bg-primary text-primary-foreground px-5 py-2.5 rounded-full hover:brightness-110 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
             >
               Launch app
               <ArrowRight className="w-4 h-4" />
@@ -119,7 +123,7 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 -mr-2 text-muted-foreground hover:text-foreground md:hidden focus:outline-none"
+              className="p-2 -mr-2 text-secondary-foreground/70 hover:text-secondary-foreground md:hidden focus:outline-none"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -231,7 +235,7 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
                 <Link
                   href="/library"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-sm font-bold bg-foreground text-background py-3 rounded-full hover:bg-foreground/90 transition-all shadow-md flex items-center justify-center gap-2"
+                  className="w-full text-sm font-bold bg-primary text-primary-foreground py-3 rounded-full hover:brightness-110 transition-all shadow-md flex items-center justify-center gap-2"
                 >
                   Launch app
                   <ArrowRight className="w-4 h-4" />

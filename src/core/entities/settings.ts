@@ -43,10 +43,6 @@ export interface CustomTheme {
   sidebarActiveForeground?: string;
 
   // Reader Override Toggle & Colors
-  overrideReader?: boolean;
-  readerBackground?: string;
-  readerForeground?: string;
-  readerBorder?: string;
   readerFont?: string;
 
   // Background Options (Solid, Gradient, Image)

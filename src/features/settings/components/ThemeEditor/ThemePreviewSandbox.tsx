@@ -10,6 +10,7 @@ interface ThemePreviewSandboxProps {
   previewDevice: "desktop" | "mobile";
   setPreviewDevice: (device: "desktop" | "mobile") => void;
   applyPresetTemplate: (preset: typeof PRESETS_TEMPLATES[0]) => void;
+  lastChangedKey?: string | null;
 }
 
 export function ThemePreviewSandbox({
@@ -17,12 +18,28 @@ export function ThemePreviewSandbox({
   previewDevice,
   setPreviewDevice,
   applyPresetTemplate,
+  lastChangedKey,
 }: ThemePreviewSandboxProps) {
   const [activeLayout, setActiveLayout] = React.useState<"library" | "performance" | "settings">("library");
   const [selectedBook, setSelectedBook] = React.useState<number | null>(null);
   const [mockSync, setMockSync] = React.useState(false);
   const [streakActive, setStreakActive] = React.useState(true);
   const [showFontPopover, setShowFontPopover] = React.useState(false);
+
+  // Auto-switch based on what changed
+  React.useEffect(() => {
+    if (!lastChangedKey) return;
+
+    // Sidebar overrides -> Switch to desktop
+    if (lastChangedKey.startsWith("sidebar") || lastChangedKey === "overrideSidebar") {
+      setPreviewDevice("desktop");
+    }
+
+    // Secondary/Popover -> Switch to settings to see them
+    if (["popover", "popoverForeground", "secondary", "secondaryForeground", "input", "ring"].includes(lastChangedKey)) {
+      setActiveLayout("settings");
+    }
+  }, [lastChangedKey, setPreviewDevice]);
 
   // Mock book catalog database
   const mockBooks = [
@@ -47,15 +64,17 @@ export function ThemePreviewSandbox({
   const popoverBg = resolveColor(themeState.popover || themeState.cardBackground);
   const popoverFg = resolveColor(themeState.popoverForeground || themeState.cardForeground);
   const secondaryBg = resolveColor(themeState.secondary || (themeState.isDark ? "#1e293b" : "#f1f5f9"));
+  const secondaryFg = resolveColor(themeState.secondaryForeground || themeState.foreground);
   const uiAccent = resolveColor(themeState.uiAccent || themeState.muted);
   const uiAccentFg = resolveColor(themeState.uiAccentForeground || themeState.accent);
 
   const cardRadius = themeState.cardRadius || "12px";
-  
+
   const getShadowStyle = (shadow: string | undefined) => {
     if (shadow === "glow") {
       if (themeState.glowSettings && themeState.glowSettings.enabled) {
-        const opacity = Math.min(1, (themeState.glowSettings.brightness || 0.15) * 3);
+        const brightness = themeState.glowSettings.brightness ?? 0.15;
+        const opacity = Math.min(1, brightness * 3);
         const glowColor = hexToRgba(themeState.glowSettings.color || themeState.accent, opacity);
         return `0 0 ${themeState.glowSettings.blur}px ${themeState.glowSettings.spread}px ${glowColor}`;
       }
@@ -79,6 +98,10 @@ export function ThemePreviewSandbox({
     ? `1px solid rgba(${hexToRgb(themeState.cardBorder || themeState.border)}, ${themeState.glassmorphism.borderOpacity})` 
     : `1px solid ${resolveColor(themeState.cardBorder || themeState.border)}`;
 
+  const getPulseClass = (keys: string[]) => {
+    return lastChangedKey && keys.includes(lastChangedKey) ? "ring-1 ring-primary/20 rounded-sm z-50 transition-all duration-300" : "";
+  };
+
   // Content Layout switcher
   const renderLayoutContent = () => {
     const isDesktop = previewDevice === "desktop";
@@ -88,7 +111,7 @@ export function ThemePreviewSandbox({
         return (
           <div className="flex flex-col flex-1 overflow-hidden gap-2">
             {/* Search Input Mock */}
-            <div className="relative shrink-0">
+            <div className={`relative shrink-0 ${getPulseClass(["input", "ring"])}`}>
               <Search className="w-3.5 h-3.5 absolute left-2 top-2 opacity-50" style={{ color: themeState.foreground }} />
               <input 
                 type="text" 
@@ -112,11 +135,13 @@ export function ThemePreviewSandbox({
             >
               {mockBooks.map((book, idx) => {
                 const isSelected = selectedBook === idx;
+                const isPulse = lastChangedKey && ["cardBackground", "cardForeground", "cardBorder", "cardRadius", "cardShadow", "glassmorphism", "glowSettings", "accent"].includes(lastChangedKey);
+                
                 return (
                   <div
                     key={idx}
                     onClick={() => setSelectedBook(isSelected ? null : idx)}
-                    className="p-2 border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col gap-0.5 relative"
+                    className={`p-2 border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col gap-0.5 relative ${isPulse ? "ring-1 ring-primary/20 shadow-sm" : ""}`}
                     style={{
                       backgroundColor: glassBg,
                       backdropFilter: glassBlur,
@@ -129,7 +154,7 @@ export function ThemePreviewSandbox({
                     <div className="flex justify-between items-start">
                       <span className="font-bold text-[10px] truncate max-w-[110px]">{book.title}</span>
                       <span 
-                        className="px-1 py-0.5 rounded text-[6px] font-bold font-mono uppercase"
+                        className={`px-1 py-0.5 rounded text-[6px] font-bold font-mono uppercase ${getPulseClass(["uiAccent", "uiAccentForeground"])}`}
                         style={{
                           backgroundColor: themeState.uiAccent || `${book.color}15`,
                           color: themeState.uiAccentForeground || book.color
@@ -138,7 +163,7 @@ export function ThemePreviewSandbox({
                         {book.category}
                       </span>
                     </div>
-                    <span className="text-[7px] opacity-70">By {book.author}</span>
+                    <span className={`text-[7px] opacity-70 ${getPulseClass(["mutedForeground"])}`} style={{ color: themeState.mutedForeground }}>By {book.author}</span>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex-1 h-0.75 rounded-full overflow-hidden" style={{ backgroundColor: `${themeState.accent}20` }}>
                         <div className="h-full rounded-full" style={{ backgroundColor: themeState.accent, width: `${book.progress}%` }} />
@@ -220,9 +245,9 @@ export function ThemePreviewSandbox({
                   { day: "S", val: 25 }
                 ].map((item, idx) => (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-1.5">
-                    <div className="w-full rounded-t-sm relative flex items-end overflow-hidden" style={{ height: "65px", backgroundColor: themeState.uiAccent || themeState.muted || "rgba(0,0,0,0.05)" }}>
+                    <div className={`w-full rounded-t-sm relative flex items-end overflow-hidden ${getPulseClass(["uiAccent"])}`} style={{ height: "65px", backgroundColor: themeState.uiAccent || themeState.muted || "rgba(0,0,0,0.05)" }}>
                       <div 
-                        className="w-full rounded-t-sm transition-all duration-500" 
+                        className={`w-full rounded-t-sm transition-all duration-500 ${getPulseClass(["accent"])}`} 
                         style={{ 
                           backgroundColor: themeState.accent, 
                           height: `${item.val}%` 
@@ -256,7 +281,7 @@ export function ThemePreviewSandbox({
               </div>
 
               {/* Auto sync toggle */}
-              <div className="flex items-center justify-between select-none">
+              <div className={`flex items-center justify-between select-none ${getPulseClass(["accent", "accentForeground", "muted", "border"])}`}>
                 <div className="flex flex-col">
                   <span className="text-[9px] font-bold" style={{ color: themeState.cardForeground }}>Auto-sync</span>
                   <span className="text-[7px] text-muted-foreground leading-tight" style={{ color: themeState.mutedForeground }}>Sync readings in background</span>
@@ -280,7 +305,7 @@ export function ThemePreviewSandbox({
               </div>
 
               {/* Font selection mockup dropdown */}
-              <div className="flex flex-col gap-1 mt-1 relative">
+              <div className={`flex flex-col gap-1 mt-1 relative ${getPulseClass(["popover", "popoverForeground", "input"])}`}>
                 <span className="text-[8px] font-bold" style={{ color: themeState.cardForeground }}>Interface font</span>
                 <div 
                   onClick={() => setShowFontPopover(!showFontPopover)}
@@ -303,7 +328,7 @@ export function ThemePreviewSandbox({
                 {/* Mock Popover menu */}
                 {showFontPopover && (
                   <div 
-                    className="absolute right-0 bottom-8 z-30 w-36 p-1 border rounded-lg shadow-lg flex flex-col gap-0.5"
+                    className="absolute right-0 bottom-8 z-30 w-36 p-1 border rounded-lg shadow-lg flex flex-col gap-0.5 animate-scale-up"
                     style={{
                       backgroundColor: popoverBg,
                       color: popoverFg,
@@ -362,7 +387,7 @@ export function ThemePreviewSandbox({
           {[
             { id: "library", label: "Library" },
             { id: "performance", label: "Stats" },
-            { id: "settings", label: "Settings" }
+            { id: "settings", label: "Prefs" }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -398,8 +423,8 @@ export function ThemePreviewSandbox({
                 "--card-foreground": resolveColor(themeState.cardForeground),
                 "--primary": resolveColor(themeState.accent),
                 "--primary-foreground": resolveColor(themeState.accentForeground),
-                "--secondary": resolveColor(themeState.secondary || (themeState.isDark ? "#1e293b" : "#f1f5f9")),
-                "--secondary-foreground": resolveColor(themeState.secondaryForeground || themeState.foreground),
+                "--secondary": secondaryBg,
+                "--secondary-foreground": secondaryFg,
                 "--muted": resolveColor(themeState.muted),
                 "--muted-foreground": resolveColor(themeState.mutedForeground),
                 "--accent": resolveColor(themeState.uiAccent || themeState.muted),
@@ -415,10 +440,29 @@ export function ThemePreviewSandbox({
                 <style dangerouslySetInnerHTML={{ __html: scopeCss(themeState.customCss, ".preview-sandbox-root") }} />
               )}
 
+              {/* Top Navbar mockup showing secondary color */}
+              <div 
+                className={`h-10 px-4 flex items-center justify-between z-20 relative border-b transition-all ${getPulseClass(["secondary", "secondaryForeground"])}`}
+                style={{
+                  backgroundColor: secondaryBg,
+                  color: secondaryFg,
+                  borderColor: `${themeState.border}20`
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-[10px]">VISUS</span>
+                  <div className="flex gap-2 opacity-70">
+                    <span className="text-[8px]">Guides</span>
+                    <span className="text-[8px]">GitHub</span>
+                  </div>
+                </div>
+                <div className="px-2 py-0.5 rounded-full bg-foreground/10 text-[8px] font-bold">Launch App</div>
+              </div>
+
               {/* Background layers */}
               {(themeState.bgType === "gradient" || themeState.bgType === "image") && (
                 <div 
-                  className="absolute inset-0 z-0 pointer-events-none transition-all duration-300"
+                  className={`absolute inset-0 z-0 pointer-events-none transition-all duration-300 ${getPulseClass(["bgType", "bgGradientStart", "bgGradientEnd", "bgImageUrl", "bgImageBlur", "bgImageOpacity"])}`}
                   style={{
                     backgroundImage: previewBg,
                     backgroundSize: "cover",
@@ -442,25 +486,22 @@ export function ThemePreviewSandbox({
               <div className="flex flex-1 h-full w-full relative z-10 text-[11px] overflow-hidden">
                 {/* Desktop mock sidebar */}
                 <aside 
-                  className="w-24 md:w-32 border-r flex flex-col p-2.5 transition-all duration-300 shrink-0 select-none"
+                  className={`w-24 md:w-32 border-r flex flex-col p-2.5 transition-all duration-300 shrink-0 select-none ${getPulseClass(["sidebarBackground", "sidebarForeground", "sidebarBorder", "overrideSidebar"])}`}
                   style={{
                     backgroundColor: sidebarBg,
                     color: sidebarFg,
                     borderColor: `${sidebarBorder}40`
                   }}
                 >
-                  <div className="font-extrabold text-[11px] tracking-tight mb-4 flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeState.accent }} />
-                    Visus
-                  </div>
-                  
                   <nav className="flex-1 space-y-1">
                     {[
                       { id: "library", label: "Library" },
-                      { id: "performance", label: "Performance" },
-                      { id: "settings", label: "Settings" }
+                      { id: "performance", label: "Stats" },
+                      { id: "settings", label: "Prefs" }
                     ].map((item) => {
                       const isActive = activeLayout === item.id;
+                      const isPulse = lastChangedKey && isActive && ["sidebarActiveBackground", "sidebarActiveForeground", "accent"].includes(lastChangedKey);
+
                       return (
                         <div 
                           key={item.id}
@@ -469,11 +510,11 @@ export function ThemePreviewSandbox({
                           }}
                           className={`p-1.5 rounded cursor-pointer font-mono text-[7px] md:text-[8px] uppercase tracking-wider font-bold transition-all border-l-2 ${
                             isActive ? "border-l-primary" : "border-l-transparent opacity-60 hover:opacity-100"
-                          }`}
+                          } ${isPulse ? "ring-1 ring-primary/20" : ""}`}
                           style={{ 
-                            backgroundColor: isActive ? `${themeState.accent}15` : "transparent", 
-                            color: isActive ? themeState.accent : sidebarFg,
-                            borderLeftColor: isActive ? themeState.accent : "transparent"
+                            backgroundColor: isActive ? `${sidebarActiveBg}15` : "transparent", 
+                            color: isActive ? sidebarActiveBg : sidebarFg,
+                            borderLeftColor: isActive ? sidebarActiveBg : "transparent"
                           }}
                         >
                           {item.label}
@@ -483,7 +524,7 @@ export function ThemePreviewSandbox({
                   </nav>
 
                   <div 
-                    className="p-1.5 rounded text-center text-[7.5px] font-bold uppercase transition-all font-mono shadow-sm"
+                    className={`p-1.5 rounded text-center text-[7.5px] font-bold uppercase transition-all font-mono shadow-sm ${getPulseClass(["accent", "accentForeground"])}`}
                     style={{
                       backgroundColor: themeState.accent,
                       color: themeState.accentForeground
@@ -496,7 +537,7 @@ export function ThemePreviewSandbox({
                 {/* Content window */}
                 <main className="flex-1 p-3 md:p-3.5 flex flex-col gap-2.5 overflow-hidden">
                   <div className="flex justify-between items-center shrink-0">
-                    <h4 className="font-bold text-[10px] md:text-[12px] font-heading uppercase tracking-wide" style={{ color: themeState.foreground }}>
+                    <h4 className={`font-bold text-[10px] md:text-[12px] font-heading uppercase tracking-wide ${getPulseClass(["foreground"])}`} style={{ color: themeState.foreground }}>
                       {activeLayout}
                     </h4>
                   </div>
@@ -521,8 +562,8 @@ export function ThemePreviewSandbox({
                 "--card-foreground": resolveColor(themeState.cardForeground),
                 "--primary": resolveColor(themeState.accent),
                 "--primary-foreground": resolveColor(themeState.accentForeground),
-                "--secondary": resolveColor(themeState.secondary || (themeState.isDark ? "#1e293b" : "#f1f5f9")),
-                "--secondary-foreground": resolveColor(themeState.secondaryForeground || themeState.foreground),
+                "--secondary": secondaryBg,
+                "--secondary-foreground": secondaryFg,
                 "--muted": resolveColor(themeState.muted),
                 "--muted-foreground": resolveColor(themeState.mutedForeground),
                 "--accent": resolveColor(themeState.uiAccent || themeState.muted),
@@ -540,10 +581,10 @@ export function ThemePreviewSandbox({
 
               {/* Phone status bar */}
               <div 
-                className="h-6 px-5 pt-2 flex justify-between items-center text-[8px] font-mono z-25 relative select-none border-b transition-all"
+                className={`h-6 px-5 pt-2 flex justify-between items-center text-[8px] font-mono z-25 relative select-none border-b transition-all ${getPulseClass(["secondary", "secondaryForeground"])}`}
                 style={{
                   backgroundColor: secondaryBg,
-                  color: themeState.secondaryForeground || themeState.foreground,
+                  color: secondaryFg,
                   borderColor: `${themeState.border}20`
                 }}
               >
@@ -592,7 +633,7 @@ export function ThemePreviewSandbox({
 
               {/* Mobile bottom navigation bar mockup */}
               <nav 
-                className="h-12 border-t flex justify-around items-center px-2 pb-1 z-10 transition-all duration-300 shrink-0 select-none"
+                className={`h-12 border-t flex justify-around items-center px-2 pb-1 z-10 transition-all duration-300 shrink-0 select-none ${getPulseClass(["sidebarBackground", "sidebarForeground", "sidebarBorder", "overrideSidebar"])}`}
                 style={{
                   backgroundColor: sidebarBg,
                   color: sidebarFg,
@@ -602,7 +643,7 @@ export function ThemePreviewSandbox({
                 {[
                   { id: "library", label: "Library" },
                   { id: "performance", label: "Stats" },
-                  { id: "settings", label: "Settings" }
+                  { id: "settings", label: "Prefs" }
                 ].map((item) => {
                   const isActive = activeLayout === item.id;
                   return (

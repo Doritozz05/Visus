@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Eye } from "lucide-react";
 
 export function Footer() {
@@ -8,9 +9,11 @@ export function Footer() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
-              <img 
+              <Image 
                 src="/icons/icon-192x192.png" 
                 alt="Visus logo" 
+                width={32}
+                height={32}
                 className="w-full h-full object-contain"
               />
             </div>

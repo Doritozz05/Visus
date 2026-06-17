@@ -66,7 +66,6 @@ describe("Theme Colors and Preset Resolving Utilities", () => {
         mutedForeground: "#6272a4",
         overrideSidebar: true,
         sidebarBackground: "#0d0e15",
-        overrideReader: false,
         bgType: "image",
         bgImageUrl: "data:image/jpeg;base64,...",
         bgImageBlur: 8,

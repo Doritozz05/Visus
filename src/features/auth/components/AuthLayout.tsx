@@ -14,12 +14,12 @@ export function AuthLayout({ children, title, subtitle, showBackButton = true }:
     <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-8 bg-background relative overflow-hidden">
       {/* Back Button */}
       {showBackButton && (
-        <Link 
-          href="/settings" 
+        <Link
+          href="/settings"
           className="absolute top-12 left-12 z-20 flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-          <span>Back to Settings</span>
+          <span>Back to settings</span>
         </Link>
       )}
 

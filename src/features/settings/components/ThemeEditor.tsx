@@ -62,6 +62,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
   const [copied, setCopied] = React.useState(false);
   const [importJson, setImportJson] = React.useState("");
   const [importError, setImportError] = React.useState<string | null>(null);
+  const [lastChangedKey, setLastChangedKey] = React.useState<string | null>(null);
 
   // Automatically switch preview device to mobile if on mobile mode
   React.useEffect(() => {
@@ -100,6 +101,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
       const prevState = history.timeline[prevIndex];
       setThemeState(deepCloneTheme(prevState));
       setHistory(prev => ({ ...prev, index: prevIndex }));
+      setLastChangedKey(null);
       setTimeout(() => { isInternalUpdate.current = false; }, 0);
     }
   }, [history]);
@@ -111,6 +113,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
       const nextState = history.timeline[nextIndex];
       setThemeState(deepCloneTheme(nextState));
       setHistory(prev => ({ ...prev, index: nextIndex }));
+      setLastChangedKey(null);
       setTimeout(() => { isInternalUpdate.current = false; }, 0);
     }
   }, [history]);
@@ -138,6 +141,19 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
     setThemeState(prev => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
       if (push && !isInternalUpdate.current) {
+        // Find what changed to trigger sandbox focus
+        const changedKey = Object.keys(next).find(k => (next as any)[k] !== (prev as any)[k]);
+        if (changedKey) {
+          setLastChangedKey(changedKey);
+          // Auto-clear after a delay
+          setTimeout(() => setLastChangedKey(null), 2000);
+
+          // Auto-switch to preview on mobile when a change is "committed"
+          if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            setMobileMode("preview");
+          }
+        }
+
         // Defer history update to avoid side-effects during render phase
         setTimeout(() => pushToHistory(next), 0);
       }
@@ -255,6 +271,7 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
             previewDevice={previewDevice}
             setPreviewDevice={setPreviewDevice}
             applyPresetTemplate={applyPresetTemplate}
+            lastChangedKey={lastChangedKey}
           />
         </section>
 

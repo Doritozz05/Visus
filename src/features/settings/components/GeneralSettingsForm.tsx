@@ -323,7 +323,7 @@ export function GeneralSettingsForm() {
         onConfirm={() => {
           if (!themeToDelete) return;
           const updatedThemes = customThemes.filter((t) => t.id !== themeToDelete.id);
-          const fallbackTheme = theme === themeToDelete.id ? "light" : theme;
+          const fallbackTheme = theme === themeToDelete.id ? "sepia" : theme;
           updateGeneralSettings({
             customThemes: updatedThemes,
             theme: fallbackTheme

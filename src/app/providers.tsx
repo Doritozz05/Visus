@@ -159,16 +159,10 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--sidebar-active-foreground", toHslString(activeTheme.accentForeground));
     }
 
-    // Reader overrides
-    if (activeTheme.overrideReader) {
-      root.style.setProperty("--reader-background", toHslString(activeTheme.readerBackground || activeTheme.background));
-      root.style.setProperty("--reader-foreground", toHslString(activeTheme.readerForeground || activeTheme.foreground));
-      root.style.setProperty("--reader-border", toHslString(activeTheme.readerBorder || activeTheme.border));
-    } else {
-      root.style.setProperty("--reader-background", toHslString(activeTheme.background));
-      root.style.setProperty("--reader-foreground", toHslString(activeTheme.foreground));
-      root.style.setProperty("--reader-border", toHslString(activeTheme.border));
-    }
+    // Set default reader variables to follow general theme
+    root.style.setProperty("--reader-background", toHslString(activeTheme.background));
+    root.style.setProperty("--reader-foreground", toHslString(activeTheme.foreground));
+    root.style.setProperty("--reader-border", toHslString(activeTheme.border));
 
     root.style.setProperty("--radius", activeTheme.cardRadius || "0.75rem");
     root.style.setProperty("--card-shadow", getShadowValue(activeTheme.cardShadow, activeTheme.glowSettings));

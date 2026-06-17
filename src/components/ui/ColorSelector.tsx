@@ -291,7 +291,8 @@ export function ColorSelector({
   };
 
   const revertToInitial = () => {
-    const resetColor = initialValue || value || resolvedHex;
+    const rawReset = initialValue || value || resolvedHex;
+    const resetColor = resolveColor(rawReset);
     onChange(resetColor);
     onChangeComplete?.(resetColor);
     setInternalHsl(null);
@@ -530,8 +531,8 @@ export function ColorSelector({
                       key={preset.id}
                       type="button"
                       onClick={() => {
-                        onChange(preset.id);
-                        onChangeComplete?.(preset.id);
+                        onChange(preset.hex);
+                        onChangeComplete?.(preset.hex);
                       }}
                       style={{ backgroundColor: preset.hex }}
                       className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
