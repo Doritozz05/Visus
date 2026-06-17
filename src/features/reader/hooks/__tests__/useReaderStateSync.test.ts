@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useReaderStateSync } from "../useReaderStateSync";
 import { useReadingStore } from "../../stores/reading-store";
+import { DEFAULT_SETTINGS } from "@/core/entities/settings";
 
 // Mock the store
 vi.mock("../../stores/reading-store", () => ({
@@ -14,6 +15,7 @@ describe("useReaderStateSync", () => {
   const mockUpdateBook = vi.fn();
   const mockChaptersData = [{ index: 0, title: "Chapter 1" }];
   const mockActiveBookRef = { current: null } as any;
+  const mockSettings = { ...DEFAULT_SETTINGS };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -47,6 +49,7 @@ describe("useReaderStateSync", () => {
         activeBookId: "book-1",
         chaptersData: mockChaptersData,
         updateBook: mockUpdateBook,
+        settings: mockSettings,
       }),
       { initialProps: { activeBook } }
     );
@@ -87,6 +90,7 @@ describe("useReaderStateSync", () => {
         activeBookId: "book-1",
         chaptersData: mockChaptersData,
         updateBook: mockUpdateBook,
+        settings: mockSettings,
       }),
       { initialProps: { activeBook } }
     );
