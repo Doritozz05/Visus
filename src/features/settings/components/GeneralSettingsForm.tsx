@@ -12,6 +12,7 @@ import { DEFAULT_NEW_THEME, deepCloneTheme } from "./ThemeEditor/utils";
 import { FontSelector } from "@/components/ui/FontSelector";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Switch } from "@/components/ui/Switch";
 
 export function GeneralSettingsForm() {
   const router = useRouter();
@@ -291,12 +292,10 @@ export function GeneralSettingsForm() {
                 <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Liquid glass</label>
                 <p className="text-[9px] text-muted-foreground mt-0.5">Enables glass effects. Disable on slow hardware.</p>
               </div>
-              <button
-                onClick={() => updateGeneralSettings({ glassmorphism: !glassmorphism })}
-                className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${glassmorphism ? "bg-primary" : "bg-accent"}`}
-              >
-                <div className={`w-4 h-4 rounded-full bg-background transition-transform duration-300 ${glassmorphism ? "translate-x-5" : "translate-x-0"}`} />
-              </button>
+              <Switch
+                checked={glassmorphism}
+                onChange={(checked) => updateGeneralSettings({ glassmorphism: checked })}
+              />
             </div>
           )}
 
@@ -306,12 +305,10 @@ export function GeneralSettingsForm() {
               <label className="block text-xs font-sans uppercase tracking-wider text-foreground font-semibold">Reduce UI motion</label>
               <p className="text-[9px] text-muted-foreground mt-0.5">Disables transitions for speed loads and pagination changes.</p>
             </div>
-            <button
-              onClick={() => updateGeneralSettings({ reducedMotion: !reducedMotion })}
-              className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 relative shrink-0 ${reducedMotion ? "bg-primary" : "bg-accent"}`}
-            >
-              <div className={`w-4 h-4 rounded-full bg-background transition-transform duration-300 ${reducedMotion ? "translate-x-5" : "translate-x-0"}`} />
-            </button>
+            <Switch
+              checked={reducedMotion}
+              onChange={(checked) => updateGeneralSettings({ reducedMotion: checked })}
+            />
           </div>
         </div>
       </div>

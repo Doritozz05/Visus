@@ -1,7 +1,5 @@
 import * as React from "react";
-import { Upload, Trash2, Sparkles } from "lucide-react";
-import type { CustomTheme } from "@/core/entities/settings";
-import { resolveColor } from "@/lib/color-utils";
+import { Switch } from "@/components/ui/Switch";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { ColorSelector } from "@/components/ui/ColorSelector";
 
@@ -376,19 +374,17 @@ export function BackgroundEffectsTab({
             <span className="text-xs font-bold">Liquid glass</span>
             <span className="text-[9px] text-muted-foreground">Adjust transparency backdrop filters globally on cards</span>
           </div>
-          <input
-            type="checkbox"
+          <Switch
             checked={themeState.glassmorphism?.enabled || false}
-            onChange={(e) => setThemeState(prev => ({
+            onChange={(checked) => setThemeState(prev => ({
               ...prev,
               glassmorphism: {
-                enabled: e.target.checked,
+                enabled: checked,
                 blur: prev.glassmorphism?.blur ?? 12,
                 opacity: prev.glassmorphism?.opacity ?? 0.45,
                 borderOpacity: prev.glassmorphism?.borderOpacity ?? 0.1
               }
             }))}
-            className="w-4 h-4 accent-primary rounded border border-border cursor-pointer"
           />
         </div>
 
@@ -399,14 +395,12 @@ export function BackgroundEffectsTab({
               <span className="text-xs font-bold">Sidebar liquid glass</span>
               <span className="text-[9px] text-muted-foreground">Enable liquid glass effect specifically for the sidebar</span>
             </div>
-            <input
-              type="checkbox"
+            <Switch
               checked={themeState.sidebarLiquidGlass || false}
-              onChange={(e) => setThemeState(prev => ({
+              onChange={(checked) => setThemeState(prev => ({
                 ...prev,
-                sidebarLiquidGlass: e.target.checked
+                sidebarLiquidGlass: checked
               }))}
-              className="w-4 h-4 accent-primary rounded border border-border cursor-pointer"
             />
           </div>
         )}

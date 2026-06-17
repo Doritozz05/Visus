@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { CustomTheme } from "@/core/entities/settings";
 import { ColorSelector } from "@/components/ui/ColorSelector";
+import { Switch } from "@/components/ui/Switch";
 
 interface DecoupledSectionsTabProps {
   themeState: CustomTheme;
@@ -32,11 +33,9 @@ export function DecoupledSectionsTab({ themeState, setThemeState, portalContaine
             <span className="text-xs font-bold">Decoupled sidebar styles</span>
             <span className="text-[9px] text-muted-foreground">Override background and text colors specifically for the sidebar panel</span>
           </div>
-          <input
-            type="checkbox"
+          <Switch
             checked={themeState.overrideSidebar}
-            onChange={(e) => handleToggleOverride("overrideSidebar", e.target.checked)}
-            className="w-4 h-4 accent-primary rounded border border-border cursor-pointer"
+            onChange={(checked) => handleToggleOverride("overrideSidebar", checked)}
           />
         </div>
         <p className="text-[9px] text-muted-foreground mb-3 leading-normal">
