@@ -314,10 +314,14 @@ export function PagesVisualBox({
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    const target = e.target as HTMLElement;
-    const wordIndexAttr = target.getAttribute('data-word-index');
-    if (wordIndexAttr) {
-      updateSelectionRange(parseInt(wordIndexAttr, 10));
+    
+    // Robust word detection using elementFromPoint for better drag feel
+    const target = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement;
+    if (target) {
+      const wordIndexAttr = target.getAttribute('data-word-index');
+      if (wordIndexAttr) {
+        updateSelectionRange(parseInt(wordIndexAttr, 10));
+      }
     }
   };
 
@@ -338,37 +342,48 @@ export function PagesVisualBox({
   };
 
   React.useEffect(() => {
-    const container = columnsContainerRef.current;
-    if (!container) return;
+    if (!isReady) return;
 
-    // Clear previous highlights completely
-    const allSpans = container.querySelectorAll('span[data-word-index]');
-    allSpans.forEach((node) => {
-      const span = node as HTMLElement;
-      span.style.backgroundColor = '';
-      span.style.textDecoration = '';
-      span.style.textDecorationStyle = '';
-      span.style.textDecorationColor = '';
-      span.style.cursor = '';
-    });
+    const paintAnnotations = () => {
+      const container = columnsContainerRef.current;
+      if (!container) return;
 
-    // Apply active highlights
-    chapterAnnotations.forEach(annotation => {
-      for (let i = annotation.startWordIndex; i <= annotation.endWordIndex; i++) {
-        const span = container.querySelector(`span[data-word-index="${i}"]`) as HTMLElement;
-        if (span) {
-          if (annotation.style === 'highlight') {
-            span.style.backgroundColor = annotation.color;
-          } else {
-            span.style.textDecoration = 'underline';
-            span.style.textDecorationStyle = annotation.style;
-            span.style.textDecorationColor = annotation.color;
+      // Clear previous highlights completely
+      const allSpans = container.querySelectorAll('span[data-word-index]');
+      allSpans.forEach((node) => {
+        const span = node as HTMLElement;
+        span.style.backgroundColor = '';
+        span.style.textDecoration = '';
+        span.style.textDecorationStyle = '';
+        span.style.textDecorationColor = '';
+        span.style.cursor = '';
+      });
+
+      // Apply active highlights
+      chapterAnnotations.forEach(annotation => {
+        for (let i = annotation.startWordIndex; i <= annotation.endWordIndex; i++) {
+          const span = container.querySelector(`span[data-word-index="${i}"]`) as HTMLElement;
+          if (span) {
+            if (annotation.style === 'highlight') {
+              span.style.backgroundColor = annotation.color;
+            } else {
+              span.style.textDecoration = 'underline';
+              span.style.textDecorationStyle = annotation.style;
+              span.style.textDecorationColor = annotation.color;
+            }
+            span.style.cursor = 'pointer';
           }
-          span.style.cursor = 'pointer';
         }
-      }
-    });
-  }, [chapterAnnotations, formattedHtml, currentPageIndex]);
+      });
+    };
+
+    // Paint immediately
+    paintAnnotations();
+    
+    // Safety delay to ensure DOM is fully settled and animations finished
+    const timer = setTimeout(paintAnnotations, 100);
+    return () => clearTimeout(timer);
+  }, [chapterAnnotations, formattedHtml, currentPageIndex, isReady]);
 
   const handleContainerClick = (e: React.MouseEvent) => {
     // Only handle if no active text selection is happening

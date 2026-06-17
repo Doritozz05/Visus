@@ -141,10 +141,10 @@ export function ReaderEpubStyles() {
 
         /* Custom selection highlight - Dynamic and Theme-aware */
         .epub-content span[data-word-index].word-selected {
-          background-color: hsla(var(--primary), 0.25) !important;
+          background-color: hsl(var(--primary) / 0.25) !important;
           color: inherit;
           border-radius: 3px;
-          box-shadow: 0 0 0 1px hsla(var(--primary), 0.1);
+          box-shadow: 0 0 0 1px hsl(var(--primary) / 0.1);
           transition: background-color 0.15s ease;
           position: relative;
           z-index: 1;
@@ -155,7 +155,7 @@ export function ReaderEpubStyles() {
           content: "";
           position: absolute;
           inset: -1px -2px;
-          background-color: hsla(var(--primary), 0.1);
+          background-color: hsl(var(--primary) / 0.1);
           border-radius: 4px;
           z-index: -1;
           pointer-events: none;
@@ -163,14 +163,14 @@ export function ReaderEpubStyles() {
 
         /* Dark mode adjustment for better contrast */
         .dark .epub-content span[data-word-index].word-selected {
-          background-color: hsla(var(--primary), 0.35) !important;
-          box-shadow: 0 0 0 1px hsla(var(--primary), 0.2);
+          background-color: hsl(var(--primary) / 0.35) !important;
+          box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2);
         }
 
         .epub-content span[data-word-index] {
           cursor: text;
-          user-select: none;
-          -webkit-user-select: none;
+          user-select: text;
+          -webkit-user-select: text;
         }
 
         /* Prevent selection from jumping to start when clicking margins */
