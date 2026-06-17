@@ -76,8 +76,13 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
+    icon: [
+      { url: "/favicon.png" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   alternates: {
     canonical: "/",
@@ -193,7 +198,7 @@ export default function RootLayout({
                   var parsed = JSON.parse(stored);
                   if (parsed && parsed.general && parsed.general.theme) {
                     theme = parsed.general.theme;
-                    var legacyThemes = ["dark", "midnight", "sepia", "nordic", "nord", "forest", "light", "matrix-green"];
+                    var legacyThemes = ["dark", "midnight", "sepia", "nordic", "nord", "forest", "light", "matrix-green", "obsidian"];
                     if (legacyThemes.includes(theme)) {
                       if (theme === "dark" || theme === "midnight" || theme === "forest" || theme === "matrix-green") {
                         theme = "dark-violet";
@@ -205,6 +210,10 @@ export default function RootLayout({
                         isDark = false;
                       } else if (theme === "nordic" || theme === "nord") {
                         theme = "nord";
+                        isDark = true;
+                      } else if (theme === "obsidian") {
+                        theme = "obsidian";
+                        isDark = true;
                       }
                     } else if (theme === "light" || theme === "sepia") {
                        isDark = false;

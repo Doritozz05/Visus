@@ -32,10 +32,7 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
     <>
       <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/60 border-b border-border/10 shadow-sm">
         <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center shadow-lg shadow-primary/20">
-              <Eye className="w-5 h-5 text-white" />
-            </div>
+          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
             <span className="font-heading font-extrabold text-xl tracking-tight">Visus</span>
           </Link>
 
@@ -152,12 +149,9 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="fixed right-0 top-0 bottom-0 w-80 max-w-[80vw] bg-card/95 backdrop-blur-md border-l border-border/20 shadow-2xl z-[100] p-6 flex flex-col gap-6 md:hidden liquid-glass"
             >
-              {/* Header with Logo and Close Button */}
+              {/* Header with Title and Close Button */}
               <div className="flex items-center justify-between">
-                <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center">
-                    <Eye className="w-5 h-5 text-white" />
-                  </div>
+                <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center">
                   <span className="font-heading font-extrabold text-xl tracking-tight">Visus</span>
                 </Link>
                 <button

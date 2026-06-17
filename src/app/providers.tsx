@@ -125,7 +125,8 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     root.style.setProperty("--popover-foreground", toHslString(activeTheme.popoverForeground || activeTheme.cardForeground));
     
     // Primary/Accent logic: Built-in themes can be tinted by user accentColor
-    const resolvedAccent = (!isCustom && accentColor) ? accentColor : activeTheme.accent;
+    // We exempt "obsidian" and "nord" from this if they should maintain their specific brand colors
+    const resolvedAccent = (!isCustom && accentColor && theme !== "obsidian") ? accentColor : activeTheme.accent;
     root.style.setProperty("--primary", toHslString(resolvedAccent));
     root.style.setProperty("--primary-foreground", toHslString(activeTheme.accentForeground));
     root.style.setProperty("--ring", toHslString(resolvedAccent));

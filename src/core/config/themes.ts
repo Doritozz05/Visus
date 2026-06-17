@@ -115,6 +115,33 @@ export const BUILTIN_THEMES: CustomTheme[] = [
     cardBorder: "#4c566a",
     overrideSidebar: false,
     bgType: "solid"
+  },
+  {
+    id: "obsidian",
+    name: "Obsidian",
+    isDark: true,
+    background: "#121212",
+    foreground: "#f5f5f5",
+    cardBackground: "#1e1e1e",
+    cardForeground: "#f5f5f5",
+    popover: "#1e1e1e",
+    popoverForeground: "#f5f5f5",
+    accent: "#f5f5f5",
+    accentForeground: "#121212",
+    secondary: "#262626",
+    secondaryForeground: "#f5f5f5",
+    muted: "#262626",
+    mutedForeground: "#a3a3a3",
+    uiAccent: "#262626",
+    uiAccentForeground: "#f5f5f5",
+    border: "#2e2e2e",
+    input: "#2e2e2e",
+    ring: "#f5f5f5",
+    cardRadius: "12px",
+    cardShadow: "sm",
+    cardBorder: "#2e2e2e",
+    overrideSidebar: false,
+    bgType: "solid"
   }
 ];
 
@@ -122,5 +149,6 @@ export const BUILTIN_THEME_DETAILS: Record<string, { desc: string, preview: stri
   "light": { desc: "Warm Minimal Light", preview: "bg-[#f6f7f9]" },
   "dark-violet": { desc: "Original Clinical Navy", preview: "bg-[#0b1428]" },
   "sepia": { desc: "Parchment Reading", preview: "bg-[#f3ebd8]" },
-  "nord": { desc: "Snowy Blue Cold", preview: "bg-[#2e3440]" }
+  "nord": { desc: "Snowy Blue Cold", preview: "bg-[#2e3440]" },
+  "obsidian": { desc: "Pure Neutral Stone", preview: "bg-[#121212]" }
 };

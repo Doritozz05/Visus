@@ -85,8 +85,8 @@ export function DecoupledSectionsTab({ themeState, setThemeState, portalContaine
             <div className="flex flex-col gap-2 p-3 bg-card border border-border/30 rounded-xl">
               <span className="text-[11px] font-bold">Active item text color</span>
               <ColorSelector
-                value={themeState.sidebarForeground || themeState.foreground}
-                onChange={(color) => handleColorChange("sidebarForeground", color)}
+                value={themeState.sidebarActiveForeground || themeState.accentForeground}
+                onChange={(color) => handleColorChange("sidebarActiveForeground", color)}
                 portalContainer={portalContainer}
               />
             </div>

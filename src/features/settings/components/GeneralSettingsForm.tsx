@@ -53,6 +53,7 @@ export function GeneralSettingsForm() {
     if (e) e.stopPropagation();
     const newId = `theme-custom-${Date.now()}`;
     const newTheme = {
+      ...DEFAULT_NEW_THEME(newId),
       ...deepCloneTheme(t),
       id: newId,
       name: `${t.name} (Copy)`
@@ -92,6 +93,7 @@ export function GeneralSettingsForm() {
             if (presetTheme) {
               const newId = `theme-custom-${Date.now()}`;
               const newTheme: CustomTheme = {
+                ...DEFAULT_NEW_THEME(newId),
                 ...deepCloneTheme(presetTheme),
                 id: newId,
                 name: `${presetTheme.name} Custom`,

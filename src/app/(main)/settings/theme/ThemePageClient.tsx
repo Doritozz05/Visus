@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { ThemeEditor } from "@/features/settings/components/ThemeEditor";
 import type { CustomTheme } from "@/core/entities/settings";
+import { toast } from "sonner";
 
 export function ThemePageClient() {
   const router = useRouter();
@@ -31,7 +32,13 @@ export function ThemePageClient() {
       customThemes: updatedThemes,
       theme: newTheme.id
     });
-    router.push("/settings");
+    
+    toast.success(`Theme "${newTheme.name}" saved and applied.`);
+    
+    // Small delay to ensure state propagates before navigation
+    setTimeout(() => {
+      router.push("/settings");
+    }, 100);
   };
 
   const handleDeleteTheme = (id: string) => {

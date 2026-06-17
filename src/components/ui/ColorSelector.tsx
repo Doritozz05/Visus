@@ -306,8 +306,8 @@ export function ColorSelector({
     const activeHex = resolvedHex.toLowerCase();
     const presetHex = resolveColor(hex).toLowerCase();
     
-    // Active if the HEX codes match (visual sync) OR the semantic ID matches (logical sync)
-    return activeHex === presetHex || (value?.toLowerCase() || "") === presetId.toLowerCase();
+    // Active if the HEX codes match (visual sync)
+    return activeHex === presetHex;
   };
 
   const isActiveSaved = (hex: string) => {
@@ -501,8 +501,8 @@ export function ColorSelector({
                         key={preset.id}
                         type="button"
                         onClick={() => {
-                          onChange(preset.id);
-                          onChangeComplete?.(preset.id);
+                          onChange(preset.hex);
+                          onChangeComplete?.(preset.hex);
                         }}
                         style={{ backgroundColor: preset.hex }}
                         className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${

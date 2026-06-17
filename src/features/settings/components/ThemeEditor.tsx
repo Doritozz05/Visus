@@ -48,8 +48,13 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
   const [initialTheme] = React.useState(() => deepCloneTheme(themeState));
 
   // History management
-  const [history, setHistory] = React.useState<CustomTheme[]>(() => [deepCloneTheme(themeState)]);
-  const [historyIndex, setHistoryIndex] = React.useState(0);
+  const [history, setHistory] = React.useState<{
+    timeline: CustomTheme[],
+    index: number
+  }>(() => ({
+    timeline: [deepCloneTheme(themeState)],
+    index: 0
+  }));
   const isInternalUpdate = React.useRef(false);
 
   const [previewDevice, setPreviewDevice] = React.useState<"desktop" | "mobile">("desktop");
@@ -65,43 +70,49 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
     }
   }, [mobileMode]);
 
-  // Function to push to history (debounced or on important changes)
-  const pushToHistory = (newState: CustomTheme) => {
+  // Function to push to history
+  const pushToHistory = React.useCallback((newState: CustomTheme) => {
     if (isInternalUpdate.current) return;
     
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(deepCloneTheme(newState));
-    
-    // Limit history size to 5 as requested
-    if (newHistory.length > 5) {
-      newHistory.shift();
-    }
-    
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-  };
+    setHistory(prev => {
+      const newTimeline = prev.timeline.slice(0, prev.index + 1);
+      newTimeline.push(deepCloneTheme(newState));
+      
+      let newIndex = newTimeline.length - 1;
+      // Limit history size to 5
+      if (newTimeline.length > 5) {
+        newTimeline.shift();
+        newIndex--;
+      }
+      
+      return {
+        timeline: newTimeline,
+        index: newIndex
+      };
+    });
+  }, []);
 
   const undo = React.useCallback(() => {
-    if (historyIndex > 0) {
+    if (history.index > 0) {
       isInternalUpdate.current = true;
-      const prevIndex = historyIndex - 1;
-      const prevState = history[prevIndex];
+      const prevIndex = history.index - 1;
+      const prevState = history.timeline[prevIndex];
       setThemeState(deepCloneTheme(prevState));
-      setHistoryIndex(prevIndex);
+      setHistory(prev => ({ ...prev, index: prevIndex }));
       setTimeout(() => { isInternalUpdate.current = false; }, 0);
     }
-  }, [history, historyIndex]);
+  }, [history]);
 
   const redo = React.useCallback(() => {
-    if (historyIndex < history.length - 1) {
+    if (history.index < history.timeline.length - 1) {
       isInternalUpdate.current = true;
-      const nextIndex = historyIndex + 1;
-      const nextState = history[nextIndex];
+      const nextIndex = history.index + 1;
+      const nextState = history.timeline[nextIndex];
       setThemeState(deepCloneTheme(nextState));
-      setHistoryIndex(nextIndex);
+      setHistory(prev => ({ ...prev, index: nextIndex }));
       setTimeout(() => { isInternalUpdate.current = false; }, 0);
     }
-  }, [history, historyIndex]);
+  }, [history]);
 
   // Keyboard shortcuts
   React.useEffect(() => {
@@ -119,13 +130,16 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [historyIndex, history, undo, redo]);
+  }, [undo, redo]);
 
   // Wrap setThemeState to track history
   const updateThemeState = (updater: CustomTheme | ((prev: CustomTheme) => CustomTheme), push: boolean = true) => {
     setThemeState(prev => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
-      if (push) pushToHistory(next);
+      if (push && !isInternalUpdate.current) {
+        // Defer history update to avoid side-effects during render phase
+        setTimeout(() => pushToHistory(next), 0);
+      }
       return next;
     });
   };
@@ -201,10 +215,10 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
   };
 
   const handleSave = () => {
-    if (!themeState.name.trim()) {
-      themeState.name = "My custom theme";
-    }
-    onSave(deepCloneTheme(themeState));
+    const finalTheme = !themeState.name.trim() 
+      ? { ...themeState, name: "My custom theme" }
+      : themeState;
+    onSave(deepCloneTheme(finalTheme));
   };
 
   const handleDelete = () => {
@@ -224,8 +238,8 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
         setThemeName={(name) => updateThemeState(prev => ({ ...prev, name }))}
         onUndo={undo}
         onRedo={redo}
-        canUndo={historyIndex > 0}
-        canRedo={historyIndex < history.length - 1}
+        canUndo={history.index > 0}
+        canRedo={history.index < history.timeline.length - 1}
         onClose={onClose}
         mobileMode={mobileMode}
         onToggleMobileMode={toggleMobileMode}
