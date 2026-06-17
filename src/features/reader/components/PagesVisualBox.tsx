@@ -217,7 +217,7 @@ export function PagesVisualBox({
     return allAnnotations.filter(a => a.chapterIndex === currentChapter.index);
   }, [allAnnotations, currentChapter.index]);
 
-  const { selection, position, clearSelection } = useTextSelection(columnsContainerRef);
+  const { selection, position, clearSelection, updateSelection } = useTextSelection(columnsContainerRef);
   const [isDictionaryOpen, setIsDictionaryOpen] = React.useState(false);
   const [selectedWord, setSelectedWord] = React.useState("");
   const [editingAnnotation, setEditingAnnotation] = React.useState<Annotation | null>(null);
@@ -225,12 +225,25 @@ export function PagesVisualBox({
   const { showMenu } = useContextMenu();
 
   const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     const sel = window.getSelection();
-    if (sel && !sel.isCollapsed && selection) {
-      // If we have an active selection, prevent default and show our custom reading tools
-      e.preventDefault();
-      e.stopPropagation(); // Prevent global context menu from firing
-      
+    
+    // Check if we are right-clicking a word or have a selection
+    const target = e.target as HTMLElement;
+    const wordIndexAttr = target.getAttribute('data-word-index');
+    
+    if ((sel && !sel.isCollapsed) || wordIndexAttr) {
+      // If no selection but right-clicked a word, select it first
+      if (sel && sel.isCollapsed && wordIndexAttr) {
+        const range = document.createRange();
+        range.selectNodeContents(target);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        updateSelection(); // Force update state in the hook
+      }
+
       const items: ContextMenuItem[] = [
         {
           id: "highlight-yellow",
@@ -278,6 +291,9 @@ export function PagesVisualBox({
         },
       ];
       showMenu(e, items);
+    } else {
+      // Fallback to global context menu (Back, Forward, etc.)
+      showMenu(e);
     }
   };
 
@@ -326,6 +342,21 @@ export function PagesVisualBox({
       const annotation = chapterAnnotations.find(a => idx >= a.startWordIndex && idx <= a.endWordIndex);
       if (annotation) {
         setEditingAnnotation(annotation);
+      }
+    }
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const wordIndexAttr = target.getAttribute('data-word-index');
+    if (wordIndexAttr) {
+      const sel = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(target);
+      if (sel) {
+        sel.removeAllRanges();
+        sel.addRange(range);
+        updateSelection(); // Force update state immediately
       }
     }
   };
@@ -582,6 +613,7 @@ export function PagesVisualBox({
             <div
               ref={columnsContainerRef}
               onClick={handleContainerClick}
+              onDoubleClick={handleDoubleClick}
               onContextMenu={handleContextMenu}
               data-custom-context-menu="true"
               className={`h-full epub-content ${readerFontClass} selection-no-browser-ui`}

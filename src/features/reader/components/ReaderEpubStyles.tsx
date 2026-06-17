@@ -131,6 +131,26 @@ export function ReaderEpubStyles() {
           font-weight: 700;
         }
         
+        /* Professional Selection Behavior */
+        .selection-no-browser-ui {
+          user-select: text !important;
+          -webkit-user-select: text !important;
+          -webkit-touch-callout: none !important;
+          -webkit-tap-highlight-color: transparent !important;
+        }
+
+        .selection-no-browser-ui span[data-word-index] {
+          cursor: text;
+          user-select: text;
+          -webkit-user-select: text;
+        }
+
+        /* Prevent selection from jumping to start when clicking margins */
+        .epub-content {
+          user-select: none;
+          -webkit-user-select: none;
+        }
+
         /* Defensive links styles - completely overrides visited link purple and underline! */
         .epub-content a, .epub-content a:visited, .epub-content a:hover, .epub-content a:active {
           color: inherit !important;

@@ -78,7 +78,7 @@ export function SelectionToolbar({
           transform: "translateX(-50%)",
           zIndex: 10000, // Ensure it's above almost everything
         }}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-900/95 dark:bg-zinc-800/95 backdrop-blur-md text-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10 select-none"
+        className="selection-toolbar flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-900/95 dark:bg-zinc-800/95 backdrop-blur-md text-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10 select-none"
       >
         {/* Colors */}
         <div className="flex items-center gap-1 border-r border-zinc-700 pr-2">

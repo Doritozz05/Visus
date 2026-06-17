@@ -239,8 +239,11 @@ body[data-glass="disabled"] .liquid-glass {
 
 /* Kindle-style: Suppress browser-native selection toolbars (Edge Copilot, Chrome tooltips) */
 .selection-no-browser-ui {
-  -webkit-touch-callout: none;
-  user-select: text;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
 .text-gradient-primary {
