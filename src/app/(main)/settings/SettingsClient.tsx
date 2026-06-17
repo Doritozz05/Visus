@@ -73,7 +73,7 @@ export default function SettingsClient() {
       animate="visible"
       className="px-6 md:px-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full"
     >
-      <div className="sticky top-0 bg-background z-30 pt-6 md:pt-12 mb-8 -mx-6 md:-mx-12 px-6 md:px-12">
+      <div className="sticky top-0 bg-background-adaptive z-30 pt-6 md:pt-12 mb-8 -mx-6 md:-mx-12 px-6 md:px-12">
         <motion.header
           variants={headerVariants}
           className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"

@@ -10,6 +10,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Hanken Grotesk';
   src: url('/fonts/Hanken-Grotesk-Bold.woff2') format('woff2');
@@ -17,6 +18,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Lora';
   src: url('/fonts/Lora-Regular.woff2') format('woff2');
@@ -24,6 +26,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Lora';
   src: url('/fonts/Lora-Bold.woff2') format('woff2');
@@ -31,6 +34,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'JetBrains Mono';
   src: url('/fonts/JetBrains-Mono-Regular.woff2') format('woff2');
@@ -38,6 +42,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Atkinson Hyperlegible';
   src: url('/fonts/Atkinson-Hyperlegible-Regular.woff2') format('woff2');
@@ -45,6 +50,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Atkinson Hyperlegible';
   src: url('/fonts/Atkinson-Hyperlegible-Bold.woff2') format('woff2');
@@ -52,6 +58,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Atkinson Hyperlegible';
   src: url('/fonts/Atkinson-Hyperlegible-Italic.woff2') format('woff2');
@@ -59,6 +66,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'OpenDyslexic';
   src: url('/fonts/OpenDyslexic-Regular.woff') format('woff');
@@ -66,6 +74,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'OpenDyslexic';
   src: url('/fonts/OpenDyslexic-Bold.woff') format('woff');
@@ -73,6 +82,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'OpenDyslexic';
   src: url('/fonts/OpenDyslexic-Italic.woff') format('woff');
@@ -93,7 +103,7 @@
     --font-heading-override: var(--font-heading);
     --font-mono-override: var(--font-mono);
     --font-serif-override: var(--font-serif);
-    
+
     --radius: 0.75rem;
 
     /* Decoupled custom theme variables fallbacks */
@@ -110,20 +120,35 @@
     --card-shadow: none;
   }
 
-  html, body {
-    overscroll-behavior: none; /* Block browser pull-to-refresh, elastic scroll, and swipe gestures */
+  .bg-background-adaptive {
+    background-color: hsl(var(--background));
+  }
+
+  body[data-bg-type="image"] .bg-background-adaptive,
+  body[data-bg-type="gradient"] .bg-background-adaptive {
+    background-color: transparent !important;
+  }
+
+  html,
+  body {
+    overscroll-behavior: none;
+    /* Block browser pull-to-refresh, elastic scroll, and swipe gestures */
     @apply scrollbar-none;
   }
+
   * {
     @apply border-border;
   }
+
   html {
     background-color: hsl(var(--background));
   }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+
   body[data-bg-type="image"],
   body[data-bg-type="gradient"] {
     background-color: transparent !important;
@@ -135,6 +160,7 @@
     -webkit-appearance: none;
     margin: 0;
   }
+
   input[type="number"] {
     -moz-appearance: textfield;
   }
@@ -145,15 +171,19 @@
    ========================================================================== */
 
 /* Font Family Mappings */
-body, .font-sans {
+body,
+.font-sans {
   font-family: var(--font-sans-override), var(--font-sans), sans-serif;
 }
+
 .font-heading {
   font-family: var(--font-heading-override), var(--font-heading), sans-serif;
 }
+
 .font-mono {
   font-family: var(--font-mono-override), var(--font-mono), monospace;
 }
+
 .font-serif {
   font-family: var(--font-serif-override), var(--font-serif), serif;
 }
@@ -215,9 +245,12 @@ body[data-glass="disabled"] .liquid-glass {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-none {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 /* Custom themed scrollbar - Global implementation */
@@ -225,15 +258,18 @@ body[data-glass="disabled"] .liquid-glass {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: hsl(var(--secondary) / 0.5);
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--primary) / 0.4);
   border-radius: 4px;
   transition: background 0.3s ease;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary) / 0.8);
 }
@@ -301,6 +337,7 @@ body[data-glass="disabled"] .liquid-glass {
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -310,6 +347,7 @@ body[data-glass="disabled"] .liquid-glass {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -320,6 +358,7 @@ body[data-glass="disabled"] .liquid-glass {
     opacity: 0;
     transform: translateY(-4px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -327,16 +366,18 @@ body[data-glass="disabled"] .liquid-glass {
 }
 
 @keyframes achievement-shine {
-  0% { 
-    filter: brightness(1) drop-shadow(0 0 0 transparent); 
+  0% {
+    filter: brightness(1) drop-shadow(0 0 0 transparent);
     transform: scale(1);
   }
-  50% { 
-    filter: brightness(1.25) drop-shadow(0 0 8px hsl(var(--primary) / 0.35)); 
+
+  50% {
+    filter: brightness(1.25) drop-shadow(0 0 8px hsl(var(--primary) / 0.35));
     transform: scale(1.03);
   }
-  100% { 
-    filter: brightness(1) drop-shadow(0 0 0 transparent); 
+
+  100% {
+    filter: brightness(1) drop-shadow(0 0 0 transparent);
     transform: scale(1);
   }
 }
@@ -346,8 +387,13 @@ body[data-glass="disabled"] .liquid-glass {
 }
 
 @keyframes ribbon-shine {
-  from { transform: translateX(-100%) rotate(45deg); }
-  to { transform: translateX(200%) rotate(45deg); }
+  from {
+    transform: translateX(-100%) rotate(45deg);
+  }
+
+  to {
+    transform: translateX(200%) rotate(45deg);
+  }
 }
 
 .shine-overlay {
@@ -362,12 +408,10 @@ body[data-glass="disabled"] .liquid-glass {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
+  background: linear-gradient(to right,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent);
   transform: rotate(45deg);
   animation: ribbon-shine 3s infinite;
   pointer-events: none;
@@ -486,15 +530,19 @@ body::after {
 .rounded-xl {
   border-radius: var(--radius, 0.75rem) !important;
 }
+
 .rounded-2xl {
   border-radius: calc(var(--radius, 0.75rem) * 1.33) !important;
 }
+
 .rounded-lg {
   border-radius: calc(var(--radius, 0.75rem) * 0.8) !important;
 }
+
 .rounded-md {
   border-radius: calc(var(--radius, 0.75rem) * 0.7) !important;
 }
+
 .rounded {
   border-radius: calc(var(--radius, 0.75rem) * 0.5) !important;
 }
@@ -503,18 +551,23 @@ body::after {
 input[type="range"]::-webkit-slider-runnable-track {
   border-radius: calc(var(--radius, 0.75rem) * 0.5) !important;
 }
+
 input[type="range"]::-webkit-slider-thumb {
   border-radius: calc(var(--radius, 0.75rem) * 0.8) !important;
 }
+
 input[type="range"]::-moz-range-track {
   border-radius: calc(var(--radius, 0.75rem) * 0.5) !important;
 }
+
 input[type="range"]::-moz-range-thumb {
   border-radius: calc(var(--radius, 0.75rem) * 0.8) !important;
 }
 
 /* Dynamic shadows */
-.liquid-glass, .bg-card, [class*="bg-card/"] {
+.liquid-glass,
+.bg-card,
+[class*="bg-card/"] {
   box-shadow: var(--card-shadow, none) !important;
 }
 

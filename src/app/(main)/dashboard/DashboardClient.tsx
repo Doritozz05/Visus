@@ -153,7 +153,7 @@ export default function DashboardClient() {
       {/* Bento Header */}
       <motion.header 
         variants={topVariants}
-        className="sticky top-0 bg-background z-30 border-b border-border/20 pt-4 md:pt-8 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4 -mx-4 md:-mx-8 px-4 md:px-8"
+        className="sticky top-0 bg-background-adaptive z-30 border-b border-border/20 pt-4 md:pt-8 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4 -mx-4 md:-mx-8 px-4 md:px-8"
       >
         <div>
           <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Telemetry & Performance</h1>
