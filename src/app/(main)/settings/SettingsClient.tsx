@@ -71,9 +71,9 @@ export default function SettingsClient() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="px-6 md:px-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full"
+      className="flex flex-col h-full w-full"
     >
-      <div className="sticky top-0 bg-background-adaptive z-30 pt-6 md:pt-12 mb-8 -mx-6 md:-mx-12 px-6 md:px-12">
+      <div className="flex-none bg-background-adaptive z-30 pt-6 md:pt-12 mb-4 px-6 md:px-12 max-w-5xl mx-auto w-full">
         <motion.header
           variants={headerVariants}
           className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
@@ -130,7 +130,7 @@ export default function SettingsClient() {
         </motion.div>
       </div>
 
-      <div className="w-full overflow-visible">
+      <div className="flex-1 overflow-y-auto px-6 md:px-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full scrollbar-thin">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

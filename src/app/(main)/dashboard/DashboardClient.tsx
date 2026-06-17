@@ -148,12 +148,12 @@ export default function DashboardClient() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="px-4 md:px-8 pb-24 md:pb-12 max-w-7xl mx-auto w-full transition-all duration-300"
+      className="flex flex-col h-full w-full transition-all duration-300"
     >
       {/* Bento Header */}
       <motion.header 
         variants={topVariants}
-        className="sticky top-0 bg-background-adaptive z-30 border-b border-border/20 pt-4 md:pt-8 pb-6 mb-8 flex flex-col md:flex-row justify-between items-end gap-4 -mx-4 md:-mx-8 px-4 md:px-8"
+        className="flex-none bg-background-adaptive z-30 border-b border-border/20 pt-4 md:pt-8 pb-6 mb-4 flex flex-col md:flex-row justify-between items-end gap-4 px-4 md:px-8 max-w-7xl mx-auto w-full"
       >
         <div>
           <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Telemetry & Performance</h1>
@@ -177,8 +177,10 @@ export default function DashboardClient() {
         </div>
       </motion.header>
 
-      {/* Top Row: Core Metrics (Horizontal) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Content wrapper to allow scrolling independent of the header */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-24 md:pb-12 max-w-7xl mx-auto w-full scrollbar-thin">
+        {/* Top Row: Core Metrics (Horizontal) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Card A: WPM */}
         <motion.div variants={leftVariants} className="bg-card border border-border/20 p-5 rounded-xl relative overflow-hidden group hover:border-primary/50 transition-all shadow-md liquid-glass flex flex-col justify-between min-h-[140px]">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -481,6 +483,8 @@ export default function DashboardClient() {
             </div>
           </div>
         </motion.div>
+      </div>
+
       </div>
 
       {/* Telemetry Reset Confirmation */}

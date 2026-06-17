@@ -22,7 +22,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* Content Wrapper */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isReader || isThemeDesigner ? "h-dvh overflow-hidden overscroll-none" : "min-h-screen"} ${!hideSidebar ? "md:ml-64" : ""}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 h-dvh overflow-hidden overscroll-none ${!hideSidebar ? "md:ml-64" : ""}`}>
         {children}
       </div>
     </div>
