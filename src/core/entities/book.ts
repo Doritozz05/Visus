@@ -19,6 +19,21 @@ export interface Bookmark {
   chapterTitle: string;
 }
 
+export interface Annotation {
+  id: string;
+  bookId: string;
+  chapterIndex: number;
+  startWordIndex: number;
+  endWordIndex: number;
+  color: string;
+  style: "highlight" | "underline" | "dashed" | "wavy" | "dotted";
+  note?: string;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+  isSynced?: boolean;
+}
+
 export interface BookBinary {
   bookId: string;
   content?: string; // Stored text content of the book

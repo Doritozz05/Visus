@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { BookVisualPage } from "@/lib/parser/paginator";
+import { Annotation } from "@/core/entities/book";
 
 interface ChapterItem {
   title: string;
@@ -18,6 +19,7 @@ export interface ReadingState {
   totalChapters: number;
   chapterWordCounts: number[];
   allBookPages: BookVisualPage[];
+  annotations: Annotation[];
   isCompletionModalOpen: boolean;
   isFocusMode: boolean;
   sessionStats: {
@@ -37,6 +39,7 @@ export interface ReadingState {
   setMode: (mode: "rsvp" | "cluster" | "normal") => void;
   setCompletedChapter: (completedChapter: string | null) => void;
   setAllBookPages: (pages: BookVisualPage[]) => void;
+  setAnnotations: (annotations: Annotation[]) => void;
   setIsCompletionModalOpen: (isOpen: boolean) => void;
   setIsFocusMode: (isFocus: boolean) => void;
   setSessionStats: (stats: { speedWpm: number; durationSeconds: number; accuracy: number | null; wordsCount: number; } | null) => void;
@@ -89,6 +92,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   totalChapters: 0,
   chapterWordCounts: [],
   allBookPages: [],
+  annotations: [],
   isCompletionModalOpen: false,
   isFocusMode: false,
   sessionStats: null,
@@ -122,6 +126,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
   setMode: (mode) => set({ mode }),
   setCompletedChapter: (completedChapter) => set({ completedChapter }),
   setAllBookPages: (allBookPages) => set({ allBookPages }),
+  setAnnotations: (annotations) => set({ annotations }),
   setIsCompletionModalOpen: (isCompletionModalOpen) => set({ isCompletionModalOpen }),
   setIsFocusMode: (isFocusMode) => set({ isFocusMode }),
   setSessionStats: (sessionStats) => set({ sessionStats }),
@@ -151,6 +156,7 @@ export const useReadingStore = create<ReadingState>((set) => ({
         totalChapters,
         chapterWordCounts,
         allBookPages: [],
+        annotations: [],
         isCompletionModalOpen: false,
         isFocusMode: false,
         sessionStats: null,

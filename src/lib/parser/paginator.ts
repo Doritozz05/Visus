@@ -206,51 +206,47 @@ export function tagHtmlBlocksWithWordIndices(htmlContent: string): { html: strin
 
     normalizeMixedContent(container);
 
-    // Primary block-level elements that always contain readable text
-    const PRIMARY_BLOCK_SELECTOR = "p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, td";
-    const PRIMARY_TAGS = new Set(["P", "H1", "H2", "H3", "H4", "H5", "H6", "LI", "BLOCKQUOTE", "PRE", "TD"]);
-
-    // Extended selector includes container elements (div, section) to capture
-    // structural EPUB content (TOC, licenses, copyright) that uses divs instead of paragraphs.
-    // Container elements are only tagged when they are "leaf" nodes (no nested block children)
-    // to prevent double-counting words. This matches extractCleanText behavior in epub.ts.
-    const EXTENDED_SELECTOR = `${PRIMARY_BLOCK_SELECTOR}, div, section`;
-    const NESTED_BLOCK_SELECTOR = "p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, td, div, section";
-
-    const allCandidates = container.querySelectorAll(EXTENDED_SELECTOR);
-    
     let wordCount = 0;
-    
-    allCandidates.forEach((block) => {
-      // Primary blocks (p, h1-h6, li, etc.) are always tagged
-      // Container blocks (div, section) are only tagged if they have no nested block children
-      if (!PRIMARY_TAGS.has(block.tagName)) {
-        const hasNestedBlock = block.querySelector(NESTED_BLOCK_SELECTOR);
-        if (hasNestedBlock) return; // Skip — inner blocks will be tagged instead
-      }
 
-      // Extract text content of this block and count words
-      const text = block.textContent || "";
-      const words = text.split(/\s+/).filter(w => w.trim() !== "");
-      const count = words.length;
-      
-      if (count > 0) {
-        const startIdx = wordCount;
-        const endIdx = wordCount + count - 1;
+    // Recursive function to walk through text nodes and wrap words
+    const wrapWords = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || "";
+        const words = text.split(/(\s+)/); // Preserve whitespace
+        const fragment = document.createDocumentFragment();
+
+        words.forEach((word) => {
+          if (word.trim().length > 0) {
+            const span = document.createElement("span");
+            span.setAttribute("data-word-index", wordCount.toString());
+            span.textContent = word;
+            fragment.appendChild(span);
+            wordCount++;
+          } else {
+            // Keep whitespace as pure text nodes to avoid DOM bloat and spacing issues
+            fragment.appendChild(document.createTextNode(word));
+          }
+        });
+
+        node.parentNode?.replaceChild(fragment, node);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        // Avoid double-wrapping or processing non-content elements
+        if (element.tagName === "SCRIPT" || element.tagName === "STYLE" || element.tagName === "IMG") return;
         
-        block.setAttribute("data-start-word-idx", startIdx.toString());
-        block.setAttribute("data-end-word-idx", endIdx.toString());
-        
-        wordCount += count;
+        const children = Array.from(node.childNodes);
+        children.forEach(wrapWords);
       }
-    });
+    };
+
+    wrapWords(container);
     
     return {
       html: container.innerHTML,
       totalWords: wordCount
     };
   } catch (err) {
-    console.error("Failed to tag HTML blocks with word indices:", err);
+    console.error("Failed to tag HTML words with indices:", err);
     return { html: htmlContent, totalWords: 0 };
   }
 }
