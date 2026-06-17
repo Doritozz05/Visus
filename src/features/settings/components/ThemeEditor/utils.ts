@@ -46,7 +46,7 @@ export const DEFAULT_NEW_THEME = (id: string): CustomTheme => ({
  * Prevents custom CSS from leaking out of the sandbox and breaking the parent editor UI.
  */
 export function scopeCss(css: string, prefix: string): string {
-  if (!css) return "";
+  if (!css || /[<>]/.test(css)) return "";
   // Remove block comments
   let cleanCss = css.replace(/\/\*[\s\S]*?\*\//g, "");
 

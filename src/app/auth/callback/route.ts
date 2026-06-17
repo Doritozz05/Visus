@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+import { isSafeRedirect } from '@/lib/auth-utils'
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   let next = searchParams.get('next') ?? '/library'
 
-  // Safety rail: Prevent open redirects by ensuring 'next' is a relative path
-  if (!next.startsWith('/') || next.startsWith('//')) {
+  // Safety rail: Prevent open redirects by ensuring 'next' is a valid relative path
+  if (!isSafeRedirect(next)) {
     next = '/library'
   }
 
