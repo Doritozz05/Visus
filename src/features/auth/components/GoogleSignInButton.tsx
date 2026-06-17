@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { authService } from "@/core/config/services";
 import { toast } from "sonner";
