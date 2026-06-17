@@ -89,6 +89,8 @@ export interface GeneralSettings {
   readerWordsPerPage: number;  // Target words per page
   telemetryPreference: "cloud" | "anonymous" | "disabled";
   yearlyReadingGoal: number;   // Yearly reading target in books
+  lastUsedWpm?: number;        // Last speed used in RSVP/Cluster
+  lastUsedMode?: "rsvp" | "cluster" | "normal"; // Last mode used
   savedColors?: string[];      // Custom saved color palette (hex codes)
   customThemes?: CustomTheme[]; // Collection of user created themes
 }
@@ -149,6 +151,8 @@ export const DEFAULT_SETTINGS: SettingsState = {
     readerWordsPerPage: 300,
     telemetryPreference: "cloud",
     yearlyReadingGoal: 15,
+    lastUsedWpm: 250,
+    lastUsedMode: "normal",
     savedColors: [],
     customThemes: [],
   },

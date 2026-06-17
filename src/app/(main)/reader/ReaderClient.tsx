@@ -96,8 +96,26 @@ export default function ReaderClient() {
   const setIsFocusMode = useReadingStore((state) => state.setIsFocusMode);
   const sessionStats = useReadingStore((state) => state.sessionStats);
 
+  const wpm = useReadingStore((state) => state.wpm);
+  const { updateGeneralSettings } = useSettings();
+
   // --- 2. CUSTOM HOOKS ---
   const { localFileInputRef, handleLocalFileChange, triggerLocalFileBrowser } = useBookIngestion();
+
+  // Persist WPM and Mode changes to general settings
+  React.useEffect(() => {
+    if (!isHydrated) return;
+    
+    const lastSavedWpm = settings.general.lastUsedWpm;
+    const lastSavedMode = settings.general.lastUsedMode;
+
+    if (wpm !== lastSavedWpm || mode !== lastSavedMode) {
+      updateGeneralSettings({
+        lastUsedWpm: wpm,
+        lastUsedMode: mode
+      });
+    }
+  }, [wpm, mode, isHydrated, updateGeneralSettings, settings.general.lastUsedWpm, settings.general.lastUsedMode]);
 
   // Active book derivation
   const activeBook = React.useMemo(() => {

@@ -124,9 +124,9 @@ export function ReadingCanvas({
                       duration: 8000,
                     });
                   } else if (accuracy < 70) {
-                    toast.info(`⚠️ Low retention: ${accuracy}%. We suggest reducing your speed for better assimilation.`, {
+                    toast.info(`📖 Let's find your comfort zone. Retention was ${accuracy}%. We suggest trying a slightly lower speed for this chapter.`, {
                       action: {
-                        label: "Decrease",
+                        label: "Adjust Speed",
                         onClick: () => useReadingStore.getState().setWpm(Math.max(100, speedWpm - 50)),
                       },
                       duration: 8000,

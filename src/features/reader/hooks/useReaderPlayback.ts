@@ -102,6 +102,7 @@ export function useReaderPlayback({
     chaptersData,
     updateBook,
     isLoadingContent,
+    settings,
   });
 
   // Consuming custom Navigation Hook

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Book } from "@/core/entities/book";
+import { SettingsState } from "@/core/entities/settings";
 import { useReadingStore } from "../stores/reading-store";
 
 export interface UseReaderStateSyncProps {
@@ -9,6 +10,7 @@ export interface UseReaderStateSyncProps {
   chaptersData: any[]; // Assuming it's the mapped chapters
   updateBook: (id: string, updates: Partial<Book>, silent?: boolean) => void;
   isLoadingContent?: boolean;
+  settings: SettingsState;
 }
 
 export function useReaderStateSync({
@@ -18,6 +20,7 @@ export function useReaderStateSync({
   chaptersData,
   updateBook,
   isLoadingContent,
+  settings,
 }: UseReaderStateSyncProps) {
   const initializedBookIdRef = React.useRef<string | null>(null);
 
@@ -26,8 +29,11 @@ export function useReaderStateSync({
     if (isLoadingContent) return;
 
     const book = activeBook;
+    const lastWpm = settings.general.lastUsedWpm || 250;
+    const lastMode = settings.general.lastUsedMode || "normal";
+
     if (!book || !activeBookId) {
-      useReadingStore.getState().initBook("", 0, 0, 250, "normal", []);
+      useReadingStore.getState().initBook("", 0, 0, lastWpm, lastMode, []);
       initializedBookIdRef.current = null;
       return;
     }
@@ -78,8 +84,8 @@ export function useReaderStateSync({
         book.id,
         restoredChapterIdx,
         restoredWordIdx,
-        250,
-        "normal",
+        lastWpm,
+        lastMode,
         chaptersData
       );
 
@@ -116,16 +122,18 @@ export function useReaderStateSync({
       }
     }
 
-  }, [activeBookId, activeBook, chaptersData, updateBook, activeBookRef, isLoadingContent]);
+  }, [activeBookId, activeBook, chaptersData, updateBook, activeBookRef, isLoadingContent, settings.general.lastUsedWpm, settings.general.lastUsedMode]);
 
   // Handle unmount or book transition cleanup to prevent stale data in the store
   React.useEffect(() => {
     return () => {
+      const lastWpm = settings.general.lastUsedWpm || 250;
+      const lastMode = settings.general.lastUsedMode || "normal";
       initializedBookIdRef.current = null;
       useReadingStore.getState().setIsPlaying(false);
-      useReadingStore.getState().initBook("", 0, 0, 250, "normal", []);
+      useReadingStore.getState().initBook("", 0, 0, lastWpm, lastMode, []);
     };
-  }, [activeBookId]);
+  }, [activeBookId, settings.general.lastUsedWpm, settings.general.lastUsedMode]);
 
   const setMode = React.useCallback((newMode: "rsvp" | "cluster" | "normal") => {
     const currentMode = useReadingStore.getState().mode;
