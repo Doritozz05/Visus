@@ -1,34 +1,5 @@
 import type { CustomFont } from "@/lib/typography";
-
-const DB_NAME = "visus_fonts";
-const STORE_NAME = "custom_fonts";
-const DB_VERSION = 1;
-
-function getDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined" || !window.indexedDB) {
-      reject(new Error("IndexedDB is only available in browser environments with IndexedDB support"));
-      return;
-    }
-
-    const request = window.indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "id" });
-      }
-    };
-
-    request.onsuccess = (event) => {
-      resolve((event.target as IDBOpenDBRequest).result);
-    };
-
-    request.onerror = (event) => {
-      reject((event.target as IDBOpenDBRequest).error || new Error("Failed to open IndexedDB"));
-    };
-  });
-}
+import { getDB, STORE_NAMES } from "./indexeddb-service";
 
 export async function saveCustomFont(name: string, file: File): Promise<CustomFont> {
   // Convert file to Base64
@@ -56,8 +27,8 @@ export async function saveCustomFont(name: string, file: File): Promise<CustomFo
 
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
+    const transaction = db.transaction(STORE_NAMES.FONTS, "readwrite");
+    const store = transaction.objectStore(STORE_NAMES.FONTS);
     const request = store.put(customFont);
 
     request.onsuccess = () => {
@@ -79,8 +50,8 @@ export async function getCustomFonts(): Promise<CustomFont[]> {
 
     const db = await getDB();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, "readonly");
-      const store = transaction.objectStore(STORE_NAME);
+      const transaction = db.transaction(STORE_NAMES.FONTS, "readonly");
+      const store = transaction.objectStore(STORE_NAMES.FONTS);
       const request = store.getAll();
 
       request.onsuccess = () => {
@@ -104,8 +75,8 @@ export async function getCustomFonts(): Promise<CustomFont[]> {
 export async function deleteCustomFont(id: string): Promise<void> {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
+    const transaction = db.transaction(STORE_NAMES.FONTS, "readwrite");
+    const store = transaction.objectStore(STORE_NAMES.FONTS);
     const request = store.delete(id);
 
     request.onsuccess = () => {

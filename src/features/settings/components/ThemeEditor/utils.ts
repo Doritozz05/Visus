@@ -86,7 +86,7 @@ export const PRESETS_TEMPLATES = BUILTIN_THEMES.map(t => ({
   }
 }));
 
-export const compressImage = (file: File): Promise<string> => {
+export const compressImage = (file: File): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     
@@ -99,7 +99,8 @@ export const compressImage = (file: File): Promise<string> => {
 
       // If the image is already within limits, return original blob URL
       if (img.width <= MAX_DIMENSION && img.height <= MAX_DIMENSION) {
-        resolve(originalUrl);
+        URL.revokeObjectURL(originalUrl);
+        resolve(file);
         return;
       }
 
@@ -107,7 +108,8 @@ export const compressImage = (file: File): Promise<string> => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) {
-        resolve(originalUrl);
+        URL.revokeObjectURL(originalUrl);
+        resolve(file);
         return;
       }
 
@@ -134,14 +136,14 @@ export const compressImage = (file: File): Promise<string> => {
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Export as Blob, then convert to ObjectURL
+      // Export as Blob
       canvas.toBlob((blob) => {
+        URL.revokeObjectURL(originalUrl); // Clean up original URL
         if (!blob) {
           reject(new Error("Failed to create blob"));
           return;
         }
-        URL.revokeObjectURL(originalUrl); // Clean up original URL
-        resolve(URL.createObjectURL(blob));
+        resolve(blob);
       }, "image/webp", 0.95);
     };
     img.onerror = () => {

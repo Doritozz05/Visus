@@ -187,8 +187,9 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     }
 
     // Background graphics engine
+    let objectUrlToRevoke: string | null = null;
+    
     if (activeTheme.bgType === "image" && activeTheme.bgImageUrl) {
-      root.style.setProperty("--bg-image", `url("${activeTheme.bgImageUrl}")`);
       root.style.setProperty("--bg-image-opacity", (activeTheme.bgImageOpacity ?? 1).toString());
       root.style.setProperty("--bg-image-blur", `${activeTheme.bgImageBlur ?? 0}px`);
       if (activeTheme.bgImageOverlay) {
@@ -196,6 +197,19 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
         root.style.setProperty("--bg-image-overlay", `rgba(${overlayRgb}, ${activeTheme.bgImageOverlayOpacity ?? 0})`);
       } else {
         root.style.setProperty("--bg-image-overlay", "transparent");
+      }
+
+      if (activeTheme.bgImageUrl.startsWith("idb://")) {
+        import("@/lib/services/image-storage").then(({ getBackgroundImageUrl }) => {
+          getBackgroundImageUrl(activeTheme.bgImageUrl!).then(url => {
+            if (url) {
+              objectUrlToRevoke = url;
+              root.style.setProperty("--bg-image", `url("${url}")`);
+            }
+          });
+        });
+      } else {
+        root.style.setProperty("--bg-image", `url("${activeTheme.bgImageUrl}")`);
       }
     } else if (activeTheme.bgType === "gradient") {
       const angle = activeTheme.bgGradientAngle ?? 135;
@@ -249,6 +263,13 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     } else {
       root.classList.remove("reduced-motion");
     }
+
+    // Cleanup object URLs to avoid memory leaks
+    return () => {
+      if (objectUrlToRevoke) {
+        URL.revokeObjectURL(objectUrlToRevoke);
+      }
+    };
   }, [theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes, customFonts, isLoaded]);
 
   return (

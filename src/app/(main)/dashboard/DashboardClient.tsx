@@ -178,7 +178,7 @@ export default function DashboardClient() {
       </motion.header>
 
       {/* Content wrapper to allow scrolling independent of the header */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-24 md:pb-12 max-w-7xl mx-auto w-full scrollbar-thin">
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-24 md:pb-12 max-w-7xl mx-auto w-full scrollbar-none">
         {/* Top Row: Core Metrics (Horizontal) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Card A: WPM */}

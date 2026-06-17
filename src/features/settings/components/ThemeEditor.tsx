@@ -17,6 +17,7 @@ import { ThemeEditorFooter } from "./ThemeEditor/ThemeEditorFooter";
 
 // Utilities
 import { DEFAULT_NEW_THEME, compressImage, deepCloneTheme } from "./ThemeEditor/utils";
+import { saveBackgroundImage } from "@/lib/services/image-storage";
 
 interface ThemeEditorProps {
   themeToEdit?: CustomTheme | null;
@@ -173,11 +174,12 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
 
     setImageError(null);
     try {
-      const base64Str = await compressImage(file);
+      const blob = await compressImage(file);
+      const bgImageUrl = await saveBackgroundImage(blob);
       updateThemeState(prev => ({
         ...prev,
         bgType: "image",
-        bgImageUrl: base64Str
+        bgImageUrl
       }));
     } catch (err) {
       setImageError("Failed to compress and load background image.");

@@ -4,6 +4,7 @@ import type { CustomTheme } from "@/core/entities/settings";
 import { resolveColor, hexToRgba } from "@/lib/color-utils";
 import { hexToRgb, PRESETS_TEMPLATES, scopeCss } from "./utils";
 import { getFontFamilyStyle } from "@/lib/typography";
+import { getBackgroundImageUrl } from "@/lib/services/image-storage";
 
 interface ThemePreviewSandboxProps {
   themeState: CustomTheme;
@@ -25,6 +26,26 @@ export function ThemePreviewSandbox({
   const [mockSync, setMockSync] = React.useState(false);
   const [streakActive, setStreakActive] = React.useState(true);
   const [showFontPopover, setShowFontPopover] = React.useState(false);
+  const [resolvedBgUrl, setResolvedBgUrl] = React.useState<string | null>(null);
+
+  // Resolve background image URL from IndexedDB
+  React.useEffect(() => {
+    let isActive = true;
+    
+    if (themeState.bgType === "image" && themeState.bgImageUrl) {
+      if (themeState.bgImageUrl.startsWith("idb://")) {
+        getBackgroundImageUrl(themeState.bgImageUrl).then(url => {
+          if (isActive && url) setResolvedBgUrl(url);
+        });
+      } else {
+        setResolvedBgUrl(themeState.bgImageUrl);
+      }
+    } else {
+      setResolvedBgUrl(null);
+    }
+    
+    return () => { isActive = false; };
+  }, [themeState.bgType, themeState.bgImageUrl]);
 
   // Auto-switch based on what changed
   React.useEffect(() => {
@@ -51,8 +72,8 @@ export function ThemePreviewSandbox({
   // Resolve styles for mock frames
   const previewBg = themeState.bgType === "gradient" 
     ? `linear-gradient(${themeState.bgGradientAngle ?? 135}deg, ${resolveColor(themeState.bgGradientStart || themeState.background)}, ${resolveColor(themeState.bgGradientEnd || themeState.background)})`
-    : themeState.bgType === "image" && themeState.bgImageUrl
-      ? `url(${themeState.bgImageUrl})`
+    : themeState.bgType === "image" && resolvedBgUrl
+      ? `url(${resolvedBgUrl})`
       : resolveColor(themeState.background);
 
   const sidebarBg = resolveColor(themeState.overrideSidebar ? (themeState.sidebarBackground || themeState.cardBackground) : themeState.cardBackground);

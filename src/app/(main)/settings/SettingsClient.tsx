@@ -130,7 +130,7 @@ export default function SettingsClient() {
         </motion.div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 md:px-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full scrollbar-thin">
+      <div className="flex-1 overflow-y-auto px-6 md:px-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full scrollbar-none">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
