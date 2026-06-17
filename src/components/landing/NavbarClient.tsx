@@ -89,9 +89,6 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
                 </motion.div>
               </div>
 
-              <Link href="/dashboard" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
-                Dashboard
-              </Link>
               <a
                 href="https://github.com/Doritozz05/Visus"
                 target="_blank"
@@ -209,15 +206,6 @@ export function NavbarClient({ guideOptions }: NavbarClientProps) {
 
                 {/* Dashboard & GitHub Links */}
                 <div className="flex flex-col gap-4">
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-sm font-bold text-foreground hover:text-primary transition-colors flex items-center justify-between py-1"
-                  >
-                    <span>Dashboard</span>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground/40" />
-                  </Link>
-
                   <a
                     href="https://github.com/Doritozz05/Visus"
                     target="_blank"
