@@ -32,21 +32,25 @@ export function BentoFeatures() {
           </div>
 
           <div className="w-full md:w-72 grid grid-cols-2 gap-4 shrink-0">
-            <div className="bg-background rounded-2xl border border-border/50 p-6 text-center shadow-lg transition-transform hover:scale-105">
-              <span className="font-sans text-3xl font-bold text-foreground block">Aa</span>
-              <span className="text-[10px] text-muted-foreground mt-3 block">Inter</span>
+            {/* Square 1: Light Paper + Inter */}
+            <div className="bg-[#f7f8fa] rounded-2xl border border-[#d8dce6] p-6 text-center shadow-lg transition-transform hover:scale-105">
+              <span className="font-sans text-3xl font-bold text-[#0f131a] block">Aa</span>
+              <span className="text-[10px] text-[#0f131a]/60 mt-3 block">Inter</span>
             </div>
-            <div className="bg-[#f4ecd8] rounded-2xl border border-[#e5d8b8] p-6 text-center shadow-lg transition-transform hover:scale-105">
-              <span className="font-serif text-3xl font-bold text-[#5c4b37] block">Aa</span>
-              <span className="text-[10px] text-[#8a7b66] mt-3 block">Sepia</span>
+            {/* Square 2: Sepia Warm + Lora */}
+            <div className="bg-[#f3ebd8] rounded-2xl border border-[#dcd2bc] p-6 text-center shadow-lg transition-transform hover:scale-105">
+              <span className="font-serif text-3xl font-bold text-[#5a4535] block">Aa</span>
+              <span className="text-[10px] text-[#5a4535]/60 mt-3 block">Lora</span>
             </div>
-            <div className="bg-[#1e1e2e] rounded-2xl border border-[#313244] p-6 text-center shadow-lg transition-transform hover:scale-105">
-              <span className="font-mono text-3xl font-bold text-[#cdd6f4] block">Aa</span>
-              <span className="text-[10px] text-[#a6adc8] mt-3 block">Mono</span>
+            {/* Square 3: Dark Violet + Outfit */}
+            <div className="bg-[#0b1326] rounded-2xl border border-[#464554] p-6 text-center shadow-lg transition-transform hover:scale-105">
+              <span className="font-heading text-3xl font-bold text-[#dae2fd] block">Aa</span>
+              <span className="text-[10px] text-[#dae2fd]/60 mt-3 block">Outfit</span>
             </div>
-            <div className="bg-background rounded-2xl border border-border/50 p-6 text-center flex flex-col items-center justify-center shadow-lg transition-transform hover:scale-105">
-              <span className="font-serif text-3xl font-bold text-foreground block italic">Aa</span>
-              <span className="text-[10px] text-muted-foreground mt-3 block">Lora</span>
+            {/* Square 4: Nord Arctic + Mono */}
+            <div className="bg-[#2e3440] rounded-2xl border border-[#4c566a] p-6 text-center shadow-lg transition-transform hover:scale-105">
+              <span className="font-mono text-3xl font-bold text-[#eceff4] block">Aa</span>
+              <span className="text-[10px] text-[#eceff4]/60 mt-3 block">Mono</span>
             </div>
           </div>
         </SpotlightCard>
