@@ -305,7 +305,7 @@ export function PagesVisualBox({
     if (wordIndexAttr) {
       startSelection(parseInt(wordIndexAttr, 10), e);
     } else {
-      // Clicked outside any word, clear selection
+      // Clicked outside any word
       if (!target.closest('.selection-toolbar') && !target.closest('.context-menu-container')) {
         clearSelection();
       }
@@ -387,8 +387,7 @@ export function PagesVisualBox({
 
   const handleContainerClick = (e: React.MouseEvent) => {
     // Only handle if no active text selection is happening
-    const sel = window.getSelection();
-    if (sel && !sel.isCollapsed) return;
+    if (selection) return;
 
     const target = e.target as HTMLElement;
     const wordIndexAttr = target.getAttribute('data-word-index');
@@ -405,14 +404,7 @@ export function PagesVisualBox({
     const target = e.target as HTMLElement;
     const wordIndexAttr = target.getAttribute('data-word-index');
     if (wordIndexAttr) {
-      const sel = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(target);
-      if (sel) {
-        sel.removeAllRanges();
-        sel.addRange(range);
-        updateSelectionRange(parseInt(wordIndexAttr, 10)); // Force update state immediately
-      }
+      selectWord(parseInt(wordIndexAttr, 10), e);
     }
   };
 

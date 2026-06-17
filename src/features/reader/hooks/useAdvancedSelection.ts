@@ -117,8 +117,8 @@ export function useAdvancedSelection(containerRef: React.RefObject<HTMLElement |
     
     setIsDragging(true);
     anchorIndex.current = wordIndex;
-    updateSelectionState(wordIndex, wordIndex);
-  }, [updateSelectionState]);
+    // Don't call updateSelectionState here, wait for movement or explicit selectWord
+  }, []);
 
   const updateSelection = React.useCallback((wordIndex: number) => {
     if (!isDragging || anchorIndex.current === null) return;

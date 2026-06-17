@@ -169,8 +169,8 @@ export function ReaderEpubStyles() {
 
         .epub-content span[data-word-index] {
           cursor: text;
-          user-select: text;
-          -webkit-user-select: text;
+          user-select: none;
+          -webkit-user-select: none;
         }
 
         /* Prevent selection from jumping to start when clicking margins */
@@ -178,6 +178,16 @@ export function ReaderEpubStyles() {
           user-select: none;
           -webkit-user-select: none;
           -webkit-touch-callout: none;
+        }
+
+        /* Hide browser's default selection highlight */
+        .epub-content ::selection {
+          background: transparent !important;
+          color: inherit !important;
+        }
+        .epub-content ::-moz-selection {
+          background: transparent !important;
+          color: inherit !important;
         }
 
         /* Defensive links styles - completely overrides visited link purple and underline! */
