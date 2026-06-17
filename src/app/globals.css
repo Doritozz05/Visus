@@ -464,6 +464,8 @@ body::before {
   opacity: var(--bg-image-opacity, 1);
   pointer-events: none;
   transition: opacity 0.3s ease, filter 0.3s ease;
+  transform: translateZ(0);
+  will-change: transform, opacity, filter;
 }
 
 /* Background image overlay tint layer */

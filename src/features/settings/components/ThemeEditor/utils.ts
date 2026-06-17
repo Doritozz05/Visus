@@ -49,7 +49,7 @@ export function scopeCss(css: string, prefix: string): string {
   if (!css) return "";
   // Remove block comments
   let cleanCss = css.replace(/\/\*[\s\S]*?\*\//g, "");
-  
+
   return cleanCss
     .split("}")
     .map((rule) => {
@@ -57,7 +57,7 @@ export function scopeCss(css: string, prefix: string): string {
       if (parts.length !== 2) return rule;
       const selectors = parts[0];
       const declarations = parts[1];
-      
+
       const scopedSelectors = selectors
         .split(",")
         .map((sel) => {
@@ -70,7 +70,7 @@ export function scopeCss(css: string, prefix: string): string {
         })
         .filter(Boolean)
         .join(", ");
-        
+
       return `${scopedSelectors} {${declarations}`;
     })
     .join("}");
@@ -88,48 +88,67 @@ export const PRESETS_TEMPLATES = BUILTIN_THEMES.map(t => ({
 
 export const compressImage = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          resolve(event.target?.result as string);
+    const img = new Image();
+    
+    // Create an initial object URL for the original file
+    const originalUrl = URL.createObjectURL(file);
+    
+    img.onload = () => {
+      // Max dimensions: 4096px width/height
+      const MAX_DIMENSION = 4096;
+
+      // If the image is already within limits, return original blob URL
+      if (img.width <= MAX_DIMENSION && img.height <= MAX_DIMENSION) {
+        resolve(originalUrl);
+        return;
+      }
+
+      // Only resize if necessary
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(originalUrl);
+        return;
+      }
+
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > MAX_DIMENSION) {
+          height *= MAX_DIMENSION / width;
+          width = MAX_DIMENSION;
+        }
+      } else {
+        if (height > MAX_DIMENSION) {
+          width *= MAX_DIMENSION / height;
+          height = MAX_DIMENSION;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Use high-quality resizing
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Export as Blob, then convert to ObjectURL
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error("Failed to create blob"));
           return;
         }
-
-        // Max dimensions: 800px width/height
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Quality 0.7 JPEG gives great results with minimal size
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-        resolve(dataUrl);
-      };
-      img.onerror = () => reject(new Error("Failed to load image"));
-      img.src = event.target?.result as string;
+        URL.revokeObjectURL(originalUrl); // Clean up original URL
+        resolve(URL.createObjectURL(blob));
+      }, "image/webp", 0.95);
     };
-    reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsDataURL(file);
+    img.onerror = () => {
+      URL.revokeObjectURL(originalUrl);
+      reject(new Error("Failed to load image"));
+    };
+    img.src = originalUrl;
   });
 };
 
