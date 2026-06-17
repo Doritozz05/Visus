@@ -133,22 +133,51 @@ export function ReaderEpubStyles() {
         
         /* Professional Selection Behavior */
         .selection-no-browser-ui {
-          user-select: text !important;
-          -webkit-user-select: text !important;
+          user-select: none !important;
+          -webkit-user-select: none !important;
           -webkit-touch-callout: none !important;
           -webkit-tap-highlight-color: transparent !important;
         }
 
-        .selection-no-browser-ui span[data-word-index] {
+        /* Custom selection highlight - Dynamic and Theme-aware */
+        .epub-content span[data-word-index].word-selected {
+          background-color: hsla(var(--primary), 0.25) !important;
+          color: inherit;
+          border-radius: 3px;
+          box-shadow: 0 0 0 1px hsla(var(--primary), 0.1);
+          transition: background-color 0.15s ease;
+          position: relative;
+          z-index: 1;
+        }
+
+        /* Subtle glow effect for the active selection */
+        .epub-content span[data-word-index].word-selected::after {
+          content: "";
+          position: absolute;
+          inset: -1px -2px;
+          background-color: hsla(var(--primary), 0.1);
+          border-radius: 4px;
+          z-index: -1;
+          pointer-events: none;
+        }
+
+        /* Dark mode adjustment for better contrast */
+        .dark .epub-content span[data-word-index].word-selected {
+          background-color: hsla(var(--primary), 0.35) !important;
+          box-shadow: 0 0 0 1px hsla(var(--primary), 0.2);
+        }
+
+        .epub-content span[data-word-index] {
           cursor: text;
-          user-select: text;
-          -webkit-user-select: text;
+          user-select: none;
+          -webkit-user-select: none;
         }
 
         /* Prevent selection from jumping to start when clicking margins */
         .epub-content {
           user-select: none;
           -webkit-user-select: none;
+          -webkit-touch-callout: none;
         }
 
         /* Defensive links styles - completely overrides visited link purple and underline! */

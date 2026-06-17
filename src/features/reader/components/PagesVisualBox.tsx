@@ -19,7 +19,7 @@ import { findPageForWordIndex, findFirstPageOfChapter, findLastPageOfChapter } f
 import { motion, AnimatePresence } from "framer-motion";
 
 // Text Selection & Annotations
-import { useTextSelection } from "../hooks/useTextSelection";
+import { useAdvancedSelection } from "../hooks/useAdvancedSelection";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { DictionaryModal } from "./DictionaryModal";
 import { AnnotationNoteDialog } from "./AnnotationNoteDialog";
@@ -217,7 +217,17 @@ export function PagesVisualBox({
     return allAnnotations.filter(a => a.chapterIndex === currentChapter.index);
   }, [allAnnotations, currentChapter.index]);
 
-  const { selection, position, clearSelection, updateSelection } = useTextSelection(columnsContainerRef);
+  const {
+    selection,
+    position,
+    isDragging,
+    clearSelection,
+    startSelection,
+    updateSelection: updateSelectionRange,
+    endSelection,
+    selectWord,
+  } = useAdvancedSelection(columnsContainerRef);
+
   const [isDictionaryOpen, setIsDictionaryOpen] = React.useState(false);
   const [selectedWord, setSelectedWord] = React.useState("");
   const [editingAnnotation, setEditingAnnotation] = React.useState<Annotation | null>(null);
@@ -228,20 +238,13 @@ export function PagesVisualBox({
     e.preventDefault();
     e.stopPropagation();
 
-    const sel = window.getSelection();
-    
-    // Check if we are right-clicking a word or have a selection
     const target = e.target as HTMLElement;
     const wordIndexAttr = target.getAttribute('data-word-index');
     
-    if ((sel && !sel.isCollapsed) || wordIndexAttr) {
+    if (selection || wordIndexAttr) {
       // If no selection but right-clicked a word, select it first
-      if (sel && sel.isCollapsed && wordIndexAttr) {
-        const range = document.createRange();
-        range.selectNodeContents(target);
-        sel.removeAllRanges();
-        sel.addRange(range);
-        updateSelection(); // Force update state in the hook
+      if (!selection && wordIndexAttr) {
+        selectWord(parseInt(wordIndexAttr, 10), e);
       }
 
       const items: ContextMenuItem[] = [
@@ -292,9 +295,46 @@ export function PagesVisualBox({
       ];
       showMenu(e, items);
     } else {
-      // Fallback to global context menu (Back, Forward, etc.)
       showMenu(e);
     }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    const wordIndexAttr = target.getAttribute('data-word-index');
+    if (wordIndexAttr) {
+      startSelection(parseInt(wordIndexAttr, 10), e);
+    } else {
+      // Clicked outside any word, clear selection
+      if (!target.closest('.selection-toolbar') && !target.closest('.context-menu-container')) {
+        clearSelection();
+      }
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const target = e.target as HTMLElement;
+    const wordIndexAttr = target.getAttribute('data-word-index');
+    if (wordIndexAttr) {
+      updateSelectionRange(parseInt(wordIndexAttr, 10));
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
+    if (target) {
+      const wordIndexAttr = target.getAttribute('data-word-index');
+      if (wordIndexAttr) {
+        updateSelectionRange(parseInt(wordIndexAttr, 10));
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    endSelection();
   };
 
   React.useEffect(() => {
@@ -356,7 +396,7 @@ export function PagesVisualBox({
       if (sel) {
         sel.removeAllRanges();
         sel.addRange(range);
-        updateSelection(); // Force update state immediately
+        updateSelectionRange(parseInt(wordIndexAttr, 10)); // Force update state immediately
       }
     }
   };
@@ -554,6 +594,45 @@ export function PagesVisualBox({
   const showCompleteBook = currentPageIndex === totalPagesInChapter - 1 && isLastChapter;
   const showNextChapter = currentPageIndex === totalPagesInChapter - 1 && !isLastChapter;
 
+  // Memoized Reader Content to prevent re-renders during selection/dragging
+  const readerContent = React.useMemo(() => (
+    <div
+      ref={columnsContainerRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onTouchStart={handleMouseDown}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleMouseUp}
+      onClick={handleContainerClick}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={handleContextMenu}
+      data-custom-context-menu="true"
+      className={`h-full epub-content ${readerFontClass} selection-no-browser-ui`}
+      style={{
+        columnWidth: "100%",
+        columnCount: 1,
+        columnGap: `${columnGap}px`,
+        columnFill: "auto",
+        transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
+        fontSize: `${scaledFontSize}px`,
+        lineHeight: "1.75",
+        fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
+      }}
+      dangerouslySetInnerHTML={{ __html: formattedHtml }}
+    />
+  ), [
+    formattedHtml, 
+    readerFontClass, 
+    columnGap, 
+    currentPageIndex, 
+    containerDimensions, 
+    scaledFontSize, 
+    settings.general.readerFontFamily, 
+    customFonts,
+    // Note: We explicitly exclude selection, position, and isDragging to prevent flickering
+  ]);
+
   return (
     <div className="w-full bg-card border border-border/20 rounded-2xl px-3.5 pb-3 pt-5 sm:px-5 sm:pb-4 sm:pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl relative overflow-hidden transition-opacity duration-300 flex flex-col h-full md:h-[660px] min-h-0">
 
@@ -610,25 +689,7 @@ export function PagesVisualBox({
               willChange: "opacity, transform",
             }}
           >
-            <div
-              ref={columnsContainerRef}
-              onClick={handleContainerClick}
-              onDoubleClick={handleDoubleClick}
-              onContextMenu={handleContextMenu}
-              data-custom-context-menu="true"
-              className={`h-full epub-content ${readerFontClass} selection-no-browser-ui`}
-              style={{
-                columnWidth: "100%",
-                columnCount: 1,
-                columnGap: `${columnGap}px`,
-                columnFill: "auto",
-                transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
-                fontSize: `${scaledFontSize}px`,
-                lineHeight: "1.75",
-                fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
-              }}
-              dangerouslySetInnerHTML={{ __html: formattedHtml }}
-            />
+            {readerContent}
           </motion.div>
         </AnimatePresence>
       </div>
