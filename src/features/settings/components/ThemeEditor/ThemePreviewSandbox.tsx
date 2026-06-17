@@ -50,7 +50,7 @@ export function ThemePreviewSandbox({
 
   // Resolve styles for mock frames
   const previewBg = themeState.bgType === "gradient" 
-    ? `linear-gradient(${themeState.bgGradientAngle ?? 135}deg, ${resolveColor(themeState.bgGradientStart || "#ffffff")}, ${resolveColor(themeState.bgGradientEnd || "#eaeaea")})`
+    ? `linear-gradient(${themeState.bgGradientAngle ?? 135}deg, ${resolveColor(themeState.bgGradientStart || themeState.background)}, ${resolveColor(themeState.bgGradientEnd || themeState.background)})`
     : themeState.bgType === "image" && themeState.bgImageUrl
       ? `url(${themeState.bgImageUrl})`
       : resolveColor(themeState.background);

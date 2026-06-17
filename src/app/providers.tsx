@@ -197,9 +197,11 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
       } else {
         root.style.setProperty("--bg-image-overlay", "transparent");
       }
-    } else if (activeTheme.bgType === "gradient" && activeTheme.bgGradientStart && activeTheme.bgGradientEnd) {
+    } else if (activeTheme.bgType === "gradient") {
       const angle = activeTheme.bgGradientAngle ?? 135;
-      root.style.setProperty("--bg-image", `linear-gradient(${angle}deg, ${activeTheme.bgGradientStart}, ${activeTheme.bgGradientEnd})`);
+      const startColor = activeTheme.bgGradientStart || activeTheme.background;
+      const endColor = activeTheme.bgGradientEnd || activeTheme.background;
+      root.style.setProperty("--bg-image", `linear-gradient(${angle}deg, ${startColor}, ${endColor})`);
       root.style.setProperty("--bg-image-opacity", "1");
       root.style.setProperty("--bg-image-blur", "0px");
       root.style.setProperty("--bg-image-overlay", "transparent");
