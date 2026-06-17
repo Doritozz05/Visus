@@ -115,8 +115,8 @@ export function useTelemetryTracker({
       wordsRead = Math.round((duration / 60) * avgWpm);
     }
 
-    // Noise filtering (discard sessions < 15s and < 15 words, unless forced by quiz completion)
-    if (!forced && duration < 15 && wordsRead < 15) {
+    // Noise filtering (discard sessions < 5m and < 15 words, unless forced by quiz completion)
+    if (!forced && duration < 300 && wordsRead < 15) {
       console.log(`[Telemetry] Session discarded (noise filter: ${duration}s, ${wordsRead} words).`);
       return;
     }
