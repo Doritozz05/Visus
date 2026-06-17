@@ -69,7 +69,6 @@ export function Sidebar({ activePath }: SidebarProps) {
         >
           <Link href="/">
             <h1 className="text-2xl font-extrabold tracking-tight text-primary font-heading flex items-center gap-2">
-              <Eye className="w-8 h-8 text-primary" />
               Visus
             </h1>
           </Link>
