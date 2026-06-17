@@ -65,7 +65,8 @@ export function ThemeEditor({ themeToEdit, onSave, onDelete, onClose }: ThemeEdi
 
   // Automatically switch preview device to mobile if on mobile mode
   React.useEffect(() => {
-    if (mobileMode === "preview") {
+    const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isSmallScreen && mobileMode === "preview") {
       setPreviewDevice("mobile");
     }
   }, [mobileMode]);
