@@ -24,38 +24,38 @@ const containerVariants = {
 
 const headerVariants = {
   hidden: { opacity: 0, y: -15 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { type: "spring", stiffness: 260, damping: 25 } 
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 260, damping: 25 }
   }
 };
 
 const tabsContainerVariants = {
   hidden: { opacity: 0, y: 10 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { type: "spring", stiffness: 260, damping: 25 } 
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 260, damping: 25 }
   }
 };
 
 const formVariants = {
   enter: { opacity: 0 },
-  center: { 
-    opacity: 1, 
-    transition: { duration: 0.15, ease: "easeInOut" } 
+  center: {
+    opacity: 1,
+    transition: { duration: 0.15, ease: "easeInOut" }
   },
-  exit: { 
-    opacity: 0, 
-    transition: { duration: 0.12, ease: "easeInOut" } 
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.12, ease: "easeInOut" }
   }
 };
 
 export default function SettingsClient() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab") as "general" | "reader" | "rsvp" | "cluster" | "account";
-  
+
   const { resetSettings } = useSettings();
   const [activeTab, setActiveTab] = React.useState<"general" | "reader" | "rsvp" | "cluster" | "account">(tabParam || "general");
 
@@ -67,19 +67,19 @@ export default function SettingsClient() {
   }, [tabParam]);
 
   return (
-    <motion.div 
+    <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
       className="px-6 md:px-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full"
     >
       <div className="sticky top-0 bg-background z-30 pt-6 md:pt-12 mb-8 -mx-6 md:-mx-12 px-6 md:px-12">
-        <motion.header 
+        <motion.header
           variants={headerVariants}
           className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
         >
           <div>
-            <h2 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Configuration</h2>
+            <h2 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">Settings</h2>
             <p className="text-muted-foreground text-xs font-sans uppercase tracking-wider mt-2 max-w-2xl">
               Adjust global visual engine parameters and manage your account security.
             </p>
@@ -93,7 +93,7 @@ export default function SettingsClient() {
         </motion.header>
 
         {/* Dynamic Inner Configuration Tabs */}
-        <motion.div 
+        <motion.div
           variants={tabsContainerVariants}
           className="flex border-b border-border/40 mb-0 overflow-x-auto scrollbar-none gap-2 relative"
         >
@@ -110,11 +110,10 @@ export default function SettingsClient() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-3 font-sans text-xs uppercase tracking-wider transition-all shrink-0 relative ${
-                  isActive
+                className={`flex items-center gap-2 px-6 py-3 font-sans text-xs uppercase tracking-wider transition-all shrink-0 relative ${isActive
                     ? "text-primary font-bold bg-accent/40"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
-                }`}
+                  }`}
               >
                 <Icon className="h-4.5 w-4.5" />
                 {tab.name}
