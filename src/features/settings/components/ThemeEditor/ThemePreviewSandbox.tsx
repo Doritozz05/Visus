@@ -420,6 +420,7 @@ export function ThemePreviewSandbox({
           {previewDevice === "desktop" ? (
             /* Desktop Mockup Screen */
             <div 
+              data-glass={themeState.glassmorphism?.enabled ? "enabled" : "disabled"}
               className={`preview-sandbox-root border border-border/30 rounded-2xl w-[320px] md:w-full h-[380px] md:h-full md:max-h-[580px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-xl ${themeState.isDark ? "dark" : ""}`}
               style={{
                 backgroundColor: resolveColor(themeState.background),
@@ -495,12 +496,12 @@ export function ThemePreviewSandbox({
               <div className="flex flex-1 h-full w-full relative z-10 text-[11px] overflow-hidden">
                 {/* Desktop mock sidebar */}
                 <aside 
-                  className={`w-24 md:w-32 border-r flex flex-col p-2.5 transition-all duration-300 shrink-0 select-none ${getPulseClass(["sidebarBackground", "sidebarForeground", "sidebarBorder", "overrideSidebar"])}`}
-                  style={{
-                    backgroundColor: sidebarBg,
-                    color: sidebarFg,
-                    borderColor: `${sidebarBorder}40`
-                  }}
+                className={`w-24 md:w-32 border-r flex flex-col p-2.5 transition-all duration-300 shrink-0 select-none ${themeState.glassmorphism?.enabled && themeState.sidebarLiquidGlass ? 'liquid-glass' : ''} ${getPulseClass(["sidebarBackground", "sidebarForeground", "sidebarBorder", "overrideSidebar"])}`}
+                style={{
+                  backgroundColor: themeState.glassmorphism?.enabled && themeState.sidebarLiquidGlass ? glassBg : sidebarBg,
+                  backdropFilter: themeState.glassmorphism?.enabled && themeState.sidebarLiquidGlass ? glassBlur : 'none',
+                  borderColor: `${sidebarBorder}40`
+                }}
                 >
                   <nav className="flex-1 space-y-1">
                     {[
@@ -559,6 +560,7 @@ export function ThemePreviewSandbox({
           ) : (
             /* Mobile Mockup Screen - Centered and Enlarged */
             <div 
+              data-glass={themeState.glassmorphism?.enabled ? "enabled" : "disabled"}
               className={`preview-sandbox-root border border-border/30 rounded-[2.2rem] w-[260px] md:w-[280px] h-[480px] md:h-[520px] overflow-hidden flex flex-col relative transition-all duration-300 shadow-2xl ${themeState.isDark ? "dark" : ""}`}
               style={{
                 backgroundColor: resolveColor(themeState.background),

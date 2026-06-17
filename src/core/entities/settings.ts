@@ -41,6 +41,7 @@ export interface CustomTheme {
   sidebarBorder?: string;
   sidebarActiveBackground?: string;
   sidebarActiveForeground?: string;
+  sidebarLiquidGlass?: boolean;
 
   // Reader Override Toggle & Colors
   readerFont?: string;

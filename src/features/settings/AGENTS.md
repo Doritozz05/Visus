@@ -8,6 +8,7 @@ Settings components, general visual settings forms, RSVP adjustments, and the th
 - Keep visual customization features decoupled.
 - Custom themes must conform to the `CustomTheme` entity definition.
 - Theme editor subcomponents must be modular and reside under `components/ThemeEditor/`.
+- Sidebar customization (e.g., Liquid Glass) for custom themes is managed within the theme editor.
 
 # Work Guidance
 - Use standard React Hooks and coordinate settings state via `useSettings` settings-context.

@@ -392,6 +392,25 @@ export function BackgroundEffectsTab({
           />
         </div>
 
+        {/* Sidebar Liquid Glass Toggle */}
+        {themeState.glassmorphism?.enabled && (
+          <div className="flex items-center justify-between mb-4 pb-2 border-b border-border/20">
+            <div className="flex flex-col">
+              <span className="text-xs font-bold">Sidebar liquid glass</span>
+              <span className="text-[9px] text-muted-foreground">Enable liquid glass effect specifically for the sidebar</span>
+            </div>
+            <input
+              type="checkbox"
+              checked={themeState.sidebarLiquidGlass || false}
+              onChange={(e) => setThemeState(prev => ({
+                ...prev,
+                sidebarLiquidGlass: e.target.checked
+              }))}
+              className="w-4 h-4 accent-primary rounded border border-border cursor-pointer"
+            />
+          </div>
+        )}
+
         {themeState.glassmorphism?.enabled && (
           <div className="space-y-4 animate-scale-up">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

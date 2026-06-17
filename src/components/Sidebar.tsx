@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Library, Glasses, TrendingUp, Settings, Eye } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSettings } from "@/features/settings/context/settings-context";
 
 interface SidebarProps {
   activePath?: string;
@@ -12,6 +13,11 @@ interface SidebarProps {
 export function Sidebar({ activePath }: SidebarProps) {
   const pathname = usePathname();
   const currentPath = activePath || pathname;
+  const { settings } = useSettings();
+
+  const isCustomTheme = settings.general.customThemes?.some(t => t.id === settings.general.theme);
+  const activeCustomTheme = settings.general.customThemes?.find(t => t.id === settings.general.theme);
+  const shouldApplyLiquidGlass = isCustomTheme ? activeCustomTheme?.sidebarLiquidGlass : false;
 
   const navItems = [
     { name: "Library", path: "/library", icon: Library, hoverAnim: { y: -4 } },
@@ -60,7 +66,7 @@ export function Sidebar({ activePath }: SidebarProps) {
   return (
     <>
       {/* Desktop SideNav */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full flex-col z-40 bg-[hsl(var(--sidebar-background))] border-r border-[hsl(var(--sidebar-border)/0.5)] w-64 text-[hsl(var(--sidebar-foreground))] transition-all duration-300">
+      <aside className={`hidden md:flex fixed left-0 top-0 h-full flex-col z-40 bg-[hsl(var(--sidebar-background))] border-r border-[hsl(var(--sidebar-border)/0.5)] w-64 text-[hsl(var(--sidebar-foreground))] transition-all duration-300 ${shouldApplyLiquidGlass ? 'liquid-glass' : ''}`}>
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -193,3 +199,4 @@ export function Sidebar({ activePath }: SidebarProps) {
     </>
   );
 }
+
