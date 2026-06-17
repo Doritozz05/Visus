@@ -93,33 +93,6 @@
     --font-heading-override: var(--font-heading);
     --font-mono-override: var(--font-mono);
     --font-serif-override: var(--font-serif);
-    --background: 222 47% 95%; /* Default fallback light */
-    --foreground: 222 47% 11%;
-    
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    
-    --primary: 243 75% 59%; /* indigo-600 */
-    --primary-foreground: 222 47% 98%;
-    
-    --secondary: 222 47% 90%;
-    --secondary-foreground: 243 75% 59%;
-    
-    --muted: 244 30% 94%;
-    --muted-foreground: 244 86% 80%;
-    
-    --accent: 243 75% 95%;
-    --accent-foreground: 243 75% 59%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    
-    --border: 222 47% 85%;
-    --input: 222 47% 85%;
-    --ring: 243 75% 59%;
     
     --radius: 0.75rem;
 
@@ -146,12 +119,10 @@
   }
   html {
     background-color: hsl(var(--background));
-    transition: background-color 0.3s ease;
   }
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    transition: background-color 0.3s ease, color 0.3s ease;
   }
   body[data-bg-type="image"],
   body[data-bg-type="gradient"] {

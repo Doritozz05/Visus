@@ -7,6 +7,7 @@ import { getCustomFonts, deleteCustomFont } from "@/lib/services/font-storage";
 
 interface SettingsContextType {
   settings: SettingsState;
+  isLoaded: boolean;
   updateGeneralSettings: (settings: Partial<GeneralSettings>) => void;
   updateRsvpSettings: (settings: Partial<RsvpSettings>) => void;
   updateClusterSettings: (settings: Partial<ClusterSettings>) => void;
@@ -169,6 +170,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     <SettingsContext.Provider
       value={{
         settings,
+        isLoaded,
         updateGeneralSettings,
         updateRsvpSettings,
         updateClusterSettings,

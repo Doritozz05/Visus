@@ -14,11 +14,11 @@ import { MotionConfig } from "framer-motion";
 import { getFontFamilyStyle } from "@/lib/typography";
 
 function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
-  const { settings, customFonts } = useSettings();
+  const { settings, customFonts, isLoaded } = useSettings();
   const { theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes = [] } = settings.general;
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !isLoaded) return;
 
     const root = document.documentElement;
     const body = document.body;
@@ -252,7 +252,7 @@ function ThemeProviderHelper({ children }: { children: React.ReactNode }) {
     } else {
       root.classList.remove("reduced-motion");
     }
-  }, [theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes, customFonts]);
+  }, [theme, accentColor, uiFont, reducedMotion, glassmorphism, customThemes, customFonts, isLoaded]);
 
   return (
     <MotionConfig reducedMotion={reducedMotion ? "always" : "never"}>

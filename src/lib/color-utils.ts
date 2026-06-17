@@ -138,3 +138,73 @@ export function hexToHsl(hex: string): { h: number; s: number; l: number; string
     stringVal: `${hDeg} ${sPct}% ${lPct}%`
   };
 }
+
+/**
+ * Generates a string of CSS variables for a given theme.
+ * Used for static injection in layout to prevent FOUC.
+ */
+export function generateThemeCss(theme: any): string {
+  const toHsl = (hex: string) => hexToHsl(hex).stringVal;
+  
+  const variables: Record<string, string> = {
+    "--background": theme.background,
+    "--foreground": theme.foreground,
+    "--card": theme.cardBackground,
+    "--card-foreground": theme.cardForeground,
+    "--popover": theme.popover || theme.cardBackground,
+    "--popover-foreground": theme.popoverForeground || theme.cardForeground,
+    "--primary": theme.accent,
+    "--primary-foreground": theme.accentForeground,
+    "--secondary": theme.secondary || (theme.isDark ? "#1e293b" : "#f1f5f9"),
+    "--secondary-foreground": theme.secondaryForeground || theme.foreground,
+    "--muted": theme.muted,
+    "--muted-foreground": theme.mutedForeground,
+    "--accent": theme.uiAccent || theme.muted,
+    "--accent-foreground": theme.uiAccentForeground || theme.accent,
+    "--border": theme.border,
+    "--input": theme.input || theme.border,
+    "--ring": theme.accent,
+    "--radius": theme.cardRadius || "0.75rem",
+  };
+
+  if (theme.destructive) {
+    variables["--destructive"] = theme.destructive;
+    variables["--destructive-foreground"] = theme.destructiveForeground || "#ffffff";
+  }
+
+  // Sidebar variables
+  if (theme.overrideSidebar) {
+    variables["--sidebar-background"] = theme.sidebarBackground || theme.cardBackground;
+    variables["--sidebar-foreground"] = theme.sidebarForeground || theme.cardForeground;
+    variables["--sidebar-border"] = theme.sidebarBorder || theme.border;
+    variables["--sidebar-active-background"] = theme.sidebarActiveBackground || theme.accent;
+    variables["--sidebar-active-foreground"] = theme.sidebarActiveForeground || theme.accentForeground;
+  } else {
+    variables["--sidebar-background"] = theme.cardBackground;
+    variables["--sidebar-foreground"] = theme.cardForeground;
+    variables["--sidebar-border"] = theme.border;
+    variables["--sidebar-active-background"] = theme.accent;
+    variables["--sidebar-active-foreground"] = theme.accentForeground;
+  }
+
+  // Reader variables
+  if (theme.overrideReader) {
+    variables["--reader-background"] = theme.readerBackground || theme.background;
+    variables["--reader-foreground"] = theme.readerForeground || theme.foreground;
+    variables["--reader-border"] = theme.readerBorder || theme.border;
+  } else {
+    variables["--reader-background"] = theme.background;
+    variables["--reader-foreground"] = theme.foreground;
+    variables["--reader-border"] = theme.border;
+  }
+
+  let css = `.theme-${theme.id} {\n`;
+  Object.entries(variables).forEach(([key, val]) => {
+    // Only convert to HSL if it's a hex color
+    const processedVal = val.startsWith("#") ? toHsl(val) : val;
+    css += `  ${key}: ${processedVal};\n`;
+  });
+  css += "}\n";
+
+  return css;
+}

@@ -6,6 +6,8 @@ import { Providers } from "./providers";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Navbar } from "@/components/landing/Navbar";
+import { BUILTIN_THEMES } from "@/core/config/themes";
+import { generateThemeCss } from "@/lib/color-utils";
 
 const inter = localFont({
   src: [
@@ -115,9 +117,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Static generation of all built-in themes to prevent FOUC
+  const staticThemeCss = BUILTIN_THEMES.map((t) => generateThemeCss(t)).join("\n");
+
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${outfit.variable}`}>
       <head>
+        <style id="visus-static-themes" dangerouslySetInnerHTML={{ __html: staticThemeCss }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
