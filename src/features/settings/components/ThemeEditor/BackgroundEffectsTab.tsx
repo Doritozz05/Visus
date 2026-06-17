@@ -376,6 +376,9 @@ export function BackgroundEffectsTab({
           </div>
           <Switch
             checked={themeState.glassmorphism?.enabled || false}
+            activeColor={themeState.accent}
+            inactiveColor={themeState.muted}
+            thumbColor={themeState.mutedForeground}
             onChange={(checked) => setThemeState(prev => ({
               ...prev,
               glassmorphism: {
@@ -397,6 +400,9 @@ export function BackgroundEffectsTab({
             </div>
             <Switch
               checked={themeState.sidebarLiquidGlass || false}
+              activeColor={themeState.accent}
+              inactiveColor={themeState.muted}
+              thumbColor={themeState.mutedForeground}
               onChange={(checked) => setThemeState(prev => ({
                 ...prev,
                 sidebarLiquidGlass: checked

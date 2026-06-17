@@ -35,6 +35,9 @@ export function DecoupledSectionsTab({ themeState, setThemeState, portalContaine
           </div>
           <Switch
             checked={themeState.overrideSidebar}
+            activeColor={themeState.accent}
+            inactiveColor={themeState.muted}
+            thumbColor={themeState.mutedForeground}
             onChange={(checked) => handleToggleOverride("overrideSidebar", checked)}
           />
         </div>

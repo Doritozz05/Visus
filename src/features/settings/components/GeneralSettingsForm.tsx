@@ -294,6 +294,9 @@ export function GeneralSettingsForm() {
               </div>
               <Switch
                 checked={glassmorphism}
+                activeColor="hsl(var(--primary))"
+                inactiveColor="hsl(var(--muted))"
+                thumbColor="hsl(var(--muted-foreground))"
                 onChange={(checked) => updateGeneralSettings({ glassmorphism: checked })}
               />
             </div>
@@ -307,6 +310,9 @@ export function GeneralSettingsForm() {
             </div>
             <Switch
               checked={reducedMotion}
+              activeColor="hsl(var(--primary))"
+              inactiveColor="hsl(var(--muted))"
+              thumbColor="hsl(var(--muted-foreground))"
               onChange={(checked) => updateGeneralSettings({ reducedMotion: checked })}
             />
           </div>
