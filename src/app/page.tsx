@@ -22,13 +22,13 @@ export default function Home() {
       <section className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-border/10">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-extrabold font-heading mb-6 tracking-tight">
-            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">Advanced Speed Reading Platform</span> to boost your reading focus.
+            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">reading platform</span> to boost your reading focus.
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
             Stop moving your eyes and start processing ideas. Visus is a fast, open-source platform that uses Rapid Serial Visual Presentation (RSVP) to show you text one word at a time. This simple change cuts out the constant eye jumping and the inner voice that slows most readers down.
           </p>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto mt-4 leading-relaxed">
-            From long EPUB books to complex work PDFs, our reader adapts to your pace. You can train your brain to hit 1000+ words per minute while keeping your focus laser-sharp and your comprehension high.
+            From long EPUB books to complex work PDFs, our reader adapts to your pace. You can train your brain to hit 1000+ words per minute while keeping your focus sharp and your comprehension high.
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export default function Home() {
             </div>
             <h3 className="text-2xl font-bold mb-4 font-heading">Eliminating saccades and eye fatigue</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Traditional reading requires mechanical eye jumps (saccades) that cause fatigue. Our <Link href="/rsvp-method" className="text-primary underline hover:opacity-80">RSVP method</Link> presents text at a fixed point, keeping your eyes still and your focus laser-sharp.
+              Traditional reading requires mechanical eye jumps (saccades) that cause fatigue. Our <Link href="/rsvp-method" className="text-primary underline hover:opacity-80">RSVP method</Link> presents text at a fixed point, keeping your eyes still and your focus sharp.
             </p>
           </div>
 

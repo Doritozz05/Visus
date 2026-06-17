@@ -31,7 +31,7 @@ export default function TermsOfService() {
             &larr; Back to Home
           </Link>
           <h1 className="text-4xl font-extrabold tracking-tight font-heading">
-            Terms of <span className="text-gradient-primary">Service</span>
+            Terms of <span className="text-gradient-primary">service</span>
           </h1>
           <p className="text-muted-foreground">Last updated: June 9, 2026</p>
         </div>

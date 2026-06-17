@@ -29,11 +29,11 @@ export function HeroSection() {
           <span className="block">Read faster.</span>
           <span className="block">Retain more.</span>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/70 to-primary bg-[length:200%_auto] animate-gradient block">
-            Advanced Speed Reading Platform
+            The end of your unread pile
           </span>
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-          Visus uses advanced RSVP and semantic clustering to boost your reading focus and double your speed, all while maintaining 100% privacy in your browser.
+          Traditional reading is slow and full of distractions. Visus shows you words exactly where your eyes focus, doubling your speed while keeping you locked in the flow.
         </p>
       </HeroClient>
     </section>

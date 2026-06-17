@@ -10,10 +10,10 @@ export function BentoFeatures() {
     <section className="relative z-10 px-6 py-32 max-w-7xl mx-auto border-t border-border/10">
       <div className="text-center mb-20">
         <h2 className="text-4xl md:text-5xl font-extrabold font-heading mb-6 tracking-tight">
-          Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">master reading.</span>
+          Read on your terms, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">at your speed.</span>
         </h2>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Visus is built like a modern developer tool: blazingly fast, entirely offline-capable, and obsessively focused on typography and performance.
+          Visus is designed to make reading effortless. Whether you're catching up on technical docs or diving into a novel, we've built the tools to help you stay focused.
         </p>
       </div>
 
@@ -25,9 +25,9 @@ export function BentoFeatures() {
             <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
               <Settings className="w-6 h-6 text-primary" />
             </div>
-            <h3 className="text-3xl font-extrabold font-heading mb-4 tracking-tight">Tailored to your eyes.</h3>
+            <h3 className="text-3xl font-extrabold font-heading mb-4 tracking-tight">Built for your focus.</h3>
             <p className="text-muted-foreground text-lg mb-6">
-              Choose from highly legible typography including Inter, Lora, and OpenDyslexic. Switch instantly between dark, light, sepia, and mono themes.
+              Reading shouldn't be a chore. Switch between fonts and themes designed to reduce eye strain and keep you immersed in the text for hours.
             </p>
           </div>
 

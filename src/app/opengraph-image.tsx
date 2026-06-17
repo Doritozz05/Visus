@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og';
 export const runtime = 'edge';
 
 // Image metadata
-export const alt = 'Visus - Advanced Speed Reading Platform';
+export const alt = 'Visus - Advanced speed reading platform';
 export const size = {
   width: 1200,
   height: 630,
@@ -90,10 +90,10 @@ export default async function Image() {
               lineHeight: 1.4,
             }}
           >
-            Advanced Speed Reading Platform
-          </div>
+            Advanced speed reading platform
+            </div>
         </div>
-        
+
         {/* Footer info */}
         <div
           style={{

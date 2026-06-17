@@ -92,7 +92,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Visus",
-    title: "Visus - Advanced Speed Reading Platform",
+    title: "Visus - Advanced speed reading platform",
     description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
     url: "https://visuslabs.tech",
     images: [
@@ -100,13 +100,13 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Visus - Advanced Speed Reading Platform",
+        alt: "Visus - Advanced speed reading platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Visus - Advanced Speed Reading Platform",
+    title: "Visus - Advanced speed reading platform",
     description: "Boost your visual reading speeds using RSVP and visual semantic clustering. Open-source multi-device PWA.",
     images: ["/twitter-image"],
   },
@@ -135,7 +135,7 @@ export default function RootLayout({
                   "@id": "https://visuslabs.tech/#website",
                   "url": "https://visuslabs.tech",
                   "name": "Visus",
-                  "description": "Advanced Speed Reading Platform based on RSVP.",
+                  "description": "Advanced speed reading platform based on RSVP.",
                   "publisher": { "@id": "https://visuslabs.tech/#organization" }
                 },
                 {

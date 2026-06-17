@@ -31,7 +31,7 @@ export default function PrivacyPolicy() {
             &larr; Back to Home
           </Link>
           <h1 className="text-4xl font-extrabold tracking-tight font-heading">
-            Privacy <span className="text-gradient-primary">Policy</span>
+            Privacy <span className="text-gradient-primary">policy</span>
           </h1>
           <p className="text-muted-foreground">Last updated: June 9, 2026</p>
         </div>

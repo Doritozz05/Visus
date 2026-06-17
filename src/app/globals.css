@@ -208,7 +208,7 @@ body[data-glass="disabled"] .liquid-glass {
 }
 
 .text-gradient-primary {
-  @apply bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
 }
 
 /* Hide scrollbars for Chrome, Safari, Opera, Edge, Firefox */
