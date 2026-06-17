@@ -1,4 +1,6 @@
 import * as React from "react";
+import type { CustomTheme } from "@/core/entities/settings";
+import { Upload, Trash2, Sparkles } from "lucide-react";
 import { Switch } from "@/components/ui/Switch";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { ColorSelector } from "@/components/ui/ColorSelector";

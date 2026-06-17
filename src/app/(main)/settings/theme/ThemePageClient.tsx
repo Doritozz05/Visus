@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { ThemeEditor } from "@/features/settings/components/ThemeEditor";
 import type { CustomTheme } from "@/core/entities/settings";
+import { BUILTIN_THEMES } from "@/core/config/themes";
 import { toast } from "sonner";
 
 export function ThemePageClient() {
@@ -17,7 +18,11 @@ export function ThemePageClient() {
   // Retrieve theme to edit if id is specified
   const themeToEdit = React.useMemo(() => {
     if (!themeId || themeId === "new") return null;
-    return customThemes.find((t) => t.id === themeId) || null;
+    return (
+      customThemes.find((t) => t.id === themeId) ||
+      BUILTIN_THEMES.find((t) => t.id === themeId) ||
+      null
+    );
   }, [themeId, customThemes]);
 
   const handleSaveTheme = (newTheme: CustomTheme) => {
