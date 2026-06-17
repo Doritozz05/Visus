@@ -1,5 +1,5 @@
 import * as React from "react";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { motion, useMotionValue, animate } from "framer-motion";
 import { useReadingStore } from "../stores/reading-store";
 
 interface WpmScrubberProps {

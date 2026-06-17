@@ -103,257 +103,266 @@ export function ThemePreviewSandbox({
   };
 
   // Content Layout switcher
-  const renderLayoutContent = () => {
+  const renderLibrary = () => {
     const isDesktop = previewDevice === "desktop";
+    return (
+      <div className="flex flex-col flex-1 overflow-hidden gap-2">
+        {/* Search Input Mock */}
+        <div className={`relative shrink-0 ${getPulseClass(["input", "ring"])}`}>
+          <Search className="w-3.5 h-3.5 absolute left-2 top-2 opacity-50" style={{ color: themeState.foreground }} />
+          <input 
+            type="text" 
+            placeholder="Search books..." 
+            className="w-full pl-7 pr-3 py-1.5 border text-[9px] focus:outline-none transition-all"
+            style={{
+              backgroundColor: themeState.input || glassBg,
+              borderColor: themeState.border,
+              color: themeState.foreground,
+              borderRadius: `calc(${cardRadius} * 0.8)`,
+              boxShadow: `0 0 0 1px ${resolveColor(themeState.ring || themeState.accent)}20`
+            }}
+            disabled
+          />
+        </div>
 
-    switch (activeLayout) {
-      case "library":
-        return (
-          <div className="flex flex-col flex-1 overflow-hidden gap-2">
-            {/* Search Input Mock */}
-            <div className={`relative shrink-0 ${getPulseClass(["input", "ring"])}`}>
-              <Search className="w-3.5 h-3.5 absolute left-2 top-2 opacity-50" style={{ color: themeState.foreground }} />
-              <input 
-                type="text" 
-                placeholder="Search books..." 
-                className="w-full pl-7 pr-3 py-1.5 border text-[9px] focus:outline-none transition-all"
-                style={{
-                  backgroundColor: themeState.input || glassBg,
-                  borderColor: themeState.border,
-                  color: themeState.foreground,
-                  borderRadius: `calc(${cardRadius} * 0.8)`,
-                  boxShadow: `0 0 0 1px ${resolveColor(themeState.ring || themeState.accent)}20`
-                }}
-                disabled
-              />
-            </div>
-
-            {/* Books catalog grid */}
-            <div 
-              className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5 scrollbar-none"
-              style={{ maxHeight: isDesktop ? "none" : "290px" }}
-            >
-              {mockBooks.map((book, idx) => {
-                const isSelected = selectedBook === idx;
-                const isPulse = lastChangedKey && ["cardBackground", "cardForeground", "cardBorder", "cardRadius", "cardShadow", "glassmorphism", "glowSettings", "accent"].includes(lastChangedKey);
-                
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => setSelectedBook(isSelected ? null : idx)}
-                    className={`p-2 border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col gap-0.5 relative ${isPulse ? "ring-1 ring-primary/20 shadow-sm" : ""}`}
-                    style={{
-                      backgroundColor: glassBg,
-                      backdropFilter: glassBlur,
-                      border: isSelected ? `1.5px solid ${resolveColor(themeState.ring || themeState.accent)}` : glassBorder,
-                      boxShadow: isSelected ? `0 0 10px ${hexToRgba(themeState.ring || themeState.accent, 0.4)}` : getShadowStyle(themeState.cardShadow),
-                      color: themeState.cardForeground,
-                      borderRadius: cardRadius
-                    }}
-                  >
-                    <div className="flex justify-between items-start">
-                      <span className="font-bold text-[10px] truncate max-w-[110px]">{book.title}</span>
-                      <span 
-                        className={`px-1 py-0.5 rounded text-[6px] font-bold font-mono uppercase ${getPulseClass(["uiAccent", "uiAccentForeground"])}`}
-                        style={{
-                          backgroundColor: themeState.uiAccent || `${book.color}15`,
-                          color: themeState.uiAccentForeground || book.color
-                        }}
-                      >
-                        {book.category}
-                      </span>
-                    </div>
-                    <span className={`text-[7px] opacity-70 ${getPulseClass(["mutedForeground"])}`} style={{ color: themeState.mutedForeground }}>By {book.author}</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-0.75 rounded-full overflow-hidden" style={{ backgroundColor: `${themeState.accent}20` }}>
-                        <div className="h-full rounded-full" style={{ backgroundColor: themeState.accent, width: `${book.progress}%` }} />
-                      </div>
-                      <span className="text-[6.5px] font-mono font-bold">{book.progress}%</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      case "performance":
-        return (
-          <div className="flex flex-col flex-1 overflow-hidden gap-2">
-            {/* Stats header card */}
-            <div className="grid grid-cols-2 gap-2 shrink-0">
-              <div 
-                className="p-2 border flex flex-col gap-0.5"
+        {/* Books catalog grid */}
+        <div 
+          className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5 scrollbar-none"
+          style={{ maxHeight: isDesktop ? "none" : "290px" }}
+        >
+          {mockBooks.map((book, idx) => {
+            const isSelected = selectedBook === idx;
+            const isPulse = lastChangedKey && ["cardBackground", "cardForeground", "cardBorder", "cardRadius", "cardShadow", "glassmorphism", "glowSettings", "accent"].includes(lastChangedKey);
+            
+            return (
+              <div
+                key={idx}
+                onClick={() => setSelectedBook(isSelected ? null : idx)}
+                className={`p-2 border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col gap-0.5 relative ${isPulse ? "ring-1 ring-primary/20 shadow-sm" : ""}`}
                 style={{
                   backgroundColor: glassBg,
                   backdropFilter: glassBlur,
-                  border: glassBorder,
-                  boxShadow: getShadowStyle(themeState.cardShadow),
-                  borderRadius: cardRadius,
-                  color: themeState.cardForeground
+                  border: isSelected ? `1.5px solid ${resolveColor(themeState.ring || themeState.accent)}` : glassBorder,
+                  boxShadow: isSelected ? `0 0 10px ${hexToRgba(themeState.ring || themeState.accent, 0.4)}` : getShadowStyle(themeState.cardShadow),
+                  color: themeState.cardForeground,
+                  borderRadius: cardRadius
                 }}
               >
-                <span className="text-[7.5px] text-muted-foreground uppercase font-mono" style={{ color: themeState.mutedForeground }}>Daily progress</span>
-                <span className="text-[10px] font-bold">45 / 50 min</span>
-              </div>
-              
-              <div 
-                onClick={() => setStreakActive(!streakActive)}
-                className="p-2 border items-center gap-2 cursor-pointer transition-all duration-300 select-none hidden sm:flex"
-                style={{ 
-                  backgroundColor: glassBg, 
-                  backdropFilter: glassBlur,
-                  border: streakActive ? `1px solid ${resolveColor(themeState.ring || themeState.accent)}` : glassBorder,
-                  boxShadow: streakActive ? `0 0 10px ${hexToRgba(themeState.ring || themeState.accent, 0.15)}` : getShadowStyle(themeState.cardShadow),
-                  borderRadius: cardRadius,
-                  color: themeState.cardForeground
-                }}
-              >
-                <Flame className={`w-5 h-5 transition-all duration-300 ${streakActive ? "text-orange-500 animate-pulse" : "text-muted-foreground opacity-35"}`} style={{ color: streakActive ? undefined : themeState.mutedForeground }} />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[7.5px] text-muted-foreground uppercase font-mono" style={{ color: themeState.mutedForeground }}>Streak days</span>
-                  <span className="text-[10px] font-bold">{streakActive ? "12 days" : "0 days"}</span>
+                <div className="flex justify-between items-start">
+                  <span className="font-bold text-[10px] truncate max-w-[110px]">{book.title}</span>
+                  <span 
+                    className={`px-1 py-0.5 rounded text-[6px] font-bold font-mono uppercase ${getPulseClass(["uiAccent", "uiAccentForeground"])}`}
+                    style={{
+                      backgroundColor: themeState.uiAccent || `${book.color}15`,
+                      color: themeState.uiAccentForeground || book.color
+                    }}
+                  >
+                    {book.category}
+                  </span>
+                </div>
+                <span className={`text-[7px] opacity-70 ${getPulseClass(["mutedForeground"])}`} style={{ color: themeState.mutedForeground }}>By {book.author}</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex-1 h-0.75 rounded-full overflow-hidden" style={{ backgroundColor: `${themeState.accent}20` }}>
+                    <div className="h-full rounded-full" style={{ backgroundColor: themeState.accent, width: `${book.progress}%` }} />
+                  </div>
+                  <span className="text-[6.5px] font-mono font-bold">{book.progress}%</span>
                 </div>
               </div>
-            </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
-            {/* CSS weekly activity chart */}
-            <div 
-              className="p-3 border flex flex-col gap-2 flex-1 min-h-[140px]"
+  const renderPerformance = () => {
+    const isDesktop = previewDevice === "desktop";
+    return (
+      <div className="flex flex-col flex-1 overflow-hidden gap-2">
+        {/* Stats header card */}
+        <div className="grid grid-cols-2 gap-2 shrink-0">
+          <div 
+            className="p-2 border flex flex-col gap-0.5"
+            style={{
+              backgroundColor: glassBg,
+              backdropFilter: glassBlur,
+              border: glassBorder,
+              boxShadow: getShadowStyle(themeState.cardShadow),
+              borderRadius: cardRadius,
+              color: themeState.cardForeground
+            }}
+          >
+            <span className="text-[7.5px] text-muted-foreground uppercase font-mono" style={{ color: themeState.mutedForeground }}>Daily progress</span>
+            <span className="text-[10px] font-bold">45 / 50 min</span>
+          </div>
+          
+          <div 
+            onClick={() => setStreakActive(!streakActive)}
+            className="p-2 border items-center gap-2 cursor-pointer transition-all duration-300 select-none hidden sm:flex"
+            style={{ 
+              backgroundColor: glassBg, 
+              backdropFilter: glassBlur,
+              border: streakActive ? `1px solid ${resolveColor(themeState.ring || themeState.accent)}` : glassBorder,
+              boxShadow: streakActive ? `0 0 10px ${hexToRgba(themeState.ring || themeState.accent, 0.15)}` : getShadowStyle(themeState.cardShadow),
+              borderRadius: cardRadius,
+              color: themeState.cardForeground
+            }}
+          >
+            <Flame className={`w-5 h-5 transition-all duration-300 ${streakActive ? "text-orange-500 animate-pulse" : "text-muted-foreground opacity-35"}`} style={{ color: streakActive ? undefined : themeState.mutedForeground }} />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[7.5px] text-muted-foreground uppercase font-mono" style={{ color: themeState.mutedForeground }}>Streak days</span>
+              <span className="text-[10px] font-bold">{streakActive ? "12 days" : "0 days"}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* CSS weekly activity chart */}
+        <div 
+          className="p-3 border flex flex-col gap-2 flex-1 min-h-[140px]"
+          style={{
+            backgroundColor: glassBg,
+            backdropFilter: glassBlur,
+            border: glassBorder,
+            boxShadow: getShadowStyle(themeState.cardShadow),
+            borderRadius: cardRadius,
+            color: themeState.cardForeground,
+            maxHeight: isDesktop ? "none" : "180px"
+          }}
+        >
+          <div className="flex justify-between items-center text-[7.5px] font-mono text-muted-foreground shrink-0 border-b pb-1.5" style={{ borderColor: themeState.border }}>
+            <span className="font-bold uppercase flex items-center gap-1"><BarChart2 className="w-3 h-3" style={{ color: themeState.accent }} /> Weekly read time</span>
+            <span style={{ color: themeState.mutedForeground }}>Total: 4.8 hr</span>
+          </div>
+
+          <div className="flex-1 flex items-end justify-between gap-1 px-1 h-[80px] mt-2">
+            {[
+              { day: "M", val: 30 },
+              { day: "T", val: 55 },
+              { day: "W", val: 80 },
+              { day: "T", val: 40 },
+              { day: "F", val: 65 },
+              { day: "S", val: 90 },
+              { day: "S", val: 25 }
+            ].map((item, idx) => (
+              <div key={idx} className="flex-1 flex flex-col items-center gap-1.5">
+                <div className={`w-full rounded-t-sm relative flex items-end overflow-hidden ${getPulseClass(["uiAccent"])}`} style={{ height: "65px", backgroundColor: themeState.uiAccent || themeState.muted || "rgba(0,0,0,0.05)" }}>
+                  <div 
+                    className={`w-full rounded-t-sm transition-all duration-500 ${getPulseClass(["accent"])}`} 
+                    style={{ 
+                      backgroundColor: themeState.accent, 
+                      height: `${item.val}%` 
+                    }} 
+                  />
+                </div>
+                <span className="text-[7px] font-mono font-bold" style={{ color: themeState.mutedForeground }}>{item.day}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSettings = () => {
+    const isDesktop = previewDevice === "desktop";
+    return (
+      <div className="flex flex-col flex-1 overflow-hidden gap-2">
+        <div 
+          className="p-3 border flex flex-col gap-3 flex-1 overflow-y-auto"
+          style={{
+            backgroundColor: glassBg,
+            backdropFilter: glassBlur,
+            border: glassBorder,
+            boxShadow: getShadowStyle(themeState.cardShadow),
+            borderRadius: cardRadius,
+            color: themeState.cardForeground,
+            maxHeight: isDesktop ? "none" : "300px"
+          }}
+        >
+          <div className="text-[7.5px] font-mono uppercase text-muted-foreground border-b pb-1" style={{ borderColor: themeState.border, color: themeState.mutedForeground }}>
+            App preferences
+          </div>
+
+          {/* Auto sync toggle */}
+          <div className={`flex items-center justify-between select-none ${getPulseClass(["accent", "accentForeground", "muted", "border"])}`}>
+            <div className="flex flex-col">
+              <span className="text-[9px] font-bold" style={{ color: themeState.cardForeground }}>Auto-sync</span>
+              <span className="text-[7px] text-muted-foreground leading-tight" style={{ color: themeState.mutedForeground }}>Sync readings in background</span>
+            </div>
+            <button
+              onClick={() => setMockSync(!mockSync)}
+              className="w-7 h-4 rounded-full p-0.5 transition-all duration-300 relative border"
               style={{
-                backgroundColor: glassBg,
-                backdropFilter: glassBlur,
-                border: glassBorder,
-                boxShadow: getShadowStyle(themeState.cardShadow),
-                borderRadius: cardRadius,
-                color: themeState.cardForeground,
-                maxHeight: isDesktop ? "none" : "180px"
+                backgroundColor: mockSync ? themeState.accent : (themeState.muted || "transparent"),
+                borderColor: mockSync ? themeState.accent : themeState.border
               }}
             >
-              <div className="flex justify-between items-center text-[7.5px] font-mono text-muted-foreground shrink-0 border-b pb-1.5" style={{ borderColor: themeState.border }}>
-                <span className="font-bold uppercase flex items-center gap-1"><BarChart2 className="w-3 h-3" style={{ color: themeState.accent }} /> Weekly read time</span>
-                <span style={{ color: themeState.mutedForeground }}>Total: 4.8 hr</span>
-              </div>
+              <div 
+                className="w-2.5 h-2.5 rounded-full shadow-sm transition-all duration-300"
+                style={{
+                  backgroundColor: mockSync ? themeState.accentForeground : (themeState.mutedForeground || themeState.border),
+                  transform: mockSync ? "translateX(12px)" : "translateX(0px)"
+                }}
+              />
+            </button>
+          </div>
 
-              <div className="flex-1 flex items-end justify-between gap-1 px-1 h-[80px] mt-2">
-                {[
-                  { day: "M", val: 30 },
-                  { day: "T", val: 55 },
-                  { day: "W", val: 80 },
-                  { day: "T", val: 40 },
-                  { day: "F", val: 65 },
-                  { day: "S", val: 90 },
-                  { day: "S", val: 25 }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-1.5">
-                    <div className={`w-full rounded-t-sm relative flex items-end overflow-hidden ${getPulseClass(["uiAccent"])}`} style={{ height: "65px", backgroundColor: themeState.uiAccent || themeState.muted || "rgba(0,0,0,0.05)" }}>
-                      <div 
-                        className={`w-full rounded-t-sm transition-all duration-500 ${getPulseClass(["accent"])}`} 
-                        style={{ 
-                          backgroundColor: themeState.accent, 
-                          height: `${item.val}%` 
-                        }} 
-                      />
-                    </div>
-                    <span className="text-[7px] font-mono font-bold" style={{ color: themeState.mutedForeground }}>{item.day}</span>
+          {/* Font selection mockup dropdown */}
+          <div className={`flex flex-col gap-1 mt-1 relative ${getPulseClass(["popover", "popoverForeground", "input"])}`}>
+            <span className="text-[8px] font-bold" style={{ color: themeState.cardForeground }}>Interface font</span>
+            <div 
+              onClick={() => setShowFontPopover(!showFontPopover)}
+              className="p-1.5 border rounded-lg text-[8px] font-mono flex justify-between items-center bg-card/40 cursor-pointer select-none"
+              style={{ 
+                borderColor: themeState.border, 
+                color: themeState.cardForeground,
+                backgroundColor: themeState.input || "rgba(0,0,0,0.02)"
+              }}
+            >
+              <span>
+                {themeState.uiFont === "inter" ? "Inter (default)" :
+                 themeState.uiFont === "outfit" ? "Outfit (heading)" :
+                 themeState.uiFont === "roboto" ? "Hanken Grotesk" :
+                 themeState.uiFont === "system-ui" ? "System UI" : "Default"}
+              </span>
+              <Settings2 className="w-2.5 h-2.5 opacity-60" style={{ color: themeState.accent }} />
+            </div>
+
+            {/* Mock Popover menu */}
+            {showFontPopover && (
+              <div 
+                className="absolute right-0 bottom-8 z-30 w-36 p-1 border rounded-lg shadow-lg flex flex-col gap-0.5 animate-scale-up"
+                style={{
+                  backgroundColor: popoverBg,
+                  color: popoverFg,
+                  borderColor: themeState.border
+                }}
+              >
+                <div className="px-2 py-1 text-[7px] font-mono uppercase opacity-55 border-b pb-1 mb-1" style={{ borderColor: themeState.border }}>Select font</div>
+                {["Inter", "Outfit", "Hanken Grotesk", "System UI"].map((font) => (
+                  <div 
+                    key={font}
+                    onClick={() => setShowFontPopover(false)}
+                    className="px-2 py-1 text-[8px] rounded hover:bg-accent/15 cursor-pointer font-sans"
+                    style={{ color: popoverFg }}
+                  >
+                    {font}
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
-        );
-      case "settings":
-        return (
-          <div className="flex flex-col flex-1 overflow-hidden gap-2">
-            <div 
-              className="p-3 border flex flex-col gap-3 flex-1 overflow-y-auto"
-              style={{
-                backgroundColor: glassBg,
-                backdropFilter: glassBlur,
-                border: glassBorder,
-                boxShadow: getShadowStyle(themeState.cardShadow),
-                borderRadius: cardRadius,
-                color: themeState.cardForeground,
-                maxHeight: isDesktop ? "none" : "300px"
-              }}
-            >
-              <div className="text-[7.5px] font-mono uppercase text-muted-foreground border-b pb-1" style={{ borderColor: themeState.border, color: themeState.mutedForeground }}>
-                App preferences
-              </div>
+        </div>
+      </div>
+    );
+  };
 
-              {/* Auto sync toggle */}
-              <div className={`flex items-center justify-between select-none ${getPulseClass(["accent", "accentForeground", "muted", "border"])}`}>
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-bold" style={{ color: themeState.cardForeground }}>Auto-sync</span>
-                  <span className="text-[7px] text-muted-foreground leading-tight" style={{ color: themeState.mutedForeground }}>Sync readings in background</span>
-                </div>
-                <button
-                  onClick={() => setMockSync(!mockSync)}
-                  className="w-7 h-4 rounded-full p-0.5 transition-all duration-300 relative border"
-                  style={{
-                    backgroundColor: mockSync ? themeState.accent : (themeState.muted || "transparent"),
-                    borderColor: mockSync ? themeState.accent : themeState.border
-                  }}
-                >
-                  <div 
-                    className="w-2.5 h-2.5 rounded-full shadow-sm transition-all duration-300"
-                    style={{
-                      backgroundColor: mockSync ? themeState.accentForeground : (themeState.mutedForeground || themeState.border),
-                      transform: mockSync ? "translateX(12px)" : "translateX(0px)"
-                    }}
-                  />
-                </button>
-              </div>
-
-              {/* Font selection mockup dropdown */}
-              <div className={`flex flex-col gap-1 mt-1 relative ${getPulseClass(["popover", "popoverForeground", "input"])}`}>
-                <span className="text-[8px] font-bold" style={{ color: themeState.cardForeground }}>Interface font</span>
-                <div 
-                  onClick={() => setShowFontPopover(!showFontPopover)}
-                  className="p-1.5 border rounded-lg text-[8px] font-mono flex justify-between items-center bg-card/40 cursor-pointer select-none"
-                  style={{ 
-                    borderColor: themeState.border, 
-                    color: themeState.cardForeground,
-                    backgroundColor: themeState.input || "rgba(0,0,0,0.02)"
-                  }}
-                >
-                  <span>
-                    {themeState.uiFont === "inter" ? "Inter (default)" :
-                     themeState.uiFont === "outfit" ? "Outfit (heading)" :
-                     themeState.uiFont === "roboto" ? "Hanken Grotesk" :
-                     themeState.uiFont === "system-ui" ? "System UI" : "Default"}
-                  </span>
-                  <Settings2 className="w-2.5 h-2.5 opacity-60" style={{ color: themeState.accent }} />
-                </div>
-
-                {/* Mock Popover menu */}
-                {showFontPopover && (
-                  <div 
-                    className="absolute right-0 bottom-8 z-30 w-36 p-1 border rounded-lg shadow-lg flex flex-col gap-0.5 animate-scale-up"
-                    style={{
-                      backgroundColor: popoverBg,
-                      color: popoverFg,
-                      borderColor: themeState.border
-                    }}
-                  >
-                    <div className="px-2 py-1 text-[7px] font-mono uppercase opacity-55 border-b pb-1 mb-1" style={{ borderColor: themeState.border }}>Select font</div>
-                    {["Inter", "Outfit", "Hanken Grotesk", "System UI"].map((font) => (
-                      <div 
-                        key={font}
-                        onClick={() => setShowFontPopover(false)}
-                        className="px-2 py-1 text-[8px] rounded hover:bg-accent/15 cursor-pointer font-sans"
-                        style={{ color: popoverFg }}
-                      >
-                        {font}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return null;
+  const renderLayoutContent = () => {
+    switch (activeLayout) {
+      case "library": return renderLibrary();
+      case "performance": return renderPerformance();
+      case "settings": return renderSettings();
+      default: return null;
     }
   };
 

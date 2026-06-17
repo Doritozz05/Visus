@@ -379,7 +379,6 @@ export function useTelemetryTracker({
           if (isWpmDecaying || last60sRegressions > 3) {
             if (!session.hasTriggeredFatigueWarning) {
               session.hasTriggeredFatigueWarning = true;
-              // Notification removed as it was distracting to users
             }
           }
         }
