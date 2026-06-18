@@ -85,6 +85,7 @@ export function SelectionToolbar({
           {COLORS.map((c) => (
             <button
               key={c.label}
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => onHighlight(c.value)}
               className="w-6 h-6 rounded-full flex items-center justify-center transition-transform hover:scale-110 focus:outline-none"
               style={{ backgroundColor: c.value }}
@@ -100,6 +101,7 @@ export function SelectionToolbar({
           {STYLES.map((s) => (
             <button
               key={s.label}
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => onUnderline(s.value)}
               className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors focus:outline-none"
               title={`Underline ${s.label}`}
@@ -111,19 +113,44 @@ export function SelectionToolbar({
 
         {/* Actions */}
         <div className="flex items-center gap-1 pl-1 pr-1">
-          <button onClick={onAddNote} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Add note">
+          <button 
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onAddNote} 
+            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
+            title="Add note"
+          >
             <MessageSquare className="w-4 h-4" />
           </button>
-          <button onClick={onDictionary} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Dictionary">
+          <button 
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onDictionary} 
+            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
+            title="Dictionary"
+          >
             <BookOpen className="w-4 h-4" />
           </button>
-          <button onClick={onCopy} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Copy text">
+          <button 
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onCopy} 
+            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
+            title="Copy text"
+          >
             <Copy className="w-4 h-4" />
           </button>
-          <button onClick={onSearch} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Search book">
+          <button 
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onSearch} 
+            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
+            title="Search book"
+          >
             <Search className="w-4 h-4" />
           </button>
-          <button onClick={onTTS} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Read aloud">
+          <button 
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onTTS} 
+            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
+            title="Read aloud"
+          >
             <Volume2 className="w-4 h-4" />
           </button>
         </div>
@@ -131,11 +158,21 @@ export function SelectionToolbar({
         {/* Delete / Close */}
         <div className="flex items-center gap-1 border-l border-zinc-700 pl-2">
           {existingAnnotation && onDelete && (
-            <button onClick={onDelete} className="p-1.5 rounded-md hover:bg-red-500/20 text-red-400 transition-colors" title="Delete annotation">
+            <button 
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={onDelete} 
+              className="p-1.5 rounded-md hover:bg-red-500/20 text-red-400 transition-colors" 
+              title="Delete annotation"
+            >
               <Trash2 className="w-4 h-4" />
             </button>
           )}
-          <button onClick={onClose} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Close menu">
+          <button 
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onClose} 
+            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
+            title="Close menu"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>

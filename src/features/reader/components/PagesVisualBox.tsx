@@ -230,14 +230,18 @@ export function PagesVisualBox({
   const [selectedWord, setSelectedWord] = React.useState("");
   const [editingAnnotation, setEditingAnnotation] = React.useState<Annotation | null>(null);
 
-  const handleAddAnnotation = React.useCallback(async (color: string, style: Annotation["style"]) => {
-    if (!selection) return;
+  const handleAddAnnotation = React.useCallback(async (color: string, style: Annotation["style"], startIndex?: number, endIndex?: number) => {
+    const finalStart = startIndex ?? selection?.startWordIndex;
+    const finalEnd = endIndex ?? selection?.endWordIndex;
+
+    if (finalStart === undefined || finalEnd === undefined) return;
+
     const newAnnotation: Annotation = {
       id: crypto.randomUUID(),
       bookId: activeBookId,
       chapterIndex: currentChapter.index,
-      startWordIndex: selection.startWordIndex,
-      endWordIndex: selection.endWordIndex,
+      startWordIndex: finalStart,
+      endWordIndex: finalEnd,
       color,
       style,
       createdAt: new Date().toISOString(),
@@ -313,32 +317,36 @@ export function PagesVisualBox({
 
       const target = e.target as HTMLElement;
       const wordIndexAttr = target.getAttribute('data-word-index');
+      const detectedWordIndex = wordIndexAttr ? parseInt(wordIndexAttr, 10) : undefined;
       
-      if (selection || wordIndexAttr) {
+      if (selection || detectedWordIndex !== undefined) {
         // If no selection but right-clicked a word, select it first
-        if (!selection && wordIndexAttr) {
-          selectWord(parseInt(wordIndexAttr, 10));
+        if (!selection && detectedWordIndex !== undefined) {
+          selectWord(detectedWordIndex);
         }
+
+        const startIdx = selection?.startWordIndex ?? detectedWordIndex;
+        const endIdx = selection?.endWordIndex ?? detectedWordIndex;
 
         const items: ContextMenuItem[] = [
           {
             id: "highlight-yellow",
             label: "Highlight yellow",
             icon: <Highlighter className="w-4 h-4 text-[#fef08a]" />,
-            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight"),
+            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight", startIdx, endIdx),
           },
           {
             id: "underline-solid",
             label: "Underline",
             icon: <Type className="w-4 h-4" />,
-            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "underline"),
+            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "underline", startIdx, endIdx),
           },
           { id: "ctx-divider-1", label: "", divider: true },
           {
             id: "ctx-add-note",
             label: "Add note",
             icon: <MessageSquare className="w-4 h-4" />,
-            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight"),
+            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight", startIdx, endIdx),
           },
           {
             id: "ctx-dictionary",

@@ -43,9 +43,10 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
       return;
     }
 
-    const getWordIndexFromNode = (node: Node | null): number | null => {
+    const getWordIndexFromNode = (node: Node | null, offset: number = 0): number | null => {
       if (!node) return null;
       
+      // 1. Direct check for word index on node or parents (Standard case)
       let current: HTMLElement | null = null;
       if (node.nodeType === Node.TEXT_NODE) {
         current = node.parentElement;
@@ -60,11 +61,44 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
         }
         current = current.parentElement;
       }
+
+      // 2. If it's an ELEMENT_NODE (like <p>), check the child at offset
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        if (offset < element.childNodes.length) {
+          const child = element.childNodes[offset];
+          return getWordIndexFromNode(child, 0);
+        } else if (element.childNodes.length > 0) {
+          // If at the end, use the last child
+          return getWordIndexFromNode(element.childNodes[element.childNodes.length - 1], 0);
+        }
+      }
+
+      // 3. If it's a whitespace TEXT_NODE, search nearest siblings for a word
+      if (node.nodeType === Node.TEXT_NODE && (!node.textContent || node.textContent.trim().length === 0)) {
+        // Look forward first
+        let next = node.nextSibling;
+        while (next) {
+          if (next.nodeType === Node.ELEMENT_NODE && (next as HTMLElement).hasAttribute("data-word-index")) {
+            return parseInt((next as HTMLElement).getAttribute("data-word-index")!, 10);
+          }
+          next = next.nextSibling;
+        }
+        // Look backward if no forward word found
+        let prev = node.previousSibling;
+        while (prev) {
+          if (prev.nodeType === Node.ELEMENT_NODE && (prev as HTMLElement).hasAttribute("data-word-index")) {
+            return parseInt((prev as HTMLElement).getAttribute("data-word-index")!, 10);
+          }
+          prev = prev.previousSibling;
+        }
+      }
+
       return null;
     };
 
-    const anchorIndex = getWordIndexFromNode(sel.anchorNode);
-    const focusIndex = getWordIndexFromNode(sel.focusNode);
+    const anchorIndex = getWordIndexFromNode(sel.anchorNode, sel.anchorOffset);
+    const focusIndex = getWordIndexFromNode(sel.focusNode, sel.focusOffset);
 
     if (anchorIndex !== null && focusIndex !== null) {
       const startWordIndex = Math.min(anchorIndex, focusIndex);
@@ -72,6 +106,12 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
 
       const range = sel.getRangeAt(0);
       const boundingRect = range.getBoundingClientRect();
+      
+      // If the bounding rect is zero (can happen with some browser edge cases), try to get it from children
+      if (boundingRect.width === 0 && boundingRect.height === 0 && range.startContainer.nodeType === Node.ELEMENT_NODE) {
+        // Fallback or skip
+      }
+
       const centerX = boundingRect.left + boundingRect.width / 2;
 
       // Adjust toolbar position logic
@@ -84,6 +124,10 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
         text: sel.toString().trim(),
       });
       setPosition({ x: clampedX, y: boundingRect.top });
+    } else {
+      // Clear if we couldn't resolve word indices but there was a selection
+      setSelection(null);
+      setPosition(null);
     }
   }, [containerRef]);
 
@@ -91,7 +135,13 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
     setSelection(null);
     setPosition(null);
     const sel = window.getSelection();
-    if (sel) sel.removeAllRanges();
+    if (sel) {
+      try {
+        sel.removeAllRanges();
+      } catch (e) {
+        // Ignore errors if selection is already gone
+      }
+    }
   }, []);
 
   const selectWord = React.useCallback((wordIndex: number) => {
@@ -108,32 +158,41 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
     sel.addRange(range);
     
     // Trigger update immediately
-    setTimeout(() => updateSelectionData(), 0);
+    updateSelectionData();
   }, [containerRef, updateSelectionData]);
 
   React.useEffect(() => {
     const handleMouseDown = (e: MouseEvent | TouchEvent) => {
-      // Don't clear if clicking inside the toolbar or context menu
       const target = e.target as HTMLElement;
       if (target.closest(".selection-toolbar") || target.closest(".context-menu-container")) {
         return;
       }
       
+      // If right-clicking and we already have a selection, don't clear or reset dragging
+      if (e instanceof MouseEvent && e.button === 2 && selection) {
+        return;
+      }
+
       setIsDragging(true);
       if (selectionTimeout.current) clearTimeout(selectionTimeout.current);
     };
 
     const handleMouseUp = (e: MouseEvent | TouchEvent) => {
+      // If it was a right click on selection, don't do anything
+      if (e instanceof MouseEvent && e.button === 2 && selection) {
+        setIsDragging(false);
+        return;
+      }
+
       setIsDragging(false);
       
-      // Small delay to ensure the native selection is finalized
-      setTimeout(() => {
+      // Use requestAnimationFrame for smoother synchronization with browser selection
+      requestAnimationFrame(() => {
         updateSelectionData();
-      }, 10);
+      });
     };
 
     const handleSelectionChange = () => {
-      // If the user is still dragging, don't update yet to avoid flickering
       if (isDragging) return;
 
       if (selectionTimeout.current) clearTimeout(selectionTimeout.current);
@@ -146,7 +205,7 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
         } else {
           updateSelectionData();
         }
-      }, 20);
+      }, 50); // Slightly increased for stability
     };
 
     document.addEventListener("mousedown", handleMouseDown);
