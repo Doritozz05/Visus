@@ -133,13 +133,24 @@ export function ReaderEpubStyles() {
         
         /* Professional Selection Behavior */
         .selection-no-browser-ui {
-          user-select: none !important;
-          -webkit-user-select: none !important;
+          user-select: text !important;
+          -webkit-user-select: text !important;
           -webkit-touch-callout: none !important;
           -webkit-tap-highlight-color: transparent !important;
         }
 
         /* Custom selection highlight - Dynamic and Theme-aware */
+        .epub-content ::selection {
+          background-color: hsl(var(--primary) / 0.25) !important;
+          color: inherit !important;
+        }
+        
+        .epub-content ::-moz-selection {
+          background-color: hsl(var(--primary) / 0.25) !important;
+          color: inherit !important;
+        }
+        
+        /* Legacy highlight class (still used for existing annotations) */
         .epub-content span[data-word-index].word-selected {
           background-color: hsl(var(--primary) / 0.25) !important;
           color: inherit;
@@ -169,25 +180,15 @@ export function ReaderEpubStyles() {
 
         .epub-content span[data-word-index] {
           cursor: text;
-          user-select: none;
-          -webkit-user-select: none;
+          user-select: text;
+          -webkit-user-select: text;
         }
 
         /* Prevent selection from jumping to start when clicking margins */
         .epub-content {
-          user-select: none;
-          -webkit-user-select: none;
+          user-select: text;
+          -webkit-user-select: text;
           -webkit-touch-callout: none;
-        }
-
-        /* Hide browser's default selection highlight */
-        .epub-content ::selection {
-          background: transparent !important;
-          color: inherit !important;
-        }
-        .epub-content ::-moz-selection {
-          background: transparent !important;
-          color: inherit !important;
         }
 
         /* Defensive links styles - completely overrides visited link purple and underline! */

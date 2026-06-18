@@ -19,7 +19,7 @@ import { findPageForWordIndex, findFirstPageOfChapter, findLastPageOfChapter } f
 import { motion, AnimatePresence } from "framer-motion";
 
 // Text Selection & Annotations
-import { useAdvancedSelection } from "../hooks/useAdvancedSelection";
+import { useTextSelection } from "../hooks/useTextSelection";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { DictionaryModal } from "./DictionaryModal";
 import { AnnotationNoteDialog } from "./AnnotationNoteDialog";
@@ -222,124 +222,185 @@ export function PagesVisualBox({
     position,
     isDragging,
     clearSelection,
-    startSelection,
     updateSelection: updateSelectionRange,
-    endSelection,
     selectWord,
-  } = useAdvancedSelection(columnsContainerRef);
+  } = useTextSelection(columnsContainerRef);
 
   const [isDictionaryOpen, setIsDictionaryOpen] = React.useState(false);
   const [selectedWord, setSelectedWord] = React.useState("");
   const [editingAnnotation, setEditingAnnotation] = React.useState<Annotation | null>(null);
 
+  const handleAddAnnotation = React.useCallback(async (color: string, style: Annotation["style"]) => {
+    if (!selection) return;
+    const newAnnotation: Annotation = {
+      id: crypto.randomUUID(),
+      bookId: activeBookId,
+      chapterIndex: currentChapter.index,
+      startWordIndex: selection.startWordIndex,
+      endWordIndex: selection.endWordIndex,
+      color,
+      style,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      await dbService.saveAnnotation(newAnnotation);
+      setAnnotations([...allAnnotations, newAnnotation]);
+      clearSelection();
+      // Automatically open note dialog for new highlights
+      setEditingAnnotation(newAnnotation);
+    } catch (error) {
+      toast.error("Failed to save annotation");
+    }
+  }, [selection, activeBookId, currentChapter.index, allAnnotations, setAnnotations, clearSelection]);
+
+  const handleCopy = React.useCallback(() => {
+    if (selection) {
+      navigator.clipboard.writeText(`"${selection.text}"\n— ${currentChapter.title}`);
+      toast.success("Copied to clipboard");
+      clearSelection();
+    }
+  }, [selection, currentChapter.title, clearSelection]);
+
+  const handleTTS = React.useCallback(() => {
+    if (selection && "speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(selection.text);
+      window.speechSynthesis.speak(utterance);
+      clearSelection();
+    } else {
+      toast.error("Text-to-speech not supported in this browser");
+    }
+  }, [selection, clearSelection]);
+
+  const handleDictionary = React.useCallback(() => {
+    const textToSearch = selection?.text || selectedWord;
+    if (textToSearch) {
+      setSelectedWord(textToSearch);
+      setIsDictionaryOpen(true);
+      // We don't clear selection yet so the user sees what they are looking up
+    }
+  }, [selection, selectedWord]);
+
+  const handleWebSearch = React.useCallback(() => {
+    const textToSearch = selection?.text || selectedWord;
+    if (textToSearch) {
+      const query = encodeURIComponent(textToSearch);
+      window.open(`https://www.google.com/search?q=${query}`, "_blank");
+      clearSelection();
+    }
+  }, [selection, selectedWord, clearSelection]);
+
   const { showMenu } = useContextMenu();
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // Stabilize handlers for the memoized reader content to prevent DOM replacements
+  // that would blow away native selection and manual annotation paints.
+  const handleContextMenuRef = React.useRef<((e: React.MouseEvent) => void) | null>(null);
+  const handleDoubleClickRef = React.useRef<((e: React.MouseEvent) => void) | null>(null);
 
-    const target = e.target as HTMLElement;
-    const wordIndexAttr = target.getAttribute('data-word-index');
-    
-    if (selection || wordIndexAttr) {
-      // If no selection but right-clicked a word, select it first
-      if (!selection && wordIndexAttr) {
-        selectWord(parseInt(wordIndexAttr, 10), e);
+  const handleContextMenu = React.useCallback((e: React.MouseEvent) => {
+    handleContextMenuRef.current?.(e);
+  }, []);
+
+  const handleDoubleClick = React.useCallback((e: React.MouseEvent) => {
+    handleDoubleClickRef.current?.(e);
+  }, []);
+
+  React.useLayoutEffect(() => {
+    handleContextMenuRef.current = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const target = e.target as HTMLElement;
+      const wordIndexAttr = target.getAttribute('data-word-index');
+      
+      if (selection || wordIndexAttr) {
+        // If no selection but right-clicked a word, select it first
+        if (!selection && wordIndexAttr) {
+          selectWord(parseInt(wordIndexAttr, 10));
+        }
+
+        const items: ContextMenuItem[] = [
+          {
+            id: "highlight-yellow",
+            label: "Highlight yellow",
+            icon: <Highlighter className="w-4 h-4 text-[#fef08a]" />,
+            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight"),
+          },
+          {
+            id: "underline-solid",
+            label: "Underline",
+            icon: <Type className="w-4 h-4" />,
+            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "underline"),
+          },
+          { id: "ctx-divider-1", label: "", divider: true },
+          {
+            id: "ctx-add-note",
+            label: "Add note",
+            icon: <MessageSquare className="w-4 h-4" />,
+            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight"),
+          },
+          {
+            id: "ctx-dictionary",
+            label: "Dictionary",
+            icon: <BookOpen className="w-4 h-4" />,
+            onClick: handleDictionary,
+          },
+          {
+            id: "ctx-search",
+            label: "Web search",
+            icon: <Search className="w-4 h-4" />,
+            onClick: handleWebSearch,
+          },
+          {
+            id: "ctx-tts",
+            label: "Read aloud",
+            icon: <Volume2 className="w-4 h-4" />,
+            onClick: handleTTS,
+          },
+          { id: "ctx-divider-2", label: "", divider: true },
+          {
+            id: "ctx-copy",
+            label: "Copy text",
+            icon: <Copy className="w-4 h-4" />,
+            onClick: handleCopy,
+          },
+        ];
+        showMenu(e, items);
+      } else {
+        showMenu(e);
       }
+    };
 
-      const items: ContextMenuItem[] = [
-        {
-          id: "highlight-yellow",
-          label: "Highlight Yellow",
-          icon: <Highlighter className="w-4 h-4 text-[#fef08a]" />,
-          onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight"),
-        },
-        {
-          id: "underline-solid",
-          label: "Underline",
-          icon: <Type className="w-4 h-4" />,
-          onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "underline"),
-        },
-        { id: "ctx-divider-1", label: "", divider: true },
-        {
-          id: "ctx-add-note",
-          label: "Add Note",
-          icon: <MessageSquare className="w-4 h-4" />,
-          onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight"),
-        },
-        {
-          id: "ctx-dictionary",
-          label: "Dictionary",
-          icon: <BookOpen className="w-4 h-4" />,
-          onClick: handleDictionary,
-        },
-        {
-          id: "ctx-search",
-          label: "Web Search",
-          icon: <Search className="w-4 h-4" />,
-          onClick: handleWebSearch,
-        },
-        {
-          id: "ctx-tts",
-          label: "Read Aloud",
-          icon: <Volume2 className="w-4 h-4" />,
-          onClick: handleTTS,
-        },
-        { id: "ctx-divider-2", label: "", divider: true },
-        {
-          id: "ctx-copy",
-          label: "Copy",
-          icon: <Copy className="w-4 h-4" />,
-          onClick: handleCopy,
-        },
-      ];
-      showMenu(e, items);
-    } else {
-      showMenu(e);
-    }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
-    const target = e.target as HTMLElement;
-    const wordIndexAttr = target.getAttribute('data-word-index');
-    if (wordIndexAttr) {
-      startSelection(parseInt(wordIndexAttr, 10), e);
-    } else {
-      // Clicked outside any word
-      if (!target.closest('.selection-toolbar') && !target.closest('.context-menu-container')) {
-        clearSelection();
-      }
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    
-    // Robust word detection using elementFromPoint for better drag feel
-    const target = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement;
-    if (target) {
+    handleDoubleClickRef.current = (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
       const wordIndexAttr = target.getAttribute('data-word-index');
       if (wordIndexAttr) {
-        updateSelectionRange(parseInt(wordIndexAttr, 10));
+        selectWord(parseInt(wordIndexAttr, 10));
       }
-    }
-  };
+    };
+  }, [
+    selection, 
+    selectWord, 
+    handleAddAnnotation, 
+    handleDictionary, 
+    handleWebSearch, 
+    handleTTS, 
+    handleCopy, 
+    showMenu
+  ]);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    const touch = e.touches[0];
-    const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
-    if (target) {
-      const wordIndexAttr = target.getAttribute('data-word-index');
-      if (wordIndexAttr) {
-        updateSelectionRange(parseInt(wordIndexAttr, 10));
-      }
+  const handleMouseDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    // We only want to clear if we're not clicking on the toolbar or context menu
+    if (!target.closest('.selection-toolbar') && !target.closest('.context-menu-container')) {
+      // Native selection will handle starting a new selection
     }
-  };
+  }, []);
 
-  const handleMouseUp = () => {
-    endSelection();
-  };
+  const handleMouseUp = React.useCallback(() => {
+    // Native selection handles everything
+  }, []);
 
   React.useEffect(() => {
     if (!isReady) return;
@@ -385,54 +446,6 @@ export function PagesVisualBox({
     return () => clearTimeout(timer);
   }, [chapterAnnotations, formattedHtml, currentPageIndex, isReady]);
 
-  const handleContainerClick = (e: React.MouseEvent) => {
-    // Only handle if no active text selection is happening
-    if (selection) return;
-
-    const target = e.target as HTMLElement;
-    const wordIndexAttr = target.getAttribute('data-word-index');
-    if (wordIndexAttr) {
-      const idx = parseInt(wordIndexAttr, 10);
-      const annotation = chapterAnnotations.find(a => idx >= a.startWordIndex && idx <= a.endWordIndex);
-      if (annotation) {
-        setEditingAnnotation(annotation);
-      }
-    }
-  };
-
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    const wordIndexAttr = target.getAttribute('data-word-index');
-    if (wordIndexAttr) {
-      selectWord(parseInt(wordIndexAttr, 10), e);
-    }
-  };
-
-  const handleAddAnnotation = async (color: string, style: Annotation["style"]) => {
-    if (!selection) return;
-    const newAnnotation: Annotation = {
-      id: crypto.randomUUID(),
-      bookId: activeBookId,
-      chapterIndex: currentChapter.index,
-      startWordIndex: selection.startWordIndex,
-      endWordIndex: selection.endWordIndex,
-      color,
-      style,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    try {
-      await dbService.saveAnnotation(newAnnotation);
-      setAnnotations([...allAnnotations, newAnnotation]);
-      clearSelection();
-      // Automatically open note dialog for new highlights
-      setEditingAnnotation(newAnnotation);
-    } catch (error) {
-      toast.error("Failed to save annotation");
-    }
-  };
-
   const handleSaveAnnotationNote = async (note: string, tags: string[]) => {
     if (!editingAnnotation) return;
     const updated: Annotation = {
@@ -461,42 +474,6 @@ export function PagesVisualBox({
       toast.success("Annotation removed");
     } catch (error) {
       toast.error("Failed to delete annotation");
-    }
-  };
-
-  const handleCopy = () => {
-    if (selection) {
-      navigator.clipboard.writeText(`"${selection.text}"\n— ${currentChapter.title}`);
-      toast.success("Copied to clipboard");
-      clearSelection();
-    }
-  };
-
-  const handleTTS = () => {
-    if (selection && "speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(selection.text);
-      window.speechSynthesis.speak(utterance);
-      clearSelection();
-    } else {
-      toast.error("Text-to-speech not supported in this browser");
-    }
-  };
-
-  const handleDictionary = () => {
-    const textToSearch = selection?.text || selectedWord;
-    if (textToSearch) {
-      setSelectedWord(textToSearch);
-      setIsDictionaryOpen(true);
-      // We don't clear selection yet so the user sees what they are looking up
-    }
-  };
-
-  const handleWebSearch = () => {
-    const textToSearch = selection?.text || selectedWord;
-    if (textToSearch) {
-      const query = encodeURIComponent(textToSearch);
-      window.open(`https://www.google.com/search?q=${query}`, "_blank");
-      clearSelection();
     }
   };
 
@@ -606,12 +583,9 @@ export function PagesVisualBox({
     <div
       ref={columnsContainerRef}
       onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onTouchStart={handleMouseDown}
-      onTouchMove={handleTouchMove}
       onTouchEnd={handleMouseUp}
-      onClick={handleContainerClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
       data-custom-context-menu="true"
@@ -637,7 +611,10 @@ export function PagesVisualBox({
     scaledFontSize, 
     settings.general.readerFontFamily, 
     customFonts,
-    // Note: We explicitly exclude selection, position, and isDragging to prevent flickering
+    handleMouseDown,
+    handleMouseUp,
+    handleDoubleClick,
+    handleContextMenu
   ]);
 
   return (

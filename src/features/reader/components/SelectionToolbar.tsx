@@ -111,19 +111,19 @@ export function SelectionToolbar({
 
         {/* Actions */}
         <div className="flex items-center gap-1 pl-1 pr-1">
-          <button onClick={onAddNote} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Add Note">
+          <button onClick={onAddNote} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Add note">
             <MessageSquare className="w-4 h-4" />
           </button>
           <button onClick={onDictionary} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Dictionary">
             <BookOpen className="w-4 h-4" />
           </button>
-          <button onClick={onCopy} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Copy Text">
+          <button onClick={onCopy} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Copy text">
             <Copy className="w-4 h-4" />
           </button>
-          <button onClick={onSearch} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Search Book">
+          <button onClick={onSearch} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Search book">
             <Search className="w-4 h-4" />
           </button>
-          <button onClick={onTTS} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Read Aloud">
+          <button onClick={onTTS} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Read aloud">
             <Volume2 className="w-4 h-4" />
           </button>
         </div>
@@ -131,11 +131,11 @@ export function SelectionToolbar({
         {/* Delete / Close */}
         <div className="flex items-center gap-1 border-l border-zinc-700 pl-2">
           {existingAnnotation && onDelete && (
-            <button onClick={onDelete} className="p-1.5 rounded-md hover:bg-red-500/20 text-red-400 transition-colors" title="Delete Annotation">
+            <button onClick={onDelete} className="p-1.5 rounded-md hover:bg-red-500/20 text-red-400 transition-colors" title="Delete annotation">
               <Trash2 className="w-4 h-4" />
             </button>
           )}
-          <button onClick={onClose} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Close Menu">
+          <button onClick={onClose} className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" title="Close menu">
             <X className="w-4 h-4" />
           </button>
         </div>
