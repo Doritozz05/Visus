@@ -50,6 +50,7 @@ export function AnnotationsSidebar({ isOpen, onClose, onGoToAnnotation }: Annota
         <>
           {/* Overlay */}
           <motion.div
+            key="annotations-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -59,6 +60,7 @@ export function AnnotationsSidebar({ isOpen, onClose, onGoToAnnotation }: Annota
 
           {/* Sidebar */}
           <motion.div
+            key="annotations-sidebar"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -135,7 +137,6 @@ export function AnnotationsSidebar({ isOpen, onClose, onGoToAnnotation }: Annota
               ) : (
                 filteredAnnotations.map((annotation) => (
                   <motion.div
-                    layout
                     key={annotation.id}
                     onClick={() => onGoToAnnotation(annotation.chapterIndex, annotation.startWordIndex)}
                     className="group relative p-4 rounded-2xl bg-muted/30 border border-border/50 hover:border-primary/30 hover:bg-muted/50 transition-all cursor-pointer overflow-hidden"
