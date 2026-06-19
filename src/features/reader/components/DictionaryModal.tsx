@@ -57,7 +57,8 @@ export function DictionaryModal({ word, onClose }: DictionaryModalProps) {
 
   const playAudio = (audioUrl?: string) => {
     if (audioUrl) {
-      new Audio(audioUrl).play();
+      const audio = new Audio(audioUrl);
+      audio.play().catch(() => {});
     }
   };
 
