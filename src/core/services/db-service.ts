@@ -1,4 +1,4 @@
-import { Book, BookBinary } from "../entities/book";
+import { Book, BookBinary, Annotation } from "../entities/book";
 import { ReadingSessionLog } from "../entities/stats";
 import { toast } from "sonner";
 
@@ -10,7 +10,7 @@ export interface SyncAction {
 }
 
 const DB_NAME = "visus_database";
-const DB_VERSION = 6;
+const DB_VERSION = 7;
 const STORES = {
   BOOKS_METADATA: "books_metadata",
   BOOKS_BINARY: "books_binary",
@@ -18,7 +18,8 @@ const STORES = {
   SYNC_QUEUE: "sync_queue",
   ACHIEVEMENTS: "achievements",
   USER_ACHIEVEMENTS: "user_achievements",
-  READING_LISTS: "reading_lists"
+  READING_LISTS: "reading_lists",
+  ANNOTATIONS: "annotations",
 };
 
 class DbService {
@@ -89,6 +90,13 @@ class DbService {
           console.log(`[DbService] Creating store "${STORES.READING_LISTS}"...`);
           const store = db.createObjectStore(STORES.READING_LISTS, { keyPath: "id" });
           store.createIndex("ownerId", "ownerId", { unique: false });
+        }
+
+        if (!db.objectStoreNames.contains(STORES.ANNOTATIONS)) {
+          console.log(`[DbService] Creating store "${STORES.ANNOTATIONS}"...`);
+          const store = db.createObjectStore(STORES.ANNOTATIONS, { keyPath: "id" });
+          store.createIndex("bookId", "bookId", { unique: false });
+          store.createIndex("chapterIndex", "chapterIndex", { unique: false });
         }
       };
 
@@ -486,6 +494,46 @@ class DbService {
       return this.withDb((db) => new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(STORES.READING_LISTS, "readwrite");
         const store = transaction.objectStore(STORES.READING_LISTS);
+        const request = store.delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      }));
+    });
+  }
+
+  // --- ANNOTATIONS STORE ACTIONS ---
+
+  async getAnnotationsForBook(bookId: string): Promise<Annotation[]> {
+    return this.withDb((db) => new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORES.ANNOTATIONS, "readonly");
+      const store = transaction.objectStore(STORES.ANNOTATIONS);
+      const index = store.index("bookId");
+      const request = index.getAll(bookId);
+
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    }));
+  }
+
+  async saveAnnotation(annotation: Annotation): Promise<void> {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.ANNOTATIONS, "readwrite");
+        const store = transaction.objectStore(STORES.ANNOTATIONS);
+        const request = store.put(annotation);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      }));
+    });
+  }
+
+  async deleteAnnotation(id: string): Promise<void> {
+    return this.enqueueWrite(() => {
+      return this.withDb((db) => new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORES.ANNOTATIONS, "readwrite");
+        const store = transaction.objectStore(STORES.ANNOTATIONS);
         const request = store.delete(id);
 
         request.onsuccess = () => resolve();

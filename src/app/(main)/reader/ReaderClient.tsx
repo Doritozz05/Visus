@@ -22,6 +22,7 @@ import { useReaderPlayback } from "@/features/reader/hooks/useReaderPlayback";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
 import { TelemetryTrackerWrapper } from "@/features/reader/components/TelemetryTrackerWrapper";
+import { AnnotationsSidebar } from "@/features/reader/components/AnnotationsSidebar";
 import { Quiz } from "@/core/algorithms/quiz-generator";
 import { toast } from "sonner";
 import { PomodoroTimer } from "@/features/stats/components/PomodoroTimer";
@@ -81,11 +82,13 @@ export default function ReaderClient() {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const [drawerTab, setDrawerTab] = React.useState<"general" | "rsvp" | "cluster" | "normal">("rsvp");
   const [isTocOpen, setIsTocOpen] = React.useState(false);
+  const [isAnnotationsOpen, setIsAnnotationsOpen] = React.useState(false);
   const [activeQuiz, setActiveQuiz] = React.useState<Quiz | null>(null);
   const [isPomodoroOpen, setIsPomodoroOpen] = React.useState(false);
 
   const mode = useReadingStore((state) => state.mode);
   const activeChapterIndex = useReadingStore((state) => state.activeChapterIndex);
+  const setWordIndex = useReadingStore((state) => state.setWordIndex);
   const storeActiveBookId = useReadingStore((state) => state.activeBookId);
   const completedChapter = useReadingStore((state) => state.completedChapter);
   const setCompletedChapter = useReadingStore((state) => state.setCompletedChapter);
@@ -122,6 +125,15 @@ export default function ReaderClient() {
     if (!activeBookId) return null;
     return books.find((book) => book.id === activeBookId) || null;
   }, [books, activeBookId]);
+
+  const handleGoToAnnotation = (chapterIndex: number, wordIndex: number) => {
+    handleChapterChange(chapterIndex);
+    setWordIndex(wordIndex);
+    setIsAnnotationsOpen(false);
+    if (activeBook) {
+      saveProgressForBook(activeBook.id, chapterIndex, wordIndex);
+    }
+  };
 
   const getSafeWordsPerPage = React.useCallback((fontSize: number, baseWords: number): number => {
     const scale = 16 / fontSize;
@@ -298,6 +310,8 @@ export default function ReaderClient() {
             onDeleteBookmark={handleRemoveBookmark}
             isPomodoroOpen={isPomodoroOpen}
             setIsPomodoroOpen={setIsPomodoroOpen}
+            isAnnotationsOpen={isAnnotationsOpen}
+            setIsAnnotationsOpen={setIsAnnotationsOpen}
           />
         </motion.div>
 
@@ -334,6 +348,12 @@ export default function ReaderClient() {
         </motion.div>
 
       </motion.main>
+
+      <AnnotationsSidebar
+        isOpen={isAnnotationsOpen}
+        onClose={() => setIsAnnotationsOpen(false)}
+        onGoToAnnotation={handleGoToAnnotation}
+      />
 
       {mode !== "normal" && !activeQuiz && !completedChapter && (
         <ReaderPlayer

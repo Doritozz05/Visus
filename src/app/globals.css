@@ -237,6 +237,15 @@ body[data-glass="disabled"] .liquid-glass {
   border: 1px solid hsl(var(--border));
 }
 
+/* Kindle-style: Suppress browser-native selection toolbars (Edge Copilot, Chrome tooltips) */
+.selection-no-browser-ui {
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
 .text-gradient-primary {
   @apply bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bookmark } from "@/core/entities/book";
+import { Bookmark, Annotation } from "@/core/entities/book";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { getFontFamilyStyle } from "@/lib/typography";
 import { BookmarkCorner } from "./BookmarkCorner";
@@ -17,6 +17,16 @@ import { usePageNavigation } from "../hooks/usePageNavigation";
 import { useReadingStore } from "../stores/reading-store";
 import { findPageForWordIndex, findFirstPageOfChapter, findLastPageOfChapter } from "../utils/binarySearch";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Text Selection & Annotations
+import { useTextSelection } from "../hooks/useTextSelection";
+import { SelectionToolbar } from "./SelectionToolbar";
+import { DictionaryModal } from "./DictionaryModal";
+import { AnnotationNoteDialog } from "./AnnotationNoteDialog";
+import { dbService } from "@/core/services/db-service";
+import { toast } from "sonner";
+import { MessageSquare, BookOpen, Search, Volume2, Copy } from "lucide-react";
+import { getUncoveredSegments } from "../utils/annotationOverlap";
 
 interface PagesVisualBoxProps {
   activeBookId: string;
@@ -200,6 +210,287 @@ export function PagesVisualBox({
     onNextChapter,
   });
 
+  // --- ANNOTATIONS ENGINE ---
+  const allAnnotations = useReadingStore((state) => state.annotations);
+  const setAnnotations = useReadingStore((state) => state.setAnnotations);
+  const chapterAnnotations = React.useMemo(() => {
+    return allAnnotations.filter(a => a.chapterIndex === currentChapter.index);
+  }, [allAnnotations, currentChapter.index]);
+
+  const {
+    selection,
+    position,
+    isDragging,
+    clearSelection,
+    updateSelection: updateSelectionRange,
+    selectWord,
+    selectRange,
+  } = useTextSelection(columnsContainerRef);
+
+  const [isDictionaryOpen, setIsDictionaryOpen] = React.useState(false);
+  const [selectedWord, setSelectedWord] = React.useState("");
+  const [isNoteDialogOpen, setIsNoteDialogOpen] = React.useState(false);
+  const [selectedAnnotation, setSelectedAnnotation] = React.useState<Annotation | null>(null);
+  const [currentColor, setCurrentColor] = React.useState("#fef08a");
+
+  const handleAddAnnotation = React.useCallback(async (color: string, style: Annotation["style"] = "highlight", startIndex?: number, endIndex?: number) => {
+    const finalStart = startIndex ?? selection?.startWordIndex;
+    const finalEnd = endIndex ?? selection?.endWordIndex;
+
+    if (finalStart === undefined || finalEnd === undefined) return;
+
+    const segments = getUncoveredSegments(finalStart, finalEnd, chapterAnnotations);
+
+    if (segments.length === 0) {
+      return;
+    }
+
+    const newAnnotations: Annotation[] = segments.map((seg) => ({
+      id: crypto.randomUUID(),
+      bookId: activeBookId,
+      chapterIndex: currentChapter.index,
+      startWordIndex: seg.startWordIndex,
+      endWordIndex: seg.endWordIndex,
+      color,
+      style,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+
+    try {
+      for (const ann of newAnnotations) {
+        await dbService.saveAnnotation(ann);
+      }
+      setAnnotations([...allAnnotations, ...newAnnotations]);
+      clearSelection();
+      setCurrentColor(color);
+    } catch (error) {
+      toast.error("Failed to save annotation");
+    }
+  }, [selection, activeBookId, currentChapter.index, allAnnotations, setAnnotations, clearSelection, chapterAnnotations]);
+
+  const handleCopy = React.useCallback(() => {
+    if (selection) {
+      navigator.clipboard.writeText(`"${selection.text}"\n— ${currentChapter.title}`);
+      toast.success("Copied to clipboard");
+      clearSelection();
+    }
+  }, [selection, currentChapter.title, clearSelection]);
+
+  const handleTTS = React.useCallback(() => {
+    if (selection && "speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(selection.text);
+      window.speechSynthesis.speak(utterance);
+      clearSelection();
+    } else {
+      toast.error("Text-to-speech not supported in this browser");
+    }
+  }, [selection, clearSelection]);
+
+  const handleDictionary = React.useCallback(() => {
+    const textToSearch = selection?.text || selectedWord;
+    if (textToSearch) {
+      setSelectedWord(textToSearch);
+      setIsDictionaryOpen(true);
+      // We don't clear selection yet so the user sees what they are looking up
+    }
+  }, [selection, selectedWord]);
+
+  const handleWebSearch = React.useCallback(() => {
+    const textToSearch = selection?.text || selectedWord;
+    if (textToSearch) {
+      const query = encodeURIComponent(textToSearch);
+      window.open(`https://www.google.com/search?q=${query}`, "_blank");
+      clearSelection();
+    }
+  }, [selection, selectedWord, clearSelection]);
+
+  // Stabilize handlers for the memoized reader content to prevent DOM replacements
+  // that would blow away native selection and manual annotation paints.
+  const handleContextMenuRef = React.useRef<((e: React.MouseEvent) => void) | null>(null);
+  const handleDoubleClickRef = React.useRef<((e: React.MouseEvent) => void) | null>(null);
+  const handleMouseUpRef = React.useRef<((e: React.MouseEvent | React.TouchEvent) => void) | null>(null);
+
+  const handleContextMenu = React.useCallback((e: React.MouseEvent) => {
+    handleContextMenuRef.current?.(e);
+  }, []);
+
+  const handleDoubleClick = React.useCallback((e: React.MouseEvent) => {
+    handleDoubleClickRef.current?.(e);
+  }, []);
+
+  const handleMouseUp = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    handleMouseUpRef.current?.(e);
+  }, []);
+
+  const handleAnnotationClick = React.useCallback((wordIndex: number) => {
+    const annotation = chapterAnnotations.find(
+      a => wordIndex >= a.startWordIndex && wordIndex <= a.endWordIndex
+    );
+    if (!annotation) return;
+    setSelectedAnnotation(annotation);
+    selectRange(annotation.startWordIndex, annotation.endWordIndex);
+  }, [chapterAnnotations, selectRange]);
+
+  React.useLayoutEffect(() => {
+    handleContextMenuRef.current = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    handleDoubleClickRef.current = (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const wordIndexAttr = target.getAttribute('data-word-index');
+      if (wordIndexAttr) {
+        selectWord(parseInt(wordIndexAttr, 10));
+      }
+    };
+  }, [selectWord]);
+
+  React.useLayoutEffect(() => {
+    handleMouseUpRef.current = (e: React.MouseEvent | React.TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.selection-toolbar') || target.closest('.context-menu-container')) {
+        return;
+      }
+
+      const sel = window.getSelection();
+      if (sel && sel.isCollapsed) {
+        const wordIndexAttr = target.getAttribute('data-word-index');
+        if (wordIndexAttr !== null) {
+          const wordIndex = parseInt(wordIndexAttr, 10);
+          handleAnnotationClick(wordIndex);
+          return;
+        }
+        setSelectedAnnotation(null);
+      }
+    };
+  }, [handleAnnotationClick]);
+
+  const handleMouseDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.selection-toolbar') || target.closest('.context-menu-container')) {
+      return;
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!isReady) return;
+
+    const paintAnnotations = () => {
+      const container = columnsContainerRef.current;
+      if (!container) return;
+
+      // Clear previous highlights completely
+      const allSpans = container.querySelectorAll('span[data-word-index]');
+      allSpans.forEach((node) => {
+        const span = node as HTMLElement;
+        span.style.backgroundColor = '';
+        span.style.textDecoration = '';
+        span.style.textDecorationStyle = '';
+        span.style.textDecorationColor = '';
+        span.style.cursor = '';
+      });
+
+      // Apply active highlights
+      chapterAnnotations.forEach(annotation => {
+        for (let i = annotation.startWordIndex; i <= annotation.endWordIndex; i++) {
+          const span = container.querySelector(`span[data-word-index="${i}"]`) as HTMLElement;
+          if (span) {
+            if (annotation.style === 'highlight') {
+              span.style.backgroundColor = annotation.color;
+            } else {
+              span.style.textDecoration = 'underline';
+              span.style.textDecorationStyle = annotation.style;
+              span.style.textDecorationColor = annotation.color;
+            }
+            span.style.cursor = 'pointer';
+          }
+        }
+      });
+    };
+
+    // Paint immediately
+    paintAnnotations();
+    
+    // Safety delay to ensure DOM is fully settled and animations finished
+    const timer = setTimeout(paintAnnotations, 100);
+    return () => clearTimeout(timer);
+  }, [chapterAnnotations, formattedHtml, currentPageIndex, isReady]);
+
+  const handleSaveAnnotationNote = async (note: string, tags: string[]) => {
+    if (!selectedAnnotation) return;
+    const updated: Annotation = {
+      ...selectedAnnotation,
+      note,
+      tags,
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      await dbService.saveAnnotation(updated);
+      setAnnotations(allAnnotations.map(a => a.id === updated.id ? updated : a));
+      setIsNoteDialogOpen(false);
+      setSelectedAnnotation(null);
+      clearSelection();
+      toast.success("Note saved");
+    } catch (error) {
+      toast.error("Failed to update note");
+    }
+  };
+
+  const handleDeleteAnnotation = async () => {
+    if (!selectedAnnotation) return;
+    try {
+      await dbService.deleteAnnotation(selectedAnnotation.id);
+      setAnnotations(allAnnotations.filter(a => a.id !== selectedAnnotation.id));
+      setSelectedAnnotation(null);
+      clearSelection();
+      toast.success("Annotation removed");
+    } catch (error) {
+      toast.error("Failed to delete annotation");
+    }
+  };
+
+  const handleAddNoteToSelection = React.useCallback(async () => {
+    if (selectedAnnotation) {
+      setIsNoteDialogOpen(true);
+      return;
+    }
+    if (!selection) return;
+
+    const segments = getUncoveredSegments(selection.startWordIndex, selection.endWordIndex, chapterAnnotations);
+
+    if (segments.length === 0) return;
+
+    const newAnnotations: Annotation[] = segments.map((seg) => ({
+      id: crypto.randomUUID(),
+      bookId: activeBookId,
+      chapterIndex: currentChapter.index,
+      startWordIndex: seg.startWordIndex,
+      endWordIndex: seg.endWordIndex,
+      color: currentColor,
+      style: "highlight",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+
+    try {
+      for (const ann of newAnnotations) {
+        await dbService.saveAnnotation(ann);
+      }
+      setAnnotations([...allAnnotations, ...newAnnotations]);
+      if (newAnnotations.length === 1) {
+        setSelectedAnnotation(newAnnotations[0]);
+        setIsNoteDialogOpen(true);
+      } else {
+        clearSelection();
+      }
+    } catch (error) {
+      toast.error("Failed to save annotation");
+    }
+  }, [selectedAnnotation, selection, currentColor, activeBookId, currentChapter.index, allAnnotations, setAnnotations, chapterAnnotations, clearSelection]);
+
   // Reset measured pages IMMEDIATELY when chapter changes to prevent stale navigation logic
   const [lastChapterIdx, setLastChapterIdx] = React.useState(currentChapter.index);
   if (lastChapterIdx !== currentChapter.index) {
@@ -301,6 +592,45 @@ export function PagesVisualBox({
   const showCompleteBook = currentPageIndex === totalPagesInChapter - 1 && isLastChapter;
   const showNextChapter = currentPageIndex === totalPagesInChapter - 1 && !isLastChapter;
 
+  // Memoized Reader Content to prevent re-renders during selection/dragging
+  const readerContent = React.useMemo(() => (
+    <div
+      ref={columnsContainerRef}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onTouchStart={handleMouseDown}
+      onTouchEnd={handleMouseUp}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={handleContextMenu}
+      data-custom-context-menu="true"
+      className={`h-full epub-content ${readerFontClass} selection-no-browser-ui`}
+      style={{
+        columnWidth: "100%",
+        columnCount: 1,
+        columnGap: `${columnGap}px`,
+        columnFill: "auto",
+        transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
+        fontSize: `${scaledFontSize}px`,
+        lineHeight: "1.75",
+        fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
+      }}
+      dangerouslySetInnerHTML={{ __html: formattedHtml }}
+    />
+  ), [
+    formattedHtml, 
+    readerFontClass, 
+    columnGap, 
+    currentPageIndex, 
+    containerDimensions, 
+    scaledFontSize, 
+    settings.general.readerFontFamily, 
+    customFonts,
+    handleMouseDown,
+    handleMouseUp,
+    handleDoubleClick,
+    handleContextMenu
+  ]);
+
   return (
     <div className="w-full bg-card border border-border/20 rounded-2xl px-3.5 pb-3 pt-5 sm:px-5 sm:pb-4 sm:pt-8 md:px-8 md:pt-11 md:pb-6 shadow-2xl relative overflow-hidden transition-opacity duration-300 flex flex-col h-full md:h-[660px] min-h-0">
 
@@ -357,24 +687,48 @@ export function PagesVisualBox({
               willChange: "opacity, transform",
             }}
           >
-            <div
-              ref={columnsContainerRef}
-              className={`h-full epub-content ${readerFontClass}`}
-              style={{
-                columnWidth: "100%",
-                columnCount: 1,
-                columnGap: `${columnGap}px`,
-                columnFill: "auto",
-                transform: `translateX(-${currentPageIndex * ((containerDimensions?.width || 0) + columnGap)}px)`,
-                fontSize: `${scaledFontSize}px`,
-                lineHeight: "1.75",
-                fontFamily: getFontFamilyStyle(settings.general.readerFontFamily, customFonts),
-              }}
-              dangerouslySetInnerHTML={{ __html: formattedHtml }}
-            />
+            {readerContent}
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <SelectionToolbar
+        selection={selection}
+        position={position}
+        existingAnnotation={selectedAnnotation}
+        onHighlight={(color) => handleAddAnnotation(color, "highlight")}
+        onAddNote={handleAddNoteToSelection}
+        onDictionary={handleDictionary}
+        onCopy={handleCopy}
+        onSearch={handleWebSearch}
+        onTTS={handleTTS}
+        onDelete={selectedAnnotation ? handleDeleteAnnotation : undefined}
+        onClose={() => { clearSelection(); setSelectedAnnotation(null); }}
+        currentColor={currentColor}
+      />
+
+      <AnimatePresence>
+        {isDictionaryOpen && (
+          <DictionaryModal
+            word={selectedWord}
+            onClose={() => {
+              setIsDictionaryOpen(false);
+              clearSelection();
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isNoteDialogOpen && selectedAnnotation && (
+          <AnnotationNoteDialog
+            annotation={selectedAnnotation}
+            onSave={handleSaveAnnotationNote}
+            onDelete={handleDeleteAnnotation}
+            onClose={() => { setIsNoteDialogOpen(false); }}
+          />
+        )}
+      </AnimatePresence>
 
       <PagesFooter
         isPaginationReady={isReady}
