@@ -90,6 +90,7 @@ export interface GeneralSettings {
   lastUsedMode?: "rsvp" | "cluster" | "normal"; // Last mode used
   savedColors?: string[];      // Custom saved color palette (hex codes)
   customThemes?: CustomTheme[]; // Collection of user created themes
+  onboardingCompleted?: boolean; // Whether the first-use onboarding has been dismissed
 }
 
 export interface RsvpSettings {

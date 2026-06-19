@@ -334,9 +334,8 @@ export function PagesVisualBox({
   }, [chapterAnnotations, selectRange]);
 
   React.useLayoutEffect(() => {
-    handleContextMenuRef.current = (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+    handleContextMenuRef.current = (_e: React.MouseEvent) => {
+      // Native context menu kept enabled for screen reader accessibility
     };
 
     handleDoubleClickRef.current = (e: React.MouseEvent) => {

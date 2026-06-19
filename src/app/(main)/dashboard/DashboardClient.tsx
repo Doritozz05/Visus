@@ -103,6 +103,19 @@ export default function DashboardClient() {
   React.useEffect(() => {
     fetchStats();
 
+    // Polling fallback every 30s if telemetry events are missed
+    const polling = setInterval(fetchStats, 30000);
+
+    // Flush on page visibility change (tab switch, minimize)
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchStats();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // Flush on page show (back/forward cache restore)
+    const handlePageShow = () => fetchStats();
+    window.addEventListener("pageshow", handlePageShow);
+
     // Listen for real-time telemetry updates
     const handleUpdate = () => {
       fetchStats();
@@ -110,6 +123,9 @@ export default function DashboardClient() {
     window.addEventListener("stats-updated", handleUpdate);
 
     return () => {
+      clearInterval(polling);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("pageshow", handlePageShow);
       window.removeEventListener("stats-updated", handleUpdate);
     };
   }, [fetchStats]);

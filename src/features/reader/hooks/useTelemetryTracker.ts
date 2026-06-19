@@ -442,14 +442,19 @@ export function useTelemetryTracker({
     };
   }, [activeBookId, flushSession]);
 
-  // Window beforeunload listener
+  // Window beforeunload + pagehide (covers bfcache restore as well)
   React.useEffect(() => {
     const handleBeforeUnload = () => {
       flushSession();
     };
+    const handlePageHide = () => {
+      flushSession();
+    };
     window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("pagehide", handlePageHide);
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("pagehide", handlePageHide);
     };
   }, [flushSession]);
 

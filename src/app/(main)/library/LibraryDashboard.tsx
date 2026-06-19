@@ -28,6 +28,7 @@ import { BookCard } from "@/features/library/components/BookCard";
 import { VisiMascot } from "@/components/ui/VisiMascot";
 
 import { ReadingListGrid } from "@/features/library/components/ReadingListGrid";
+import { OnboardingOverlay } from "@/features/library/components/OnboardingOverlay";
 
 // Extracted Hooks
 import { useBookIngestion } from "@/features/library/hooks/useBookIngestion";
@@ -139,6 +140,19 @@ export default function LibraryDashboard() {
   // State controls for UI
   const [searchQuery, setSearchQuery] = React.useState("");
   const [activeTab, setActiveTab] = React.useState<"active" | "completed" | "lists">("active");
+  const [isOnboardingOpen, setIsOnboardingOpen] = React.useState(false);
+
+  // Show onboarding on first visit when library is empty
+  React.useEffect(() => {
+    if (isHydrated && books.length === 0 && !settings.general.onboardingCompleted) {
+      setIsOnboardingOpen(true);
+    }
+  }, [isHydrated, books.length, settings.general.onboardingCompleted]);
+
+  const handleOnboardingDismiss = React.useCallback(() => {
+    setIsOnboardingOpen(false);
+    updateGeneralSettings({ onboardingCompleted: true });
+  }, [updateGeneralSettings]);
   const [activeGenre, setActiveGenre] = React.useState<string | null>(null);
   const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null);
   const [detailsBook, setDetailsBook] = React.useState<Book | null>(null);
@@ -626,6 +640,12 @@ export default function LibraryDashboard() {
           onReadBook={handleReadBook}
         />
       )}
+
+      {/* --- FIRST-VISIT ONBOARDING OVERLAY --- */}
+      <OnboardingOverlay
+        isOpen={isOnboardingOpen}
+        onDismiss={handleOnboardingDismiss}
+      />
 
     </>
   );
