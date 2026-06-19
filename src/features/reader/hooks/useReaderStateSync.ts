@@ -2,6 +2,7 @@ import * as React from "react";
 import { Book } from "@/core/entities/book";
 import { SettingsState } from "@/core/entities/settings";
 import { useReadingStore } from "../stores/reading-store";
+import { dbService } from "@/core/services/db-service";
 
 export interface UseReaderStateSyncProps {
   activeBook: Book | null;
@@ -88,6 +89,11 @@ export function useReaderStateSync({
         lastMode,
         chaptersData
       );
+
+      // Load annotations asynchronously after initBook
+      dbService.getAnnotationsForBook(book.id).then((annotations) => {
+        useReadingStore.getState().setAnnotations(annotations || []);
+      }).catch(console.error);
 
       if (
         restoredChapterIdx !== (book.lastChapterIndex ?? 0) ||

@@ -177,13 +177,22 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
 
   React.useEffect(() => {
     const handleGlobalContextMenu = (e: MouseEvent) => {
-      // Check if we should ignore context menu (e.g. on specific elements)
-      // For now, let's just show it everywhere
+      // Allow specific components to handle their own context menu (like Reader)
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-custom-context-menu="true"]')) {
+        return;
+      }
+      
       showMenu(e);
     };
 
-    const handleGlobalClick = () => {
-      if (state.isOpen) hideMenu();
+    const handleGlobalClick = (e: MouseEvent) => {
+      if (state.isOpen) {
+        // If clicking inside the menu, let the button handler deal with it
+        const target = e.target as HTMLElement;
+        if (target.closest('.context-menu-container')) return;
+        hideMenu();
+      }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -259,7 +268,7 @@ function ContextMenuUI({ x, y, items, onClose }: ContextMenuUIProps) {
         left: position.left,
         zIndex: 1000,
       }}
-      className="w-64 overflow-hidden rounded-xl border border-border/40 bg-card p-1.5 shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass animate-in fade-in zoom-in-95 duration-100"
+      className="context-menu-container w-64 overflow-hidden rounded-xl border border-border/40 bg-card p-1.5 shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass animate-in fade-in zoom-in-95 duration-100"
       onContextMenu={(e) => e.preventDefault()}
     >
       <div className="flex flex-col gap-0.5">

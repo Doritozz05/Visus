@@ -24,7 +24,8 @@ import {
   BookOpen,
   Zap,
   Layers,
-  Menu
+  Menu,
+  Highlighter
 } from "lucide-react";
 
 interface ChapterItem {
@@ -47,6 +48,8 @@ interface ReaderHeaderProps {
   onDeleteBookmark: (id: string) => void;
   isPomodoroOpen?: boolean;
   setIsPomodoroOpen?: (open: boolean) => void;
+  isAnnotationsOpen: boolean;
+  setIsAnnotationsOpen: (open: boolean) => void;
 }
 
 export function ReaderHeader({
@@ -65,6 +68,8 @@ export function ReaderHeader({
   onDeleteBookmark,
   isPomodoroOpen = false,
   setIsPomodoroOpen,
+  isAnnotationsOpen,
+  setIsAnnotationsOpen,
 }: ReaderHeaderProps) {
   const chapterBtnRef = React.useRef<HTMLButtonElement>(null);
   const [anchorPos, setAnchorPos] = React.useState<{ x: number; y: number } | null>(null);
@@ -230,6 +235,19 @@ export function ReaderHeader({
           />
         </div>
       </div>
+
+      {/* Highlighter/Notebook Toggle */}
+      <button
+        onClick={() => setIsAnnotationsOpen(!isAnnotationsOpen)}
+        className={`flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm liquid-glass cursor-pointer ${
+          isAnnotationsOpen
+            ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(var(--primary),0.2)] border-primary"
+            : "bg-card hover:bg-accent text-muted-foreground hover:text-primary"
+        }`}
+        title="Open Notebook"
+      >
+        <Highlighter className="w-4 h-4" />
+      </button>
 
       {/* Pomodoro Timer Toggle */}
       <button
