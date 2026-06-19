@@ -5,6 +5,8 @@ import { FancyDropdown } from "@/components/ui/FancyDropdown";
 import { Pencil, X } from "lucide-react";
 import { FormField } from "@/components/ui/FormField";
 import { NumberInput } from "@/components/ui/NumberInput";
+import { Dialog } from "@/components/ui/Dialog";
+import { IconButton } from "@/components/ui/IconButton";
 
 interface EditBookModalProps {
   isOpen: boolean;
@@ -51,16 +53,10 @@ export function EditBookModal({
   statusOptions,
   titleError,
 }: EditBookModalProps) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div 
-        onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-[4px] transition-opacity"
-      />
-      <div className="w-full max-w-md bg-card border border-border/30 rounded-2xl p-6 shadow-2xl relative z-10 liquid-glass overflow-hidden animate-scale-up">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+    <Dialog isOpen={isOpen} onClose={onClose} title="Edit book details">
+      <div className="p-6">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none"></div>
         
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-border/10 mb-4 relative z-10">
@@ -68,12 +64,12 @@ export function EditBookModal({
             <Pencil className="text-primary h-5 w-5" />
             <h3 className="font-heading font-bold text-lg">Edit book details</h3>
           </div>
-          <button 
+          <IconButton
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
-          >
-            <X className="h-[18px] w-[18px]" />
-          </button>
+            icon={<X className="h-[18px] w-[18px]" />}
+            variant="ghost"
+            aria-label="Close dialog"
+          />
         </div>
 
         {/* Form */}
@@ -187,6 +183,6 @@ export function EditBookModal({
           </div>
         </form>
       </div>
-    </div>
+    </Dialog>
   );
 }

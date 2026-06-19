@@ -7,6 +7,7 @@ import { RsvpSettingsForm } from "@/features/settings/components/RsvpSettingsFor
 import { ClusterSettingsForm } from "@/features/settings/components/ClusterSettingsForm";
 import { ReaderSettingsForm } from "@/features/settings/components/ReaderSettingsForm";
 import { useReadingStore } from "@/features/reader/stores/reading-store";
+import { IconButton } from "@/components/ui/IconButton";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SettingsDrawerProps {
@@ -98,13 +99,14 @@ export function SettingsDrawer({
                 <Sliders className="text-primary h-5 w-5" />
                 <h3 className="font-heading font-bold text-base">Quick settings</h3>
               </div>
-              <button
+              <IconButton
                 data-testid="settings-close-button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground border border-border/20 transition-all"
-              >
-                <X className="h-[18px] w-[18px]" />
-              </button>
+                icon={<X className="h-[18px] w-[18px]" />}
+                variant="ghost"
+                title="Close settings"
+                aria-label="Close settings"
+              />
             </div>
 
             {/* Mobile-only Quick Actions (Fullscreen, Focus Mode, Pomodoro) */}

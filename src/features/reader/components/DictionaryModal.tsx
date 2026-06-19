@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, X, Volume2, AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Dialog } from "@/components/ui/Dialog";
+import { IconButton } from "@/components/ui/IconButton";
 
 interface DictionaryModalProps {
   word: string;
@@ -64,27 +64,24 @@ export function DictionaryModal({ word, onClose }: DictionaryModalProps) {
 
   if (!mounted) return null;
 
-  return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-card w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-border/50 flex flex-col max-h-[80vh]"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/30">
-          <div className="flex items-center gap-2 text-primary font-medium">
-            <BookOpen className="w-5 h-5" />
-            <span>Dictionary</span>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+  return (
+    <Dialog isOpen onClose={onClose} title="Dictionary">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/30">
+        <div className="flex items-center gap-2 text-primary font-medium">
+          <BookOpen className="w-5 h-5" />
+          <span>Dictionary</span>
         </div>
+        <IconButton
+          onClick={onClose}
+          icon={<X className="w-5 h-5" />}
+          variant="ghost"
+          aria-label="Close dictionary"
+        />
+      </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto flex-1">
+      {/* Content */}
+      <div className="p-6 overflow-y-auto flex-1 max-h-[60vh]">
           {loading && (
             <div className="flex flex-col items-center justify-center h-32 gap-4">
               <LoadingSpinner />
@@ -143,8 +140,6 @@ export function DictionaryModal({ word, onClose }: DictionaryModalProps) {
             </div>
           )}
         </div>
-      </motion.div>
-    </div>,
-    document.body
+    </Dialog>
   );
 }

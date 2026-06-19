@@ -34,6 +34,7 @@ export function ConfirmDialog({
   isLoading = false,
 }: ConfirmDialogProps) {
   const [mounted, setMounted] = React.useState(false);
+  const dialogRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     setMounted(true);
@@ -47,10 +48,29 @@ export function ConfirmDialog({
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) onClose();
     };
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     
     window.addEventListener("keydown", handleEscape);
+    window.addEventListener("keydown", handleTab);
     return () => {
       window.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("keydown", handleTab);
       document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
@@ -77,7 +97,7 @@ export function ConfirmDialog({
   };
 
   const dialogContent = (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
       {/* Backdrop with blur */}
       <div 
         onClick={onClose}
@@ -85,7 +105,7 @@ export function ConfirmDialog({
       />
       
       {/* Dialog Content */}
-      <div className="w-full max-w-sm bg-card border border-border/30 rounded-2xl p-6 shadow-2xl relative z-10 liquid-glass overflow-hidden animate-scale-up">
+      <div ref={dialogRef} className="w-full max-w-sm bg-card border border-border/30 rounded-2xl p-6 shadow-2xl relative z-10 liquid-glass overflow-hidden animate-scale-up">
         {/* Visual Decoration */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none"></div>
         
@@ -95,7 +115,7 @@ export function ConfirmDialog({
               {getIcon()}
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-bold font-heading text-foreground tracking-tight">
+              <h3 id="confirm-dialog-title" className="text-lg font-bold font-heading text-foreground tracking-tight">
                 {title}
               </h3>
               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">

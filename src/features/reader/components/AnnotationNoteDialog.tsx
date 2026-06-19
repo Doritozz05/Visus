@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, X, Save, Trash2, Tag as TagIcon } from "lucide-react";
 import { Annotation } from "@/core/entities/book";
+import { Dialog } from "@/components/ui/Dialog";
+import { IconButton } from "@/components/ui/IconButton";
 
 interface AnnotationNoteDialogProps {
   annotation: Partial<Annotation>;
@@ -32,16 +33,10 @@ export function AnnotationNoteDialog({ annotation, onSave, onDelete, onClose }: 
   };
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-card w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-border flex flex-col"
-        >
-          {/* Header */}
-          <div className="p-6 border-b border-border flex items-center justify-between bg-muted/20">
+    <Dialog isOpen onClose={onClose} title="Annotation Note" maxWidth="max-w-lg">
+      <div className="flex flex-col">
+        {/* Header */}
+        <div className="p-6 border-b border-border flex items-center justify-between bg-muted/20">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
                 <MessageSquare className="w-5 h-5" />
@@ -125,8 +120,7 @@ export function AnnotationNoteDialog({ annotation, onSave, onDelete, onClose }: 
               </button>
             </div>
           </div>
-        </motion.div>
       </div>
-    </AnimatePresence>
+    </Dialog>
   );
 }

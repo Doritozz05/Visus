@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { Book } from "@/core/entities/book";
 import { Book as BookIcon, X, BookOpen } from "lucide-react";
+import { Dialog } from "@/components/ui/Dialog";
 
 interface BookDetailsModalProps {
   book: Book;
@@ -17,12 +18,8 @@ export function BookDetailsModal({
   onReadBook,
 }: BookDetailsModalProps) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div
-        onClick={onClose}
-        className="absolute inset-0 bg-black/60 transition-opacity duration-300"
-      />
-      <div className="w-full max-w-2xl bg-card border border-border/30 rounded-2xl shadow-2xl relative z-10 liquid-glass overflow-hidden animate-scale-up flex flex-col md:flex-row min-h-[420px] max-h-[90vh]">
+    <Dialog isOpen onClose={onClose} title={book.title} maxWidth="max-w-2xl">
+      <div className="flex flex-col md:flex-row min-h-[420px] max-h-[90vh]">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none"></div>
 
         {/* Left Column: Large Book Cover / Backdrop Visual */}
@@ -150,6 +147,6 @@ export function BookDetailsModal({
         </div>
 
       </div>
-    </div>
+    </Dialog>
   );
 }

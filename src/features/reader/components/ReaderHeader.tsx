@@ -7,6 +7,7 @@ import { useReadingStore } from "../stores/reading-store";
 import { motion } from "framer-motion";
 import { FancyTabs } from "@/components/ui/FancyTabs";
 import { FancyDropdown } from "@/components/ui/FancyDropdown";
+import { IconButton } from "@/components/ui/IconButton";
 import { useSettings } from "@/features/settings/context/settings-context";
 import { getFontFamilyStyle } from "@/lib/typography";
 import { 
@@ -170,20 +171,18 @@ export function ReaderHeader({
 
       {/* Layout Utilities (Glued next to bookshelf) */}
       <div className="hidden md:flex items-center gap-1 md:gap-1.5">
-        <button
+        <IconButton
           onClick={toggleFullscreen}
-          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
+          icon={isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
           title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-        >
-          {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-        </button>
-        <button
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        />
+        <IconButton
           onClick={() => setIsFocusMode(true)}
-          className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
+          icon={<EyeOff className="w-4 h-4" />}
           title="Enter focus mode"
-        >
-          <EyeOff className="w-4 h-4" />
-        </button>
+          aria-label="Enter focus mode"
+        />
       </div>
     </div>
   );
@@ -237,40 +236,32 @@ export function ReaderHeader({
       </div>
 
       {/* Highlighter/Notebook Toggle */}
-      <button
+      <IconButton
         onClick={() => setIsAnnotationsOpen(!isAnnotationsOpen)}
-        className={`flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm liquid-glass cursor-pointer ${
-          isAnnotationsOpen
-            ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(var(--primary),0.2)] border-primary"
-            : "bg-card hover:bg-accent text-muted-foreground hover:text-primary"
-        }`}
+        icon={<Highlighter className="w-4 h-4" />}
+        isActive={isAnnotationsOpen}
         title="Open Notebook"
-      >
-        <Highlighter className="w-4 h-4" />
-      </button>
+        aria-label="Toggle notebook"
+      />
 
       {/* Pomodoro Timer Toggle */}
-      <button
+      <IconButton
         onClick={() => setIsPomodoroOpen?.(!isPomodoroOpen)}
-        className={`hidden md:flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 transition-all shrink-0 shadow-sm liquid-glass cursor-pointer ${
-          isPomodoroOpen
-            ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(var(--primary),0.2)] border-primary"
-            : "bg-card hover:bg-accent text-muted-foreground hover:text-primary"
-        }`}
+        icon={<Timer className="w-4 h-4" />}
+        isActive={isPomodoroOpen}
         title="Toggle Pomodoro timer"
-      >
-        <Timer className="w-4 h-4" />
-      </button>
+        aria-label="Toggle Pomodoro timer"
+        className="hidden md:flex"
+      />
 
       {/* Quick Settings Trigger */}
-      <button
+      <IconButton
         data-testid="desktop-settings-button"
         onClick={openQuickSettings}
-        className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer"
+        icon={<Settings className="w-4 h-4 animate-spin-slow" />}
         title="Open settings"
-      >
-        <Settings className="w-4 h-4 animate-spin-slow" />
-      </button>
+        aria-label="Open settings"
+      />
     </div>
   );
 

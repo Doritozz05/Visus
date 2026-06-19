@@ -91,6 +91,7 @@ export interface GeneralSettings {
   savedColors?: string[];      // Custom saved color palette (hex codes)
   customThemes?: CustomTheme[]; // Collection of user created themes
   onboardingCompleted?: boolean; // Whether the first-use onboarding has been dismissed
+  isFocusMode?: boolean; // Focus mode persisted across reading sessions
 }
 
 export interface RsvpSettings {

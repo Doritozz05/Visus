@@ -50,22 +50,7 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Custom premium reading themes
-        sepia: {
-          background: "#f4ecd8",
-          foreground: "#5b4636",
-          border: "#e4dcd3",
-        },
-        discordDark: {
-          background: "#313338",
-          foreground: "#dbdee1",
-          border: "#1e1f22",
-        },
-        nord: {
-          background: "#2e3440",
-          foreground: "#d8dee9",
-          border: "#4c566a",
-        }
+
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -120,6 +120,24 @@ export default function ReaderClient() {
     }
   }, [wpm, mode, isHydrated, updateGeneralSettings, settings.general.lastUsedWpm, settings.general.lastUsedMode]);
 
+  // Initialize focus mode from settings on hydration
+  const focusInitialized = React.useRef(false);
+  React.useEffect(() => {
+    if (!isHydrated || focusInitialized.current) return;
+    focusInitialized.current = true;
+    const saved = settings.general.isFocusMode;
+    if (saved !== undefined) {
+      setIsFocusMode(saved);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHydrated]);
+
+  React.useEffect(() => {
+    if (!isHydrated) return;
+    updateGeneralSettings({ isFocusMode });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFocusMode, isHydrated, updateGeneralSettings]);
+
   // Active book derivation
   const activeBook = React.useMemo(() => {
     if (!activeBookId) return null;

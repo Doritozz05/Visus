@@ -118,6 +118,15 @@
     --reader-border: var(--border);
 
     --card-shadow: none;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
   }
 
   .bg-background-adaptive {
