@@ -57,7 +57,7 @@ export function QuickColorPicker({ value, onChange, size = "md" }: QuickColorPic
       clearTimeout(timer);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isPopupOpen]);
+  }, [isPopupOpen, activeColor]);
 
   const handleSwatchClick = (color: string) => {
     saveLastColor(color);

@@ -309,6 +309,7 @@ export function PagesVisualBox({
   // that would blow away native selection and manual annotation paints.
   const handleContextMenuRef = React.useRef<((e: React.MouseEvent) => void) | null>(null);
   const handleDoubleClickRef = React.useRef<((e: React.MouseEvent) => void) | null>(null);
+  const handleMouseUpRef = React.useRef<((e: React.MouseEvent | React.TouchEvent) => void) | null>(null);
 
   const handleContextMenu = React.useCallback((e: React.MouseEvent) => {
     handleContextMenuRef.current?.(e);
@@ -317,6 +318,19 @@ export function PagesVisualBox({
   const handleDoubleClick = React.useCallback((e: React.MouseEvent) => {
     handleDoubleClickRef.current?.(e);
   }, []);
+
+  const handleMouseUp = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    handleMouseUpRef.current?.(e);
+  }, []);
+
+  const handleAnnotationClick = React.useCallback((wordIndex: number) => {
+    const annotation = chapterAnnotations.find(
+      a => wordIndex >= a.startWordIndex && wordIndex <= a.endWordIndex
+    );
+    if (!annotation) return;
+    setSelectedAnnotation(annotation);
+    selectRange(annotation.startWordIndex, annotation.endWordIndex);
+  }, [chapterAnnotations, selectRange]);
 
   React.useLayoutEffect(() => {
     handleContextMenuRef.current = (e: React.MouseEvent) => {
@@ -331,16 +345,27 @@ export function PagesVisualBox({
         selectWord(parseInt(wordIndexAttr, 10));
       }
     };
-  }, []);
+  }, [selectWord]);
 
-  const handleAnnotationClick = React.useCallback((wordIndex: number) => {
-    const annotation = chapterAnnotations.find(
-      a => wordIndex >= a.startWordIndex && wordIndex <= a.endWordIndex
-    );
-    if (!annotation) return;
-    setSelectedAnnotation(annotation);
-    selectRange(annotation.startWordIndex, annotation.endWordIndex);
-  }, [chapterAnnotations, selectRange]);
+  React.useLayoutEffect(() => {
+    handleMouseUpRef.current = (e: React.MouseEvent | React.TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.selection-toolbar') || target.closest('.context-menu-container')) {
+        return;
+      }
+
+      const sel = window.getSelection();
+      if (sel && sel.isCollapsed) {
+        const wordIndexAttr = target.getAttribute('data-word-index');
+        if (wordIndexAttr !== null) {
+          const wordIndex = parseInt(wordIndexAttr, 10);
+          handleAnnotationClick(wordIndex);
+          return;
+        }
+        setSelectedAnnotation(null);
+      }
+    };
+  }, [handleAnnotationClick]);
 
   const handleMouseDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const target = e.target as HTMLElement;
@@ -348,24 +373,6 @@ export function PagesVisualBox({
       return;
     }
   }, []);
-
-  const handleMouseUp = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.closest('.selection-toolbar') || target.closest('.context-menu-container')) {
-      return;
-    }
-
-    const sel = window.getSelection();
-    if (sel && sel.isCollapsed) {
-      const wordIndexAttr = target.getAttribute('data-word-index');
-      if (wordIndexAttr !== null) {
-        const wordIndex = parseInt(wordIndexAttr, 10);
-        handleAnnotationClick(wordIndex);
-        return;
-      }
-      setSelectedAnnotation(null);
-    }
-  }, [handleAnnotationClick]);
 
   React.useEffect(() => {
     if (!isReady) return;

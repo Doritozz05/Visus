@@ -26,6 +26,8 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
   const [position, setPosition] = React.useState<Position | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const selectionTimeout = React.useRef<NodeJS.Timeout | null>(null);
+  const selectionRef = React.useRef(selection);
+  selectionRef.current = selection;
 
   const getWordIndexFromNode = React.useCallback((node: Node | null, offset: number = 0): number | null => {
     if (!node) return null;
@@ -167,7 +169,7 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
         return;
       }
       
-      if (e instanceof MouseEvent && e.button === 2 && selection) {
+      if (e instanceof MouseEvent && e.button === 2 && selectionRef.current) {
         return;
       }
 
@@ -176,7 +178,7 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
     };
 
     const handleMouseUp = (e: MouseEvent | TouchEvent) => {
-      if (e instanceof MouseEvent && e.button === 2 && selection) {
+      if (e instanceof MouseEvent && e.button === 2 && selectionRef.current) {
         setIsDragging(false);
         return;
       }

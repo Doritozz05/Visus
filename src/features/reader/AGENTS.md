@@ -14,8 +14,9 @@ RSVP reader, bionic reading, text pagination, playback persistence, text selecti
 
 # Work Guidance
 - Optimize for high-performance text rendering.
+- Use ref pattern (`handleXxxRef`) for event handlers passed to `readerContent` useMemo to prevent DOM recreation on unrelated state changes. Same pattern: `handleContextMenuRef`, `handleDoubleClickRef`, `handleMouseUpRef`.
 - Annotation painting uses direct DOM style mutation on `span[data-word-index]` elements via `paintAnnotations()`.
-- `QuickColorPicker` stores last used color in localStorage (`visus:lastAnnotationColor`). No usa `<input type="color">` nativo — el popup HEX es un input de texto estilizado.
+- `CompactColorPicker` replaces `QuickColorPicker` in the toolbar: hue bar + sat/brightness 2D square + HEX input + native `<input type="color">` fallback + recent colors (`visus:recentAnnotationColors` in localStorage).
 - `SelectionToolbar` renders in two modes: new selection (color + note + dict + copy + search + TTS) and edit existing (color + edit note + delete).
 - Click on annotated word triggers full-range selection via `selectRange()` in `handleAnnotationClick`.
 
@@ -24,6 +25,7 @@ RSVP reader, bionic reading, text pagination, playback persistence, text selecti
 
 # Child DOX Index
 - `utils/annotationOverlap.ts` — Uncovered segment computation for collision-free highlighting
-- `components/QuickColorPicker.tsx` — 8 inline swatches + HEX input popup (no native picker)
+- `components/CompactColorPicker.tsx` — Interactive color picker (hue bar + sat/brightness square + HEX + native picker + recent colors)
+- `components/QuickColorPicker.tsx` — 8 inline swatches + HEX input popup (legacy, replaced by CompactColorPicker)
 - `components/SelectionToolbar.tsx` — Contextual floating toolbar for text actions
 - `hooks/useTextSelection.ts` — Text selection tracking with DOM word index resolution
