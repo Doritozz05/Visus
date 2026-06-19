@@ -4,8 +4,6 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Position, SelectionData } from "../hooks/useTextSelection";
 import {
-  Type,
-  Underline,
   PenLine,
   BookOpen,
   Copy,
@@ -16,13 +14,13 @@ import {
   MessageSquare
 } from "lucide-react";
 import { Annotation } from "@/core/entities/book";
+import { QuickColorPicker } from "./QuickColorPicker";
 
 interface SelectionToolbarProps {
   selection: SelectionData | null;
   position: Position | null;
   existingAnnotation?: Annotation | null;
   onHighlight: (color: string) => void;
-  onUnderline: (style: Annotation["style"]) => void;
   onAddNote: () => void;
   onDictionary: () => void;
   onCopy: () => void;
@@ -30,39 +28,28 @@ interface SelectionToolbarProps {
   onTTS: () => void;
   onDelete?: () => void;
   onClose: () => void;
+  currentColor?: string;
 }
-
-const COLORS = [
-  { label: "Yellow", value: "var(--highlight-yellow, #fef08a)" },
-  { label: "Green", value: "var(--highlight-green, #bbf7d0)" },
-  { label: "Blue", value: "var(--highlight-blue, #bfdbfe)" },
-  { label: "Pink", value: "var(--highlight-pink, #fbcfe8)" },
-];
-
-const STYLES: { label: string; value: Annotation["style"], icon: React.ReactNode }[] = [
-  { label: "Solid", value: "underline", icon: <Underline className="w-4 h-4" /> },
-  { label: "Dashed", value: "dashed", icon: <Type className="w-4 h-4" /> },
-  { label: "Wavy", value: "wavy", icon: <Type className="w-4 h-4" /> },
-];
 
 export function SelectionToolbar({
   selection,
   position,
   existingAnnotation,
   onHighlight,
-  onUnderline,
   onAddNote,
   onDictionary,
   onCopy,
   onSearch,
   onTTS,
   onDelete,
-  onClose
+  onClose,
+  currentColor = "#fef08a",
 }: SelectionToolbarProps) {
   if (!selection || !position) return null;
 
-  // Final top calculation: at least 10px from top, or 60px above selection
   const toolbarY = Math.max(10, position.y - 65);
+
+  const isEditMode = !!existingAnnotation;
 
   return (
     <AnimatePresence>
@@ -76,101 +63,104 @@ export function SelectionToolbar({
           left: position.x,
           top: toolbarY,
           transform: "translateX(-50%)",
-          zIndex: 10000, // Ensure it's above almost everything
+          zIndex: 10000,
         }}
         className="selection-toolbar flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-900/95 dark:bg-zinc-800/95 backdrop-blur-md text-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10 select-none"
       >
-        {/* Colors */}
-        <div className="flex items-center gap-1 border-r border-zinc-700 pr-2">
-          {COLORS.map((c) => (
+        {/* Color Picker */}
+        <div className="flex items-center gap-1.5 border-r border-zinc-700 pr-2">
+          <QuickColorPicker
+            value={currentColor}
+            onChange={(color) => onHighlight(color)}
+            size="sm"
+          />
+          {!isEditMode && (
             <button
-              key={c.label}
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => onHighlight(c.value)}
-              className="w-6 h-6 rounded-full flex items-center justify-center transition-transform hover:scale-110 focus:outline-none"
-              style={{ backgroundColor: c.value }}
-              title={`Highlight ${c.label}`}
+              onClick={() => onHighlight(currentColor)}
+              className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 hover:text-white transition-colors px-1"
+              title="Highlight with current color"
             >
-              {existingAnnotation?.color === c.value && <PenLine className="w-3 h-3 text-black/50" />}
+              <PenLine className="w-3.5 h-3.5" />
             </button>
-          ))}
-        </div>
-
-        {/* Styles (Underlines) */}
-        <div className="flex items-center gap-1 border-r border-zinc-700 pr-2 pl-1">
-          {STYLES.map((s) => (
-            <button
-              key={s.label}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => onUnderline(s.value)}
-              className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors focus:outline-none"
-              title={`Underline ${s.label}`}
-            >
-              {s.icon}
-            </button>
-          ))}
+          )}
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 pl-1 pr-1">
-          <button 
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={onAddNote} 
-            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
-            title="Add note"
-          >
-            <MessageSquare className="w-4 h-4" />
-          </button>
-          <button 
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={onDictionary} 
-            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
-            title="Dictionary"
-          >
-            <BookOpen className="w-4 h-4" />
-          </button>
-          <button 
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={onCopy} 
-            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
-            title="Copy text"
-          >
-            <Copy className="w-4 h-4" />
-          </button>
-          <button 
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={onSearch} 
-            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
-            title="Search book"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-          <button 
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={onTTS} 
-            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
-            title="Read aloud"
-          >
-            <Volume2 className="w-4 h-4" />
-          </button>
+        <div className="flex items-center gap-1 pl-1">
+          {isEditMode ? (
+            <>
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={onAddNote}
+                className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors"
+                title={existingAnnotation?.note ? "Edit note" : "Add note"}
+              >
+                <MessageSquare className={`w-4 h-4 ${existingAnnotation?.note ? "text-blue-400" : ""}`} />
+              </button>
+              {onDelete && (
+                <button
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={onDelete}
+                  className="p-1.5 rounded-md hover:bg-red-500/20 text-red-400 transition-colors"
+                  title="Delete annotation"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={onAddNote}
+                className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors"
+                title="Add note"
+              >
+                <MessageSquare className="w-4 h-4" />
+              </button>
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={onDictionary}
+                className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors"
+                title="Dictionary"
+              >
+                <BookOpen className="w-4 h-4" />
+              </button>
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={onCopy}
+                className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors"
+                title="Copy text"
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={onSearch}
+                className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors"
+                title="Search book"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={onTTS}
+                className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors"
+                title="Read aloud"
+              >
+                <Volume2 className="w-4 h-4" />
+              </button>
+            </>
+          )}
         </div>
 
-        {/* Delete / Close */}
+        {/* Close */}
         <div className="flex items-center gap-1 border-l border-zinc-700 pl-2">
-          {existingAnnotation && onDelete && (
-            <button 
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={onDelete} 
-              className="p-1.5 rounded-md hover:bg-red-500/20 text-red-400 transition-colors" 
-              title="Delete annotation"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          )}
-          <button 
+          <button
             onMouseDown={(e) => e.preventDefault()}
-            onClick={onClose} 
-            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors" 
+            onClick={onClose}
+            className="p-1.5 rounded-md hover:bg-zinc-700 transition-colors"
             title="Close menu"
           >
             <X className="w-4 h-4" />

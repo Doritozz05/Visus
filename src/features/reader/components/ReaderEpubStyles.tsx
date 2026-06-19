@@ -150,34 +150,6 @@ export function ReaderEpubStyles() {
           color: inherit !important;
         }
         
-        /* Legacy highlight class (still used for existing annotations) */
-        .epub-content span[data-word-index].word-selected {
-          background-color: hsl(var(--primary) / 0.25) !important;
-          color: inherit;
-          border-radius: 3px;
-          box-shadow: 0 0 0 1px hsl(var(--primary) / 0.1);
-          transition: background-color 0.15s ease;
-          position: relative;
-          z-index: 1;
-        }
-
-        /* Subtle glow effect for the active selection */
-        .epub-content span[data-word-index].word-selected::after {
-          content: "";
-          position: absolute;
-          inset: -1px -2px;
-          background-color: hsl(var(--primary) / 0.1);
-          border-radius: 4px;
-          z-index: -1;
-          pointer-events: none;
-        }
-
-        /* Dark mode adjustment for better contrast */
-        .dark .epub-content span[data-word-index].word-selected {
-          background-color: hsl(var(--primary) / 0.35) !important;
-          box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2);
-        }
-
         .epub-content span[data-word-index] {
           cursor: text;
           user-select: text;

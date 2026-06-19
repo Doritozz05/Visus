@@ -25,8 +25,8 @@ import { DictionaryModal } from "./DictionaryModal";
 import { AnnotationNoteDialog } from "./AnnotationNoteDialog";
 import { dbService } from "@/core/services/db-service";
 import { toast } from "sonner";
-import { useContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
-import { Highlighter, Type, MessageSquare, BookOpen, Search, Volume2, Trash2, Copy } from "lucide-react";
+import { MessageSquare, BookOpen, Search, Volume2, Copy } from "lucide-react";
+import { getUncoveredSegments } from "../utils/annotationOverlap";
 
 interface PagesVisualBoxProps {
   activeBookId: string;
@@ -224,40 +224,50 @@ export function PagesVisualBox({
     clearSelection,
     updateSelection: updateSelectionRange,
     selectWord,
+    selectRange,
   } = useTextSelection(columnsContainerRef);
 
   const [isDictionaryOpen, setIsDictionaryOpen] = React.useState(false);
   const [selectedWord, setSelectedWord] = React.useState("");
-  const [editingAnnotation, setEditingAnnotation] = React.useState<Annotation | null>(null);
+  const [isNoteDialogOpen, setIsNoteDialogOpen] = React.useState(false);
+  const [selectedAnnotation, setSelectedAnnotation] = React.useState<Annotation | null>(null);
+  const [currentColor, setCurrentColor] = React.useState("#fef08a");
 
-  const handleAddAnnotation = React.useCallback(async (color: string, style: Annotation["style"], startIndex?: number, endIndex?: number) => {
+  const handleAddAnnotation = React.useCallback(async (color: string, style: Annotation["style"] = "highlight", startIndex?: number, endIndex?: number) => {
     const finalStart = startIndex ?? selection?.startWordIndex;
     const finalEnd = endIndex ?? selection?.endWordIndex;
 
     if (finalStart === undefined || finalEnd === undefined) return;
 
-    const newAnnotation: Annotation = {
+    const segments = getUncoveredSegments(finalStart, finalEnd, chapterAnnotations);
+
+    if (segments.length === 0) {
+      return;
+    }
+
+    const newAnnotations: Annotation[] = segments.map((seg) => ({
       id: crypto.randomUUID(),
       bookId: activeBookId,
       chapterIndex: currentChapter.index,
-      startWordIndex: finalStart,
-      endWordIndex: finalEnd,
+      startWordIndex: seg.startWordIndex,
+      endWordIndex: seg.endWordIndex,
       color,
       style,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    };
+    }));
 
     try {
-      await dbService.saveAnnotation(newAnnotation);
-      setAnnotations([...allAnnotations, newAnnotation]);
+      for (const ann of newAnnotations) {
+        await dbService.saveAnnotation(ann);
+      }
+      setAnnotations([...allAnnotations, ...newAnnotations]);
       clearSelection();
-      // Automatically open note dialog for new highlights
-      setEditingAnnotation(newAnnotation);
+      setCurrentColor(color);
     } catch (error) {
       toast.error("Failed to save annotation");
     }
-  }, [selection, activeBookId, currentChapter.index, allAnnotations, setAnnotations, clearSelection]);
+  }, [selection, activeBookId, currentChapter.index, allAnnotations, setAnnotations, clearSelection, chapterAnnotations]);
 
   const handleCopy = React.useCallback(() => {
     if (selection) {
@@ -295,8 +305,6 @@ export function PagesVisualBox({
     }
   }, [selection, selectedWord, clearSelection]);
 
-  const { showMenu } = useContextMenu();
-
   // Stabilize handlers for the memoized reader content to prevent DOM replacements
   // that would blow away native selection and manual annotation paints.
   const handleContextMenuRef = React.useRef<((e: React.MouseEvent) => void) | null>(null);
@@ -314,70 +322,6 @@ export function PagesVisualBox({
     handleContextMenuRef.current = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-
-      const target = e.target as HTMLElement;
-      const wordIndexAttr = target.getAttribute('data-word-index');
-      const detectedWordIndex = wordIndexAttr ? parseInt(wordIndexAttr, 10) : undefined;
-      
-      if (selection || detectedWordIndex !== undefined) {
-        // If no selection but right-clicked a word, select it first
-        if (!selection && detectedWordIndex !== undefined) {
-          selectWord(detectedWordIndex);
-        }
-
-        const startIdx = selection?.startWordIndex ?? detectedWordIndex;
-        const endIdx = selection?.endWordIndex ?? detectedWordIndex;
-
-        const items: ContextMenuItem[] = [
-          {
-            id: "highlight-yellow",
-            label: "Highlight yellow",
-            icon: <Highlighter className="w-4 h-4 text-[#fef08a]" />,
-            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight", startIdx, endIdx),
-          },
-          {
-            id: "underline-solid",
-            label: "Underline",
-            icon: <Type className="w-4 h-4" />,
-            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "underline", startIdx, endIdx),
-          },
-          { id: "ctx-divider-1", label: "", divider: true },
-          {
-            id: "ctx-add-note",
-            label: "Add note",
-            icon: <MessageSquare className="w-4 h-4" />,
-            onClick: () => handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight", startIdx, endIdx),
-          },
-          {
-            id: "ctx-dictionary",
-            label: "Dictionary",
-            icon: <BookOpen className="w-4 h-4" />,
-            onClick: handleDictionary,
-          },
-          {
-            id: "ctx-search",
-            label: "Web search",
-            icon: <Search className="w-4 h-4" />,
-            onClick: handleWebSearch,
-          },
-          {
-            id: "ctx-tts",
-            label: "Read aloud",
-            icon: <Volume2 className="w-4 h-4" />,
-            onClick: handleTTS,
-          },
-          { id: "ctx-divider-2", label: "", divider: true },
-          {
-            id: "ctx-copy",
-            label: "Copy text",
-            icon: <Copy className="w-4 h-4" />,
-            onClick: handleCopy,
-          },
-        ];
-        showMenu(e, items);
-      } else {
-        showMenu(e);
-      }
     };
 
     handleDoubleClickRef.current = (e: React.MouseEvent) => {
@@ -387,28 +331,41 @@ export function PagesVisualBox({
         selectWord(parseInt(wordIndexAttr, 10));
       }
     };
-  }, [
-    selection, 
-    selectWord, 
-    handleAddAnnotation, 
-    handleDictionary, 
-    handleWebSearch, 
-    handleTTS, 
-    handleCopy, 
-    showMenu
-  ]);
+  }, []);
+
+  const handleAnnotationClick = React.useCallback((wordIndex: number) => {
+    const annotation = chapterAnnotations.find(
+      a => wordIndex >= a.startWordIndex && wordIndex <= a.endWordIndex
+    );
+    if (!annotation) return;
+    setSelectedAnnotation(annotation);
+    selectRange(annotation.startWordIndex, annotation.endWordIndex);
+  }, [chapterAnnotations, selectRange]);
 
   const handleMouseDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const target = e.target as HTMLElement;
-    // We only want to clear if we're not clicking on the toolbar or context menu
-    if (!target.closest('.selection-toolbar') && !target.closest('.context-menu-container')) {
-      // Native selection will handle starting a new selection
+    if (target.closest('.selection-toolbar') || target.closest('.context-menu-container')) {
+      return;
     }
   }, []);
 
-  const handleMouseUp = React.useCallback(() => {
-    // Native selection handles everything
-  }, []);
+  const handleMouseUp = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.selection-toolbar') || target.closest('.context-menu-container')) {
+      return;
+    }
+
+    const sel = window.getSelection();
+    if (sel && sel.isCollapsed) {
+      const wordIndexAttr = target.getAttribute('data-word-index');
+      if (wordIndexAttr !== null) {
+        const wordIndex = parseInt(wordIndexAttr, 10);
+        handleAnnotationClick(wordIndex);
+        return;
+      }
+      setSelectedAnnotation(null);
+    }
+  }, [handleAnnotationClick]);
 
   React.useEffect(() => {
     if (!isReady) return;
@@ -455,9 +412,9 @@ export function PagesVisualBox({
   }, [chapterAnnotations, formattedHtml, currentPageIndex, isReady]);
 
   const handleSaveAnnotationNote = async (note: string, tags: string[]) => {
-    if (!editingAnnotation) return;
+    if (!selectedAnnotation) return;
     const updated: Annotation = {
-      ...editingAnnotation,
+      ...selectedAnnotation,
       note,
       tags,
       updatedAt: new Date().toISOString(),
@@ -466,7 +423,9 @@ export function PagesVisualBox({
     try {
       await dbService.saveAnnotation(updated);
       setAnnotations(allAnnotations.map(a => a.id === updated.id ? updated : a));
-      setEditingAnnotation(null);
+      setIsNoteDialogOpen(false);
+      setSelectedAnnotation(null);
+      clearSelection();
       toast.success("Note saved");
     } catch (error) {
       toast.error("Failed to update note");
@@ -474,16 +433,56 @@ export function PagesVisualBox({
   };
 
   const handleDeleteAnnotation = async () => {
-    if (!editingAnnotation) return;
+    if (!selectedAnnotation) return;
     try {
-      await dbService.deleteAnnotation(editingAnnotation.id);
-      setAnnotations(allAnnotations.filter(a => a.id !== editingAnnotation.id));
-      setEditingAnnotation(null);
+      await dbService.deleteAnnotation(selectedAnnotation.id);
+      setAnnotations(allAnnotations.filter(a => a.id !== selectedAnnotation.id));
+      setSelectedAnnotation(null);
+      clearSelection();
       toast.success("Annotation removed");
     } catch (error) {
       toast.error("Failed to delete annotation");
     }
   };
+
+  const handleAddNoteToSelection = React.useCallback(async () => {
+    if (selectedAnnotation) {
+      setIsNoteDialogOpen(true);
+      return;
+    }
+    if (!selection) return;
+
+    const segments = getUncoveredSegments(selection.startWordIndex, selection.endWordIndex, chapterAnnotations);
+
+    if (segments.length === 0) return;
+
+    const newAnnotations: Annotation[] = segments.map((seg) => ({
+      id: crypto.randomUUID(),
+      bookId: activeBookId,
+      chapterIndex: currentChapter.index,
+      startWordIndex: seg.startWordIndex,
+      endWordIndex: seg.endWordIndex,
+      color: currentColor,
+      style: "highlight",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+
+    try {
+      for (const ann of newAnnotations) {
+        await dbService.saveAnnotation(ann);
+      }
+      setAnnotations([...allAnnotations, ...newAnnotations]);
+      if (newAnnotations.length === 1) {
+        setSelectedAnnotation(newAnnotations[0]);
+        setIsNoteDialogOpen(true);
+      } else {
+        clearSelection();
+      }
+    } catch (error) {
+      toast.error("Failed to save annotation");
+    }
+  }, [selectedAnnotation, selection, currentColor, activeBookId, currentChapter.index, allAnnotations, setAnnotations, chapterAnnotations, clearSelection]);
 
   // Reset measured pages IMMEDIATELY when chapter changes to prevent stale navigation logic
   const [lastChapterIdx, setLastChapterIdx] = React.useState(currentChapter.index);
@@ -689,16 +688,16 @@ export function PagesVisualBox({
       <SelectionToolbar
         selection={selection}
         position={position}
+        existingAnnotation={selectedAnnotation}
         onHighlight={(color) => handleAddAnnotation(color, "highlight")}
-        onUnderline={(style) => handleAddAnnotation("var(--highlight-yellow, #fef08a)", style)}
-        onAddNote={() => {
-          if (selection) handleAddAnnotation("var(--highlight-yellow, #fef08a)", "highlight");
-        }}
+        onAddNote={handleAddNoteToSelection}
         onDictionary={handleDictionary}
         onCopy={handleCopy}
         onSearch={handleWebSearch}
         onTTS={handleTTS}
-        onClose={clearSelection}
+        onDelete={selectedAnnotation ? handleDeleteAnnotation : undefined}
+        onClose={() => { clearSelection(); setSelectedAnnotation(null); }}
+        currentColor={currentColor}
       />
 
       <AnimatePresence>
@@ -714,12 +713,12 @@ export function PagesVisualBox({
       </AnimatePresence>
 
       <AnimatePresence>
-        {editingAnnotation && (
+        {isNoteDialogOpen && selectedAnnotation && (
           <AnnotationNoteDialog
-            annotation={editingAnnotation}
+            annotation={selectedAnnotation}
             onSave={handleSaveAnnotationNote}
             onDelete={handleDeleteAnnotation}
-            onClose={() => setEditingAnnotation(null)}
+            onClose={() => { setIsNoteDialogOpen(false); }}
           />
         )}
       </AnimatePresence>
