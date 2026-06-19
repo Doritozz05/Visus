@@ -4,6 +4,11 @@ import { findPageForWordIndex } from "../utils/binarySearch";
 import { SettingsState } from "@/core/entities/settings";
 import { toast } from "sonner";
 
+const isDev = process.env.NODE_ENV !== "production";
+const devLog = (...args: any[]) => { if (isDev) console.log(...args); };
+const devDebug = (...args: any[]) => { if (isDev) console.debug(...args); };
+const devWarn = (...args: any[]) => { if (isDev) console.warn(...args); };
+
 function getStdDev(arr: number[]): { mean: number; stdDev: number } {
   if (arr.length === 0) return { mean: 0, stdDev: 0 };
   const mean = arr.reduce((s, x) => s + x, 0) / arr.length;
@@ -117,7 +122,7 @@ export function useTelemetryTracker({
 
     // Noise filtering (discard sessions < 5m and < 15 words, unless forced by quiz completion)
     if (!forced && duration < 300 && wordsRead < 15) {
-      console.log(`[Telemetry] Session discarded (noise filter: ${duration}s, ${wordsRead} words).`);
+      devLog(`[Telemetry] Session discarded (noise filter: ${duration}s, ${wordsRead} words).`);
       return;
     }
 
@@ -153,7 +158,7 @@ export function useTelemetryTracker({
       },
     };
 
-    console.log(`[Telemetry] Saving telemetry log: "${session.bookTitle}" (${duration}s, ${finalWpm} WPM, ${wordsRead} words)`);
+    devLog(`[Telemetry] Saving telemetry log: "${session.bookTitle}" (${duration}s, ${finalWpm} WPM, ${wordsRead} words)`);
 
     try {
       await StatsService.recordSession({
@@ -166,7 +171,7 @@ export function useTelemetryTracker({
         telemetryData: telemetryData,
       });
     } catch (err) {
-      console.warn("[Telemetry] Failed to persist session log:", err);
+      devWarn("[Telemetry] Failed to persist session log:", err);
     }
   }, []);
 
@@ -209,7 +214,7 @@ export function useTelemetryTracker({
       }
     }
 
-    console.log(`[Telemetry] Started reading tracker session for "${bookTitle}" (Session ID: ${sessionRef.current.id})`);
+    devLog(`[Telemetry] Started reading tracker session for "${bookTitle}" (Session ID: ${sessionRef.current.id})`);
 
     return () => {
       // Flush session on unmount or book transition
@@ -231,7 +236,7 @@ export function useTelemetryTracker({
     // Detect reading regressions (user rewinds or clicks back)
     if (wordDiff < 0) {
       session.regressionEvents.push(session.activeSeconds);
-      console.debug(`[Telemetry] Regression event logged at offset ${session.activeSeconds}s`);
+      devDebug(`[Telemetry] Regression event logged at offset ${session.activeSeconds}s`);
     }
 
     if (mode === "normal" && allBookPages.length > 0) {
@@ -267,11 +272,11 @@ export function useTelemetryTracker({
                 if (session.pageTurnIntervals.length > 10) {
                   session.pageTurnIntervals.shift();
                 }
-                console.debug(`[Telemetry] Recorded page WPM: ${pageWpm} (duration: ${pageTimeSeconds.toFixed(1)}s)`);
+                devDebug(`[Telemetry] Recorded page WPM: ${pageWpm} (duration: ${pageTimeSeconds.toFixed(1)}s)`);
               }
             }
           } else {
-            console.debug(`[Telemetry] Fast transition (${sinceLastPageChange}ms). WPM computation skipped.`);
+            devDebug(`[Telemetry] Fast transition (${sinceLastPageChange}ms). WPM computation skipped.`);
           }
         }
       }
@@ -308,7 +313,7 @@ export function useTelemetryTracker({
           // Transitioned from active to AFK
           session.interruptionCount++;
           wasActiveLastTick = false;
-          console.debug("[Telemetry] AFK limit reached. Pausing tracking.");
+          devDebug("[Telemetry] AFK limit reached. Pausing tracking.");
         }
       } else {
         // Active if RSVP/Cluster is playing and tab is visible
@@ -318,7 +323,7 @@ export function useTelemetryTracker({
         } else if (state.isPlaying && document.visibilityState !== "visible" && wasActiveLastTick) {
           session.interruptionCount++;
           wasActiveLastTick = false;
-          console.debug("[Telemetry] Tab hidden while playing. Interruption logged.");
+          devDebug("[Telemetry] Tab hidden while playing. Interruption logged.");
         }
       }
 
@@ -385,7 +390,7 @@ export function useTelemetryTracker({
 
         // Automatic 30-minute session flush to prevent massive log payloads
         if (session.activeSeconds >= 1800) {
-          console.log("[Telemetry] Session time reached 30m limit. Splitting logs.");
+          devLog("[Telemetry] Session time reached 30m limit. Splitting logs.");
           
           // CRITICAL: Take a deep copy snapshot before resetting the live reference
           const snapshot = { ...session };
@@ -418,7 +423,7 @@ export function useTelemetryTracker({
     const handleVisibility = () => {
       if (document.hidden) {
         sessionRef.current.interruptionCount++;
-        console.debug("[Telemetry] Tab hidden. Interruption logged.");
+        devDebug("[Telemetry] Tab hidden. Interruption logged.");
       } else {
         sessionRef.current.lastInteractionTime = Date.now();
       }

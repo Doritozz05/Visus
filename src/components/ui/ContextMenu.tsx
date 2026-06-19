@@ -57,6 +57,8 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
     y: 0,
     items: [],
   });
+  const isOpenRef = React.useRef(state.isOpen);
+  React.useEffect(() => { isOpenRef.current = state.isOpen; }, [state.isOpen]);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -187,7 +189,7 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
     };
 
     const handleGlobalClick = (e: MouseEvent) => {
-      if (state.isOpen) {
+      if (isOpenRef.current) {
         // If clicking inside the menu, let the button handler deal with it
         const target = e.target as HTMLElement;
         if (target.closest('.context-menu-container')) return;
@@ -210,7 +212,7 @@ export function ContextMenuProvider({ children }: { children: React.ReactNode })
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("scroll", hideMenu, true);
     };
-  }, [showMenu, hideMenu, state.isOpen]);
+  }, [showMenu, hideMenu]);
 
   return (
     <ContextMenuContext.Provider value={{ showMenu, hideMenu }}>

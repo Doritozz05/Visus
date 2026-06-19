@@ -300,7 +300,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           const reg = await navigator.serviceWorker.register("/sw.js", {
             updateViaCache: 'none'
           });
-          console.log("Visus Service Worker successfully registered. Scope:", reg.scope);
+          if (process.env.NODE_ENV !== "production") console.log("Visus Service Worker successfully registered. Scope:", reg.scope);
 
           // Force update check on every page load
           reg.update();
@@ -314,7 +314,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             const newWorker = reg.installing;
             newWorker?.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log("New content available, preparing to update...");
+                if (process.env.NODE_ENV !== "production") console.log("New content available, preparing to update...");
                 // The new SW is ready. sw.js has skipWaiting(), so it will 
                 // activate and trigger 'controllerchange' automatically.
               }
@@ -332,7 +332,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (refreshing) return;
         refreshing = true;
-        console.log("Service Worker updated, reloading page...");
+        if (process.env.NODE_ENV !== "production") console.log("Service Worker updated, reloading page...");
         window.location.reload();
       });
     }

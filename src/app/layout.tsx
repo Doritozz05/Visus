@@ -228,7 +228,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
+      <body className="font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-0">
         <Providers>
           <React.Suspense fallback={null}>
             <Navbar />

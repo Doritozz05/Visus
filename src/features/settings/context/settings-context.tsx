@@ -67,7 +67,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err) {
-      console.warn("Could not parse settings from localStorage (corrupt data). Resetting to default configuration.");
+      if (process.env.NODE_ENV !== "production") console.warn("Could not parse settings from localStorage (corrupt data). Resetting to default configuration.");
       // Clean corrupt storage keys automatically
       try {
         localStorage.removeItem(LOCAL_STORAGE_KEY);

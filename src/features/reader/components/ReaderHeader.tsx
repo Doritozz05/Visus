@@ -164,7 +164,7 @@ export function ReaderHeader({
           placeholder="Actions"
           ariaLabel="Reading actions"
           triggerClassName="flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 bg-card hover:bg-accent text-muted-foreground hover:text-primary transition-all shrink-0 shadow-sm liquid-glass cursor-pointer select-none"
-          menuClassName="min-w-[180px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass"
+          menuClassName="min-w-[180px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[var(--dropdown-shadow)] liquid-glass"
           renderTrigger={() => <Menu className="w-4 h-4" />}
         />
       </div>
@@ -207,7 +207,7 @@ export function ReaderHeader({
             placeholder="Select mode"
             ariaLabel="Select reading mode"
             triggerClassName="group flex h-8 items-center justify-center gap-1 rounded-lg border border-border/40 bg-card px-2 text-xs font-mono font-bold text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-accent focus:outline-none liquid-glass cursor-pointer shrink-0"
-            menuClassName="min-w-[200px] max-w-[260px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass"
+            menuClassName="min-w-[200px] max-w-[260px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[var(--dropdown-shadow)] liquid-glass"
             align="end"
             renderTrigger={(selectedOption, isOpen) => {
               const CurrentIcon = currentModeOption.icon as any;
@@ -255,13 +255,15 @@ export function ReaderHeader({
       />
 
       {/* Quick Settings Trigger */}
-      <IconButton
-        data-testid="desktop-settings-button"
-        onClick={openQuickSettings}
-        icon={<Settings className="w-4 h-4 animate-spin-slow" />}
-        title="Open settings"
-        aria-label="Open settings"
-      />
+      <span className="group">
+        <IconButton
+          data-testid="desktop-settings-button"
+          onClick={openQuickSettings}
+          icon={<Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />}
+          title="Open settings"
+          aria-label="Open settings"
+        />
+      </span>
     </div>
   );
 

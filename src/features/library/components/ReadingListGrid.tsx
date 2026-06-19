@@ -6,6 +6,7 @@ import { ReadingListCard, CreateListCard } from "./ReadingListCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { FolderPlus, Pencil, X } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { VisiMascot } from "@/components/ui/VisiMascot";
 import { toast } from "sonner";
 import { createPortal } from "react-dom";
 
@@ -109,24 +110,38 @@ export function ReadingListGrid() {
 
   return (
     <div className="flex flex-col gap-8 pb-32">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <CreateListCard onClick={() => setIsCreating(true)} />
-        
-        <AnimatePresence mode="popLayout">
-          {lists.map((list) => (
-            <ReadingListCard
-              key={list.id}
-              list={list}
-              onClick={() => setActiveListId(list.id)}
-              onEdit={(e) => {
-                setEditingId(list.id);
-                setEditName(list.name);
-              }}
-              onDelete={(e) => setEditingDeleteId(list.id)}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
+      {lists.length === 0 && !isCreating ? (
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <VisiMascot variant="empty" size={90} className="mb-2" />
+          <p className="text-lg font-bold text-foreground font-heading">No reading lists yet</p>
+          <p className="text-sm text-muted-foreground font-sans">Create your first reading list to organize your books.</p>
+          <button
+            onClick={() => setIsCreating(true)}
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-2xl text-xs font-bold font-mono uppercase tracking-widest hover:brightness-110 transition-all"
+          >
+            Create list
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <CreateListCard onClick={() => setIsCreating(true)} />
+          
+          <AnimatePresence mode="popLayout">
+            {lists.map((list) => (
+              <ReadingListCard
+                key={list.id}
+                list={list}
+                onClick={() => setActiveListId(list.id)}
+                onEdit={(e) => {
+                  setEditingId(list.id);
+                  setEditName(list.name);
+                }}
+                onDelete={(e) => setEditingDeleteId(list.id)}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
 
       {/* RENDER UNIFIED MODALS */}
       {renderModal(

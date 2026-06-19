@@ -235,7 +235,7 @@ export function FancyDropdown({
                 data-positioned={isMenuPositioned ? "true" : "false"}
                 className={
                   menuClassName ??
-                  `overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[0_24px_70px_rgba(0,0,0,0.22)] liquid-glass ${maxMenuHeightClassName}`
+                  `overflow-hidden rounded-2xl border border-border/40 bg-card shadow-[var(--dropdown-shadow)] liquid-glass ${maxMenuHeightClassName}`
                 }
                 aria-hidden={!isMenuPositioned}
               >

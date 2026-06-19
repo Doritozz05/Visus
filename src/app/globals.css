@@ -118,6 +118,7 @@
     --reader-border: var(--border);
 
     --card-shadow: none;
+    --dropdown-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
 
     --space-1: 4px;
     --space-2: 8px;

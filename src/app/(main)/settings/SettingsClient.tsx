@@ -58,6 +58,8 @@ export default function SettingsClient() {
 
   const { resetSettings } = useSettings();
   const [activeTab, setActiveTab] = React.useState<"general" | "reader" | "rsvp" | "cluster" | "account">(tabParam || "general");
+  const tabsRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollRight, setCanScrollRight] = React.useState(false);
 
   // Sync activeTab if searchParam changes
   React.useEffect(() => {
@@ -65,6 +67,25 @@ export default function SettingsClient() {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
+
+  React.useEffect(() => {
+    const el = tabsRef.current;
+    if (!el) return;
+    const check = () => setCanScrollRight(el.scrollWidth > el.clientWidth);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    el.addEventListener("scroll", check);
+    return () => { ro.disconnect(); el.removeEventListener("scroll", check); };
+  }, []);
+
+  const TABS = [
+    { id: "general", name: "General", icon: Settings },
+    { id: "reader", name: "Reader", icon: BookOpen },
+    { id: "rsvp", name: "RSVP", icon: Zap },
+    { id: "cluster", name: "Cluster", icon: Columns },
+    { id: "account", name: "Account", icon: UserCircle },
+  ] as const;
 
   return (
     <motion.div
@@ -95,38 +116,40 @@ export default function SettingsClient() {
         {/* Dynamic Inner Configuration Tabs */}
         <motion.div
           variants={tabsContainerVariants}
-          className="flex border-b border-border/40 mb-0 overflow-x-auto scrollbar-none gap-2 relative"
+          className="relative"
         >
-          {[
-            { id: "general", name: "General & UI", icon: Settings },
-            { id: "reader", name: "Reader", icon: BookOpen },
-            { id: "rsvp", name: "RSVP", icon: Zap },
-            { id: "cluster", name: "Cluster", icon: Columns },
-            { id: "account", name: "Account & Sync", icon: UserCircle },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-3 font-sans text-xs uppercase tracking-wider transition-all shrink-0 relative ${isActive
-                    ? "text-primary font-bold bg-accent/40"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
-                  }`}
-              >
-                <Icon className="h-4.5 w-4.5" />
-                {tab.name}
-                {isActive && (
-                  <motion.div
-                    layoutId="active-settings-tab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
-              </button>
-            );
-          })}
+          <div
+            ref={tabsRef}
+            className="flex border-b border-border/40 mb-0 overflow-x-auto scrollbar-none gap-2 relative"
+          >
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 px-4 sm:px-6 py-3 font-sans text-xs uppercase tracking-wider transition-all shrink-0 relative ${isActive
+                      ? "text-primary font-bold bg-accent/40"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                    }`}
+                >
+                  <Icon className="h-4.5 w-4.5" />
+                  {tab.name}
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-settings-tab"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {canScrollRight && (
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent" />
+          )}
         </motion.div>
       </div>
 
