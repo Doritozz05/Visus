@@ -311,6 +311,7 @@ export function PagesVisualBox({
   const handleDoubleClickRef = React.useRef<((e: React.MouseEvent) => void) | null>(null);
   const handleMouseUpRef = React.useRef<((e: React.MouseEvent | React.TouchEvent) => void) | null>(null);
 
+
   const handleContextMenu = React.useCallback((e: React.MouseEvent) => {
     handleContextMenuRef.current?.(e);
   }, []);
@@ -371,6 +372,12 @@ export function PagesVisualBox({
     const target = e.target as HTMLElement;
     if (target.closest('.selection-toolbar') || target.closest('.context-menu-container')) {
       return;
+    }
+
+    if (e.nativeEvent instanceof MouseEvent && e.nativeEvent.detail === 2) {
+      if (target.hasAttribute('data-word-index')) {
+        e.preventDefault();
+      }
     }
   }, []);
 
