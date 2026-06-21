@@ -11,7 +11,7 @@ Global components, standard UI inputs, dropdowns, error boundaries, spinners, an
 
 # Work Guidance
 - Keep components modular, highly accessible, and responsive.
-- Do not import feature-specific state or contexts; components here must receive configurations via props.
+- Prefer props for configuration, but the Sidebar may import feature contexts directly (useAuth, useLibrary, useReadingStore, useSettings, useBookIngestion) since it serves as a permanent app shell that composes data from multiple domains.
 
 # Verification
 - Ensure local components compile without type errors via `npm run typecheck`.
