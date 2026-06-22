@@ -3,7 +3,7 @@
  * Provides offline support and intelligent caching strategy.
  */
 
-const CACHE_NAME = "visus-cache-v3"; // Increment version to bust old cache
+const CACHE_NAME = "visus-cache-v4"; // Increment version to bust old cache
 const ASSETS_TO_CACHE = [
   "/",
   "/manifest.json",
@@ -11,18 +11,19 @@ const ASSETS_TO_CACHE = [
   "/icons/icon-512x512.png"
 ];
 
-// 1. Install Phase: Cache core assets
+// 1. Install Phase: Cache core assets atomically
 self.addEventListener("install", (event) => {
+  // Opt out of Chromium ServiceWorkerAutoPreload bug (https://crbug.com/466790291)
+  if (event.addRoutes) {
+    event.addRoutes({
+      condition: { urlPattern: new URLPattern({}) },
+      source: "fetch-event",
+    });
+  }
+
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return Promise.allSettled(
-        ASSETS_TO_CACHE.map((url) => 
-          fetch(url).then((response) => {
-            if (!response.ok) throw new Error(`Failed to fetch ${url}`);
-            return cache.put(url, response);
-          })
-        )
-      );
+      return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
@@ -51,23 +52,27 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(event.request.url);
 
-  // Strategy A: Network-First for HTML/Navigation
-  // This ensures users always see the latest version if they have internet.
+  // Strategy A: Cache-first for HTML/Navigation
+  // Serve from cache immediately, background-update on each navigation.
+  // Prevents blank screen on cold start (Chromium bug #466790291).
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => caches.match("/"))
+      caches.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return networkResponse;
+        }).catch(() => cachedResponse || caches.match("/"));
+
+        return cachedResponse || fetchPromise;
+      })
     );
     return;
   }
 
   // Strategy B: Stale-While-Revalidate for other assets
-  // Serve from cache immediately, but update cache in background.
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
@@ -80,10 +85,6 @@ self.addEventListener("fetch", (event) => {
         return networkResponse;
       });
 
-      // If we have a cached response, return it. The fetchPromise will continue 
-      // in the background (and fail silently if blocked, which is fine).
-      // If we DON'T have a cached response, we MUST return the fetchPromise 
-      // directly so the browser handles the network success/failure.
       return cachedResponse || fetchPromise;
     })
   );
