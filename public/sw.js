@@ -3,9 +3,8 @@
  * Provides offline support and intelligent caching strategy.
  */
 
-const CACHE_NAME = "visus-cache-v4"; // Increment version to bust old cache
+const CACHE_NAME = "visus-cache-v5"; // Increment version to bust old cache
 const ASSETS_TO_CACHE = [
-  "/",
   "/manifest.json",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png"
@@ -22,9 +21,21 @@ self.addEventListener("install", (event) => {
   }
 
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      await Promise.allSettled(
+        ASSETS_TO_CACHE.map(async (url) => {
+          try {
+            const response = await fetch(url, { redirect: "follow" });
+            if (response.ok) {
+              await cache.put(url, response);
+            }
+          } catch (err) {
+            console.warn("[SW] Failed to cache asset:", url, err);
+          }
+        })
+      );
+    })()
   );
   self.skipWaiting();
 });
@@ -58,7 +69,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.mode === 'navigate') {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
-        const fetchPromise = fetch(event.request).then((networkResponse) => {
+        const fetchPromise = fetch(event.request, { redirect: "follow" }).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const copy = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
@@ -72,18 +83,21 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Strategy B: Stale-While-Revalidate for other assets
+  // Skip external origins — let browser handle them natively
+  if (url.origin !== self.location.origin) return;
+
+  // Strategy B: Stale-While-Revalidate for same-origin assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && url.origin === self.location.origin) {
+        if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
         }
         return networkResponse;
-      });
+      }).catch(() => cachedResponse);
 
       return cachedResponse || fetchPromise;
     })
