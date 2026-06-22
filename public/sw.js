@@ -61,24 +61,12 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
-  // Strategy A: Navigation — only intercept if cached
-  // Cache hit: serve cache, background-update on each navigation.
-  // Cache miss: let browser handle natively (follows redirects correctly).
-  if (event.request.mode === 'navigate') {
-    event.waitUntil(
-      caches.match(event.request).then((cached) => {
-        if (cached) {
-          event.respondWith(
-            (async () => {
-              fetch(event.request).catch(() => {});
-              return cached;
-            })()
-          );
-        }
-      })
-    );
-    return;
-  }
+  // Strategy A: Navigation — let browser handle natively
+  // Don't intercept navigations. Browser follows middleware
+  // redirects (/ → /library) correctly, avoiding ERR_FAILED.
+  // Sub-resources (JS, CSS, images) are cached via Strategy B
+  // for offline app shell support.
+  if (event.request.mode === 'navigate') return;
 
   // Skip external origins — let browser handle them natively
   const url = new URL(event.request.url);
