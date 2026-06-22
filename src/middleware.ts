@@ -1,8 +1,25 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase-middleware'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  const response = await updateSession(request)
+
+  const url = request.nextUrl
+
+  if (url.pathname === '/') {
+    if (request.cookies.has('visus_landing_visited')) {
+      return NextResponse.redirect(new URL('/library', url))
+    }
+    response.cookies.set('visus_landing_visited', 'true', {
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+    })
+  }
+
+  return response
 }
 
 export const config = {
