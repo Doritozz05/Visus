@@ -284,7 +284,6 @@ export function Sidebar({ activePath }: SidebarProps) {
                 {summary.currentStreakDays}-day streak
               </span>
             </div>
-            <div className="w-px h-3 bg-[hsl(var(--sidebar-border)/0.25)]" />
             <div className="flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5 text-[hsl(var(--sidebar-foreground)/0.4)]" />
               <span className="text-[11px] font-mono text-[hsl(var(--sidebar-foreground)/0.75)] font-medium">
@@ -292,7 +291,7 @@ export function Sidebar({ activePath }: SidebarProps) {
               </span>
             </div>
           </div>
-          <div className="w-full h-0.5 bg-[hsl(var(--sidebar-border)/0.15)] rounded-full mt-1.5 overflow-hidden">
+          <div className="w-full h-0.5 rounded-full mt-1.5 overflow-hidden">
             <div
               className="h-full bg-primary/60 rounded-full transition-all duration-500"
               style={{ width: `${goalProgressPercentage}%` }}
