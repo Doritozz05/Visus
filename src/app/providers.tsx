@@ -297,7 +297,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       const registerSW = async () => {
         try {
           // Use updateViaCache: 'none' to ensure the browser always checks the server for a new SW script
-          const reg = await navigator.serviceWorker.register("/sw.js", {
+          const reg = await navigator.serviceWorker.register("/sw.js?v=5", {
             updateViaCache: 'none'
           });
           if (process.env.NODE_ENV !== "production") console.log("Visus Service Worker successfully registered. Scope:", reg.scope);
