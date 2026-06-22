@@ -61,29 +61,27 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
-  const url = new URL(event.request.url);
-
-  // Strategy A: Cache-first for HTML/Navigation
-  // Serve from cache immediately, background-update on each navigation.
-  // Prevents blank screen on cold start (Chromium bug #466790291).
+  // Strategy A: Navigation — only intercept if cached
+  // Cache hit: serve cache, background-update on each navigation.
+  // Cache miss: let browser handle natively (follows redirects correctly).
   if (event.request.mode === 'navigate') {
-    event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        const fetchPromise = fetch(event.request, { redirect: "follow" }).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const copy = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          }
-          return networkResponse;
-        }).catch(() => cachedResponse || caches.match("/"));
-
-        return cachedResponse || fetchPromise;
+    event.waitUntil(
+      caches.match(event.request).then((cached) => {
+        if (cached) {
+          event.respondWith(
+            (async () => {
+              fetch(event.request).catch(() => {});
+              return cached;
+            })()
+          );
+        }
       })
     );
     return;
   }
 
   // Skip external origins — let browser handle them natively
+  const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
   // Strategy B: Stale-While-Revalidate for same-origin assets
