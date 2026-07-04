@@ -92,7 +92,7 @@ export default function SettingsClient() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col h-full w-full"
+      className="flex flex-col flex-1 min-h-0 w-full"
     >
       <div className="flex-none bg-background-adaptive z-30 pt-6 md:pt-12 mb-4 px-6 md:px-12 max-w-5xl mx-auto w-full">
         <motion.header
@@ -153,7 +153,7 @@ export default function SettingsClient() {
         </motion.div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 md:px-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full scrollbar-none">
+      <div className="flex-1 md:overflow-y-auto px-6 md:px-12 pb-24 md:pb-12 max-w-5xl mx-auto w-full scrollbar-none">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

@@ -15,6 +15,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   const hideSidebar = (isReader && (isFocusMode || !!activeBookId)) || isThemeDesigner;
 
+  const isScrollablePage = !isReader && !isThemeDesigner;
+
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex flex-col md:flex-row antialiased transition-all duration-300 main-layout-wrapper">
       <div className={`transition-all duration-300 ${hideSidebar ? 'w-0 overflow-hidden opacity-0 translate-x-[-100%]' : ''}`}>
@@ -22,7 +24,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* Content Wrapper */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 h-dvh overflow-hidden overscroll-none ${!hideSidebar ? "md:ml-64" : ""}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
+        isScrollablePage ? "min-h-screen md:h-dvh overflow-y-visible md:overflow-hidden overscroll-contain md:overscroll-none" : "h-dvh overflow-hidden overscroll-none"
+      } ${!hideSidebar ? "md:ml-64" : ""}`}>
         {children}
       </div>
     </div>

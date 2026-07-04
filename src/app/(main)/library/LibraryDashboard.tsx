@@ -298,7 +298,7 @@ export default function LibraryDashboard() {
         className="hidden" 
       />
 
-      <div className="p-6 md:p-10 flex-1 max-w-5xl mx-auto w-full h-full overflow-hidden flex flex-col">
+      <div className="p-6 md:p-10 flex-1 max-w-5xl mx-auto w-full flex flex-col md:min-h-0 md:overflow-hidden">
         <motion.header 
           variants={headerVariants}
           initial="hidden"
@@ -359,8 +359,9 @@ export default function LibraryDashboard() {
           </div>
         </motion.header>
 
+        <div className="flex-1 flex flex-col md:min-h-0 md:overflow-hidden">
           {/* Bento Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 overflow-y-auto md:overflow-visible pb-24 md:pb-4 scrollbar-none">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 overflow-visible pb-24 md:pb-4">
             
             {/* Left Column: Ingestion Zone & Progress Stats */}
             <motion.div 
@@ -549,7 +550,7 @@ export default function LibraryDashboard() {
 
               {/* Main Content Scrollable Panel */}
               <div className="relative flex-1 min-h-[380px] md:max-h-[58vh] mt-4">
-                <div className="h-full md:max-h-[58vh] overflow-visible md:overflow-y-auto scrollbar-none md:scroll-fade-bottom pl-4 pr-4 -ml-4 -mr-4 pb-12 md:pb-48 pt-6">
+                <div className="md:max-h-[58vh] md:overflow-y-auto overflow-visible scrollbar-none md:scroll-fade-bottom pl-4 pr-4 -ml-4 -mr-4 pb-12 md:pb-48 pt-6">
                   {activeTab === "lists" ? (
                     <ReadingListGrid />
                   ) : filteredBooks.length === 0 ? (
@@ -586,6 +587,7 @@ export default function LibraryDashboard() {
             </motion.div>
 
           </div>
+        </div>
         </div>
 
       {/* --- ADD BOOK DIALOG MODAL --- */}
