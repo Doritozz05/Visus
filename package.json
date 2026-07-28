@@ -31,7 +31,7 @@
                          "framer-motion":  "^11.11.17",
                          "isomorphic-dompurify":  "^3.17.0",
                          "jszip":  "^3.10.1",
-                         "next":  "^15.5.19",
+                         "next":  "^15.5.22",
                          "pdfjs-dist":  "^4.8.69",
                          "qrcode.react":  "^4.2.0",
                          "react":  "^19.2.7",
